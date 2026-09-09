@@ -1,0 +1,4 @@
+#### Consumables
+[[POTION_RESISTANCE]]
+[[POTION_SPEED]]
+[[POTION_LIFE]]
