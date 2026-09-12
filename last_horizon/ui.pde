@@ -7,6 +7,8 @@ final int LAYER_EVENT = 1;
 final int LAYER_PAUSE = 2;
 final int MAX_BUTTONS = 16;
 final int NAME_MAX_LENGTH = 12;
+final float MIN_TEXT_SIZE = 12;
+final float MIN_WRAP_TEXT_SIZE = 14;
 
 int draw_layer = LAYER_SCENE;
 int button_count = 0;
@@ -71,9 +73,12 @@ void drawButton(PGraphics g, float x, float y, float w, float h, String label, i
   boolean hover = on && uiLayer() == draw_layer && isHovering(x, y, w, h);
   int border = on ? (hover ? COL_CYAN : COL_BORDER) : COL_DIM;
   int colour = on ? (hover ? COL_CYAN : COL_TEXT) : COL_DIM;
+  float text_size = fitTextSize(g, label, MIN_TEXT_SIZE, w - 16);
 
   drawPanel(g, x, y, w, h, border);
-  text(g, label, x + 8, y + (h - 9) / 2.0, 9, colour);
+  g.fill(colour);
+  g.textSize(text_size);
+  g.text(label, x + 8, y + (h - text_size) / 2.0);
 
   addButton(x, y, w, h, action, on);
 }
@@ -104,18 +109,41 @@ void drawStars(PGraphics g){
     g.rect(x, y, side, side);
   }
 }
+float fitTextSize(PGraphics g, String value, float desired_size, float max_width){
+  float size = desired_size;
+  g.textSize(size);
+
+  while (size > 10 && g.textWidth(value) > max_width){
+    size -= 1;
+    g.textSize(size);
+  }
+
+  return size;
+}
+float readableTextSize(float size){
+  return max(size, MIN_TEXT_SIZE);
+}
+
+
+float readableWrapSize(float size){
+  return max(size, MIN_WRAP_TEXT_SIZE);
+}
 
 
 void text(PGraphics g, String value, float x, float y, float size, int colour){
+  float actual_size = readableTextSize(size);
+
   g.fill(colour);
-  g.textSize(size);
+  g.textSize(actual_size);
   g.text(value, x, y);
 }
 
 
 void textCentered(PGraphics g, String value, float cx, float y, float size, int colour){
+  float actual_size = readableTextSize(size);
+
   g.fill(colour);
-  g.textSize(size);
+  g.textSize(actual_size);
   g.text(value, cx - g.textWidth(value) / 2.0, y);
 }
 
@@ -123,9 +151,11 @@ void textCentered(PGraphics g, String value, float cx, float y, float size, int 
 float drawTextWrapped(PGraphics g, String value, float x, float y, float w, float size, float line_h, int colour){
   String[] words = split(value, ' ');
   String line = "";
+  float actual_size = readableWrapSize(size);
+  float actual_line_h = max(line_h, actual_size + 2);
 
   g.fill(colour);
-  g.textSize(size);
+  g.textSize(actual_size);
 
   float line_y = y;
 
@@ -135,7 +165,7 @@ float drawTextWrapped(PGraphics g, String value, float x, float y, float w, floa
     if (line.length() > 0 && g.textWidth(candidate) > w){
       g.text(line, x, line_y);
       line = words[i];
-      line_y += line_h;
+      line_y += actual_line_h;
     } else {
       line = candidate;
     }
@@ -145,5 +175,5 @@ float drawTextWrapped(PGraphics g, String value, float x, float y, float w, floa
     g.text(line, x, line_y);
   }
 
-  return line_y + line_h;
+  return line_y + actual_line_h;
 }
