@@ -359,6 +359,7 @@ void mousePressed(){
 
 void keyPressed(){
   if (keyCode == ESC){
+    key = 0;
     esc_pressed = true;
     return;
   }

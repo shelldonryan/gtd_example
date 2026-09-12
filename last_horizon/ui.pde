@@ -7,8 +7,8 @@ final int LAYER_EVENT = 1;
 final int LAYER_PAUSE = 2;
 final int MAX_BUTTONS = 16;
 final int NAME_MAX_LENGTH = 12;
-final float MIN_TEXT_SIZE = 12;
-final float MIN_WRAP_TEXT_SIZE = 14;
+final float MIN_TEXT_SIZE = 16;
+final float MIN_WRAP_TEXT_SIZE = 16;
 
 int draw_layer = LAYER_SCENE;
 int button_count = 0;

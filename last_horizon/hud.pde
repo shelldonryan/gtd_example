@@ -93,10 +93,14 @@ void drawFooter(PGraphics g){
   g.fill(COL_PANEL_2);
   g.rect(0, FOOTER_Y, BASE_W, FOOTER_H);
 
-  drawButton(g, 6, FOOTER_Y + 4, 90, 19, "VOLTAR", ACTION_BACK_TO_SHIP, isRoomScreen());
-  drawButton(g, BASE_W - 6 - 166, FOOTER_Y + 4, 166, 19, "PASSAR DIA", ACTION_PASS_DAY, true);
+  boolean scene_controls_on = !event_open && !paused;
+
+  drawButton(g, 6, FOOTER_Y + 4, 90, 19, "VOLTAR", ACTION_BACK_TO_SHIP, isRoomScreen() && scene_controls_on);
+  drawButton(g, BASE_W - 6 - 166, FOOTER_Y + 4, 166, 19, "PASSAR DIA", ACTION_PASS_DAY, scene_controls_on);
 
   if (!paused){
-    textCentered(g, "ESC = PAUSA", (BASE_W + 106) / 2.0, FOOTER_Y + 8, 9, COL_DIM);
+    String hint = event_open ? "RESPONDA O EVENTO" : "ESC = PAUSA";
+    int hint_colour = event_open ? COL_ORANGE : COL_DIM;
+    textCentered(g, hint, (BASE_W + 106) / 2.0, FOOTER_Y + 8, 9, hint_colour);
   }
 }

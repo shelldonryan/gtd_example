@@ -21,10 +21,18 @@ void drawShipArea(PGraphics g){
 
   if (isRoomScreen()){
     drawRoom(g);
-    return;
+  } else {
+    drawShip(g);
   }
 
-  drawShip(g);
+  if (event_open){
+    drawEventLockNotice(g);
+  }
+}
+void drawEventLockNotice(PGraphics g){
+  drawPanel(g, 64, 226, SIDE_X - 128, 42, COL_ORANGE);
+  textCentered(g, "EVENTO PENDENTE", SIDE_X / 2.0, 232, 12, COL_ORANGE);
+  textCentered(g, "RESPONDA O EVENTO PARA CONTINUAR", SIDE_X / 2.0, 250, 10, COL_TEXT);
 }
 
 
@@ -66,14 +74,17 @@ void drawHull(PGraphics g){
 
 
 void drawRoomDoor(PGraphics g, int index){
-  boolean hover = uiLayer() == LAYER_SCENE && isHovering(room_x[index], ROOM_Y, ROOM_W, ROOM_H);
-  int border = hover ? COL_CYAN : COL_BORDER;
+  boolean scene_controls_on = !event_open && !paused;
+  boolean hover = scene_controls_on && uiLayer() == LAYER_SCENE && isHovering(room_x[index], ROOM_Y, ROOM_W, ROOM_H);
+  int border = scene_controls_on ? (hover ? COL_CYAN : COL_BORDER) : COL_DIM;
+  int label_colour = scene_controls_on ? (hover ? COL_CYAN : COL_TEXT) : COL_DIM;
+  int status_colour = scene_controls_on ? COL_MUTED : COL_DIM;
 
   drawPanel(g, room_x[index], ROOM_Y, ROOM_W, ROOM_H, border);
-  textCentered(g, room_label[index], room_x[index] + ROOM_W / 2.0, ROOM_Y + 26, 9, hover ? COL_CYAN : COL_TEXT);
-  textCentered(g, roomStatus(index), room_x[index] + ROOM_W / 2.0, ROOM_Y + 46, 8, COL_MUTED);
+  textCentered(g, room_label[index], room_x[index] + ROOM_W / 2.0, ROOM_Y + 26, 9, label_colour);
+  textCentered(g, roomStatus(index), room_x[index] + ROOM_W / 2.0, ROOM_Y + 46, 8, status_colour);
 
-  addButton(room_x[index], ROOM_Y, ROOM_W, ROOM_H, room_action[index], true);
+  addButton(room_x[index], ROOM_Y, ROOM_W, ROOM_H, room_action[index], scene_controls_on);
 }
 
 

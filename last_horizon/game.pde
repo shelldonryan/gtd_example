@@ -496,7 +496,7 @@ String gameOverMessage(){
 
 void drawEventCard(PGraphics g){
   drawPanel(g, SIDE_X, SIDE_Y, SIDE_W, SIDE_H, COL_ORANGE);
-  text(g, "EVENTO DO DIA", SIDE_X + 8, SIDE_Y + 7, 9, COL_ORANGE);
+  text(g, "EVENTO PENDENTE", SIDE_X + 8, SIDE_Y + 7, 9, COL_ORANGE);
   drawTextWrapped(g, event_title[event_index], SIDE_X + 8, SIDE_Y + 24, SIDE_W - 16, 11, 14, COL_TEXT);
   drawTextWrapped(g, event_body[event_index], SIDE_X + 8, SIDE_Y + 52, SIDE_W - 16, 9, 12, COL_MUTED);
 

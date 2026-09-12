@@ -52,13 +52,16 @@ balanceamento.
   seguinte testa a lista montada.
 - **Camadas de input**: cena, evento e pausa. O cartão de evento bloqueia as ações do dia
   e a pausa bloqueia todo o resto — só os botões da camada do topo respondem.
+- **ESC** é consumido pelo sketch (`key = 0`) antes de alternar a pausa; não encerra mais a janela.
+- Enquanto há evento pendente, os cômodos e `PASSAR DIA` ficam apagados, o título vira
+  `EVENTO PENDENTE` e a cena mostra `RESPONDA O EVENTO PARA CONTINUAR`.
 
 ## Legibilidade
 
 O playtest inicial mostrou que 8–10 px na base eram microtexto na janela 2×. A fonte
-`m5x7` e a base 640×360 continuam iguais, mas os helpers tipográficos agora garantem
-12 px mínimos para rótulos e 14 px mínimos para texto quebrado. Os botões tentam 12 px
-e reduzem somente quando a frase não cabe na largura disponível; o limite é 10 px.
+`m5x7` e a base 640×360 continuam iguais, mas os helpers tipográficos agora usam
+**16 px** para rótulos e textos quebrados. Os botões tentam 16 px e reduzem somente
+quando a frase não cabe na largura disponível; o limite é 10 px.
 `COL_MUTED` e `COL_DIM` também foram clareados para manter contraste com o fundo.
 
 As capturas atualizadas ficam em `last_horizon/output/` na branch do protótipo.
