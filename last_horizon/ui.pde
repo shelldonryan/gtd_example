@@ -57,6 +57,36 @@ int findButton(float x, float y){
 
   return ACTION_NONE;
 }
+void updateCursor(){
+  int top_layer = uiLayer();
+
+  for (int i = button_count - 1; i >= 0; i--){
+    if (button_layer[i] != top_layer || !isButtonHovered(i)){
+      continue;
+    }
+
+    cursor(button_on[i] ? HAND : WAIT);
+    return;
+  }
+
+  if (top_layer != LAYER_SCENE){
+    for (int i = button_count - 1; i >= 0; i--){
+      if (button_layer[i] != LAYER_SCENE || !isButtonHovered(i)){
+        continue;
+      }
+
+      cursor(button_on[i] ? HAND : WAIT);
+      return;
+    }
+  }
+
+  cursor(ARROW);
+}
+
+
+boolean isButtonHovered(int index){
+  return checkRectOverlap(base_mouse_x, base_mouse_y, 0, 0, button_x[index], button_y[index], button_w[index], button_h[index]);
+}
 
 
 boolean isHovering(float x, float y, float w, float h){

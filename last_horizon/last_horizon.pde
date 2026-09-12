@@ -190,6 +190,7 @@ void setup(){
   pixel_font = createFont("m5x7.ttf", 16, false);
 
   frameRate(60);
+  cursor(ARROW);
   readArgs();
 
   if (hit_test_mode){
@@ -203,6 +204,7 @@ void draw(){
   updateInput();
 
   drawBase();
+  updateCursor();
   drawWindow();
 
   updateCapture();

@@ -55,6 +55,8 @@ balanceamento.
 - **ESC** é consumido pelo sketch (`key = 0`) antes de alternar a pausa; não encerra mais a janela.
 - Enquanto há evento pendente, os cômodos e `PASSAR DIA` ficam apagados, o título vira
   `EVENTO PENDENTE` e a cena mostra `RESPONDA O EVENTO PARA CONTINUAR`.
+- **Cursor**: `HAND` sobre botões e cômodos ativos, `WAIT` sobre controles desabilitados e
+  `ARROW` no restante. São cursores padrão do Processing; nenhuma imagem foi adicionada.
 
 ## Legibilidade
 
