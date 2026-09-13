@@ -33,7 +33,7 @@ ao próprio beliche no Dormitório, confere o consumo previsto e confirma.
 
 O jogador deve equilibrar os seguintes recursos:
 
-- **Energia:** mantêm o motor e os sistemas da nave funcionando.
+- **Energia:** mantém o motor e os sistemas da nave funcionando.
 - **Oxigênio:** garante a sobrevivência das pessoas a bordo.
 - **Água:** Consumida pelos sobreviventes.
 - **Comida:** Consumida diariamente pelos sobreviventes.
@@ -68,11 +68,11 @@ estoques, mas reduz a moral dos sobreviventes.
 
 ### Dormitório
 
-É onde os sobreviventes descansam. Neusa, a enfermeira, aponta quem está mal e
-onde o casco vaza, e entrega o cartucho refrigerante de uma das variantes de
-energia; o técnico organiza o descanso na mesa comum ou leva água ao sobrevivente
-que precisa. Descanso e organização recuperam moral, mas custam energia e fazem o
-jogador abrir mão das outras tarefas do dia.
+É onde os sobreviventes e o técnico descansam. Neusa, a enfermeira, aponta quem
+está mal e onde o casco vaza, e entrega o cartucho refrigerante de uma das
+variantes de energia. A mesa comum conclui `Descanso e organização`; o beliche
+do sobrevivente recebe a água de socorro; o beliche do técnico mostra o consumo
+previsto e encerra o dia após confirmação.
 
 ## Eventos
 

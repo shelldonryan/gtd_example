@@ -46,12 +46,9 @@ e as fontes afetadas.
 
 ## Contradições conhecidas
 
-- `issue://1` foi sincronizado em 12/09 e revisado em 13/09: o loop descrito no
-  mapa já é o das decisões D-008/D-009 (sala 2D jogável, tarefa em cadeia de
-  passos, briefing no comando), a lista de decisões aponta o #14,
-  `interface/ROOMS.md` entrou nas fontes de verdade e o mapa ganhou a seção
-  **Fronteira**. As issues #2 a #17 estão ligadas como sub-issues, com o
-  contador em **13/16 concluídas** em 13/09 (abertas: #7, #8 e #10).
+- `issue://1` está sincronizado com o redesign D-048 a D-060. As issues #2 a
+  #18 estão ligadas como sub-issues, com **14/17 concluídas** em 13/09
+  (abertas: #7, #8 e #10). A #18 está CLOSED com evidência de execução.
 - `issue://13` registra o que deveria ser ignorado no antigo exemplo de
   plataforma. Física, pulo e teclado deixam de ser itens a ignorar no
   Last Horizon; combate e IA de inimigos continuam fora do escopo.
@@ -266,14 +263,14 @@ arquivo foi alterado: a aceitação e a evidência devem estar no próprio ticke
 
 As decisões D-001 a D-005 são da primeira sessão de 12/09; D-006 a D-023 saíram
 da sessão de grilling registrada em [issue://14](issue://14); D-024 a D-029 saíram
-da sessão de grilling registrada em [issue://11](issue://11); D-030 e D-031 saíram
-da validação de balanceamento registrada em [issue://12](issue://12); D-032 a D-035
-também foram confirmadas no #12; D-047 foi confirmada na sessão do
-[issue://17](issue://17).
+da sessão de grilling registrada em [issue://11](issue://11); D-030 a D-046
+saíram da validação de balanceamento registrada em [issue://12](issue://12);
+D-047 foi confirmada no [issue://17](issue://17); D-048 a D-060 vieram do
+playtest e do redesign implementado no [issue://18](issue://18).
 
 | ID | Decisão | Estado |
 |---|---|---|
-| D-001 | O mapa macro abre salas 2D jogáveis | CONFIRMADA |
+| D-001 | Interpretação anterior: o mapa macro abre as salas jogáveis | SUPERSEDED |
 | D-002 | O técnico é controlável dentro das salas | CONFIRMADA |
 | D-003 | A sala usa plataforma básica: andar, pular, escadas, colisão e interação | CONFIRMADA |
 | D-004 | Uma tarefa por dia; movimento é livre e a interação concluída consome a ação | CONFIRMADA |
@@ -281,7 +278,7 @@ também foram confirmadas no #12; D-047 foi confirmada na sessão do
 | D-006 | O técnico não entra na conta dos quatro sobreviventes | CONFIRMADA |
 | D-007 | Sem sobreviventes vivos é derrota imediata (quinta causa) | CONFIRMADA |
 | D-008 | Uma tarefa por dia, em cadeia de passos; só a conclusão gasta o dia | CONFIRMADA |
-| D-009 | Todas as estações ativas; briefing no comando sugere sem travar | CONFIRMADA |
+| D-009 | Interpretação anterior: todas as estações ativas e briefing apenas sugestivo | SUPERSEDED |
 | D-010 | Cinco tarefas, todas com NPC e troca de cômodo | CONFIRMADA |
 | D-011 | Tarefas como dado: tabela em `tasks.pde` + despachante de efeitos | CONFIRMADA |
 | D-012 | Três conveses e duas escadas em todos os cômodos | CONFIRMADA |
@@ -292,7 +289,7 @@ também foram confirmadas no #12; D-047 foi confirmada na sessão do
 | D-017 | Seis ícones de 16×16 no HUD | CONFIRMADA |
 | D-018 | Tipografia 16 px / entrelinha 18 / título 32 / botão até 10 | CONFIRMADA |
 | D-019 | Alerta com borda piscando e ícone de aviso | CONFIRMADA |
-| D-020 | Controles: setas + WASD, espaço, E, ESC; rodapé com o mouse | CONFIRMADA |
+| D-020 | Interpretação anterior: setas + WASD, espaço, E, ESC e controles de navegação no rodapé | SUPERSEDED |
 | D-021 | O dia 1 ensina pelo briefing, sem tela de tutorial | CONFIRMADA |
 | D-022 | Playtest com checklist de seis perguntas | CONFIRMADA |
 | D-023 | Tarefa não concluída não custa nada; o item fica com o técnico | CONFIRMADA |
@@ -300,7 +297,7 @@ também foram confirmadas no #12; D-047 foi confirmada na sessão do
 | D-025 | Vinheta em três telas, com objetivo explícito e sem tutorial de controles | CONFIRMADA |
 | D-026 | Terra reage uma vez a cada primeiro incidente grave; Marte fala só na vitória | CONFIRMADA |
 | D-027 | Eventos, transmissões e desfechos são modais; consequência externa vem antes do evento seguinte | CONFIRMADA |
-| D-028 | Nove estados visíveis têm linhas curtas de ação ou estado no painel | CONFIRMADA |
+| D-028 | Interpretação anterior: nove estados aparecem como linhas no painel lateral | SUPERSEDED |
 | D-029 | Cinco derrotas usam causa e consequência em texto seco | CONFIRMADA |
 | D-030 | Comida inicial em 70; as demais barras começam em 100 e as peças em 6 | CONFIRMADA |
 | D-031 | Eventos uniformes, sem repetição imediata, durante a viagem | CONFIRMADA |
@@ -338,15 +335,11 @@ também foram confirmadas no #12; D-047 foi confirmada na sessão do
 ## Decisões que exigem consulta
 
 - se a tela de vitória permite continuar jogando depois da chegada;
-- o silêncio das comunicações suspende transmissões que o sketch ainda não tem:
-  o modal de transmissão da Terra (D-026) continua fora do código;
-- a aplicação dos textos do #11 segue sem ticket: as linhas do painel `SISTEMA`
-  já estão no código (`interface/HUD.md`), e faltam vinheta, transmissões,
-  modais e as telas de vitória/derrota;
-- **uma tarefa por dia não está imposta no código:** `action_used` só é escrito,
-  nunca lido como bloqueio, então uma segunda cadeia pode ser iniciada e
-  concluída no mesmo dia. Verificado em 13/09; falta decidir onde bloquear (na
-  estação que inicia a cadeia ou na conclusão) e abrir o ticket;
+- o silêncio das comunicações deve suspender transmissões da Terra, mas o modal
+  de transmissão da D-026 continua fora do código;
+- a aplicação dos textos do #11 segue sem ticket: alertas operacionais já usam
+  avisos breves, mas ainda faltam transmissões e os textos finais de vinheta,
+  vitória e derrota;
 - qualquer nome, retrato ou história de personagem além do registrado em
   `characters/npcs/`.
 
