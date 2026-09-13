@@ -92,7 +92,7 @@ passo marcado como conclusão gasta o dia.
 | Descanso e organização | Neusa indica quem está mal (dormitório) | mesa comum | 8 energia |
 | Socorrer sobrevivente | Bento entrega a água (depósito) | beliche do sobrevivente | 5 água |
 | Reparar suporte de vida | Sílvia dá o diagnóstico (energia) → Bento entrega 2 peças (depósito) | painel de suporte de vida | 2 peças |
-| Reparar sistema de energia | Sílvia entrega uma variante (energia) → NPC da variante entrega o item | estação da variante (energia) | conforme a variante |
+| Reparar sistema de energia | Sílvia sorteia a variante (energia) → NPC da variante entrega o item | estação da variante (energia) | conforme a variante |
 | Reparar comunicações | Vera dá o diagnóstico (comando) → Bento entrega 1 peça (depósito) | antena (comando) | 1 peça |
 
 De onde cada tarefa vem:
@@ -110,7 +110,9 @@ De onde cada tarefa vem:
 
 Interruptores (**modo economia** e **racionamento**) não gastam o dia: ligam e
 desligam na visita ao cômodo, e a moral cobra o preço por dia enquanto estiverem
-ativos.
+ativos. O painel de distribuição acumula as duas funções: a conclusão da variante
+do fusível vale quando o técnico chega com o fusível na mão; sem o item, o ponto
+continua sendo o interruptor do modo economia.
 
 ## Leitura do jogador
 
@@ -125,3 +127,7 @@ A tabela de tarefas vive em `tasks.pde`, como dado: rótulo, estado que a abre
 (gate), cômodo da conclusão, custo, passo intermediário e efeito. Somar uma
 tarefa nova é somar uma linha na tabela e uma estação em um dos cômodos acima.
 Detalhes de estilo em `code/SKETCH_ARCHITECTURE.md`.
+
+No jogo, as estações usam rótulos curtos na tela: **SUPORTE** para o painel de
+suporte de vida, **DISTRIBUIÇÃO** para o painel de distribuição e **ANTENA**
+para a antena das comunicações.

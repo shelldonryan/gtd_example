@@ -6,7 +6,7 @@
 | Papel | Enfermeira |
 | Onde fica | Dormitório, em ponto fixo junto às camas |
 | Temperamento | Cansada, mas é quem segura o grupo |
-| Função nas tarefas | Aponta quem está mal (descanso e organização) e aponta o ponto do vazamento (reparar casco) |
+| Função nas tarefas | Aponta quem está mal (descanso e organização), aponta o ponto do vazamento (reparar casco) e entrega o cartucho refrigerante |
 
 ## Papel no jogo
 
@@ -14,12 +14,14 @@ Neusa cuida dos sobreviventes dentro do Dormitório. Ela observa quem dorme mal,
 quem come pouco e quem já não responde direito, e diz ao técnico onde o grupo
 está cedendo. Na tarefa de descanso e organização, aponta quem precisa parar e
 como distribuir o espaço para a moral subir. Na de reparar casco, aponta o
-ponto exato do vazamento, mesmo sem sair do cômodo.
+ponto exato do vazamento, mesmo sem sair do cômodo. Quando a falha é de energia,
+entrega o cartucho refrigerante da variante que resfria o regulador.
 
 ## Como o técnico interage
 
 - Descanso e organização: Neusa aponta quem está mal e quem precisa descansar.
 - Reparar casco: aponta o ponto do vazamento para o reparo.
+- Variante "resfriar regulador": entrega o cartucho refrigerante.
 
 ## Vínculos
 

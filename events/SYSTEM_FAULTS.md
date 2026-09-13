@@ -32,6 +32,9 @@ O modo de emergência permanece ativo até a nova tarefa ser concluída. A taref
 pode ser concluída no mesmo dia da resposta do evento; a resposta não consome a
 ação.
 
+**No cartão (D-047):** `FALHA NO SUPORTE DE VIDA` — `REPARAR (2 PEÇAS)` ou
+`EMERGÊNCIA (ENERGIA -10)`; no painel `SISTEMA`, `REPARAR SUPORTE`.
+
 ## Falha no sistema de energia
 
 A rede elétrica perde estabilidade e passa a operar em carga forçada.
@@ -45,6 +48,9 @@ As duas alternativas deixam a falha ativa: a energia continua sendo drenada
 (+3 por dia) até Sílvia entregar uma das três variantes de reparo. Cada variante
 só pode ser usada uma vez por partida.
 
+**No cartão (D-047):** `FALHA NO SISTEMA DE ENERGIA` — `FORÇAR A REDE (ENERGIA
+-10)` ou `DESLIGAR SETORES (MORAL -10)`; no painel `SISTEMA`, `REPARAR ENERGIA`.
+
 ## Falha nas comunicações
 
 O transmissor perde o contato com a Terra e a nave viaja sem instruções externas.
@@ -57,6 +63,11 @@ O transmissor perde o contato com a Terra e a nave viaja sem instruções extern
 O silêncio permanece até a tarefa `Reparar comunicações` ser concluída, com
 1 peça, na antena da Sala de comando.
 
+**No cartão (D-047):** `FALHA NAS COMUNICAÇÕES` — `REPARAR (1 PEÇA)` ou
+`SILÊNCIO (MORAL -1/DIA)`; no painel `SISTEMA`, `REPARAR COMUNICAÇÕES`.
+
 ## Pendências
 
 - Nenhuma falha de sistema pendente nesta versão.
+- Os cartões das falhas anteriores à D-047 (motor, meteoros, comida e conflito)
+  seguem na versão provisória até a etapa de implementação dos textos do #11.

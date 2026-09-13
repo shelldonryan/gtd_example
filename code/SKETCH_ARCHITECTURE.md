@@ -25,7 +25,7 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
 | `screens.pde` | máquina de estados, menu inicial, vinheta, pausa, vitória, derrota |
 | `ship.pde` | nave em vista lateral com os 4 cômodos clicáveis e o interior de cada sala |
 | `game.pde` | ciclo do dia, consumo, ações, eventos, fim de jogo |
-| `tasks.pde` | (novo) tabela das tarefas, gates, custos, efeitos e o despachante |
+| `tasks.pde` | tabela das tarefas, gates, custos, variantes, efeitos e o despachante |
 | `capture.pde` | prova: um PNG por estado e o teste de clique fora da IDE |
 
 ## Camadas da revisão
@@ -40,7 +40,9 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
   destacado. Só a interação que **conclui** a tarefa gasta a ação do dia.
 - **Tarefas como dado:** a tabela de `tasks.pde` declara rótulo, gate, cômodo da
   conclusão, custo, passo intermediário e efeito. Somar tarefa é somar uma linha
-  e uma estação; só efeito inédito pede código novo.
+  e uma estação; só efeito inédito pede código novo. A tarefa de energia é o
+  único caso em que o sorteio escreve na própria linha: a variante sorteada
+  define item, custo, ponto de entrega e estação da conclusão.
 - **Ciclo:** movimento é livre, a tarefa concluída usa a ação do dia e
   "Passar dia" aplica consumo, eventos e condições de término.
 
@@ -170,4 +172,6 @@ Limitações observadas:
   tipografia e controles. Ver `interface/ROOMS.md` e `SESSION_START.md`.
 - **Textos:** o contrato final de vinheta, transmissões, modais, alertas e
   derrotas está registrado no `issue://11` e nas fontes de interface. O sketch
-  ainda contém a implementação provisória desses textos.
+  ainda contém a implementação provisória desses textos. Os cartões e as linhas
+  de painel das três falhas novas são finais desde a D-047
+  (`events/SYSTEM_FAULTS.md` e `interface/HUD.md`).

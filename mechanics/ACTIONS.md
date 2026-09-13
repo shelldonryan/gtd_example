@@ -61,10 +61,10 @@ concluída não custa nada. O mapa dos pontos de interação de cada cômodo est
 | Descanso e organização | Neusa indica quem está mal (dormitório) | mesa comum (dormitório) | 8 de energia | moral +15, até o limite de 100 |
 | Socorrer sobrevivente | Bento entrega a água (depósito) | beliche do sobrevivente (dormitório) | 5 de água | moral +10 |
 | Reparar suporte de vida | Sílvia diagnostica (energia) → Bento entrega 2 peças (depósito) | painel de suporte de vida (energia) | 2 peças | encerra o modo de emergência |
-| Reparar sistema de energia | Sílvia diagnostica (energia) → NPC da variante entrega o item | estação da variante (energia) | conforme a variante | encerra a falha de energia |
+| Reparar sistema de energia | Sílvia sorteia a variante (energia) → NPC da variante entrega o item | estação da variante (energia) | conforme a variante | encerra a falha de energia |
 | Reparar comunicações | Vera diagnostica (comando) → Bento entrega 1 peça (depósito) | antena (Sala de comando) | 1 peça | restaura as transmissões e encerra o silêncio |
 
-Variantes de `Reparar sistema de energia` — Sílvia entrega uma, sem repetição:
+Variantes de `Reparar sistema de energia` — Sílvia sorteia uma, sem repetição:
 
 | Variante | Item | Passo livre | Conclusão | Custo |
 | --- | --- | --- | --- | --- |

@@ -45,29 +45,33 @@ O jogador deve equilibrar os seguintes recursos:
 ### Sala de comando
 
 É a sala de leitura da viagem. O técnico acompanha a rota, os recursos e o
-briefing do dia no console, e é onde Vera, a piloto, recalcula a rota quando o
-jogador decide aumentar a potência. Nenhuma tarefa termina aqui: o dia avança
-pelo rodapé.
+briefing do dia no console. Vera, a piloto, recalcula a rota em "aumentar
+potência", dá o diagnóstico das comunicações e entrega o cabo de derivação de
+uma das variantes de energia. A antena, no convés de cima, é onde o reparo das
+comunicações é concluído.
 
 ### Sala de energia
 
-Contém o motor e os controles de energia. Sílvia, a mecânica, dá o diagnóstico
-do motor; o técnico instala o reparo na bancada, alinha o reator para aumentar a
-potência e liga o modo de economia no painel de distribuição.
+Contém o motor, o reator, o painel de distribuição e o painel de suporte de vida.
+Sílvia, a mecânica, dá o diagnóstico do motor, do suporte de vida e do sistema de
+energia; o técnico instala o reparo na bancada, alinha o reator para aumentar a
+potência, liga o modo de economia e troca o fusível no painel de distribuição.
 
 ### Depósito
 
-Armazena comida, água e peças. Bento, o intendente, entrega as peças do reparo e
-a água do socorro, e libera o racionamento. O depósito também guarda o kit de
-vedação e o ponto do casco, onde o vazamento é estancado. O racionamento preserva
-os estoques, mas reduz a moral dos sobreviventes.
+Armazena comida, água e peças. Bento, o intendente, entrega as peças do reparo do
+motor e do suporte de vida, a peça das comunicações, o fusível reserva e a água
+do socorro, e libera o racionamento. O depósito também guarda o kit de vedação e
+o ponto do casco, onde o vazamento é estancado. O racionamento preserva os
+estoques, mas reduz a moral dos sobreviventes.
 
 ### Dormitório
 
 É onde os sobreviventes descansam. Neusa, a enfermeira, aponta quem está mal e
-onde o casco vaza; o técnico organiza o descanso na mesa comum ou leva água ao
-sobrevivente que precisa. Descanso e organização recuperam moral, mas custam
-energia e fazem o jogador abrir mão das outras tarefas do dia.
+onde o casco vaza, e entrega o cartucho refrigerante de uma das variantes de
+energia; o técnico organiza o descanso na mesa comum ou leva água ao sobrevivente
+que precisa. Descanso e organização recuperam moral, mas custam energia e fazem o
+jogador abrir mão das outras tarefas do dia.
 
 ## Eventos
 
@@ -78,6 +82,16 @@ energia e fazem o jogador abrir mão das outras tarefas do dia.
   racionamento.
 - **Conflito no dormitório:** pode ser ignorado ou resolvido com uma ação que
   recupera a moral.
+- **Falha no suporte de vida:** reparar com peças ou operar em emergência, que
+  gasta energia na hora e consome mais oxigênio por dia até o reparo.
+- **Falha no sistema de energia:** forçar a rede ou desligar setores; as duas
+  mantêm a falha ativa, que drena energia por dia até o reparo com uma das três
+  variantes.
+- **Falha nas comunicações:** reparar com uma peça ou seguir em silêncio, que
+  custa moral por dia até o conserto.
+
+Os eventos são sorteados de um pool uniforme, sem repetir o anterior, e uma
+falha que já está ativa não volta ao sorteio.
 
 Cada evento deve apresentar pelo menos duas alternativas com consequências
 diferentes. Dessa forma, o jogador nao apenas reage aos problemas, mas decide

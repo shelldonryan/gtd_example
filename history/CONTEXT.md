@@ -47,8 +47,8 @@ mais de um cômodo. Andar, pular, usar escada e cumprir os passos intermediário
 não consomem a ação; só a interação que conclui a tarefa usa a única ação do dia.
 Depois, o jogador decide quando avançar o tempo. Ao final do dia, a nave consome
 água, comida, oxigênio e energia. Eventos como falhas no motor, chuva de
-meteoros, falta de comida e conflitos entre os sobreviventes podem alterar o
-estado da missão.
+meteoros, falta de comida, conflitos entre os sobreviventes e as falhas de
+suporte de vida, de energia e de comunicações podem alterar o estado da missão.
 
 As decisões não possuem uma solução perfeita. Reparar o motor pode gastar as
 últimas peças, manter o consumo normal pode deixar os estoques vazios e aplicar

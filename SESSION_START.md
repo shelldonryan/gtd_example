@@ -321,6 +321,10 @@ também foram confirmadas no #12; D-047 foi confirmada na sessão do
   o modal de transmissão da Terra (D-026) continua fora do código;
 - a aplicação dos textos do #11 (derrotas, alertas, vitória) no sketch segue
   sem ticket — o contrato está fechado, o código ainda usa os textos antigos;
+- **uma tarefa por dia não está imposta no código:** `action_used` só é escrito,
+  nunca lido como bloqueio, então uma segunda cadeia pode ser iniciada e
+  concluída no mesmo dia. Verificado em 13/09; falta decidir onde bloquear (na
+  estação que inicia a cadeia ou na conclusão) e abrir o ticket;
 - qualquer nome, retrato ou história de personagem além do registrado em
   `characters/npcs/`.
 
@@ -376,8 +380,9 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 
 ### Textos das falhas novas (D-047)
 
-Aprovados nesta sessão no formato do #11 e já no código. Os cartões ficam em
-`game.pde` e as linhas do painel em `hud.pde`.
+Escritos nesta sessão no formato do #11 e já no código. Os cartões ficam em
+`game.pde` e as linhas do painel em `hud.pde`; a fonte de domínio é
+`events/SYSTEM_FAULTS.md` e a de interface, `interface/HUD.md`.
 
 | Falha | Cartão | Alternativa A | Alternativa B | Painel |
 |---|---|---|---|---|
