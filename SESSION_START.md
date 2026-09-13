@@ -365,19 +365,26 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 - **Documentos atualizados nesta sessão:** `SESSION_START.md`,
   `mechanics/ACTIONS.md`, `interface/ROOMS.md`, `interface/FLOW.md`,
   `interface/HUD.md`, `interface/MENU_INIT.md`, `interface/MENU_GAME_OVER.md`,
-  `interface/MENU_VICTORY.md`, `events/SYSTEM_FAULTS.md`,
-  `code/SKETCH_ARCHITECTURE.md` e `AGENTS.md`.
+  `interface/MENU_VICTORY.md`, `events/SYSTEM_FAULTS.md`, `README.md`,
+  `history/CONTEXT.md`, `characters/npcs/NPC_1.md` a `NPC_4.md`,
+  `code/SKETCH_ARCHITECTURE.md` e `AGENTS.md` (este fora do git).
 - **Código:** o sketch tem as três falhas novas, as três tarefas novas, as
   variantes de energia com sorteio sem reposição, o pool de sete eventos e os
   três estados novos do painel `SISTEMA`. `FOOD_START = 70` aparece no HUD do
-  dia 1.
+  dia 1. A tipografia voltou ao piso de 16 px: nenhum texto de leitura é
+  desenhado por fora dos helpers, e o painel `SISTEMA` foi reorganizado
+  (tarefa no alto, alertas em faixa fixa, mensagem com três linhas).
 - **Verificação:** `Processing.exe cli --sketch=.\last_horizon --run --capture`
   percorre 42 estados e imprime 28 checagens `OK` (falhas novas, custos, item da
-  variante, sorteio, painel de distribuição e antena no alcance);
-  `--hit-test` e `--ladder-test` continuam `OK`.
+  variante, sorteio, painel de distribuição e antena no alcance); `--hit-test` e
+  `--ladder-test` imprimem 5 `OK` cada. Nenhum `FALHOU`.
+- **Commits da sessão:** `1980d28` (falhas novas no sketch), `afcd44b` (D-047 e
+  fechamento do #17), `23ec078` (sincronização do vault), `8ca4507` (tipografia)
+  — todos empurrados para `origin/prototype/sketch-architecture`.
 - **Mapa #1 sincronizado:** #12 e #17 fechados; disponíveis #7, #8 e #10.
 - **Próximo trabalho recomendado:** a cadeia de arte (#10 → #8), com #7 em
-  paralelo; a implementação dos textos do #11 no sketch continua sem ticket.
+  paralelo; depois a imposição de uma tarefa por dia (lacuna verificada) e os
+  textos restantes do #11.
 
 ### Textos das falhas novas (D-047)
 
@@ -394,5 +401,6 @@ Escritos nesta sessão no formato do #11 e já no código. Os cartões ficam em
 Corpos dos cartões: `O SUPORTE PERDEU ESTABILIDADE. A NAVE CONSOME MAIS OXIGÊNIO.`, `A REDE PERDEU ESTABILIDADE E OPERA EM CARGA FORÇADA.` e `O TRANSMISSOR PERDEU O CONTATO COM A TERRA.`
 
 O repositório está com **protótipo jogável executável**: as oito tarefas, os sete
-eventos e os três estados novos do painel estão no sketch e verificados; o que
-resta é a cadeia de arte (#10 → #8) e a implementação dos textos do #11.
+eventos, os três estados novos do painel e a tipografia no piso de 16 px estão no
+sketch e verificados. O que resta é a cadeia de arte (#10 → #8), a imposição de
+uma tarefa por dia e os textos restantes do #11.
