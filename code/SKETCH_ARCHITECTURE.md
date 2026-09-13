@@ -1,14 +1,13 @@
 # Arquitetura do sketch
 
 Este documento descreve o esqueleto inicial do ticket [#9](https://github.com/shelldonryan/gtd_example/issues/9).
-Ele continua válido para o viewport, o HUD e o estado global, mas a direção de
-gameplay foi revisada: o mapa macro abre salas 2D jogáveis, e o técnico é
-controlável dentro delas. O sketch atual ainda é a prova da camada de menus e
-botões; não é a implementação final dessa exploração.
+Ele continua válido para o viewport, o HUD e o estado global. O mapa macro agora
+abre salas 2D jogáveis, e o técnico é controlável dentro delas.
+
 
 A especificação das salas — pontos de interação, as cinco tarefas e os números de
-movimento — está em `interface/ROOMS.md`. Este documento registra como o sketch
-implementa isso e o que ainda falta.
+movimento — está em `interface/ROOMS.md`. A implementação permanece plana e
+registra esse contrato nas abas do sketch.
 
 ## Onde o código mora
 
@@ -48,10 +47,9 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
 Números do movimento (base 640×360): personagem 16×24, andar 1,5 px/quadro, pulo
 de 48 px, gravidade 0,5, escada 1,0, plataformas atravessáveis por baixo.
 
-O código atual ainda não contém as camadas de sala jogável, movimento,
-colisão, interação ou a tabela de tarefas. Elas substituem o modelo em que cada
-ação era disparada diretamente por um botão.
-
+O código contém as camadas de sala jogável, movimento, colisão, interação e a
+tabela de tarefas. Elas substituem o modelo em que cada ação era disparada
+diretamente por um botão dentro da sala.
 **Sem classes e sem hierarquia.** O Processing junta todas as abas numa classe só, então
 o estilo do professor continua valendo: globais agrupadas por seção, funções curtas,
 `update` separado de `draw`, `loadAssets()` centralizado quando a arte entrar.
@@ -60,7 +58,9 @@ o estilo do professor continua valendo: globais agrupadas por seção, funções
 
 Globais planas, todas em `last_horizon.pde`: `day`, `trip_days`, `survivors`, `energy`,
 `oxygen`, `water`, `food`, `morale`, `parts`, `engine_state`, `engine_damaged_days`,
-`leak_on`, `saving_on`, `rationing_on`, `action_used`, `boost_count`, `game_over_reason`.
+`leak_on`, `saving_on`, `rationing_on`, `action_used`, `boost_count`, `game_over_reason`,
+`current_room`, `player_x`, `player_y`, `player_velocity_y`, `player_grounded`,
+`player_on_ladder`, `held_item`, `active_task` e `task_step_index`.
 Nenhuma tela recebe parâmetro: todas leem e escrevem as mesmas globais — é assim que o
 dia, os recursos e o motor atravessam as telas.
 
@@ -99,10 +99,9 @@ tentam 16 px e reduzem somente quando a frase não cabe na largura disponível; 
 limite é 10 px. `COL_MUTED` e `COL_DIM` também foram clareados para manter contraste
 com o fundo.
 
-Pendente no HUD, conforme `interface/HUD.md`: os seis cartões de recurso passam a
-**ícone de 16×16 + número + barra**, sem rótulo de texto; o cartão de quantos estão
-a bordo vira **A BORDO**; e o recurso em vermelho pisca a borda e ganha ícone de
-aviso. O letreiro "ARES-7" do mapa macro sai — a nave não tem nome.
+O HUD implementa os seis cartões de recurso com **ícone de 16×16 + número + barra**,
+sem rótulo de texto; o cartão de quantos estão a bordo usa **A BORDO**; e o recurso
+crítico pisca a borda e ganha ícone de aviso. O mapa macro não imprime nome de nave.
 
 As capturas atualizadas ficam em `last_horizon/output/` na branch do protótipo.
 
@@ -122,21 +121,42 @@ de derrota, documentada em `README.md`, `mechanics/ACTIONS.md` e
 
 ## Como rodar
 
+Na instalação usada, `processing-java` não existe e também não existe
+`C:\Program Files\Processing\runtime\bin\java.exe`. O launcher suportado é o
+CLI embutido no `Processing.exe`. Os comandos abaixo são executados a partir da
+raiz do repositório:
+
 ```
-"C:\Program Files\Processing\Processing.exe" cli --sketch="<caminho>\last_horizon" --run
-"C:\Program Files\Processing\Processing.exe" cli --sketch="<caminho>\last_horizon" --run --capture
-"C:\Program Files\Processing\Processing.exe" cli --sketch="<caminho>\last_horizon" --run --hit-test
+"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run
+"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --capture
+"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --hit-test
+"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --ladder-test
 ```
 
-`--capture` salva um PNG por estado em `output/` (o nativo 640×360 e a janela ampliada) e
-encerra sozinho; `--hit-test` abre a janela em 1400×900 (fora de 16:9) e imprime a conversão
-do clique para as coordenadas da base.
+`--capture` percorre 30 estados, salva `output/NN_estado.png` em 640×360 e
+`output/NN_estado_window.png` na janela, e encerra sozinho. `--hit-test` abre
+uma janela de 1400×900 e prova a conversão de clique para a base 640×360.
+`--ladder-test` verifica saída lateral, travessia, encaixe, bloqueio de
+reentrada enquanto a direção vertical está pressionada e rearme posterior;
+também salva `output/ladder_middle_exit.png`.
+
+Limitações observadas:
+
+- A rota manual solicitada pelo ticket seria verificada com
+  `Test-Path 'C:\Program Files\Processing\runtime\bin\java.exe'`. O resultado
+  nesta instalação é `False`; portanto não há comando manual executável de
+  compilação usando esse runtime. O launcher suportado é o CLI do Processing.
+- A captura não usa bibliotecas externas do sketch: usa somente o core carregado
+  pelo CLI e `data/m5x7.ttf`. Não há biblioteca adicional ausente bloqueando o
+  harness.
+- O CLI emite os avisos `display count needs to be implemented for non-AWT` e
+  `AWT disabled`, mas compila, executa, salva as imagens e encerra com sucesso.
+  A execução headless não foi validada nesta sessão.
 
 ## Estado da revisão
 
-- **Código atual:** menus, mapa, salas estáticas, botões e captura automática
-  continuam sendo o esqueleto existente; movimento de plataforma, interação e a
-  tabela de tarefas ainda precisam ser implementados.
+- **Código atual:** menus, mapa, salas jogáveis, movimento, escadas, colisão,
+  interação, tarefas declarativas, HUD atualizado e captura automática.
 - **Decisões aplicadas nos documentos em 12/09:** roster (4 sobreviventes + técnico),
   quinta causa de derrota, tarefas em cadeia, layout de três conveses, números de
   movimento, nomes dos sobreviventes, vocabulário dos cômodos, ícones do HUD,

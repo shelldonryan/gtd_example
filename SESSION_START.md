@@ -3,7 +3,7 @@
 > Documento obrigatório de abertura e encerramento de toda sessão. Leia antes de
 > analisar, editar ou implementar qualquer coisa.
 
-Atualizado em: 2026-09-12 (após a sessão de grilling do [#14](issue://14))
+Atualizado em: 2026-09-13 (após a resolução dos cinco conflitos do sketch)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Como usar este arquivo
@@ -56,10 +56,12 @@ e as fontes afetadas.
   Last Horizon; combate e IA de inimigos continuam fora do escopo.
 - `issue://9` e o sketch atual descrevem uma prova de menus e botões. Eles são
   evidência da implementação existente, não da jogabilidade final.
-- O **código** ainda tem três pontos que os documentos já corrigiram: imprime
-  "ARES-7" no mapa macro (a nave não tem nome), rotula o cartão como
-  `TRIPULAÇÃO` (agora é **A BORDO**, só sobreviventes) e conta o técnico entre
-  os quatro. Tudo isso está no escopo do [#16](issue://16).
+- Os conflitos do código foram resolvidos no sketch: as salas agora são jogáveis,
+  o HUD usa ícones e **A BORDO**, e o mapa macro não imprime nome de nave.
+- O vocabulário visível do código usa **sobreviventes**; `CREW` permanece apenas
+  como identificador interno de regra.
+- As referências visuais usam o caminho real `assets/concept_arts/`; as artes
+  continuam sendo referência de linguagem visual, não fonte de nomes.
 - Os documentos do vault foram sincronizados em 12/09: `events/CREW_ISSUES.md` e
   `events/SYSTEM_FAULTS.md` não dizem mais que a resposta do evento gasta a ação
   do dia.
@@ -69,11 +71,11 @@ e as fontes afetadas.
 Last Horizon é um protótipo de gerenciamento de recursos com exploração 2D em
 plataforma dentro de uma nave espacial. A nave **não tem nome**.
 
-- `assets/HUD_CONCEPT_ART.png` é referência de linguagem visual do mapa macro e
-  do HUD; os números do mock (520/600, Dia 084, 42 tripulantes) são ilustrativos —
-  a fonte é `mechanics/ACTIONS.md`.
-- `assets/COMMAND_ROOM_CONCEPT_ART.png` é a linguagem visual das salas: cena
-  lateral 2D em três conveses ligados por escadas, com terminais.
+- `assets/concept_arts/HUD_CONCEPT_ART.png` é referência de linguagem visual do
+  mapa macro e do HUD; os números do mock (520/600, Dia 084, 42 tripulantes)
+  são ilustrativos — a fonte é `mechanics/ACTIONS.md`.
+- `assets/concept_arts/COMMAND_ROOM_CONCEPT_ART.png` é a linguagem visual das
+  salas: cena lateral 2D em três conveses ligados por escadas, com terminais.
 - Clicar em um cômodo no mapa macro abre a sala correspondente; o técnico é
   controlado diretamente dentro dela (setas/WASD, espaço, E, ESC).
 - Cada tarefa do dia é uma **cadeia de poucos passos** (falar, coletar, instalar)
@@ -127,25 +129,20 @@ decisão explícita. Os pontos de interação e as cinco tarefas estão em
 - Áudio offline sem biblioteca externa: `javax.sound.sampled`, WAV PCM 16 bits em
   `data/`.
 
-## Estado real da implementação
+O sketch em `last_horizon/` implementa menus, mapa, salas jogáveis, movimento,
+gravidade, pulo, escadas, colisão de plataformas, pontos de interação, tarefas
+em cadeia, NPCs fixos, HUD com ícones e captura automática.
 
-**O código ainda não acompanha a direção atual.** O sketch em `last_horizon/`
-implementa menus, mapa, salas estáticas, botões, ciclo de recursos/eventos e
-captura automática. Ainda não implementa:
-
-- controle do técnico;
-- gravidade, pulo, escadas e colisão de plataformas;
-- pontos de interação, cadeia de passos e a tabela de tarefas;
-- NPCs dentro das salas;
-- o HUD novo (ícones, A BORDO, alerta piscando) e a remoção do "ARES-7".
-
-`code/SKETCH_ARCHITECTURE.md` registra essa diferença. As capturas existentes em
-`last_horizon/output/` comprovam a camada de menus/mapa, não a exploração.
-O ticket [#15](issue://15) cobre a sala jogável e o [#16](issue://16) o HUD.
+`code/SKETCH_ARCHITECTURE.md` registra a implementação atual. As capturas em
+`last_horizon/output/` incluem estados de exploração e a verificação de que só
+a conclusão da tarefa consome a ação do dia.
+Os tickets [#15](issue://15) e [#16](issue://16) estão CLOSED após a validação
+da evidência na aceitação nativa de cada issue.
 
 Os arquivos `characters/npcs/NPC_1.md` a `NPC_4.md` estão preenchidos com Vera,
 Bento, Neusa e Sílvia. Não inventar nomes, personalidades ou histórias novas
 sem decisão do usuário.
+
 
 ## Fontes obrigatórias
 
@@ -175,8 +172,8 @@ sem decisão do usuário.
 
 ### Visual e implementação
 
-- `assets/HUD_CONCEPT_ART.png` — mapa macro e HUD.
-- `assets/COMMAND_ROOM_CONCEPT_ART.png` — sala lateral jogável.
+- `assets/concept_arts/HUD_CONCEPT_ART.png` — mapa macro e HUD.
+- `assets/concept_arts/COMMAND_ROOM_CONCEPT_ART.png` — sala lateral jogável.
 - `code/SKETCH_ARCHITECTURE.md` — arquitetura registrada e lacunas conhecidas.
 - Todos os `.pde` de `last_horizon/` quando a tarefa tocar o código.
 
@@ -212,8 +209,8 @@ regra nas issues no início de cada sessão; não confie apenas na tabela abaixo
 
 ### Snapshot atual da fronteira
 
-Sincronizado com o grafo nativo de dependências em 2026-09-12, depois de fechar
-o #14 e abrir o #15 e o #16:
+Sincronizado com o grafo nativo de dependências em 2026-09-13, após fechar #14,
+#15 e #16:
 
 | Issue | Estado | Bloqueadores abertos | Relação relevante |
 |---|---|---|---|
@@ -222,12 +219,12 @@ o #14 e abrir o #15 e o #16:
 | #8 — Inventário de assets | disponível | — | depende apenas de #5/#6 CLOSED |
 | #10 — Pipeline Aseprite → Processing | disponível | — | depende apenas de #6 CLOSED |
 | #11 — Roteiro e textos | disponível | — | bloqueia #12 |
-| #15 — Sala jogável | disponível | — | independente do #16 |
-| #16 — HUD: ícones, alerta e rótulos | disponível | — | independente do #15 |
+| #15 — Sala jogável | CLOSED | — | sala jogável validada |
+| #16 — HUD: ícones, alerta e rótulos | CLOSED | — | HUD validado |
 | #12 — Balanceamento | bloqueada | #4 e #11 | só iniciar quando ambos fecharem |
 
-Issues de base já CLOSED: #2, #3, #5, #6, #9, #13 e #14. A issue #1 permanece
-OPEN como mapa do projeto.
+Issues de base já CLOSED: #2, #3, #5, #6, #9, #13, #14, #15 e #16. A issue #1
+permanece OPEN como mapa do projeto.
 
 O grafo Wayfinder é a fonte da disponibilidade; a ordem recomendada pode mudar
 conforme o prazo e os riscos. Não declarar uma issue concluída apenas porque um
@@ -315,26 +312,37 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 
 - **Grilling concluído:** 18 decisões (D-006 a D-023) confirmadas uma a uma e
   registradas em `issue://14`, que foi fechado.
+- **Issue iniciada nesta sessão:** [#4](issue://4), execução e captura do sketch;
+  permanece OPEN enquanto a evidência do ticket não estiver aceita.
 - **Documentos aplicados:** `README.md`, `mechanics/ACTIONS.md`,
   `interface/FLOW.md`, `interface/HUD.md`, `interface/TEXT_FONTS.md`,
   `interface/MENU_GAME_OVER.md`, `interface/MENU_VICTORY.md`,
   `interface/ROOMS.md` (novo), `characters/PLAYER.md`, `characters/npcs/NPC_1` a
   `NPC_4`, `history/CONTEXT.md`, `events/CREW_ISSUES.md`,
   `events/SYSTEM_FAULTS.md` e `code/SKETCH_ARCHITECTURE.md`.
-- **Código:** ainda não alterado nesta sessão. As mudanças estão nos tickets
-  [#15](issue://15) (sala jogável) e [#16](issue://16) (HUD).
-- **Verificação:** nenhum sketch foi executado nesta sessão; a prova é a
-  conferência dos documentos contra as decisões e o `git status`.
-- **Mapa #1 sincronizado:** loop atualizado para a cadeia de passos, seção
-  Fronteira acrescentada, `interface/ROOMS.md` nas fontes de verdade, "Not yet
-  specified" reduzido ao que segue aberto e #14/#15/#16 ligados como sub-issues
-  (contador de sub-issues: 7 de 15).
-- **Nada foi commitado:** as decisões estão na working tree da branch
-  `prototype/sketch-architecture`, junto de mudanças não commitadas de sessões
-  anteriores. Antes de começar o #15, vale commitar os documentos deste grilling.
-- **Próximo trabalho recomendado:** [#15](issue://15) é o maior risco do prazo
-  (23/09) e não depende de ninguém; o [#16](issue://16) é o mais barato e pode
-  andar em paralelo. O [#4](issue://4) ainda bloqueia o balanceamento.
+- **Código:** o sketch foi atualizado para a sala jogável, tabela de tarefas,
+  NPCs fixos, HUD com ícones, alerta piscante, `A BORDO` e mapa sem nome de nave.
+  As referências visuais agora usam `assets/concept_arts/`.
+- **Arquivos alterados nesta sessão:** `last_horizon/last_horizon.pde`,
+  `last_horizon/ship.pde`, `last_horizon/tasks.pde`, `last_horizon/game.pde`,
+  `last_horizon/screens.pde`, `last_horizon/hud.pde`, `last_horizon/capture.pde`,
+  `SESSION_START.md` e `code/SKETCH_ARCHITECTURE.md`.
+- **Verificação:** executados `Processing.exe cli --run --capture`,
+  `Processing.exe cli --run --hit-test` e `Processing.exe cli --run --ladder-test`.
+  A regressão da escada confirmou saída lateral, captura da travessia, encaixe
+  ao parar, bloqueio da reentrada enquanto a direção vertical permanece
+  pressionada e rearme depois de soltá-la. A prova visual está em
+  `last_horizon/output/ladder_middle_exit.png`.
+- **Mapa #1 sincronizado:** #15 e #16 foram fechadas após validação do usuário.
+  Permanecem disponíveis #4, #7, #8, #10 e #11; #12 continua bloqueada por #4
+  e #11. A issue #1 explicita que `last_horizon/` é um protótipo funcional,
+  não a arte final.
+- **Issues concluídas nesta sessão:** #15 (sala jogável) e #16 (HUD).
+- **Nada foi commitado:** as alterações permanecem na working tree da branch
+  `prototype/sketch-architecture`.
+- **Próximo trabalho recomendado:** executar o playtest formal e seguir para #4
+  e #11; depois, liberar o balanceamento #12.
 
-O repositório está com **documentação decidida e código pendente**: a direção de
-gameplay está fechada em papel, mas a sala jogável ainda não existe no sketch.
+O repositório está com **protótipo jogável executável**: menus, mapa, exploração
+2D, tarefas, HUD e captura funcionam; textos finais, assets finais e
+balanceamento continuam abertos nos tickets correspondentes.
