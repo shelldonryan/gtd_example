@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "ed2de0a345e262d8",
+        "id": "682bb5a491805dd7",
         "type": "tabs",
         "children": [
           {
-            "id": "7d02006d6c8f4865",
+            "id": "1d630e18927fd6ab",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "interface/HUD.md",
-                "mode": "source",
+                "file": "mechanics/ACTIONS.md",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "HUD"
+              "title": "ACTIONS"
             }
           }
         ]
@@ -46,7 +46,7 @@
                 "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
-              "title": "Files"
+              "title": "Explorador de arquivos"
             }
           },
           {
@@ -179,48 +179,62 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "switcher:Open quick switcher": false,
-      "graph:Open graph view": false,
-      "canvas:Create new canvas": false,
-      "daily-notes:Open today's daily note": false,
-      "templates:Insert template": false,
-      "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "switcher:Abrir a troca rápida": false,
+      "graph:Abrir visualização em gráfico": false,
+      "canvas:Criar novo canvas": false,
+      "daily-notes:Abrir a nota de hoje": false,
+      "templates:Inserir modelo": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Criar nova base": false
     }
   },
-  "active": "7d02006d6c8f4865",
+  "active": "1d630e18927fd6ab",
   "lastOpenFiles": [
-    "assets/sala_comando_screen.jpg",
-    "assets/Unconfirmed 392327.crdownload",
-    "assets/HUD.jpg",
-    "assets/Unconfirmed 155235.crdownload",
-    "README.md",
-    "history/CONTEXT.md",
+    "characters/npcs/NPC_4.md",
+    "interface/ROOMS.md",
+    "code/SKETCH_ARCHITECTURE.md",
+    "SESSION_START.md",
     "characters/PLAYER.md",
-    "interface/HUD.md",
-    "mechanics/economy/MONEY.md",
-    "mechanics/economy/BUYABLE.md",
-    "mechanics/consumables/POTION_LIFE.md",
-    "interface/TEXT_FONTS.md",
-    "assets",
-    "mechanics/consumables/POTION_RESISTANCE.md",
-    "mechanics/economy/buyable",
-    "mechanics/consumables/POTION_SPEED.md",
+    "assets/concept_arts/sala_comando_screen.jpg",
+    "assets/concept_arts/COMMAND_ROOM_CONCEPT_ART.png",
+    "assets/concept_arts",
+    "assets/concept_arts/HUD.jpg",
+    "assets/concept_arts/HUD_CONCEPT_ART.png",
+    "README.md",
     "characters/npcs/NPC_3.md",
     "characters/npcs/NPC_2.md",
     "characters/npcs/NPC_1.md",
-    "characters/npcs",
-    "enemies/SUB_BOSSES.md",
-    "enemies/MINIONS.md",
-    "enemies/BOSSES.md",
-    "interface/MENU_PAUSE.md",
-    "interface/MENU_GAME_OVER.md",
+    "last_horizon/screens.pde",
+    "last_horizon/ship.pde",
+    "last_horizon/ui.pde",
+    "last_horizon/output/23_victory_window.png",
+    "last_horizon/output/23_victory.png",
+    "last_horizon/output/22_ship_last_day_window.png",
+    "last_horizon/output/22_ship_last_day.png",
+    "last_horizon/output/21_menu_init_again_window.png",
+    "last_horizon/output/21_menu_init_again.png",
+    "last_horizon/output",
+    "last_horizon/data/m5x7.ttf",
+    "last_horizon/last_horizon.pde",
+    "last_horizon/hud.pde",
+    "last_horizon/game.pde",
+    "last_horizon/data",
+    "interface/FLOW.md",
+    "events/CREW_ISSUES.md",
+    "events/HAZARDS.md",
+    "events/SYSTEM_FAULTS.md",
+    "history/CONTEXT.md",
+    "interface/HUD.md",
     "interface/MENU_CONFIGURATION.md",
+    "interface/MENU_GAME_OVER.md",
     "interface/MENU_INIT.md",
-    "interface",
-    "level_design/map",
-    "level_design/world",
-    "level_design",
-    "mechanics/economy"
+    "interface/MENU_PAUSE.md",
+    "interface/MENU_VICTORY.md",
+    "interface/TEXT_FONTS.md",
+    "mechanics/ACTIONS.md",
+    "mechanics/economy/MONEY.md",
+    "mechanics/economy/BUYABLE.md",
+    "enemies/SUB_BOSSES.md",
+    "enemies/MINIONS.md"
   ]
 }
