@@ -210,21 +210,21 @@ regra nas issues no início de cada sessão; não confie apenas na tabela abaixo
 ### Snapshot atual da fronteira
 
 Sincronizado com o grafo nativo de dependências em 2026-09-13, após fechar #14,
-#15 e #16:
+#15, #16 e #4:
 
 | Issue | Estado | Bloqueadores abertos | Relação relevante |
 |---|---|---|---|
-| #4 — Executar e capturar o sketch | disponível | — | bloqueia #12 |
+| #4 — Executar e capturar o sketch | CLOSED | — | execução e captura aceitas |
 | #7 — Documento de entrega | disponível | — | independente |
 | #8 — Inventário de assets | disponível | — | depende apenas de #5/#6 CLOSED |
 | #10 — Pipeline Aseprite → Processing | disponível | — | depende apenas de #6 CLOSED |
 | #11 — Roteiro e textos | disponível | — | bloqueia #12 |
 | #15 — Sala jogável | CLOSED | — | sala jogável validada |
 | #16 — HUD: ícones, alerta e rótulos | CLOSED | — | HUD validado |
-| #12 — Balanceamento | bloqueada | #4 e #11 | só iniciar quando ambos fecharem |
+| #12 — Balanceamento | bloqueada | #11 | só iniciar quando #11 fechar |
 
-Issues de base já CLOSED: #2, #3, #5, #6, #9, #13, #14, #15 e #16. A issue #1
-permanece OPEN como mapa do projeto.
+Issues de base já CLOSED: #2, #3, #4, #5, #6, #9, #13, #14, #15 e #16.
+A issue #1 permanece OPEN como mapa do projeto.
 
 O grafo Wayfinder é a fonte da disponibilidade; a ordem recomendada pode mudar
 conforme o prazo e os riscos. Não declarar uma issue concluída apenas porque um
@@ -232,7 +232,7 @@ arquivo foi alterado: a aceitação e a evidência devem estar no próprio ticke
 
 ### Cadeias de trabalho relevantes
 
-- `#4` + `#11` → `#12`: captura/verificação e textos antes do balanceamento.
+- `#4` (fechado) + `#11` → `#12`: captura/verificação e textos antes do balanceamento.
 - `#15` → sala jogável; `#16` → HUD. Independentes entre si e ambos no caminho
   crítico do protótipo jogável (prazo 23/09).
 - `#10` → definição segura do pipeline de arte → produção dos assets listados em `#8`.
@@ -312,8 +312,8 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 
 - **Grilling concluído:** 18 decisões (D-006 a D-023) confirmadas uma a uma e
   registradas em `issue://14`, que foi fechado.
-- **Issue iniciada nesta sessão:** [#4](issue://4), execução e captura do sketch;
-  permanece OPEN enquanto a evidência do ticket não estiver aceita.
+- **Issue executada nesta sessão:** [#4](issue://4), execução e captura do sketch;
+  aceita e fechada após a verificação nativa.
 - **Documentos aplicados:** `README.md`, `mechanics/ACTIONS.md`,
   `interface/FLOW.md`, `interface/HUD.md`, `interface/TEXT_FONTS.md`,
   `interface/MENU_GAME_OVER.md`, `interface/MENU_VICTORY.md`,
@@ -333,15 +333,16 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
   ao parar, bloqueio da reentrada enquanto a direção vertical permanece
   pressionada e rearme depois de soltá-la. A prova visual está em
   `last_horizon/output/ladder_middle_exit.png`.
-- **Mapa #1 sincronizado:** #15 e #16 foram fechadas após validação do usuário.
-  Permanecem disponíveis #4, #7, #8, #10 e #11; #12 continua bloqueada por #4
-  e #11. A issue #1 explicita que `last_horizon/` é um protótipo funcional,
+- **Mapa #1 sincronizado:** #4, #15 e #16 foram fechadas após validação do usuário.
+  Permanecem disponíveis #7, #8, #10 e #11; #12 continua bloqueada por #11.
+  A issue #1 explicita que `last_horizon/` é um protótipo funcional,
   não a arte final.
-- **Issues concluídas nesta sessão:** #15 (sala jogável) e #16 (HUD).
-- **Nada foi commitado:** as alterações permanecem na working tree da branch
-  `prototype/sketch-architecture`.
-- **Próximo trabalho recomendado:** executar o playtest formal e seguir para #4
-  e #11; depois, liberar o balanceamento #12.
+- **Issues concluídas nesta sessão:** #4 (execução e captura), #15 (sala jogável)
+  e #16 (HUD).
+- **Commits:** `5c3f682` (`feat: adicionar harness de captura do CLI do
+  Processing`) e `b732fd6` (`docs: sincronizar fronteira Wayfinder após issue 4`).
+- **Próximo trabalho recomendado:** seguir para #11; #7, #8 e #10 continuam
+  independentes. Depois de #11, liberar o balanceamento #12.
 
 O repositório está com **protótipo jogável executável**: menus, mapa, exploração
 2D, tarefas, HUD e captura funcionam; textos finais, assets finais e
