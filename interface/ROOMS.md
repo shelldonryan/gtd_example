@@ -38,12 +38,13 @@ Regras que valem em todos os cômodos:
 
 ## Sala de comando
 
-Nenhuma tarefa termina aqui: o cômodo é leitura e briefing.
+O cômodo é leitura e briefing; a antena é o ponto de conclusão das comunicações.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
 | superior | console do briefing — urgência do dia e onde está cada sobrevivente | leitura |
-| superior | Vera — assina o briefing e recalcula a rota | conversa (passo de "aumentar potência") |
+| superior | Vera — assina o briefing, entrega o cabo de derivação e diagnostica as comunicações | conversa (passos de "aumentar potência", "reparar sistema de energia" e "reparar comunicações") |
+| superior | antena — reparo das comunicações | conclusão |
 | médio | console da rota — dia, jornada percorrida, dias restantes | leitura |
 | inferior | painel de status — recursos, motor e vazamento | leitura |
 
@@ -54,10 +55,11 @@ tarefa sugerida destacada e as teclas no rodapé até a primeira interação.
 
 | Convés | Ponto | Tipo | Tarefa |
 | --- | --- | --- | --- |
-| inferior | bancada do motor | conclusão | reparar motor — 2 peças |
-| médio | Sílvia — diagnóstico do motor e comentário da potência | conversa | passo de "reparar motor" |
-| médio | painel de distribuição | interruptor | modo economia |
-| superior | reator | conclusão | aumentar potência — 20 energia |
+| inferior | bancada do motor | conclusão | reparar motor — 2 peças; variante "resfriar regulador" — 5 água |
+| médio | Sílvia — diagnóstico do motor, do suporte de vida e do sistema de energia | conversa | passos de "reparar motor", "reparar suporte de vida", "reparar sistema de energia" e "aumentar potência" |
+| médio | painel de distribuição | interruptor e conclusão | modo economia; variante "trocar fusível" — 1 peça |
+| superior | reator | conclusão | aumentar potência — 20 energia; variante "reforçar circuito" — 10 energia |
+| superior | painel de suporte de vida | conclusão | reparar suporte de vida — 2 peças |
 
 ## Depósito
 
@@ -65,7 +67,7 @@ tarefa sugerida destacada e as teclas no rodapé até a primeira interação.
 | --- | --- | --- | --- |
 | inferior | prateleira do kit de vedação | coleta | passo de "reparar casco" |
 | inferior | ponto do casco | conclusão | reparar casco — 1 peça |
-| médio | Bento — entrega as peças ou a água da tarefa em andamento | conversa | passos de "reparar motor" e "socorrer sobrevivente" |
+| médio | Bento — entrega peças, água e itens das tarefas em andamento | conversa | passos de "reparar motor", "socorrer sobrevivente", "reparar suporte de vida", "reparar comunicações" e da variante "trocar fusível" |
 | médio | alavanca de racionamento | interruptor | racionamento |
 | superior | prateleira de reserva | leitura | — |
 
@@ -74,10 +76,10 @@ tarefa sugerida destacada e as teclas no rodapé até a primeira interação.
 | Convés | Ponto | Tipo | Tarefa |
 | --- | --- | --- | --- |
 | inferior | beliche do sobrevivente | conclusão | socorrer sobrevivente — 5 água |
-| médio | Neusa — quem está mal e onde o casco vaza | conversa | passos de "descanso e organização" e "reparar casco" |
+| médio | Neusa — quem está mal, onde o casco vaza e o cartucho refrigerante | conversa | passos de "descanso e organização", "reparar casco" e da variante "resfriar regulador" |
 | superior | mesa comum | conclusão | descanso e organização — 8 energia |
 
-## As cinco tarefas
+## As oito tarefas
 
 Todas passam por um sobrevivente e por pelo menos uma troca de cômodo. Só o
 passo marcado como conclusão gasta o dia.
@@ -89,6 +91,9 @@ passo marcado como conclusão gasta o dia.
 | Reparar casco | Neusa aponta o vazamento (dormitório) → kit de vedação (depósito) | ponto do casco | 1 peça |
 | Descanso e organização | Neusa indica quem está mal (dormitório) | mesa comum | 8 energia |
 | Socorrer sobrevivente | Bento entrega a água (depósito) | beliche do sobrevivente | 5 água |
+| Reparar suporte de vida | Sílvia dá o diagnóstico (energia) → Bento entrega 2 peças (depósito) | painel de suporte de vida | 2 peças |
+| Reparar sistema de energia | Sílvia entrega uma variante (energia) → NPC da variante entrega o item | estação da variante (energia) | conforme a variante |
+| Reparar comunicações | Vera dá o diagnóstico (comando) → Bento entrega 1 peça (depósito) | antena (comando) | 1 peça |
 
 De onde cada tarefa vem:
 
@@ -99,6 +104,9 @@ De onde cada tarefa vem:
 | Reparar casco | vazamento ativo |
 | Descanso e organização | sempre |
 | Socorrer sobrevivente | oxigênio ou moral em vermelho |
+| Reparar suporte de vida | suporte de vida em emergência |
+| Reparar sistema de energia | falha no sistema de energia ativa |
+| Reparar comunicações | comunicação em silêncio |
 
 Interruptores (**modo economia** e **racionamento**) não gastam o dia: ligam e
 desligam na visita ao cômodo, e a moral cobra o preço por dia enquanto estiverem

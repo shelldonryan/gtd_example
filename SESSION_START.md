@@ -3,7 +3,7 @@
 > Documento obrigatório de abertura e encerramento de toda sessão. Leia antes de
 > analisar, editar ou implementar qualquer coisa.
 
-Atualizado em: 2026-09-13 (após a resolução dos cinco conflitos do sketch)
+Atualizado em: 2026-09-13 (após a resolução do ticket #12 de balanceamento)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Como usar este arquivo
@@ -65,6 +65,7 @@ e as fontes afetadas.
 - Os documentos do vault foram sincronizados em 12/09: `events/CREW_ISSUES.md` e
   `events/SYSTEM_FAULTS.md` não dizem mais que a resposta do evento gasta a ação
   do dia.
+- `issue://11` foi resolvida nesta sessão: a voz, a vinheta, as transmissões, os modais, os alertas e as cinco mensagens de derrota agora têm contrato registrado no ticket e nas fontes de interface.
 
 ## Direção atual do produto
 
@@ -88,6 +89,11 @@ plataforma dentro de uma nave espacial. A nave **não tem nome**.
   **Sílvia** (mecânica, energia). Ficam parados em ponto fixo e são interativos;
   não há rotinas autônomas.
 - Botões existem só para menus, pausa e rodapé ("Passar dia" e "Voltar").
+- A voz textual confirmada no #11 é híbrida por canal: sistema seco; Terra e Marte brevemente humanos, sem monólogos.
+- Transmissões externas reagem à primeira ocorrência de incidentes graves; usam o nome do técnico, são modais e não consomem tempo, ação, recursos ou tarefa.
+- Eventos, transmissões externas e desfechos são modais; alertas, resultados de tarefas e estados operacionais permanecem no painel `SISTEMA`.
+- O balanceamento confirmou comida inicial em 70; energia, oxigênio, água e moral começam em 100, e as peças em 6.
+- A falha de suporte de vida pode entrar em modo de emergência: custa 10 de energia e acrescenta 3 de consumo de oxigênio por dia até a nova tarefa de reparo.
 
 ### Loop de jogo confirmado
 
@@ -102,7 +108,7 @@ plataforma dentro de uma nave espacial. A nave **não tem nome**.
 8. O próximo evento é sorteado.
 
 Os números e as consequências continuam em `mechanics/ACTIONS.md` até uma nova
-decisão explícita. Os pontos de interação e as cinco tarefas estão em
+decisão explícita. Os pontos de interação e as oito tarefas estão em
 `interface/ROOMS.md`.
 
 ## Restrições técnicas confirmadas
@@ -132,6 +138,7 @@ decisão explícita. Os pontos de interação e as cinco tarefas estão em
 O sketch em `last_horizon/` implementa menus, mapa, salas jogáveis, movimento,
 gravidade, pulo, escadas, colisão de plataformas, pontos de interação, tarefas
 em cadeia, NPCs fixos, HUD com ícones e captura automática.
+O contrato textual do #11 está resolvido; o sketch ainda contém textos provisórios e precisa de uma etapa posterior de implementação.
 
 `code/SKETCH_ARCHITECTURE.md` registra a implementação atual. As capturas em
 `last_horizon/output/` incluem estados de exploração e a verificação de que só
@@ -209,8 +216,8 @@ regra nas issues no início de cada sessão; não confie apenas na tabela abaixo
 
 ### Snapshot atual da fronteira
 
-Sincronizado com o grafo nativo de dependências em 2026-09-13, após fechar #14,
-#15, #16 e #4:
+Sincronizado com o grafo nativo de dependências em 2026-09-13, após fechar #4,
+#11, #12, #14, #15 e #16:
 
 | Issue | Estado | Bloqueadores abertos | Relação relevante |
 |---|---|---|---|
@@ -218,31 +225,37 @@ Sincronizado com o grafo nativo de dependências em 2026-09-13, após fechar #14
 | #7 — Documento de entrega | disponível | — | independente |
 | #8 — Inventário de assets | disponível | — | depende apenas de #5/#6 CLOSED |
 | #10 — Pipeline Aseprite → Processing | disponível | — | depende apenas de #6 CLOSED |
-| #11 — Roteiro e textos | disponível | — | bloqueia #12 |
+| #11 — Roteiro e textos | CLOSED | — | resolução registrada em 13/09 |
+| #12 — Balanceamento | CLOSED | — | resolução registrada nesta sessão |
 | #15 — Sala jogável | CLOSED | — | sala jogável validada |
 | #16 — HUD: ícones, alerta e rótulos | CLOSED | — | HUD validado |
-| #12 — Balanceamento | bloqueada | #11 | só iniciar quando #11 fechar |
+| #17 — Implementar as falhas novas no sketch | disponível | — | executa o contrato do #12 |
 
-Issues de base já CLOSED: #2, #3, #4, #5, #6, #9, #13, #14, #15 e #16.
-A issue #1 permanece OPEN como mapa do projeto.
+Issues de base já CLOSED: #2, #3, #4, #5, #6, #9, #11, #13, #14, #15 e
+#16.
+A issue #1 permanece OPEN como mapa de coordenação.
 
 O grafo Wayfinder é a fonte da disponibilidade; a ordem recomendada pode mudar
 conforme o prazo e os riscos. Não declarar uma issue concluída apenas porque um
 arquivo foi alterado: a aceitação e a evidência devem estar no próprio ticket.
 
+
 ### Cadeias de trabalho relevantes
 
-- `#4` (fechado) + `#11` → `#12`: captura/verificação e textos antes do balanceamento.
-- `#15` → sala jogável; `#16` → HUD. Independentes entre si e ambos no caminho
-  crítico do protótipo jogável (prazo 23/09).
-- `#10` → definição segura do pipeline de arte → produção dos assets listados em `#8`.
+- `#12` (fechado) → `#17`: o balanceamento libera a implementação das falhas
+  novas no sketch.
+- `#15` e `#16` estão fechados; sala jogável e HUD já estão no protótipo.
+- `#10` → definição segura do pipeline de arte → produção dos assets listados em
+  `#8`.
 - `#7` é independente e pode ser fechado sem bloquear o protótipo.
 
 ## Decisões confirmadas
 
 As decisões D-001 a D-005 são da primeira sessão de 12/09; D-006 a D-023 saíram
-da sessão de grilling registrada em [issue://14](issue://14), com o detalhe
-completo de cada uma.
+da sessão de grilling registrada em [issue://14](issue://14); D-024 a D-029 saíram
+da sessão de grilling registrada em [issue://11](issue://11); D-030 e D-031 saíram
+da validação de balanceamento registrada em [issue://12](issue://12); D-032 a D-035
+também foram confirmadas no #12.
 
 | ID | Decisão | Estado |
 |---|---|---|
@@ -269,15 +282,33 @@ completo de cada uma.
 | D-021 | O dia 1 ensina pelo briefing, sem tela de tutorial | CONFIRMADA |
 | D-022 | Playtest com checklist de seis perguntas | CONFIRMADA |
 | D-023 | Tarefa não concluída não custa nada; o item fica com o técnico | CONFIRMADA |
+| D-024 | Voz híbrida por canal: sistema seco; Terra e Marte brevemente humanos | CONFIRMADA |
+| D-025 | Vinheta em três telas, com objetivo explícito e sem tutorial de controles | CONFIRMADA |
+| D-026 | Terra reage uma vez a cada primeiro incidente grave; Marte fala só na vitória | CONFIRMADA |
+| D-027 | Eventos, transmissões e desfechos são modais; consequência externa vem antes do evento seguinte | CONFIRMADA |
+| D-028 | Nove estados visíveis têm linhas curtas de ação ou estado no painel | CONFIRMADA |
+| D-029 | Cinco derrotas usam causa e consequência em texto seco | CONFIRMADA |
+| D-030 | Comida inicial em 70; as demais barras começam em 100 e as peças em 6 | CONFIRMADA |
+| D-031 | Eventos uniformes, sem repetição imediata, durante a viagem | CONFIRMADA |
+| D-032 | `Socorrer sobrevivente` recupera 10 de moral por 5 de água | CONFIRMADA |
+| D-033 | Falha de suporte: 2 peças ou emergência com 10 de energia e +3 O₂/dia | CONFIRMADA |
+| D-034 | Nova tarefa declarativa de reparo, concluível no mesmo dia do evento | CONFIRMADA |
+| D-035 | Falha de suporte entra no pool uniforme de cinco eventos, sem repetição imediata | CONFIRMADA |
+| D-036 | Interpretação anterior: falha de energia libera três tarefas alternativas | SUPERSEDED |
+| D-037 | Uma tarefa de energia; Sílvia entrega automaticamente uma de três soluções com itens distintos e sem repetição | CONFIRMADA |
+| D-038 | Sílvia sorteia a solução entre as três variantes ainda não usadas, sem reposição | CONFIRMADA |
+| D-039 | Variantes: fusível (Depósito, 1 peça, painel de distribuição), cabo (Sala de comando, 10 energia, reator) e cartucho (Dormitório, 5 água, bancada do motor) | CONFIRMADA |
+| D-040 | Sorteio apenas entre variantes pagáveis; depois das três usadas, a falha sai do pool | CONFIRMADA |
+| D-041 | Evento de energia: energia −10 ou moral −10; falha ativa com +3 de energia por dia até o reparo | CONFIRMADA |
+| D-042 | Reparo pendente persiste com item e variante; a falha ativa não é resortada e cobra +3 de energia por dia até a instalação | CONFIRMADA |
+| D-043 | `Falha no sistema de energia` entra no pool uniforme, que passa a seis eventos; no máximo três ocorrências por partida | CONFIRMADA |
+| D-044 | Comunicações: reparar com 1 peça; o silêncio custa moral −1/dia e suspende as transmissões da Terra até `Reparar comunicações` | CONFIRMADA |
+| D-045 | Os itens novos vêm do NPC da sala: Bento entrega o fusível e as peças; Vera, o cabo; Neusa, o cartucho | CONFIRMADA |
+| D-046 | Falha ativa não é resortada: motor danificado, suporte em emergência, energia ativa e comunicações em silêncio | CONFIRMADA |
+
 
 ## Decisões que exigem consulta
 
-Não decidir silenciosamente:
-
-- curva de dificuldade e probabilidade/repetição de eventos (é o #12);
-- efeito definitivo de "socorrer sobrevivente" (+10 de moral é PROVISÓRIO);
-- custo de outras falhas de sistema além do motor;
-- textos definitivos da vinheta, mensagens e telas (é o #11);
 - se a tela de vitória permite continuar jogando depois da chegada;
 - qualquer nome, retrato ou história de personagem além do registrado em
   `characters/npcs/`.
@@ -310,42 +341,27 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 
 ## Estado desta sessão
 
-- **Grilling concluído:** 18 decisões (D-006 a D-023) confirmadas uma a uma e
-  registradas em `issue://14`, que foi fechado.
-- **Issue executada nesta sessão:** [#4](issue://4), execução e captura do sketch;
-  aceita e fechada após a verificação nativa.
-- **Documentos aplicados:** `README.md`, `mechanics/ACTIONS.md`,
-  `interface/FLOW.md`, `interface/HUD.md`, `interface/TEXT_FONTS.md`,
-  `interface/MENU_GAME_OVER.md`, `interface/MENU_VICTORY.md`,
-  `interface/ROOMS.md` (novo), `characters/PLAYER.md`, `characters/npcs/NPC_1` a
-  `NPC_4`, `history/CONTEXT.md`, `events/CREW_ISSUES.md`,
-  `events/SYSTEM_FAULTS.md` e `code/SKETCH_ARCHITECTURE.md`.
-- **Código:** o sketch foi atualizado para a sala jogável, tabela de tarefas,
-  NPCs fixos, HUD com ícones, alerta piscante, `A BORDO` e mapa sem nome de nave.
-  As referências visuais agora usam `assets/concept_arts/`.
-- **Arquivos alterados nesta sessão:** `last_horizon/last_horizon.pde`,
-  `last_horizon/ship.pde`, `last_horizon/tasks.pde`, `last_horizon/game.pde`,
-  `last_horizon/screens.pde`, `last_horizon/hud.pde`, `last_horizon/capture.pde`,
-  `SESSION_START.md` e `code/SKETCH_ARCHITECTURE.md`.
-- **Verificação:** executados `Processing.exe cli --run --capture`,
-  `Processing.exe cli --run --hit-test` e `Processing.exe cli --run --ladder-test`.
-  A captura gerou 30 estados com PNG base e PNG da janela, incluindo comando,
-  energia, depósito e dormitório. O hit-test confirmou os quatro cômodos e o
-  letterbox. A regressão da escada confirmou saída lateral, travessia, encaixe,
-  bloqueio da reentrada e rearme; o CLI emitiu apenas avisos AWT não fatais.
-  O modo headless não foi validado. A prova visual está em
-  `last_horizon/output/ladder_middle_exit.png`.
-- **Mapa #1 sincronizado:** #4, #15 e #16 foram fechadas após validação do usuário.
-  Permanecem disponíveis #7, #8, #10 e #11; #12 continua bloqueada por #11.
-  A issue #1 explicita que `last_horizon/` é um protótipo funcional,
-  não a arte final.
-- **Issues concluídas nesta sessão:** #4 (execução e captura), #15 (sala jogável)
-  e #16 (HUD).
-- **Commits:** `5c3f682` (`feat: adicionar harness de captura do CLI do
-  Processing`) e `19dedb4` (`docs: sincronizar fronteira Wayfinder após issue 4`).
-- **Próximo trabalho recomendado:** seguir para #11; #7, #8 e #10 continuam
-  independentes. Depois de #11, liberar o balanceamento #12.
+- **Grilling concluído:** D-006 a D-023 em `issue://14`, D-024 a D-029 em
+  `issue://11` e D-030 a D-046 em `issue://12`; os três tickets estão CLOSED.
+- **Issues resolvidas nesta sessão:** [#11](issue://11) (roteiro e textos) e
+  [#12](issue://12) (balanceamento), ambas com comentário de resolução.
+- **Issue aberta nesta sessão:** [#17](issue://17) — implementar no sketch as
+  falhas de suporte, energia e comunicações (`wayfinder:task`).
+- **Documentos atualizados nesta sessão:** `SESSION_START.md`,
+  `mechanics/ACTIONS.md`, `interface/ROOMS.md`, `interface/FLOW.md`,
+  `interface/HUD.md`, `interface/MENU_INIT.md`, `interface/MENU_GAME_OVER.md`,
+  `interface/MENU_VICTORY.md`, `events/SYSTEM_FAULTS.md` e
+  `code/SKETCH_ARCHITECTURE.md`.
+- **Código:** `FOOD_START = 70` foi aplicado em `last_horizon.pde` e
+  `game.pde`. As falhas novas, as tarefas e as regras de sorteio ainda não
+  estão no sketch — é o trabalho do #17.
+- **Verificação:** `Processing.exe cli --sketch=.\last_horizon --run --capture`
+  passou com as verificações `OK`; a simulação de balanceamento rodou 200.000
+  partidas por estilo e a rota da quinta derrota foi confirmada no dia 13.
+- **Mapa #1 sincronizado:** #12 fechado, #17 aberto; disponíveis #7, #8, #10 e
+  #17.
+- **Próximo trabalho recomendado:** #17; #7, #8 e #10 continuam independentes.
 
-O repositório está com **protótipo jogável executável**: menus, mapa, exploração
-2D, tarefas, HUD e captura funcionam; textos finais, assets finais e
-balanceamento continuam abertos nos tickets correspondentes.
+O repositório está com **protótipo jogável executável** e o balanceamento
+fechado em números; a implementação das falhas novas no sketch é o próximo
+passo.

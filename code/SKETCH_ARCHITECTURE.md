@@ -5,7 +5,7 @@ Ele continua válido para o viewport, o HUD e o estado global. O mapa macro agor
 abre salas 2D jogáveis, e o técnico é controlável dentro delas.
 
 
-A especificação das salas — pontos de interação, as cinco tarefas e os números de
+A especificação das salas — pontos de interação, as oito tarefas e os números de
 movimento — está em `interface/ROOMS.md`. A implementação permanece plana e
 registra esse contrato nas abas do sketch.
 
@@ -157,11 +157,13 @@ Limitações observadas:
 
 - **Código atual:** menus, mapa, salas jogáveis, movimento, escadas, colisão,
   interação, tarefas declarativas, HUD atualizado e captura automática.
+- As tarefas novas (suporte de vida, sistema de energia e comunicações) e os
+  eventos de falha correspondentes estão decididos no #12, mas ainda não foram
+  implementados no sketch; o código atual mantém as cinco tarefas anteriores.
 - **Decisões aplicadas nos documentos em 12/09:** roster (4 sobreviventes + técnico),
   quinta causa de derrota, tarefas em cadeia, layout de três conveses, números de
   movimento, nomes dos sobreviventes, vocabulário dos cômodos, ícones do HUD,
   tipografia e controles. Ver `interface/ROOMS.md` e `SESSION_START.md`.
-- **Arte:** tudo é retângulo e painel. Sprites entram com o ticket de assets e o pipeline.
-- **Textos:** provisórios, escritos a partir do `history/CONTEXT.md`. A redação é do ticket
-  de roteiro e textos.
-- **Números:** cópia fiel do `ACTIONS.md` de hoje; o balanceamento ainda vai mexer neles.
+- **Textos:** o contrato final de vinheta, transmissões, modais, alertas e
+  derrotas está registrado no `issue://11` e nas fontes de interface. O sketch
+  ainda contém a implementação provisória desses textos.

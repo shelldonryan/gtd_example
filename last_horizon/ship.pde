@@ -11,6 +11,70 @@ float[] room_x = {52, 152, 252, 352};
 int[] room_screen = {SCREEN_COMMAND, SCREEN_ENERGY, SCREEN_DEPOT, SCREEN_DORMITORY};
 int[] room_action = {ACTION_OPEN_COMMAND, ACTION_OPEN_ENERGY, ACTION_OPEN_DEPOT, ACTION_OPEN_DORMITORY};
 
+final int DECK_COUNT = 3;
+float[] deck_y = {164, 232, 300};
+final int LADDER_COUNT = 2;
+float[] ladder_x = {150, 330};
+
+final int POINT_READ = 0;
+final int POINT_COLLECT = 1;
+final int POINT_NPC = 2;
+final int POINT_SWITCH = 3;
+final int POINT_COMPLETE = 4;
+
+final int POINT_COMMAND_BRIEFING = 0;
+final int POINT_VERA = 1;
+final int POINT_ROUTE = 2;
+final int POINT_STATUS = 3;
+final int POINT_ENGINE_BENCH = 4;
+final int POINT_SILVIA = 5;
+final int POINT_SAVING = 6;
+final int POINT_REACTOR = 7;
+final int POINT_SEAL_KIT = 8;
+final int POINT_HULL = 9;
+final int POINT_BENTO = 10;
+final int POINT_RATIONING = 11;
+final int POINT_RESERVE = 12;
+final int POINT_BUNK = 13;
+final int POINT_NEUSA = 14;
+final int POINT_COMMON_TABLE = 15;
+final int POINT_COUNT = 16;
+
+int[] point_room = {
+  SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND,
+  SCREEN_ENERGY, SCREEN_ENERGY, SCREEN_ENERGY, SCREEN_ENERGY,
+  SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT,
+  SCREEN_DORMITORY, SCREEN_DORMITORY, SCREEN_DORMITORY
+};
+
+float[] point_x = {
+  76, 360, 230, 100,
+  76, 340, 210, 360,
+  76, 360, 230, 120, 360,
+  100, 320, 235
+};
+
+float[] point_y = {
+  164, 164, 232, 300,
+  300, 232, 232, 164,
+  300, 300, 232, 232, 164,
+  300, 232, 164
+};
+
+String[] point_label = {
+  "BRIEFING", "VERA", "ROTA", "STATUS",
+  "BANCADA", "SÍLVIA", "ECONOMIA", "REATOR",
+  "KIT", "CASCO", "BENTO", "RACIONAMENTO", "RESERVA",
+  "BELICHE", "NEUSA", "MESA COMUM"
+};
+
+int[] point_kind = {
+  POINT_READ, POINT_NPC, POINT_READ, POINT_READ,
+  POINT_COMPLETE, POINT_NPC, POINT_SWITCH, POINT_COMPLETE,
+  POINT_COLLECT, POINT_COMPLETE, POINT_NPC, POINT_SWITCH, POINT_READ,
+  POINT_COMPLETE, POINT_NPC, POINT_COMPLETE
+};
+
 
 void drawShipArea(PGraphics g){
   g.noStroke();
@@ -43,7 +107,6 @@ void drawShip(PGraphics g){
     drawRoomDoor(g, i);
   }
 
-  textCentered(g, "ARES-7", SIDE_X / 2.0, 232, 13, COL_CYAN);
   textCentered(g, "CLIQUE EM UM CÔMODO PARA ENTRAR", SIDE_X / 2.0, 254, 9, COL_DIM);
   textCentered(g, "TÉCNICO: " + player_name, SIDE_X / 2.0, 272, 9, COL_MUTED);
 }
@@ -106,111 +169,474 @@ String roomStatus(int index){
 
 
 void drawRoom(PGraphics g){
-  drawBackdrop(g, 8, 62, SIDE_X - 16, 192);
-
+  drawBackdrop(g, ROOM_LEFT, ROOM_TOP, ROOM_RIGHT - ROOM_LEFT, ROOM_BOTTOM - ROOM_TOP);
+  drawRoomTitle(g);
   if (screen == SCREEN_COMMAND){
-    drawCommandRoom(g);
-    return;
+    drawCommandBriefing(g);
+  }
+  drawDecks(g);
+  drawLadders(g);
+
+  for (int i = 0; i < POINT_COUNT; i++){
+    if (point_room[i] == screen){
+      drawRoomPoint(g, i);
+    }
   }
 
-  if (screen == SCREEN_ENERGY){
-    drawEnergyRoom(g);
-    return;
-  }
+  drawPlayer(g);
+  drawHeldItem(g);
 
-  if (screen == SCREEN_DEPOT){
-    drawDepotRoom(g);
-    return;
+  if (task_choice_open){
+    drawTaskChoice(g);
   }
-
-  drawDormitoryRoom(g);
 }
 
 
-void drawCommandRoom(PGraphics g){
-  text(g, "SALA DE COMANDO", 18, 70, 12, COL_CYAN);
-
-  drawPanel(g, 24, 92, 424, 106, COL_BORDER);
-  text(g, "ROTA TERRA - MARTE", 34, 100, 9, COL_MUTED);
-
-  g.stroke(COL_CYAN_DARK);
-  g.line(56, 150, 416, 150);
-  g.noStroke();
-
-  float progress = constrain((day - 1) / (float) trip_days, 0, 1);
-
+void drawRoomTitle(PGraphics g){
+  String title = roomTitle(screen);
   g.fill(COL_CYAN);
-  g.ellipse(56 + 360 * progress, 150, 10, 10);
-  g.fill(COL_ORANGE);
-  g.ellipse(416, 150, 14, 14);
-
-  text(g, "TERRA", 42, 166, 9, COL_MUTED);
-  text(g, "MARTE", 404, 166, 9, COL_ORANGE);
-
-  text(g, "DIA " + day + " DE " + trip_days, 34, 216, 11, COL_TEXT);
-  text(g, "RESTAM " + max(trip_days - day, 0) + " DIAS DE VIAGEM", 224, 216, 11, COL_MUTED);
-  text(g, "TÉCNICO: " + player_name, 34, 236, 10, COL_MUTED);
+  g.textSize(12);
+  g.text(title, ROOM_LEFT + 10, ROOM_TOP + 6);
 }
 
 
-void drawEnergyRoom(PGraphics g){
-  text(g, "SALA DE ENERGIA", 18, 70, 12, COL_CYAN);
-
-  drawPanel(g, 24, 92, 190, 110, COL_BORDER);
-  text(g, "MOTOR", 34, 100, 9, COL_MUTED);
-  text(g, engineStateLabel(), 34, 114, 13, engine_state == ENGINE_WORKING ? COL_GREEN : COL_RED);
-  text(g, "DIAS DANIFICADO: " + engine_damaged_days + "/" + ENGINE_DAMAGED_LIMIT_DAYS, 34, 140, 9, COL_MUTED);
-  text(g, "ENERGIA NA BATERIA: " + str(int(energy)), 34, 160, 9, resourceColour(energy));
-
-  drawPanel(g, 228, 92, 220, 110, COL_BORDER);
-  text(g, saving_on ? "ECONOMIA: LIGADA" : "ECONOMIA: DESLIGADA", 238, 102, 10, saving_on ? COL_CYAN : COL_DIM);
-  text(g, "POTÊNCIA EXTRA: " + boost_count + "/" + BOOST_LIMIT, 238, 124, 10, COL_TEXT);
-  text(g, "AÇÃO DO DIA: " + (action_used ? "USADA" : "LIVRE"), 238, 146, 10, action_used ? COL_ORANGE : COL_GREEN);
-  text(g, "GASTO DIÁRIO: " + (saving_on ? ENERGY_PER_DAY_SAVING : ENERGY_PER_DAY), 238, 168, 9, COL_MUTED);
-
-  drawButton(g, 8, 262, 144, 24, "REPARAR MOTOR (2 PEÇAS)", ACTION_REPAIR_ENGINE, canRepairEngine());
-  drawButton(g, 164, 262, 144, 24, saving_on ? "ECONOMIA: LIGADA" : "ECONOMIA: DESLIGADA", ACTION_TOGGLE_SAVING, true);
-  drawButton(g, 320, 262, 144, 24, "AUMENTAR POTÊNCIA", ACTION_BOOST_ENGINE, canBoostEngine());
-}
-
-
-void drawDepotRoom(PGraphics g){
-  text(g, "DEPÓSITO", 18, 70, 12, COL_CYAN);
-
-  drawPanel(g, 24, 92, 190, 110, COL_BORDER);
-  text(g, "COMIDA: " + str(int(food)), 34, 108, 11, resourceColour(food));
-  text(g, "ÁGUA: " + str(int(water)), 34, 130, 11, resourceColour(water));
-  text(g, "PEÇAS: " + str(parts), 34, 152, 11, COL_TEXT);
-  text(g, "GASTO DIÁRIO: " + (rationing_on ? "RACIONADO" : "NORMAL"), 34, 174, 9, COL_MUTED);
-
-  drawPanel(g, 228, 92, 220, 110, COL_BORDER);
-  text(g, rationing_on ? "RACIONAMENTO: LIGADO" : "RACIONAMENTO: DESLIGADO", 238, 102, 10, rationing_on ? COL_CYAN : COL_DIM);
-  text(g, leak_on ? "CASCO: VAZANDO" : "CASCO: INTEIRO", 238, 124, 10, leak_on ? COL_RED : COL_GREEN);
-  text(g, "VAZAMENTO: -" + LEAK_PER_DAY + " DE OXIGÊNIO POR DIA", 238, 146, 9, COL_MUTED);
-  text(g, rationing_on ? "MORAL: -" + MORALE_PER_DAY_RATIONING + " POR DIA" : "SEM CUSTO DE MORAL", 238, 164, 9, COL_MUTED);
-
-  drawButton(g, 8, 262, 216, 24, rationing_on ? "RACIONAMENTO: LIGADO" : "RACIONAMENTO: DESLIGADO", ACTION_TOGGLE_RATIONING, true);
-  drawButton(g, 236, 262, 216, 24, "REPARAR CASCO (1 PEÇA)", ACTION_REPAIR_HULL, canRepairHull());
-}
-
-
-void drawDormitoryRoom(PGraphics g){
-  text(g, "DORMITÓRIO", 18, 70, 12, COL_CYAN);
-
-  drawPanel(g, 24, 92, 190, 110, COL_BORDER);
-  text(g, "SOBREVIVENTES: " + survivors + " DE " + CREW_START, 34, 108, 11, COL_TEXT);
-  text(g, "MORAL: " + str(int(morale)), 34, 130, 11, resourceColour(morale));
-  text(g, "AÇÃO DO DIA: " + (action_used ? "USADA" : "LIVRE"), 34, 152, 10, action_used ? COL_ORANGE : COL_GREEN);
-  text(g, "DESCANSO GASTA " + REST_ENERGY_COST + " DE ENERGIA", 34, 172, 9, COL_MUTED);
-
-  for (int i = 0; i < CREW_START; i++){
-    float bunk_x = 240 + (i % 2) * 104;
-    float bunk_y = 100 + (i / 2) * 50;
-    boolean alive = i < survivors;
-
-    drawPanel(g, bunk_x, bunk_y, 88, 40, alive ? COL_CYAN_DARK : COL_DIM);
-    text(g, alive ? "A BORDO" : "PERDIDO", bunk_x + 10, bunk_y + 15, 9, alive ? COL_TEXT : COL_DIM);
+String roomTitle(int room_screen){
+  if (room_screen == SCREEN_COMMAND){
+    return "SALA DE COMANDO";
   }
 
-  drawButton(g, 8, 262, 240, 24, "DESCANSO E ORGANIZAÇÃO (8 ENERGIA)", ACTION_REST_CREW, canRestCrew());
+  if (room_screen == SCREEN_ENERGY){
+    return "SALA DE ENERGIA";
+  }
+
+  if (room_screen == SCREEN_DEPOT){
+    return "DEPÓSITO";
+  }
+
+  return "DORMITÓRIO";
+}
+
+void drawCommandBriefing(PGraphics g){
+  int suggestion = suggestedTask();
+  g.fill(COL_PANEL);
+  g.stroke(COL_CYAN_DARK);
+  g.rect(ROOM_LEFT + 8, ROOM_TOP + 28, ROOM_RIGHT - ROOM_LEFT - 16, 34, 2);
+  g.fill(COL_TEXT);
+  g.textSize(10);
+  g.text("BRIEFING DO DIA: " + task_label[suggestion], ROOM_LEFT + 16, ROOM_TOP + 36);
+
+  if (day == 1 && !first_interaction_done){
+    g.textSize(10);
+    g.text("ANDAR  A/D   ESCADA  W/S   PULAR  ESPAÇO   INTERAGIR  E", ROOM_LEFT + 16, ROOM_TOP + 50);
+  }
+}
+
+
+void drawDecks(PGraphics g){
+  g.stroke(COL_BORDER);
+  g.strokeWeight(2);
+
+  for (int i = 0; i < DECK_COUNT; i++){
+    g.fill(i == DECK_COUNT - 1 ? COL_PANEL_2 : COL_PANEL);
+    g.line(ROOM_LEFT + 4, deck_y[i], ROOM_RIGHT - 4, deck_y[i]);
+    g.rect(ROOM_LEFT + 4, deck_y[i], ROOM_RIGHT - ROOM_LEFT - 8, 4);
+  }
+
+  g.strokeWeight(1);
+}
+
+
+void drawLadders(PGraphics g){
+  g.stroke(COL_ORANGE);
+  g.strokeWeight(2);
+
+  for (int i = 0; i < LADDER_COUNT; i++){
+    float x = ladder_x[i];
+    g.line(x - 5, deck_y[0], x - 5, deck_y[DECK_COUNT - 1]);
+    g.line(x + 5, deck_y[0], x + 5, deck_y[DECK_COUNT - 1]);
+
+    for (float y = deck_y[0] + 8; y < deck_y[DECK_COUNT - 1]; y += 8){
+      g.line(x - 5, y, x + 5, y);
+    }
+  }
+
+  g.strokeWeight(1);
+}
+
+
+void drawRoomPoint(PGraphics g, int point){
+  boolean available = pointIsAvailable(point);
+  boolean nearby = available && isPointInRange(point);
+  int colour = nearby ? COL_CYAN : (available ? COL_TEXT : COL_DIM);
+  float x = point_x[point];
+  float y = point_y[point];
+
+  g.stroke(nearby ? COL_CYAN : COL_BORDER);
+  g.fill(nearby ? COL_CYAN_DARK : COL_PANEL);
+  g.rect(x - 12, y - 22, 24, 18, 2);
+  g.fill(colour);
+  g.textSize(12);
+  g.text(pointMarker(point_kind[point]), x - 4, y - 20);
+
+  g.fill(colour);
+  g.textSize(10);
+  g.text(point_label[point], x - min(32, g.textWidth(point_label[point]) / 2.0), y - 38);
+
+  if (nearby){
+    g.noFill();
+    g.stroke(COL_CYAN);
+    g.rect(x - 16, y - 26, 32, 26, 2);
+    g.fill(COL_CYAN);
+    g.textSize(10);
+    g.text("E", x - 3, y + 6);
+  }
+
+  if (point_kind[point] == POINT_NPC){
+    drawNpc(g, x, y, point_label[point], nearby);
+  }
+}
+
+
+char pointMarker(int kind){
+  if (kind == POINT_READ){
+    return '?';
+  }
+
+  if (kind == POINT_COLLECT){
+    return '+';
+  }
+
+  if (kind == POINT_NPC){
+    return 'N';
+  }
+
+  if (kind == POINT_SWITCH){
+    return 'S';
+  }
+
+  return '!';
+}
+
+
+void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
+  g.noStroke();
+  g.fill(nearby ? COL_CYAN : COL_ORANGE);
+  g.rect(x - PLAYER_W / 2.0, y - PLAYER_H, PLAYER_W, PLAYER_H);
+  g.fill(COL_TEXT);
+  g.rect(x - 4, y - 19, 2, 2);
+  g.rect(x + 2, y - 19, 2, 2);
+}
+
+
+void drawPlayer(PGraphics g){
+  g.noStroke();
+  g.fill(player_on_ladder ? COL_CYAN : COL_ORANGE);
+  g.rect(player_x, player_y, PLAYER_W, PLAYER_H);
+  g.fill(COL_BG);
+  g.rect(player_x + 4, player_y + 5, 2, 2);
+  g.rect(player_x + 10, player_y + 5, 2, 2);
+  g.rect(player_x + 4, player_y + 17, 8, 2);
+}
+
+
+void drawHeldItem(PGraphics g){
+  if (held_item == ITEM_NONE){
+    return;
+  }
+
+  g.fill(COL_ORANGE);
+  g.textSize(10);
+  g.text("NA MÃO: " + heldItemLabel(), ROOM_LEFT + 8, ROOM_TOP + 24);
+}
+
+
+void enterRoom(int next_screen){
+  screen = next_screen;
+  current_room = next_screen;
+  resetPlayerPosition();
+  task_choice_open = false;
+  jump_queued = false;
+  interact_queued = false;
+}
+
+
+void leaveRoom(){
+  screen = SCREEN_SHIP;
+  current_room = SCREEN_SHIP;
+  player_on_ladder = false;
+  ladder_vertical_release_required = false;
+  task_choice_open = false;
+  jump_queued = false;
+  interact_queued = false;
+}
+
+
+void resetRoomState(){
+  current_room = SCREEN_SHIP;
+  player_x = ROOM_LEFT + 24;
+  player_y = deck_y[DECK_COUNT - 1] - PLAYER_H;
+  player_velocity_y = 0;
+  player_grounded = true;
+  player_on_ladder = false;
+  ladder_vertical_release_required = false;
+  jump_queued = false;
+  interact_queued = false;
+  held_item = ITEM_NONE;
+}
+
+
+void resetPlayerPosition(){
+  player_x = ROOM_LEFT + 24;
+  player_y = deck_y[DECK_COUNT - 1] - PLAYER_H;
+  player_velocity_y = 0;
+  player_grounded = true;
+  player_on_ladder = false;
+  ladder_vertical_release_required = false;
+}
+
+
+void updateRoom(){
+  if (event_open || paused){
+    jump_queued = false;
+    interact_queued = false;
+    return;
+  }
+
+  if (task_choice_open){
+    updateTaskChoice();
+    return;
+  }
+
+  if (interact_queued){
+    interact_queued = false;
+    interactNearby();
+  }
+
+  if (player_on_ladder){
+    updatePlayerOnLadder();
+  } else {
+    updatePlayerOnDeck();
+  }
+
+  jump_queued = false;
+}
+
+
+void updatePlayerOnDeck(){
+  float horizontal = 0;
+
+  if (move_left_held){
+    horizontal -= PLAYER_SPEED;
+  }
+
+  if (move_right_held){
+    horizontal += PLAYER_SPEED;
+  }
+
+  player_x = constrain(player_x + horizontal, ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
+
+  if (jump_queued && player_grounded){
+    player_velocity_y = -sqrt(2 * GRAVITY * JUMP_HEIGHT);
+    player_grounded = false;
+  }
+
+  float old_bottom = player_y + PLAYER_H;
+  player_velocity_y += GRAVITY;
+  float next_y = player_y + player_velocity_y;
+  player_grounded = false;
+
+  for (int i = 0; i < DECK_COUNT; i++){
+    if (player_velocity_y < 0){
+      continue;
+    }
+
+    boolean crossing = old_bottom <= deck_y[i] && next_y + PLAYER_H >= deck_y[i];
+    boolean overlaps = player_x + PLAYER_W > ROOM_LEFT && player_x < ROOM_RIGHT;
+
+    if (crossing && overlaps){
+      next_y = deck_y[i] - PLAYER_H;
+      player_velocity_y = 0;
+      player_grounded = true;
+      break;
+    }
+  }
+
+  player_y = min(next_y, deck_y[DECK_COUNT - 1] - PLAYER_H);
+
+  boolean vertical_input = move_up_held || move_down_held;
+  boolean horizontal_input = move_left_held || move_right_held;
+
+  if (!vertical_input){
+    ladder_vertical_release_required = false;
+  }
+
+  if (vertical_input && !horizontal_input && !ladder_vertical_release_required
+    && player_grounded){
+    int ladder = nearestLadder();
+
+    if (ladder >= 0){
+      player_on_ladder = true;
+      player_grounded = false;
+      player_x = ladder_x[ladder] - PLAYER_W / 2.0;
+      player_velocity_y = 0;
+      updatePlayerOnLadder();
+    }
+  }
+}
+
+
+void updatePlayerOnLadder(){
+  int vertical = 0;
+
+  if (move_up_held){
+    vertical -= 1;
+  }
+
+  if (move_down_held){
+    vertical += 1;
+  }
+
+  int horizontal = 0;
+
+  if (move_left_held){
+    horizontal -= 1;
+  }
+
+  if (move_right_held){
+    horizontal += 1;
+  }
+
+  float old_y = player_y;
+  player_y += vertical * LADDER_SPEED;
+  float top = deck_y[0] - PLAYER_H;
+  float bottom = deck_y[DECK_COUNT - 1] - PLAYER_H;
+  player_y = constrain(player_y, top, bottom);
+
+  boolean wants_deck = horizontal != 0 || vertical == 0;
+  int deck = ladderDeckAt(old_y, player_y, wants_deck);
+
+  if (deck >= 0 && wants_deck){
+    leaveLadderAtDeck(deck, horizontal);
+    return;
+  }
+
+  if (player_y <= top || player_y >= bottom){
+    int end_deck = player_y <= top ? 0 : DECK_COUNT - 1;
+    leaveLadderAtDeck(end_deck, horizontal);
+  }
+}
+
+
+int ladderDeckAt(float old_y, float new_y, boolean allow_nearby){
+  final float snap_distance = 4;
+  int nearest = -1;
+  float nearest_distance = snap_distance + 1;
+
+  for (int i = 0; i < DECK_COUNT; i++){
+    float target_y = deck_y[i] - PLAYER_H;
+    boolean crossed = (old_y <= target_y && new_y >= target_y)
+      || (old_y >= target_y && new_y <= target_y);
+
+    if (crossed){
+      return i;
+    }
+
+    float distance = abs(new_y - target_y);
+
+    if (allow_nearby && distance <= snap_distance && distance < nearest_distance){
+      nearest = i;
+      nearest_distance = distance;
+    }
+  }
+
+  return nearest;
+}
+
+
+void leaveLadderAtDeck(int deck, int horizontal){
+  player_y = deck_y[deck] - PLAYER_H;
+  player_x = constrain(player_x + horizontal * PLAYER_SPEED,
+    ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
+  player_on_ladder = false;
+  player_grounded = true;
+  player_velocity_y = 0;
+  ladder_vertical_release_required = move_up_held || move_down_held;
+}
+
+
+
+int nearestLadder(){
+  if (!player_grounded){
+    return -1;
+  }
+
+  float center_x = player_x + PLAYER_W / 2.0;
+  float bottom = player_y + PLAYER_H;
+
+  if (!isDeckSurface(bottom)){
+    return -1;
+  }
+
+  int result = -1;
+  float best_distance = INTERACTION_RANGE + 1;
+
+  for (int i = 0; i < LADDER_COUNT; i++){
+    float distance = abs(center_x - ladder_x[i]);
+
+    if (distance <= INTERACTION_RANGE && distance < best_distance){
+      result = i;
+      best_distance = distance;
+    }
+  }
+
+  return result;
+}
+
+
+boolean isDeckSurface(float bottom){
+  for (int i = 0; i < DECK_COUNT; i++){
+    if (abs(bottom - deck_y[i]) < 1.1){
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+void interactNearby(){
+  int point = nearestInteractablePoint();
+
+  if (point >= 0){
+    interactPoint(point);
+  }
+}
+
+
+int nearestInteractablePoint(){
+  int result = -1;
+  float best_distance = INTERACTION_RANGE + 1;
+
+  for (int i = 0; i < POINT_COUNT; i++){
+    if (point_room[i] != screen || !pointIsInteractable(i) || !isPointInRange(i)){
+      continue;
+    }
+
+    float distance = abs(player_x + PLAYER_W / 2.0 - point_x[i]);
+
+    if (distance < best_distance){
+      result = i;
+      best_distance = distance;
+    }
+  }
+
+  return result;
+}
+
+
+boolean isPointInRange(int point){
+  float player_center_x = player_x + PLAYER_W / 2.0;
+  float player_bottom = player_y + PLAYER_H;
+  return abs(player_center_x - point_x[point]) <= INTERACTION_RANGE
+    && abs(player_bottom - point_y[point]) <= 3;
 }

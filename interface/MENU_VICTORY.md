@@ -15,20 +15,21 @@ pelo menos um sobrevivente vivo. Qualquer outra combinação cai no
 | Resumo da viagem | Dias transcorridos e dias ganhos com "Aumentar potência" |
 | Sobreviventes | Quantos chegaram vivos, de quantos partiram — Vera, Bento, Neusa e Sílvia, por nome na variação com perdas |
 | Recursos finais | Barras restantes e peças |
-| Mensagem de Marte | Texto da base confirmando o recebimento da nave |
+| Mensagem de Marte | Texto da base confirmando o recebimento da nave; usa o nome do técnico |
 | Botão "Nova partida" | Volta para o `MENU_INIT` |
+A tela de vitória é o desfecho modal e incorpora a mensagem de Marte; não há
+um cartão adicional antes ou depois dela.
 
 ## Variações
 
-- **Todos vivos:** a mensagem fecha o arco da missão — os quatro sobreviventes
-  reconstroem a humanidade em Marte.
-- **Com perdas:** a mesma chegada, com a lista de quem não sobreviveu entre Vera,
-  Bento, Neusa e Sílvia. A vitória não é escondida nem penalizada; o desfecho só
-  reconhece o preço.
-- **Motor reparado no limite:** quando a chegada acontece logo depois de um
-  reparo, a mensagem de Marte menciona o estado da nave.
+- **Todos vivos:** `MARTE: [NOME], RECEBEMOS OS QUATRO SOBREVIVENTES. A BASE ESTÁ PRONTA.`
+- **Com perdas:** `MARTE: [NOME], RECEBEMOS OS SOBREVIVENTES QUE RESTARAM. A BASE ESTÁ PRONTA.`
+- **Reparo no limite:** `MARTE: [NOME], RECEBEMOS A NAVE. O MOTOR CHEGOU NO LIMITE, MAS VOCÊS CONSEGUIRAM.`
+
+`[NOME]` é o nome digitado para o técnico. Se houver perdas e a chegada
+acontecer logo após um reparo, prevalece a variação de reparo no limite; o
+resumo continua listando os sobreviventes.
 
 ## Pendências
 
-- Texto definitivo de cada variação.
 - Se a tela permite continuar jogando depois da chegada.

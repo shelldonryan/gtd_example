@@ -32,18 +32,30 @@ final int ACTION_OPEN_DEPOT = 12;
 final int ACTION_OPEN_DORMITORY = 13;
 final int ACTION_BACK_TO_SHIP = 14;
 final int ACTION_PASS_DAY = 15;
-final int ACTION_REPAIR_ENGINE = 20;
-final int ACTION_TOGGLE_SAVING = 21;
-final int ACTION_BOOST_ENGINE = 22;
-final int ACTION_TOGGLE_RATIONING = 23;
-final int ACTION_REPAIR_HULL = 24;
-final int ACTION_REST_CREW = 25;
 final int ACTION_EVENT_A = 30;
 final int ACTION_EVENT_B = 31;
 final int ACTION_RESUME = 40;
 final int ACTION_RESTART = 41;
 final int ACTION_MAIN_MENU = 42;
 final int ACTION_NEW_GAME = 43;
+
+/* sala jogável - interface/ROOMS.md */
+final int PLAYER_W = 16;
+final int PLAYER_H = 24;
+final float PLAYER_SPEED = 1.5;
+final float JUMP_HEIGHT = 48;
+final float GRAVITY = 0.5;
+final float LADDER_SPEED = 1.0;
+final float INTERACTION_RANGE = 12;
+final float ROOM_LEFT = 8;
+final float ROOM_RIGHT = 462;
+final float ROOM_TOP = 62;
+final float ROOM_BOTTOM = 330;
+
+final int ITEM_NONE = 0;
+final int ITEM_ENGINE_PARTS = 1;
+final int ITEM_WATER = 2;
+final int ITEM_SEAL_KIT = 3;
 
 /* regras - mechanics/ACTIONS.md */
 final int RESOURCE_MAX = 100;
@@ -54,6 +66,7 @@ final int TRIP_DAYS = 10;
 final int CREW_START = 4;
 final int PARTS_START = 6;
 final int STOCK_START = 100;
+final int FOOD_START = 70;
 
 final int ENERGY_PER_DAY = 6;
 final int ENERGY_PER_DAY_SAVING = 3;
@@ -101,7 +114,7 @@ final int REASON_MORALE = 3;
 final int REASON_ENGINE = 4;
 final int REASON_CREW = 5;
 
-/* paleta - assets/HUD_CONCEPT_ART.png */
+/* paleta - assets/concept_arts/HUD_CONCEPT_ART.png */
 final int COL_BG = 0xFF060B16;
 final int COL_ROOM = 0xFF0A1422;
 final int COL_PANEL = 0xFF0D1B2B;
@@ -157,6 +170,29 @@ boolean action_used = false;
 int boost_count = 0;
 int game_over_reason = REASON_NONE;
 String system_message = "";
+/* estado da sala jogável */
+int current_room = SCREEN_SHIP;
+float player_x = ROOM_LEFT + 24;
+float player_y = 276;
+float player_velocity_y = 0;
+boolean player_grounded = true;
+boolean player_on_ladder = false;
+boolean ladder_vertical_release_required = false;
+boolean jump_queued = false;
+boolean interact_queued = false;
+int held_item = ITEM_NONE;
+boolean first_interaction_done = false;
+
+/* seleção da tarefa quando uma estação inicia mais de uma cadeia */
+boolean task_choice_open = false;
+int task_choice_cursor = 0;
+int task_choice_count = 0;
+int[] task_choice_indices = new int[5];
+
+boolean move_left_held = false;
+boolean move_right_held = false;
+boolean move_up_held = false;
+boolean move_down_held = false;
 
 /* interface base */
 PGraphics base;
@@ -202,6 +238,10 @@ void setup(){
 void draw(){
   updateViewport();
   updateInput();
+
+  if (isRoomScreen()){
+    updateRoom();
+  }
 
   drawBase();
   updateCursor();
@@ -376,8 +416,62 @@ void keyPressed(){
     return;
   }
 
+  if (isRoomScreen()){
+    setMovementKey(keyCode, true);
+
+    if (key == 'a' || key == 'A' || key == 'd' || key == 'D'
+      || key == 'w' || key == 'W' || key == 's' || key == 'S'){
+      setMovementLetter(key, true);
+      return;
+    }
+
+    if (key == ' '){
+      jump_queued = true;
+      return;
+    }
+
+    if (key == 'e' || key == 'E'){
+      interact_queued = true;
+      return;
+    }
+
+    return;
+  }
+
   if (key != CODED && key >= 32){
     key_char = key;
     key_char_pressed = true;
+  }
+}
+
+
+void keyReleased(){
+  setMovementKey(keyCode, false);
+  setMovementLetter(key, false);
+}
+
+
+void setMovementKey(int code, boolean value){
+  if (code == LEFT){
+    move_left_held = value;
+  } else if (code == RIGHT){
+    move_right_held = value;
+  } else if (code == UP){
+    move_up_held = value;
+  } else if (code == DOWN){
+    move_down_held = value;
+  }
+}
+
+
+void setMovementLetter(char value, boolean state){
+  if (value == 'a' || value == 'A'){
+    move_left_held = state;
+  } else if (value == 'd' || value == 'D'){
+    move_right_held = state;
+  } else if (value == 'w' || value == 'W'){
+    move_up_held = state;
+  } else if (value == 's' || value == 'S'){
+    move_down_held = state;
   }
 }

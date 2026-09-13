@@ -20,6 +20,6 @@ Abrir a partida: apresentar o jogo e registrar quem é o técnico.
 - Enter inicia a partida, igual ao botão.
 - Limite curto de caracteres, para caber na largura da tela.
 
-## Pendências
+## Regra de mensagens
 
-- Se o nome aparece durante a partida, nas mensagens da Terra e de Marte.
+O nome digitado para o técnico aparece nas transmissões da Terra e de Marte.

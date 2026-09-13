@@ -49,6 +49,7 @@ no inventário de assets.
 | Rodapé | "Passar dia" e o botão de voltar |
 
 O cartão de evento ocupa o painel da direita, e a tela de trás continua visível.
+Transmissões da Terra aparecem em um cartão modal sobre a tela atual; o clique fecha o cartão sem consumir tarefa, ação, recurso ou tempo. A consequência é mostrada antes do evento seguinte. A mensagem de Marte fica dentro da tela de vitória.
 
 ## Botões
 
@@ -81,10 +82,10 @@ Os pontos de interação de cada cômodo estão em `interface/ROOMS.md`.
 - **Visão da nave:** mostra o mapa macro e permite escolher um cômodo.
 - **Salas de interior:** mostram uma cena 2D jogável, o técnico controlável,
   três conveses ligados por duas escadas, pontos de interação e o briefing do dia.
-- **Evento:** mostra uma mensagem e as alternativas disponíveis; bloqueia a
-  exploração até ser respondido.
-- **Vitória:** informa que a nave chegou a Marte.
-- **Derrota:** informa qual recurso ou sistema causou o fim da viagem.
+- **Evento:** mostra uma mensagem e as alternativas disponíveis; bloqueia a exploração até ser respondido.
+- **Transmissão externa:** mostra uma mensagem da Terra ou de Marte em cartão modal; bloqueia a exploração até o clique.
+- **Vitória:** informa que a nave chegou a Marte e incorpora a mensagem correspondente da base.
+- **Derrota:** informa qual recurso ou sistema causou o fim da viagem em um desfecho modal.
 
 ## Avisos
 
@@ -93,11 +94,20 @@ um **ícone de aviso** ao lado do número e a **borda do cartão piscando** (mei
 segundo aceso, meio apagado). A cor sozinha deixa quem não a distingue sem
 nenhuma pista.
 
-Quando um sistema estiver em estado crítico, a mensagem do sistema pode exibir
-instruções diretas, como:
+O painel SISTEMA não é modal. Os cartões, as cores e os ícones identificam o
+estado; a linha curta indica a próxima ação ou confirma um estado ativo.
 
-- `Oxigênio crítico: verifique os sistemas.`
-- `Motor danificado: use 2 peças no reparo.`
-- `Moral baixa: visite o dormitório para recuperar os sobreviventes.`
+| Estado | Linha do painel |
+| --- | --- |
+| Energia crítica | `IR: ENERGIA` |
+| Oxigênio crítico | `VER SISTEMAS` |
+| Estoques baixos | `IR: DEPÓSITO` |
+| Moral baixa | `IR: DORMITÓRIO` |
+| Motor danificado | `REPARAR MOTOR` |
+| Vazamento ativo | `REPARAR CASCO` |
+| Modo economia | `ECONOMIA ATIVA` |
+| Racionamento | `RACIONAMENTO ATIVO` |
+| Ação usada | `AÇÃO JÁ USADA` |
 
-Os textos definitivos são do ticket de roteiro e textos.
+As linhas devem caber em uma linha curta na grade de 16 px. Alertas críticos
+mantêm a borda piscando e o ícone de aviso nos cartões de recurso.

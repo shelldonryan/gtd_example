@@ -11,9 +11,9 @@ descrevem as escolhas, mas não repetem valores.
 | Peças | contagem inteira |
 | Sobreviventes | 4 a bordo; o técnico não entra na conta |
 | Duração | 10 dias |
-| Estoque inicial | 100 em cada barra e 6 peças |
+| Estoques iniciais | 100 em energia, oxigênio, água e moral; 70 de comida; 6 peças |
 | Tarefas por dia | 1 em cadeia, além de "Passar dia" |
-| Eventos | 1 por dia, a partir do dia 2 |
+| Eventos | 1 por dia, a partir do dia 2; pool uniforme sem repetição imediata; falha ativa não é resortada |
 
 Decisões fixadas neste arquivo:
 
@@ -59,7 +59,21 @@ concluída não custa nada. O mapa dos pontos de interação de cada cômodo est
 | Aumentar potência | Vera recalcula a rota (comando) | reator (energia) | 20 de energia | viagem encurta 1 dia; no máximo 2 vezes |
 | Reparar casco | Neusa aponta o vazamento (dormitório) → kit de vedação (depósito) | ponto do casco (depósito) | 1 peça | estanca o vazamento de oxigênio |
 | Descanso e organização | Neusa indica quem está mal (dormitório) | mesa comum (dormitório) | 8 de energia | moral +15, até o limite de 100 |
-| Socorrer sobrevivente | Bento entrega a água (depósito) | beliche do sobrevivente (dormitório) | 5 de água | moral +10 (provisório, ver Pendências) |
+| Socorrer sobrevivente | Bento entrega a água (depósito) | beliche do sobrevivente (dormitório) | 5 de água | moral +10 |
+| Reparar suporte de vida | Sílvia diagnostica (energia) → Bento entrega 2 peças (depósito) | painel de suporte de vida (energia) | 2 peças | encerra o modo de emergência |
+| Reparar sistema de energia | Sílvia diagnostica (energia) → NPC da variante entrega o item | estação da variante (energia) | conforme a variante | encerra a falha de energia |
+| Reparar comunicações | Vera diagnostica (comando) → Bento entrega 1 peça (depósito) | antena (Sala de comando) | 1 peça | restaura as transmissões e encerra o silêncio |
+
+Variantes de `Reparar sistema de energia` — Sílvia entrega uma, sem repetição:
+
+| Variante | Item | Passo livre | Conclusão | Custo |
+| --- | --- | --- | --- | --- |
+| Trocar fusível | Fusível reserva | Bento entrega (depósito) | painel de distribuição (energia) | 1 peça |
+| Reforçar circuito | Cabo de derivação | Vera entrega (comando) | reator (energia) | 10 energia |
+| Resfriar regulador | Cartucho refrigerante | Neusa entrega (dormitório) | bancada do motor (energia) | 5 água |
+
+O sorteio considera apenas variantes ainda não usadas e pagáveis; depois das
+três, a falha sai do pool de eventos.
 
 Limites: nenhum recurso fica negativo e nenhuma barra passa de 100 — o efeito
 que ultrapassa o limite é descartado.
@@ -73,6 +87,9 @@ que ultrapassa o limite é descartado.
 | Reparar casco | vazamento ativo |
 | Descanso e organização | sempre |
 | Socorrer sobrevivente | oxigênio ou moral em vermelho |
+| Reparar suporte de vida | suporte de vida em emergência |
+| Reparar sistema de energia | falha no sistema de energia ativa |
+| Reparar comunicações | comunicação em silêncio |
 
 O jogador escolhe qual cadeia cumprir no dia. O briefing do comando sugere uma
 tarefa, mas não trava as outras estações.
@@ -93,6 +110,13 @@ tarefa, mas não trava as outras estações.
 | Destruído | derrota imediata | — |
 
 A vitória exige o motor operante no dia final.
+## Estado do suporte de vida
+
+| Estado | Efeito | Como sai |
+| --- | --- | --- |
+| Estável | consumo normal de oxigênio | a falha leva à emergência |
+| Emergência | energia −10 na escolha ou +3 de oxigênio por dia até reparar | reparar com 2 peças |
+
 
 ## Consequências dos eventos
 
@@ -102,6 +126,9 @@ A vitória exige o motor operante no dia final.
 | Chuva de meteoros | escudos: 15 de energia | impacto: oxigênio −15 e vazamento de 3 por dia até reparar o casco |
 | Falta de comida | porções normais: consumo normal | racionamento: moral −8 |
 | Conflito no dormitório | ignorar: moral −10 | intervir: moral +10, energia −10 |
+| Falha no suporte de vida | reparar: 2 peças | modo de emergência: energia −10 e oxigênio +3 por dia até reparar |
+| Falha no sistema de energia | forçar a rede: energia −10 | desligar setores: moral −10; a falha fica ativa com +3 de energia por dia até reparar |
+| Falha nas comunicações | reparar: 1 peça | silêncio: moral −1 por dia e as transmissões da Terra suspensas até reparar |
 
 ## Sobreviventes e fim de jogo
 
@@ -117,7 +144,4 @@ A vitória exige o motor operante no dia final.
 
 ## Pendências
 
-- Probabilidade de cada evento e repetição ao longo dos dez dias.
-- O efeito de "socorrer sobrevivente" (+10 de moral) é provisório até o
-  balanceamento.
-- Custo de outras falhas de sistema além do motor.
+- Nenhuma falha de sistema pendente nesta versão.

@@ -19,8 +19,16 @@ Oxigênio em zero, energia em zero, moral em zero, motor destruído ou nenhum so
 
 ## Regras
 
-- A mensagem muda conforme a causa: oxigênio, energia, moral, motor ou fim dos sobreviventes.
-- Textos definitivos ficam no ticket de roteiro e textos (ver o mapa).
+- A tela de derrota é um desfecho modal e informa a causa sem mensagem adicional de Marte.
+- A mensagem muda conforme a causa:
+
+| Causa | Título | Mensagem |
+| --- | --- | --- |
+| Oxigênio em zero | OXIGÊNIO ZERO | `O OXIGÊNIO ACABOU ANTES DA CHEGADA.` |
+| Energia em zero | ENERGIA ZERO | `SEM ENERGIA, A NAVE NÃO PÔDE SEGUIR.` |
+| Moral em zero | MORAL ZERO | `A MORAL CAIU A ZERO. O GRUPO NÃO RESISTIU À VIAGEM.` |
+| Motor destruído | MOTOR DESTRUÍDO | `O MOTOR FOI DESTRUÍDO ANTES DE MARTE.` |
+| Nenhum sobrevivente vivo | SOBREVIVENTES PERDIDOS | `NENHUM SOBREVIVENTE RESTOU A BORDO.` |
 
 ## Pendências
 

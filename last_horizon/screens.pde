@@ -74,27 +74,27 @@ void doAction(int action){
   }
 
   if (action == ACTION_OPEN_COMMAND){
-    screen = SCREEN_COMMAND;
+    enterRoom(SCREEN_COMMAND);
     return;
   }
 
   if (action == ACTION_OPEN_ENERGY){
-    screen = SCREEN_ENERGY;
+    enterRoom(SCREEN_ENERGY);
     return;
   }
 
   if (action == ACTION_OPEN_DEPOT){
-    screen = SCREEN_DEPOT;
+    enterRoom(SCREEN_DEPOT);
     return;
   }
 
   if (action == ACTION_OPEN_DORMITORY){
-    screen = SCREEN_DORMITORY;
+    enterRoom(SCREEN_DORMITORY);
     return;
   }
 
   if (action == ACTION_BACK_TO_SHIP){
-    screen = SCREEN_SHIP;
+    leaveRoom();
     return;
   }
 
@@ -103,35 +103,6 @@ void doAction(int action){
     return;
   }
 
-  if (action == ACTION_REPAIR_ENGINE){
-    repairEngineWithParts();
-    return;
-  }
-
-  if (action == ACTION_TOGGLE_SAVING){
-    toggleSaving();
-    return;
-  }
-
-  if (action == ACTION_BOOST_ENGINE){
-    boostEngine();
-    return;
-  }
-
-  if (action == ACTION_TOGGLE_RATIONING){
-    toggleRationing();
-    return;
-  }
-
-  if (action == ACTION_REPAIR_HULL){
-    repairHull();
-    return;
-  }
-
-  if (action == ACTION_REST_CREW){
-    restCrew();
-    return;
-  }
 
   if (action == ACTION_EVENT_A){
     applyEventChoice(0);

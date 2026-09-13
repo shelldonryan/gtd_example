@@ -18,7 +18,7 @@ String[] event_title = {
 String[] event_body = {
   "O MOTOR PERDEU RENDIMENTO. A VIAGEM ESTÁ EM RISCO.",
   "IMPACTO IMINENTE: O CASCO PODE CEDER.",
-  "A COMIDA ESTÁ ACABANDO E A TRIPULAÇÃO PERCEBEU.",
+  "A COMIDA ESTÁ ACABANDO E OS SOBREVIVENTES PERCEBERAM.",
   "UMA DISCUSSÃO DIVIDE OS SOBREVIVENTES."
 };
 
@@ -61,7 +61,7 @@ void resetRun(){
   energy = STOCK_START;
   oxygen = STOCK_START;
   water = STOCK_START;
-  food = STOCK_START;
+  food = FOOD_START;
   morale = STOCK_START;
   parts = PARTS_START;
   engine_state = ENGINE_WORKING;
@@ -77,6 +77,8 @@ void resetRun(){
   event_open = false;
   paused = false;
   system_message = "";
+  resetRoomState();
+  resetTaskState();
 }
 
 
@@ -272,36 +274,6 @@ void damageEngine(){
 }
 
 
-boolean canRepairEngine(){
-  return !action_used && engine_state == ENGINE_DAMAGED && parts >= REPAIR_ENGINE_PARTS;
-}
-
-
-boolean canBoostEngine(){
-  return !action_used && energy >= BOOST_ENERGY_COST && boost_count < BOOST_LIMIT;
-}
-
-
-boolean canRepairHull(){
-  return !action_used && leak_on && parts >= REPAIR_HULL_PARTS;
-}
-
-
-boolean canRestCrew(){
-  return !action_used && energy >= REST_ENERGY_COST;
-}
-
-
-void repairEngineWithParts(){
-  if (!canRepairEngine()){
-    return;
-  }
-
-  parts -= REPAIR_ENGINE_PARTS;
-  action_used = true;
-  repairEngine();
-}
-
 
 void toggleSaving(){
   saving_on = !saving_on;
@@ -333,47 +305,6 @@ void toggleRationing(){
 }
 
 
-void boostEngine(){
-  if (!canBoostEngine()){
-    return;
-  }
-
-  energy -= BOOST_ENERGY_COST;
-  boost_count++;
-  trip_days = max(trip_days - 1, 1);
-  action_used = true;
-  system_message = "POTÊNCIA EXTRA: A VIAGEM ENCURTOU 1 DIA.";
-  clampResources();
-  checkEndConditions();
-}
-
-
-void repairHull(){
-  if (!canRepairHull()){
-    return;
-  }
-
-  parts -= REPAIR_HULL_PARTS;
-  leak_on = false;
-  action_used = true;
-  system_message = "CASCO REPARADO: O VAZAMENTO PAROU.";
-  clampResources();
-  checkEndConditions();
-}
-
-
-void restCrew(){
-  if (!canRestCrew()){
-    return;
-  }
-
-  energy -= REST_ENERGY_COST;
-  morale += REST_MORALE_GAIN;
-  action_used = true;
-  system_message = "TRIPULAÇÃO DESCANSOU E SE ORGANIZOU.";
-  clampResources();
-  checkEndConditions();
-}
 
 
 boolean eventChoiceOn(int choice){
@@ -466,7 +397,7 @@ String gameOverTitle(){
   }
 
   if (game_over_reason == REASON_CREW){
-    return "TRIPULAÇÃO PERDIDA";
+    return "SOBREVIVENTES PERDIDOS";
   }
 
   return "MOTOR PERDIDO";
@@ -483,7 +414,7 @@ String gameOverMessage(){
   }
 
   if (game_over_reason == REASON_MORALE){
-    return "A TRIPULAÇÃO PERDEU A CONFIANÇA NA MISSÃO.";
+    return "OS SOBREVIVENTES PERDERAM A CONFIANÇA NA MISSÃO.";
   }
 
   if (game_over_reason == REASON_CREW){
