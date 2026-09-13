@@ -2,7 +2,7 @@
 
 ## Visao geral
 
-Last Horizon é um jogo 2D de gerenciamento de recursos. 
+Last Horizon é um jogo 2D de gerenciamento de recursos e exploração em plataformas.
 
 O jogador assume o papel de um técnico responsével por uma espaconave que transporta os últimos sobreviventes da Terra para uma base em Marte.
 
@@ -14,16 +14,20 @@ Durante o percurso, o jogador precisa manter a nave funcionando, administrar os 
 ## Genero e perspectiva
 
 - Gerenciamento de recursos
-- Sobrevivencia
-- Jogo 2D
-- Visao lateral da espaconave
+- Sobrevivência
+- Exploração 2D em plataforma
+- Visão macro da espaçonave como mapa
+- Cômodos laterais exploráveis
 - Interface com indicadores de recursos
-- Nave dividida em comodos interativos
 
 ## Mecanica principal
 
-A partida representa uma viagem de dez dias. Em cada dia, o jogador pode
-visitar os comodos da nave, realizar uma ação e avançar o tempo pelo botão
+A partida representa uma viagem de dez dias. Em cada dia, o jogador entra em um
+cômodo, controla o técnico numa cena 2D lateral e conclui uma tarefa. Cada tarefa
+é uma cadeia de poucos passos — ir até o lugar, falar com um sobrevivente, pegar
+o item, instalar — e passa por mais de um cômodo. Andar, pular, usar escada e
+cumprir os passos intermediários não consomem a ação; só a interação que conclui
+a tarefa usa a única ação do dia. Depois, o jogador avança o tempo pelo botão
 "Passar dia". Ao final do dia, os recursos são consumidos.
 
 O jogador deve equilibrar os seguintes recursos:
@@ -40,27 +44,30 @@ O jogador deve equilibrar os seguintes recursos:
 
 ### Sala de comando
 
-É a tela principal de gerenciamento. O jogador vê os recursos,
-verifica o dia atual, acompanha a distância atá Marte e decide quando avançar
-para o proximo dia.
+É a sala de leitura da viagem. O técnico acompanha a rota, os recursos e o
+briefing do dia no console, e é onde Vera, a piloto, recalcula a rota quando o
+jogador decide aumentar a potência. Nenhuma tarefa termina aqui: o dia avança
+pelo rodapé.
 
-### Sala de controle de energia
+### Sala de energia
 
-Contêm o motor e os principais controles de energia da espaconave. O jogador
-pode reparar o motor usando peças, ativar um modo de economia ou aumentar a
-potência para tentar reduzir o tempo da viagem.
+Contém o motor e os controles de energia. Sílvia, a mecânica, dá o diagnóstico
+do motor; o técnico instala o reparo na bancada, alinha o reator para aumentar a
+potência e liga o modo de economia no painel de distribuição.
 
 ### Depósito
 
-Armazena comida, água e peças. O jogador pode escolher entre
-manter o consumo normal ou aplicar racionamento. O racionamento preserva os
-estoques, mas reduz a moral dos sobreviventes.
+Armazena comida, água e peças. Bento, o intendente, entrega as peças do reparo e
+a água do socorro, e libera o racionamento. O depósito também guarda o kit de
+vedação e o ponto do casco, onde o vazamento é estancado. O racionamento preserva
+os estoques, mas reduz a moral dos sobreviventes.
 
 ### Dormitório
 
-Representa o espaço de descanso dos passageiros. Ações de descanso e
-organização podem recuperar parte da moral, mas consomem energia e fazem o
-jogador abrir mão de outras atividades naquele dia.
+É onde os sobreviventes descansam. Neusa, a enfermeira, aponta quem está mal e
+onde o casco vaza; o técnico organiza o descanso na mesa comum ou leva água ao
+sobrevivente que precisa. Descanso e organização recuperam moral, mas custam
+energia e fazem o jogador abrir mão das outras tarefas do dia.
 
 ## Eventos
 
@@ -86,16 +93,17 @@ um sobrevivente vivo.
 ### Derrota
 
 O jogador perde caso o oxigênio chegue a zero, o motor seja destruído, a moral
-chegue a zero ou a nave fique sem energia para continuar a viagem.
+chegue a zero, a nave fique sem energia para continuar a viagem ou não reste
+nenhum sobrevivente vivo a bordo.
 
 ## Escopo da primeira versão
 
-O protótipo sera desenvolvido com quatro cômodos, quatro sobreviventes, seis
-recursos e uma viagem de dez dias.
+O protótipo sera desenvolvido com quatro cômodos, quatro sobreviventes a bordo
+(além do técnico controlado pelo jogador), seis recursos e uma viagem de dez dias.
 
-O objetivo é garantir uma versão em duas semanas, com
-foco na navegação entre telas, no controle dos recursos e nas consequências
-das decisões.
+O objetivo é garantir uma versão em duas semanas, com foco na navegação entre o
+mapa macro e os cômodos, no controle direto do técnico, no controle dos
+recursos e nas consequências das decisões.
 
 ## Referências
 

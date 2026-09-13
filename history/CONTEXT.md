@@ -18,9 +18,21 @@ O jogador assume o controle da espacionave logo após a partida. A nave possui
 quatro áreas principais:
 
 - Sala de comando.
-- Sala de controle de energia, onde fica o motor.
+- Sala de energia, onde fica o motor.
 - Depósito.
 - Dormitório.
+A visão geral da nave é o mapa macro da viagem. Ao selecionar um cômodo nesse
+mapa, o jogador entra numa cena 2D lateral própria, com três conveses ligados por
+duas escadas.
+
+Dentro do cômodo, o técnico é controlável: pode andar, pular, usar escadas,
+atravessar plataformas e interagir com os pontos do cômodo.
+
+Quatro sobreviventes viajam a bordo, além do técnico: **Vera**, a piloto, no
+comando; **Bento**, o intendente, no depósito; **Neusa**, a enfermeira, no
+dormitório; e **Sílvia**, a mecânica, na sala de energia. Eles ficam parados em
+pontos dos cômodos e respondem quando o técnico interage com eles. Não possuem
+rotinas autônomas nesta versão.
 
 Os sistemas estão funcionando, mas não foram preparados para uma viagem sem
 problemas. A nave precisa economizar energia, controlar os estoques e lidar com
@@ -28,11 +40,15 @@ falhas que podem surgir durante o percurso.
 
 ## Desenvolvimento da viagem
 
-A viagem é representada por dez dias de jogo. Em cada dia, o técnico pode
-visitar os cômodos, realizar ações e decidir quando avançar o tempo. Ao final
-do dia, a nave consome água, comida, oxigênio e energia. Eventos como falhas no
-motor, chuva de meteoros, falta de comida e conflitos entre os sobreviventes
-podem alterar o estado da missão.
+A viagem é representada por dez dias de jogo. Em cada dia, o técnico explora os
+cômodos com movimentação livre e conclui uma tarefa. Cada tarefa é uma cadeia de
+poucos passos — falar com um sobrevivente, pegar o item, instalar — e atravessa
+mais de um cômodo. Andar, pular, usar escada e cumprir os passos intermediários
+não consomem a ação; só a interação que conclui a tarefa usa a única ação do dia.
+Depois, o jogador decide quando avançar o tempo. Ao final do dia, a nave consome
+água, comida, oxigênio e energia. Eventos como falhas no motor, chuva de
+meteoros, falta de comida e conflitos entre os sobreviventes podem alterar o
+estado da missão.
 
 As decisões não possuem uma solução perfeita. Reparar o motor pode gastar as
 últimas peças, manter o consumo normal pode deixar os estoques vazios e aplicar
@@ -55,6 +71,6 @@ decisões do jogador.
 
 ## Escopo
 
-O foco será a viagem e a administração da nave.
-Ao final, a vitória representa a chegada à base marciana e a possibilidade de
-reconstruir a humanidade.
+O foco será a viagem, a administração da nave e a exploração controlável dos
+cômodos. A visão macro organiza a navegação; as cenas laterais transformam cada
+cômodo em um espaço jogável para cumprir os objetivos da viagem.

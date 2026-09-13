@@ -6,22 +6,36 @@
 | Função | Técnico responsável pela manutenção e pelo gerenciamento da espaçonave |
 | Histórico | Foi selecionado para acompanhar a nave por conhecer os sistemas de energia, o motor e os protocolos de emergência. |
 | Objetivo | Manter a nave funcionando e conduzir os sobreviventes até a base em Marte. |
+| A bordo | Viaja com os quatro sobreviventes, mas não entra na contagem deles |
 
 ## Papel no jogo
 
-O protagonista é o jogador dentro da nave. Ele é responsável
-por visitar os cômodos, verificar os sistemas e escolher como utilizar os
-recursos disponíveis. Ele precisa administrar o tempo, as peças e a colaboração dos sobreviventes.
+O protagonista é o jogador dentro da nave. Ele controla diretamente o técnico
+durante a exploração dos cômodos. No mapa geral, seleciona um cômodo; dentro
+dele, move-se pela cena 2D lateral, alcança os três conveses, as escadas, as
+estações e os sobreviventes, e interage com o ponto que fecha a tarefa do dia.
 
-O jogador não controla o personagem em movimentação livre. Ao selecionar um
-cômodo na representação da nave, o personagem é mostrado naquele local e as
-ações disponíveis são apresentadas na interface.
+Cada tarefa é uma cadeia de poucos passos e atravessa mais de um cômodo: o
+técnico fala com um sobrevivente, pega o item no lugar certo e instala. A
+movimentação e os passos intermediários são livres e não substituem a decisão de
+gestão: só a interação que conclui a tarefa usa a ação do dia.
+
+O técnico carrega um item por vez. O item não se perde quando o dia vira:
+continua com ele até ser entregue ou trocado por outro.
+
+## Controles
+
+| Ação | Tecla |
+| --- | --- |
+| Andar | ← → ou A/D |
+| Usar escada | ↑ ↓ ou W/S |
+| Pular | espaço |
+| Interagir | E |
+| Pausa | ESC |
 
 ## Vínculos
 
-- **Sobreviventes:** dependem das decisões do técnico para permanecer vivos.
-- **Tripulação:** auxilia nas tarefas da nave, mas pode perder a confiança caso
-  a moral fique baixa.
+- **Sobreviventes:** Vera, Bento, Neusa e Sílvia ficam nos cômodos e respondem às interações do técnico; dependem das decisões dele para permanecer vivos.
 - **Base em Marte:** representa o destino da missão e a possibilidade de um
   novo começo para a humanidade.
 - **Terra:** permanece como uma lembrança da civilização que ficou para trás e
@@ -32,7 +46,7 @@ ações disponíveis são apresentadas na interface.
 O personagem possui acesso a:
 
 - Sala de comando.
-- Sala de controle de energia e motor.
+- Sala de energia e motor.
 - Depósito.
 - Dormitório.
 - Painel de informações da nave.
