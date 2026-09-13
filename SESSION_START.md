@@ -3,8 +3,7 @@
 > Documento obrigatório de abertura e encerramento de toda sessão. Leia antes de
 > analisar, editar ou implementar qualquer coisa.
 
-Atualizado em: 2026-09-13 (após as resoluções dos tickets #11 e #12 e a
-implementação do #17)
+Atualizado em: 2026-09-13 (após as resoluções dos tickets #11, #12 e #17)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Como usar este arquivo
@@ -223,7 +222,7 @@ regra nas issues no início de cada sessão; não confie apenas na tabela abaixo
 ### Snapshot atual da fronteira
 
 Sincronizado com o grafo nativo de dependências em 2026-09-13, após fechar #4,
-#11, #12, #14, #15 e #16:
+#11, #12, #14, #15, #16 e #17:
 
 | Issue | Estado | Bloqueadores abertos | Relação relevante |
 |---|---|---|---|
@@ -235,10 +234,10 @@ Sincronizado com o grafo nativo de dependências em 2026-09-13, após fechar #4,
 | #12 — Balanceamento | CLOSED | — | resolução registrada nesta sessão |
 | #15 — Sala jogável | CLOSED | — | sala jogável validada |
 | #16 — HUD: ícones, alerta e rótulos | CLOSED | — | HUD validado |
-| #17 — Implementar as falhas novas no sketch | disponível | — | implementado e verificado; falta confirmar os textos novos |
+| #17 — Implementar as falhas novas no sketch | CLOSED | — | implementado, verificado e aceito; textos confirmados (D-047) |
 
-Issues de base já CLOSED: #2, #3, #4, #5, #6, #9, #11, #13, #14, #15 e
-#16.
+Issues de base já CLOSED: #2, #3, #4, #5, #6, #9, #11, #13, #14, #15, #16 e
+#17.
 A issue #1 permanece OPEN como mapa de coordenação.
 
 O grafo Wayfinder é a fonte da disponibilidade; a ordem recomendada pode mudar
@@ -248,8 +247,8 @@ arquivo foi alterado: a aceitação e a evidência devem estar no próprio ticke
 
 ### Cadeias de trabalho relevantes
 
-- `#12` (fechado) → `#17`: o balanceamento liberou a implementação das falhas
-  novas, já no sketch e verificada pela captura.
+- `#12` (fechado) → `#17` (fechado): o balanceamento liberou a implementação das
+  falhas novas no sketch, verificada pela captura e aceita.
 - `#15` e `#16` estão fechados; sala jogável e HUD já estão no protótipo.
 - `#10` → definição segura do pipeline de arte → produção dos assets listados em
   `#8`.
@@ -261,7 +260,8 @@ As decisões D-001 a D-005 são da primeira sessão de 12/09; D-006 a D-023 saí
 da sessão de grilling registrada em [issue://14](issue://14); D-024 a D-029 saíram
 da sessão de grilling registrada em [issue://11](issue://11); D-030 e D-031 saíram
 da validação de balanceamento registrada em [issue://12](issue://12); D-032 a D-035
-também foram confirmadas no #12.
+também foram confirmadas no #12; D-047 foi confirmada na sessão do
+[issue://17](issue://17).
 
 | ID | Decisão | Estado |
 |---|---|---|
@@ -311,15 +311,12 @@ também foram confirmadas no #12.
 | D-044 | Comunicações: reparar com 1 peça; o silêncio custa moral −1/dia e suspende as transmissões da Terra até `Reparar comunicações` | CONFIRMADA |
 | D-045 | Os itens novos vêm do NPC da sala: Bento entrega o fusível e as peças; Vera, o cabo; Neusa, o cartucho | CONFIRMADA |
 | D-046 | Falha ativa não é resortada: motor danificado, suporte em emergência, energia ativa e comunicações em silêncio | CONFIRMADA |
+| D-047 | Textos das falhas de suporte, energia e comunicações (cartões, alternativas e linhas do painel) aprovados no formato do #11 | CONFIRMADA |
 
 
 ## Decisões que exigem consulta
 
 - se a tela de vitória permite continuar jogando depois da chegada;
-- textos dos cartões, das alternativas e das linhas de alerta das falhas de
-  suporte, energia e comunicações: **escritos nesta sessão, já no código como
-  PROVISÓRIA** e listados no quadro do fim deste arquivo — falta confirmar ou
-  trocar;
 - o silêncio das comunicações suspende transmissões que o sketch ainda não tem:
   o modal de transmissão da Terra (D-026) continua fora do código;
 - a aplicação dos textos do #11 (derrotas, alertas, vitória) no sketch segue
@@ -359,7 +356,7 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
   `issue://11` e D-030 a D-046 em `issue://12`; os três tickets estão CLOSED.
 - **Issues trabalhadas nesta sessão:** [#11](issue://11) e [#12](issue://12)
   resolvidas; [#17](issue://17) implementada no sketch (`wayfinder:task`) com
-  evidência na captura. O ticket segue OPEN até a confirmação dos textos novos.
+  evidência na captura, textos confirmados (D-047) e ticket CLOSED.
 - **Documentos atualizados nesta sessão:** `SESSION_START.md`,
   `mechanics/ACTIONS.md`, `interface/ROOMS.md`, `interface/FLOW.md`,
   `interface/HUD.md`, `interface/MENU_INIT.md`, `interface/MENU_GAME_OVER.md`,
@@ -373,15 +370,14 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
   percorre 42 estados e imprime 28 checagens `OK` (falhas novas, custos, item da
   variante, sorteio, painel de distribuição e antena no alcance);
   `--hit-test` e `--ladder-test` continuam `OK`.
-- **Mapa #1 sincronizado:** #12 fechado, #17 aberto; disponíveis #7, #8, #10 e
-  #17.
-- **Próximo trabalho recomendado:** confirmar os textos das falhas novas e
-  fechar o #17; depois a cadeia de arte (#10 → #8), com #7 em paralelo.
+- **Mapa #1 sincronizado:** #12 e #17 fechados; disponíveis #7, #8 e #10.
+- **Próximo trabalho recomendado:** a cadeia de arte (#10 → #8), com #7 em
+  paralelo; a implementação dos textos do #11 no sketch continua sem ticket.
 
-### Textos novos das falhas (PROVISÓRIA)
+### Textos das falhas novas (D-047)
 
-Escritos nesta sessão no formato do #11 e já no código; aguardam confirmação ou
-troca. Os cartões ficam em `game.pde` e as linhas do painel em `hud.pde`.
+Aprovados nesta sessão no formato do #11 e já no código. Os cartões ficam em
+`game.pde` e as linhas do painel em `hud.pde`.
 
 | Falha | Cartão | Alternativa A | Alternativa B | Painel |
 |---|---|---|---|---|
@@ -391,6 +387,6 @@ troca. Os cartões ficam em `game.pde` e as linhas do painel em `hud.pde`.
 
 Corpos dos cartões: `O SUPORTE PERDEU ESTABILIDADE. A NAVE CONSOME MAIS OXIGÊNIO.`, `A REDE PERDEU ESTABILIDADE E OPERA EM CARGA FORÇADA.` e `O TRANSMISSOR PERDEU O CONTATO COM A TERRA.`
 
-O repositório está com **protótipo jogável executável**: a implementação das
-falhas novas está pronta e verificada, e o que resta no #17 é a confirmação
-desses textos.
+O repositório está com **protótipo jogável executável**: as oito tarefas, os sete
+eventos e os três estados novos do painel estão no sketch e verificados; o que
+resta é a cadeia de arte (#10 → #8) e a implementação dos textos do #11.
