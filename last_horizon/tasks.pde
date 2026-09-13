@@ -1,5 +1,3 @@
-/* tasks - tabela declarativa e despachante de efeitos (interface/ROOMS.md) */
-
 final int TASK_NONE = -1;
 final int TASK_REPAIR_ENGINE = 0;
 final int TASK_BOOST_ENGINE = 1;
@@ -126,18 +124,8 @@ int[][] task_step_point = {
   {POINT_VERA, POINT_BENTO}
 };
 
-String[][] task_step_label = {
-  {"DIAGNÓSTICO DA SÍLVIA", "PEÇAS DO BENTO"},
-  {"ROTA RECALCULADA PELA VERA"},
-  {"VAZAMENTO APONTADO PELA NEUSA", "KIT DE VEDAÇÃO"},
-  {"SITUAÇÃO DO GRUPO COM A NEUSA"},
-  {"ÁGUA LIBERADA PELO BENTO"},
-  {"DIAGNÓSTICO DA SÍLVIA", "PEÇAS DO BENTO"},
-  {"DIAGNÓSTICO DA SÍLVIA", "FUSÍVEL DO BENTO"},
-  {"DIAGNÓSTICO DA VERA", "PEÇA DO BENTO"}
-};
 
-/* variantes de "reparar sistema de energia" - interface/ROOMS.md */
+/* power repair variants */
 int[] variant_item = {ITEM_FUSE, ITEM_CABLE, ITEM_COOLANT};
 int[] variant_room = {SCREEN_DEPOT, SCREEN_COMMAND, SCREEN_DORMITORY};
 int[] variant_point = {POINT_BENTO, POINT_VERA, POINT_NEUSA};
@@ -145,26 +133,14 @@ int[] variant_cost_type = {COST_PARTS, COST_ENERGY, COST_WATER};
 int[] variant_cost_value = {1, 10, 5};
 int[] variant_completion_point = {POINT_DISTRIBUTION, POINT_REACTOR, POINT_ENGINE_BENCH};
 
-String[] variant_delivery_label = {
-  "FUSÍVEL DO BENTO",
-  "CABO DA VERA",
-  "CARTUCHO DA NEUSA"
-};
-
-String[] variant_title = {
-  "TROCAR FUSÍVEL",
-  "REFORÇAR CIRCUITO",
-  "RESFRIAR REGULADOR"
-};
 
 int active_task = TASK_NONE;
 int task_step_index = 0;
-int task_choice_last_frame = -30;
 
-/* seleção da tarefa quando uma estação inicia mais de uma cadeia */
 boolean task_choice_open = false;
 int task_choice_cursor = 0;
 int task_choice_count = 0;
+int task_choice_last_frame = -30;
 int[] task_choice_indices = new int[TASK_COUNT];
 
 
@@ -175,7 +151,6 @@ void resetTaskState(){
   task_choice_cursor = 0;
   task_choice_count = 0;
   task_choice_last_frame = -30;
-  first_interaction_done = false;
 }
 
 
@@ -217,9 +192,12 @@ boolean taskIsAvailable(int task){
 
 
 boolean taskCostAvailable(int task){
+  if (task == TASK_POWER && power_variant == POWER_VARIANT_NONE){
+    return powerVariantPayable();
+  }
+
   return costAvailable(task_cost_type[task], task_cost_value[task]);
 }
-
 
 boolean costAvailable(int type, int value){
   if (type == COST_PARTS){
@@ -238,8 +216,7 @@ boolean costAvailable(int type, int value){
 }
 
 
-/* variantes de "reparar sistema de energia": so entram no sorteio as ainda
-   nao usadas e pagaveis; depois das tres, a falha sai do pool. */
+/* Only unused, affordable power variants can be selected. */
 int powerVariantsUsed(){
   int total = 0;
 
@@ -300,45 +277,18 @@ int drawPowerVariant(){
   task_completion_point[TASK_POWER] = variant_completion_point[variant];
   task_step_room[TASK_POWER][1] = variant_room[variant];
   task_step_point[TASK_POWER][1] = variant_point[variant];
-  task_step_label[TASK_POWER][1] = variant_delivery_label[variant];
   return variant;
 }
 
 
-int[] task_priority = {
-  TASK_REPAIR_ENGINE,
-  TASK_LIFE_SUPPORT,
-  TASK_POWER,
-  TASK_COMMS,
-  TASK_REPAIR_HULL,
-  TASK_RESCUE_SURVIVOR,
-  TASK_REST_CREW,
-  TASK_BOOST_ENGINE
-};
-
-
-int suggestedTask(){
-  for (int i = 0; i < task_priority.length; i++){
-    if (taskIsAvailable(task_priority[i])){
-      return task_priority[i];
-    }
-  }
-
-  return TASK_REST_CREW;
-}
 
 
 String taskStatusLabel(){
   if (active_task == TASK_NONE){
-    return "NENHUMA TAREFA ATIVA";
+    return action_used ? "TAREFA DO DIA CONCLUÍDA" : "ESCOLHA UMA TAREFA NO COMANDO";
   }
 
-  if (task_step_index < task_step_count[active_task]){
-    return task_label[active_task] + " | PASSO " + (task_step_index + 1)
-      + "/" + task_step_count[active_task];
-  }
-
-  return task_label[active_task] + " | IR AO PONTO FINAL";
+  return task_label[active_task] + " | " + taskNextInstruction();
 }
 
 
@@ -373,6 +323,85 @@ String heldItemLabel(){
 
   return "NADA";
 }
+String taskNextInstruction(){
+  if (active_task == TASK_NONE){
+    return action_used
+      ? "VÁ AO SEU BELICHE - DORMITÓRIO"
+      : "USE O CONSOLE DE BRIEFING - SALA DE COMANDO";
+  }
+
+  if (task_step_index < task_step_count[active_task]){
+    int point = task_step_point[active_task][task_step_index];
+    int room = task_step_room[active_task][task_step_index];
+    return pointActionLabel(point) + " - " + roomTitle(room);
+  }
+
+  int point = task_completion_point[active_task];
+  return pointActionLabel(point) + " - " + roomTitle(task_completion_room[active_task]);
+}
+
+
+String pointActionLabel(int point){
+  if (point_kind[point] == POINT_NPC){
+    return "FALE COM " + point_label[point];
+  }
+
+  if (point_kind[point] == POINT_COLLECT){
+    return "PEGUE " + point_label[point];
+  }
+
+  return "USE " + point_label[point];
+}
+
+
+boolean taskVisitsRoom(int room){
+  if (active_task == TASK_NONE){
+    return false;
+  }
+
+  if (task_completion_room[active_task] == room){
+    return true;
+  }
+
+  for (int i = task_step_index; i < task_step_count[active_task]; i++){
+    if (task_step_room[active_task][i] == room){
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+String taskCostLabel(int task){
+  String resource = task_cost_type[task] == COST_PARTS ? "PEÇAS"
+    : task_cost_type[task] == COST_ENERGY ? "ENERGIA"
+    : task_cost_type[task] == COST_WATER ? "ÁGUA" : "SEM CUSTO";
+  return task_cost_type[task] == COST_NONE
+    ? resource : task_cost_value[task] + " " + resource;
+}
+
+
+String taskRouteLabel(int task){
+  String route = "";
+  int previous_room = SCREEN_NONE;
+
+  for (int i = 0; i < task_step_count[task]; i++){
+    int room = task_step_room[task][i];
+
+    if (room != previous_room){
+      route += (route.length() == 0 ? "" : " > ") + roomTitle(room);
+      previous_room = room;
+    }
+  }
+
+  int final_room = task_completion_room[task];
+  if (final_room != previous_room){
+    route += " > " + roomTitle(final_room);
+  }
+
+  return route;
+}
 
 
 boolean pointIsAvailable(int point){
@@ -406,7 +435,10 @@ boolean taskPointIsExpected(int point){
 
 
 void interactPoint(int point){
-  first_interaction_done = true;
+  if (point_kind[point] == POINT_END_DAY){
+    end_day_open = true;
+    return;
+  }
 
   if (point_kind[point] == POINT_READ){
     readPoint(point);
@@ -432,9 +464,7 @@ void interactPoint(int point){
 }
 
 
-/* o painel de distribuicao e interruptor e ponto de conclusao: a conclusao
-   vale quando o tecnico chega com o item da variante; sem o item, o ponto
-   continua sendo o interruptor do modo economia. */
+/* The distribution panel repairs only when the matching item is held. */
 boolean pointCompletesActiveTask(int point){
   return active_task != TASK_NONE && taskPointIsExpected(point)
     && taskItemAvailable(active_task);
@@ -443,19 +473,42 @@ boolean pointCompletesActiveTask(int point){
 
 void readPoint(int point){
   if (point == POINT_COMMAND_BRIEFING){
-    int suggestion = suggestedTask();
-    system_message = "BRIEFING: SUGESTÃO - " + task_label[suggestion] + ".";
+    openTaskConsole();
   } else if (point == POINT_ROUTE){
-    system_message = "ROTA: DIA " + day + " DE " + trip_days + ".";
+    openTechnical("ROTA", "DIA " + day + " DE " + trip_days
+      + ". RESTAM " + max(0, trip_days - day) + " DIAS.");
   } else if (point == POINT_STATUS){
-    system_message = "STATUS: MOTOR " + engineStateLabel() + ".";
+    openTechnical("STATUS DA NAVE", "MOTOR " + engineStateLabel()
+      + ". ESTADOS: " + activeStateSummary() + ".");
   } else if (point == POINT_RESERVE){
-    system_message = "RESERVA: " + parts + " PEÇAS DISPONÍVEIS.";
+    openTechnical("RESERVA", parts + " PEÇAS DISPONÍVEIS.");
   }
 }
 
 
 void switchPoint(int point){
+  pending_switch_point = point;
+  technical_open = true;
+
+  if (point == POINT_DISTRIBUTION){
+    technical_title = saving_on ? "DESATIVAR ECONOMIA" : "ATIVAR ECONOMIA";
+    technical_text = saving_on
+      ? "O CONSUMO VOLTA A 6 DE ENERGIA POR DIA."
+      : "ENERGIA -3/DIA. CUSTO INICIAL: MORAL -5; DEPOIS -1/DIA.";
+  } else {
+    technical_title = rationing_on ? "DESATIVAR RACIONAMENTO" : "ATIVAR RACIONAMENTO";
+    technical_text = rationing_on
+      ? "ÁGUA E COMIDA VOLTAM AO CONSUMO NORMAL."
+      : "ÁGUA -4 E COMIDA -3/DIA. CUSTO INICIAL: MORAL -8; DEPOIS -1/DIA.";
+  }
+}
+
+
+void applySwitchPoint(){
+  int point = pending_switch_point;
+  pending_switch_point = -1;
+  technical_open = false;
+
   if (point == POINT_DISTRIBUTION){
     toggleSaving();
   } else if (point == POINT_RATIONING){
@@ -464,36 +517,27 @@ void switchPoint(int point){
 }
 
 
-void interactNpc(int point){
-  if (active_task != TASK_NONE && taskPointIsExpected(point)){
-    advanceTaskStep(point);
+void openTaskConsole(){
+  if (action_used){
+    openTechnical("BRIEFING", "A TAREFA DE HOJE JÁ FOI CONCLUÍDA.");
     return;
   }
 
   if (active_task != TASK_NONE){
-    system_message = "TAREFA: " + taskStatusLabel() + ".";
+    openTechnical("TAREFA ATIVA", taskStatusLabel());
     return;
   }
 
   task_choice_count = 0;
 
   for (int task = 0; task < TASK_COUNT; task++){
-    if (!taskIsAvailable(task) || task_step_room[task][0] != screen
-      || task_step_point[task][0] != point){
-      continue;
+    if (taskIsAvailable(task) && taskCostAvailable(task)){
+      task_choice_indices[task_choice_count++] = task;
     }
-
-    task_choice_indices[task_choice_count] = task;
-    task_choice_count++;
   }
 
   if (task_choice_count == 0){
-    system_message = "NENHUMA TAREFA DISPONÍVEL AQUI.";
-    return;
-  }
-
-  if (task_choice_count == 1){
-    beginTask(task_choice_indices[0]);
+    openTechnical("BRIEFING", "NENHUMA TAREFA PODE SER PAGA HOJE.");
     return;
   }
 
@@ -503,8 +547,44 @@ void interactNpc(int point){
 }
 
 
+void interactNpc(int point){
+  String name = point_label[point];
+
+  if (active_task != TASK_NONE && taskPointIsExpected(point)){
+    advanceTaskStep(point);
+    openDialogue(name, "ENTENDIDO. " + taskNextInstruction());
+    return;
+  }
+
+  if (active_task != TASK_NONE){
+    openDialogue(name, "SUA PRIORIDADE É: " + taskNextInstruction());
+    return;
+  }
+
+  openDialogue(name, npcIdleText(point));
+}
+
+
+String npcIdleText(int point){
+  if (point == POINT_VERA){
+    return "CONSULTE O CONSOLE DE BRIEFING PARA ESCOLHER A TAREFA DE HOJE.";
+  }
+
+  if (point == POINT_SILVIA){
+    return "MOTOR E SISTEMAS DE ENERGIA SOB OBSERVAÇÃO.";
+  }
+
+  if (point == POINT_BENTO){
+    return "ESTOQUE CONFERIDO. PEÇAS DISPONÍVEIS: " + parts + ".";
+  }
+
+  return "O GRUPO ESTÁ COM MORAL " + int(morale) + ".";
+}
+
+
 void beginTask(int task){
-  if (!taskIsAvailable(task)){
+  if (action_used || active_task != TASK_NONE || !taskIsAvailable(task)
+    || !taskCostAvailable(task)){
     return;
   }
 
@@ -514,18 +594,13 @@ void beginTask(int task){
 
   active_task = task;
   task_step_index = 0;
-  system_message = "TAREFA INICIADA: " + task_label[task] + ".";
-  advanceTaskStep(task_step_point[task][0]);
-
-  if (task == TASK_POWER){
-    system_message = "SÍLVIA SORTEOU A SOLUÇÃO: " + variant_title[power_variant] + ".";
-  }
+  system_message = "TAREFA ACEITA: " + task_label[task] + ".";
 }
 
 
 void advanceTaskStep(int point){
   if (active_task == TASK_NONE || !taskPointIsExpected(point)){
-    system_message = "ESTAÇÃO FORA DA TAREFA ATUAL.";
+    system_message = "ESSA INTERAÇÃO NÃO FAZ PARTE DA TAREFA ATUAL.";
     return;
   }
 
@@ -536,14 +611,9 @@ void advanceTaskStep(int point){
   }
 
   task_step_index++;
-
-  if (task_step_index >= task_step_count[active_task]){
-    system_message = "PASSOS LIVRES CONCLUÍDOS: " + task_label[active_task]
-      + ". VÁ AO PONTO FINAL.";
-  } else {
-    system_message = "PASSO CONCLUÍDO: " + task_step_label[active_task][task_step_index - 1]
-      + ".";
-  }
+  system_message = item != ITEM_NONE
+    ? "ITEM OBTIDO: " + heldItemLabel() + "."
+    : "ETAPA CONCLUÍDA. " + taskNextInstruction();
 }
 
 
@@ -577,29 +647,34 @@ int itemForStep(int task, int step){
 
 
 void completeTask(int point){
+  if (action_used){
+    system_message = "A TAREFA DO DIA JÁ FOI CONCLUÍDA.";
+    return;
+  }
+
   if (active_task == TASK_NONE || !taskPointIsExpected(point)){
-    system_message = "NENHUMA TAREFA PRONTA PARA CONCLUIR.";
+    system_message = "ESSA NÃO É A AÇÃO ATUAL.";
     return;
   }
 
   if (!taskCostAvailable(active_task)){
-    system_message = "RECURSO INSUFICIENTE PARA CONCLUIR.";
+    system_message = "RECURSO INSUFICIENTE.";
     return;
   }
 
   if (!taskItemAvailable(active_task)){
-    system_message = "ITEM ERRADO NA MÃO DO TÉCNICO.";
+    system_message = "FALTA O ITEM NECESSÁRIO.";
     return;
   }
 
-  consumeTaskCost(active_task);
-  applyTaskEffect(active_task);
+  int completed_task = active_task;
+  consumeTaskCost(completed_task);
+  applyTaskEffect(completed_task);
   action_used = true;
-  system_message = "TAREFA CONCLUÍDA: " + task_label[active_task] + " - "
-    + task_effect[active_task] + ".";
   held_item = ITEM_NONE;
   active_task = TASK_NONE;
   task_step_index = 0;
+  system_message = task_label[completed_task] + ": " + task_effect[completed_task] + ".";
   clampResources();
   checkEndConditions();
 }
@@ -685,14 +760,21 @@ void updateTaskChoice(){
 
 
 void drawTaskChoice(PGraphics g){
-  drawPanel(g, 40, 98, 390, 120, COL_CYAN);
-  text(g, "ESCOLHA A TAREFA", 56, 106, 16, COL_CYAN);
+  drawModalShade(g);
+  drawPanel(g, 20, 52, 600, 260, COL_CYAN);
+  text(g, "CONSOLE DE BRIEFING", 36, 64, 16, COL_CYAN);
 
   for (int i = 0; i < task_choice_count; i++){
     int task = task_choice_indices[i];
-    text(g, (i == task_choice_cursor ? "> " : "  ") + task_label[task], 62, 130 + i * 18, 16,
-      i == task_choice_cursor ? COL_CYAN : COL_TEXT);
+    text(g, (i == task_choice_cursor ? "> " : "  ") + task_label[task],
+      36, 94 + i * 20, 16, i == task_choice_cursor ? COL_CYAN : COL_TEXT);
   }
 
-  text(g, "SETAS: ESCOLHER   E: CONFIRMAR", 56, 196, 16, COL_MUTED);
+  int selected = task_choice_indices[task_choice_cursor];
+  drawPanel(g, 318, 88, 286, 170, COL_BORDER);
+  text(g, task_label[selected], 334, 102, 16, COL_ORANGE);
+  text(g, "CUSTO: " + taskCostLabel(selected), 334, 132, 16, COL_TEXT);
+  drawTextWrapped(g, "EFEITO: " + task_effect[selected], 334, 158, 254, 16, 18, COL_TEXT);
+  drawTextWrapped(g, "ROTA: " + taskRouteLabel(selected), 334, 204, 254, 16, 18, COL_MUTED);
+  text(g, "SETAS: ESCOLHER   E: ACEITAR   ESC: VOLTAR", 36, 278, 16, COL_MUTED);
 }

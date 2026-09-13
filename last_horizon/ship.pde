@@ -1,26 +1,27 @@
-/* nave e salas - vista lateral com os 4 comodos clicaveis (interface/FLOW.md)
-   Tudo aqui e lugar-comum geometrico: nenhum sprite entra antes do ticket de arte. */
-
 final int ROOM_COUNT = 4;
-final float ROOM_Y = 108;
-final float ROOM_W = 96;
-final float ROOM_H = 88;
+final float MAP_ROOM_Y = 112;
+final float MAP_ROOM_W = 120;
+final float MAP_ROOM_H = 92;
 
 String[] room_label = {"COMANDO", "ENERGIA", "DEPÓSITO", "DORMITÓRIO"};
-float[] room_x = {52, 152, 252, 352};
+float[] room_x = {60, 184, 308, 432};
 int[] room_screen = {SCREEN_COMMAND, SCREEN_ENERGY, SCREEN_DEPOT, SCREEN_DORMITORY};
-int[] room_action = {ACTION_OPEN_COMMAND, ACTION_OPEN_ENERGY, ACTION_OPEN_DEPOT, ACTION_OPEN_DORMITORY};
+int[] room_action = {
+  ACTION_INSPECT_COMMAND, ACTION_INSPECT_ENERGY,
+  ACTION_INSPECT_DEPOT, ACTION_INSPECT_DORMITORY
+};
 
 final int DECK_COUNT = 3;
-float[] deck_y = {164, 232, 300};
+float[] deck_y = {128, 202, 278};
 final int LADDER_COUNT = 2;
-float[] ladder_x = {150, 330};
+float[] ladder_x = {190, 445};
 
 final int POINT_READ = 0;
 final int POINT_COLLECT = 1;
 final int POINT_NPC = 2;
 final int POINT_SWITCH = 3;
 final int POINT_COMPLETE = 4;
+final int POINT_END_DAY = 5;
 
 final int POINT_COMMAND_BRIEFING = 0;
 final int POINT_VERA = 1;
@@ -40,30 +41,31 @@ final int POINT_NEUSA = 14;
 final int POINT_COMMON_TABLE = 15;
 final int POINT_LIFE_SUPPORT = 16;
 final int POINT_ANTENNA = 17;
-final int POINT_COUNT = 18;
+final int POINT_TECH_BUNK = 18;
+final int POINT_COUNT = 19;
 
 int[] point_room = {
   SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND,
   SCREEN_ENERGY, SCREEN_ENERGY, SCREEN_ENERGY, SCREEN_ENERGY,
   SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT,
   SCREEN_DORMITORY, SCREEN_DORMITORY, SCREEN_DORMITORY,
-  SCREEN_ENERGY, SCREEN_COMMAND
+  SCREEN_ENERGY, SCREEN_COMMAND, SCREEN_DORMITORY
 };
 
 float[] point_x = {
-  76, 360, 230, 100,
-  76, 340, 210, 360,
-  76, 360, 230, 120, 360,
-  100, 320, 235,
-  76, 210
+  76, 540, 260, 100,
+  90, 340, 230, 520,
+  80, 530, 310, 150, 510,
+  100, 330, 500,
+  80, 400, 120
 };
 
 float[] point_y = {
-  164, 164, 232, 300,
-  300, 232, 232, 164,
-  300, 300, 232, 232, 164,
-  300, 232, 164,
-  164, 164
+  128, 128, 202, 278,
+  278, 202, 202, 128,
+  278, 278, 202, 202, 128,
+  278, 202, 128,
+  128, 128, 128
 };
 
 String[] point_label = {
@@ -71,7 +73,7 @@ String[] point_label = {
   "BANCADA", "SÍLVIA", "DISTRIBUIÇÃO", "REATOR",
   "KIT", "CASCO", "BENTO", "RACIONAMENTO", "RESERVA",
   "BELICHE", "NEUSA", "MESA COMUM",
-  "SUPORTE", "ANTENA"
+  "SUPORTE", "ANTENA", "SEU BELICHE"
 };
 
 int[] point_kind = {
@@ -79,82 +81,85 @@ int[] point_kind = {
   POINT_COMPLETE, POINT_NPC, POINT_SWITCH, POINT_COMPLETE,
   POINT_COLLECT, POINT_COMPLETE, POINT_NPC, POINT_SWITCH, POINT_READ,
   POINT_COMPLETE, POINT_NPC, POINT_COMPLETE,
-  POINT_COMPLETE, POINT_COMPLETE
+  POINT_COMPLETE, POINT_COMPLETE, POINT_END_DAY
 };
 
 
 void drawShipArea(PGraphics g){
   g.noStroke();
   g.fill(COL_ROOM);
-  g.rect(0, SIDE_Y, SIDE_X, SIDE_H);
-
+  g.rect(0, ROOM_TOP, BASE_W, OBJECTIVE_Y - ROOM_TOP);
   drawStars(g);
-
-  if (isRoomScreen()){
-    drawRoom(g);
-  } else {
-    drawShip(g);
-  }
-
-  if (event_open){
-    drawEventLockNotice(g);
-  }
-}
-void drawEventLockNotice(PGraphics g){
-  drawPanel(g, 64, 226, SIDE_X - 128, 42, COL_ORANGE);
-  textCentered(g, "EVENTO PENDENTE", SIDE_X / 2.0, 232, 12, COL_ORANGE);
-  textCentered(g, "RESPONDA O EVENTO PARA CONTINUAR", SIDE_X / 2.0, 250, 10, COL_TEXT);
+  drawRoom(g);
 }
 
 
-void drawShip(PGraphics g){
-  drawHull(g);
+void drawMapOverlay(PGraphics g){
+  drawModalShade(g);
+  drawPanel(g, 34, 62, 572, 236, COL_CYAN);
+  text(g, "MAPA DA NAVE", 50, 74, 16, COL_CYAN);
+  text(g, "CLIQUE PARA CONSULTAR. O MAPA NÃO MOVE O TÉCNICO.", 50, 96, 16, COL_MUTED);
 
   for (int i = 0; i < ROOM_COUNT; i++){
-    drawRoomDoor(g, i);
+    drawMapRoomCard(g, i);
   }
 
-  textCentered(g, "CLIQUE EM UM CÔMODO PARA ENTRAR", SIDE_X / 2.0, 254, 9, COL_DIM);
-  textCentered(g, "TÉCNICO: " + player_name, SIDE_X / 2.0, 272, 9, COL_MUTED);
+  drawMapRoomDetails(g);
+  drawButton(g, 466, 262, 124, 22, "FECHAR", ACTION_CLOSE_MODAL, true);
 }
 
 
-void drawHull(PGraphics g){
-  g.noStroke();
-  g.fill(COL_CYAN_DARK);
-  g.rect(12, 128, 30, 44);
 
-  g.fill(COL_ORANGE);
-  g.triangle(12, 138, 2, 150, 12, 162);
 
-  g.fill(COL_PANEL_2);
-  g.beginShape();
-  g.vertex(46, 150);
-  g.vertex(78, 100);
-  g.vertex(440, 100);
-  g.vertex(462, 150);
-  g.vertex(440, 200);
-  g.vertex(78, 200);
-  g.endShape(CLOSE);
+void drawMapRoomCard(PGraphics g, int index){
+  boolean hover = uiLayer() == LAYER_MODAL
+    && isHovering(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H);
+  boolean selected = map_selected_room == index;
+  int border = selected ? COL_CYAN : (hover ? COL_CYAN : COL_BORDER);
 
-  g.stroke(COL_BORDER);
-  g.noFill();
-  g.line(78, 150, 440, 150);
+  drawPanel(g, room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H, border);
+  textCentered(g, room_label[index], room_x[index] + MAP_ROOM_W / 2.0,
+    MAP_ROOM_Y + 10, 16, selected ? COL_CYAN : COL_TEXT);
+  textCentered(g, roomStatus(index), room_x[index] + MAP_ROOM_W / 2.0,
+    MAP_ROOM_Y + 34, 16, COL_MUTED);
+
+  if (room_screen[index] == screen){
+    textCentered(g, "VOCÊ ESTÁ AQUI", room_x[index] + MAP_ROOM_W / 2.0,
+      MAP_ROOM_Y + 58, 16, COL_ORANGE);
+  }
+
+  addButton(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H,
+    room_action[index], true);
+}
+int roomIndex(int room_id){
+  for (int i = 0; i < ROOM_COUNT; i++){
+    if (room_screen[i] == room_id){
+      return i;
+    }
+  }
+
+  return 0;
 }
 
 
-void drawRoomDoor(PGraphics g, int index){
-  boolean scene_controls_on = !event_open && !paused;
-  boolean hover = scene_controls_on && uiLayer() == LAYER_SCENE && isHovering(room_x[index], ROOM_Y, ROOM_W, ROOM_H);
-  int border = scene_controls_on ? (hover ? COL_CYAN : COL_BORDER) : COL_DIM;
-  int label_colour = scene_controls_on ? (hover ? COL_CYAN : COL_TEXT) : COL_DIM;
-  int status_colour = scene_controls_on ? COL_MUTED : COL_DIM;
+void drawMapRoomDetails(PGraphics g){
+  int index = constrain(map_selected_room, 0, ROOM_COUNT - 1);
+  String detail = roomOccupant(index) + " | " + roomStatus(index);
 
-  drawPanel(g, room_x[index], ROOM_Y, ROOM_W, ROOM_H, border);
-  textCentered(g, room_label[index], room_x[index] + ROOM_W / 2.0, ROOM_Y + 26, 9, label_colour);
-  textCentered(g, roomStatus(index), room_x[index] + ROOM_W / 2.0, ROOM_Y + 46, 8, status_colour);
+  if (room_screen[index] == screen){
+    detail += " | POSIÇÃO ATUAL";
+  }
 
-  addButton(room_x[index], ROOM_Y, ROOM_W, ROOM_H, room_action[index], scene_controls_on);
+  text(g, detail, 50, 222, 16, COL_TEXT);
+  text(g, taskVisitsRoom(room_screen[index])
+    ? "A TAREFA ATUAL PASSA POR ESTE CÔMODO."
+    : "SEM ETAPA ATUAL NESTE CÔMODO.", 50, 242, 16, COL_MUTED);
+}
+
+
+String roomOccupant(int index){
+  String[] occupants = {"VERA", "SÍLVIA", "BENTO", "NEUSA"};
+  return occupants[index];
 }
 
 
@@ -178,11 +183,9 @@ String roomStatus(int index){
 void drawRoom(PGraphics g){
   drawBackdrop(g, ROOM_LEFT, ROOM_TOP, ROOM_RIGHT - ROOM_LEFT, ROOM_BOTTOM - ROOM_TOP);
   drawRoomTitle(g);
-  if (screen == SCREEN_COMMAND){
-    drawCommandBriefing(g);
-  }
   drawDecks(g);
   drawLadders(g);
+  drawDoors(g);
 
   for (int i = 0; i < POINT_COUNT; i++){
     if (point_room[i] == screen){
@@ -192,10 +195,6 @@ void drawRoom(PGraphics g){
 
   drawPlayer(g);
   drawHeldItem(g);
-
-  if (task_choice_open){
-    drawTaskChoice(g);
-  }
 }
 
 
@@ -221,17 +220,6 @@ String roomTitle(int room_screen){
   return "DORMITÓRIO";
 }
 
-void drawCommandBriefing(PGraphics g){
-  int suggestion = suggestedTask();
-  g.fill(COL_PANEL);
-  g.stroke(COL_CYAN_DARK);
-  g.rect(ROOM_LEFT + 8, ROOM_TOP + 28, ROOM_RIGHT - ROOM_LEFT - 16, 44, 2);
-  text(g, "BRIEFING DO DIA: " + task_label[suggestion], ROOM_LEFT + 16, ROOM_TOP + 34, 16, COL_TEXT);
-
-  if (day == 1 && !first_interaction_done){
-    text(g, "ANDAR  A/D   ESCADA  W/S   PULAR  ESPAÇO   INTERAGIR  E", ROOM_LEFT + 16, ROOM_TOP + 52, 16, COL_TEXT);
-  }
-}
 
 
 void drawDecks(PGraphics g){
@@ -263,6 +251,28 @@ void drawLadders(PGraphics g){
   }
 
   g.strokeWeight(1);
+}
+void drawDoors(PGraphics g){
+  drawDoor(g, -1, leftRoom(screen), ROOM_LEFT + 5);
+  drawDoor(g, 1, rightRoom(screen), ROOM_RIGHT - 17);
+}
+
+
+void drawDoor(PGraphics g, int direction, int destination, float x){
+  if (destination == SCREEN_NONE){
+    return;
+  }
+
+  float y = deck_y[DECK_COUNT - 1];
+  boolean nearby = doorInRange(direction);
+  g.fill(nearby ? COL_CYAN_DARK : COL_PANEL_2);
+  g.stroke(nearby ? COL_CYAN : COL_BORDER);
+  g.rect(x, y - 38, 12, 38);
+
+  if (nearby){
+    String label = "E - " + roomTitle(destination);
+    text(g, label, direction < 0 ? x + 18 : x - 210, y - 58, 16, COL_CYAN);
+  }
 }
 
 
@@ -309,6 +319,10 @@ char pointMarker(int kind){
     return 'S';
   }
 
+  if (kind == POINT_END_DAY){
+    return 'Z';
+  }
+
   return '!';
 }
 
@@ -344,29 +358,27 @@ void drawHeldItem(PGraphics g){
 
 
 void enterRoom(int next_screen){
-  screen = next_screen;
-  current_room = next_screen;
-  resetPlayerPosition();
-  task_choice_open = false;
-  jump_queued = false;
-  interact_queued = false;
+  enterRoomFrom(next_screen, -1);
 }
 
 
-void leaveRoom(){
-  screen = SCREEN_SHIP;
-  current_room = SCREEN_SHIP;
+void enterRoomFrom(int next_screen, int entry_side){
+  screen = next_screen;
+  current_room = next_screen;
+  player_x = entry_side > 0 ? ROOM_RIGHT - 28 - PLAYER_W : ROOM_LEFT + 28;
+  player_y = deck_y[DECK_COUNT - 1] - PLAYER_H;
+  player_velocity_y = 0;
+  player_grounded = true;
   player_on_ladder = false;
   ladder_vertical_release_required = false;
-  task_choice_open = false;
   jump_queued = false;
   interact_queued = false;
 }
 
 
 void resetRoomState(){
-  current_room = SCREEN_SHIP;
-  player_x = ROOM_LEFT + 24;
+  current_room = SCREEN_COMMAND;
+  player_x = ROOM_LEFT + 28;
   player_y = deck_y[DECK_COUNT - 1] - PLAYER_H;
   player_velocity_y = 0;
   player_grounded = true;
@@ -375,21 +387,51 @@ void resetRoomState(){
   jump_queued = false;
   interact_queued = false;
   held_item = ITEM_NONE;
+  map_open = false;
+  dialog_open = false;
+  technical_open = false;
+  end_day_open = false;
 }
 
 
-void resetPlayerPosition(){
-  player_x = ROOM_LEFT + 24;
-  player_y = deck_y[DECK_COUNT - 1] - PLAYER_H;
-  player_velocity_y = 0;
-  player_grounded = true;
-  player_on_ladder = false;
-  ladder_vertical_release_required = false;
+int leftRoom(int room_id){
+  int index = roomIndex(room_id);
+  return index > 0 ? room_screen[index - 1] : SCREEN_NONE;
+}
+
+
+int rightRoom(int room_id){
+  int index = roomIndex(room_id);
+  return index < ROOM_COUNT - 1 ? room_screen[index + 1] : SCREEN_NONE;
+}
+
+
+boolean doorInRange(int direction){
+  float center = player_x + PLAYER_W / 2.0;
+  float bottom = player_y + PLAYER_H;
+  boolean on_lower_deck = abs(bottom - deck_y[DECK_COUNT - 1]) <= 3;
+  return on_lower_deck && (direction < 0
+    ? center <= ROOM_LEFT + 38 : center >= ROOM_RIGHT - 38);
+}
+
+
+boolean useNearbyDoor(){
+  if (doorInRange(-1) && leftRoom(screen) != SCREEN_NONE){
+    enterRoomFrom(leftRoom(screen), 1);
+    return true;
+  }
+
+  if (doorInRange(1) && rightRoom(screen) != SCREEN_NONE){
+    enterRoomFrom(rightRoom(screen), -1);
+    return true;
+  }
+
+  return false;
 }
 
 
 void updateRoom(){
-  if (event_open || paused){
+  if (paused || event_open || map_open || technical_open || end_day_open){
     jump_queued = false;
     interact_queued = false;
     return;
@@ -397,12 +439,25 @@ void updateRoom(){
 
   if (task_choice_open){
     updateTaskChoice();
+    jump_queued = false;
+    return;
+  }
+
+  if (dialog_open){
+    if (interact_queued){
+      interact_queued = false;
+      dialog_open = false;
+    }
+    jump_queued = false;
     return;
   }
 
   if (interact_queued){
     interact_queued = false;
-    interactNearby();
+
+    if (!useNearbyDoor()){
+      interactNearby();
+    }
   }
 
   if (player_on_ladder){

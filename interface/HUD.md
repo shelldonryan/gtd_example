@@ -2,10 +2,10 @@
 
 ## Objetivo
 
-O HUD apresenta as informações necessárias para o jogador
-acompanhar o estado da espaçonave. Ele deve ser simples e legível, e continua
-visível dentro dos cômodos, enquanto o técnico anda, pula, usa escadas e
-interage.
+O HUD apresenta apenas o que o jogador precisa acompanhar enquanto atravessa a
+nave. O painel lateral `SISTEMA / TAREFA` foi removido: mapa e salas usam a
+largura liberada. A tarefa ativa fica numa faixa textual compacta, e alertas
+aparecem nos cartões de recurso ou como avisos temporários.
 
 ## Informações exibidas
 
@@ -19,7 +19,7 @@ interage.
 | Comida | ícone, número e barra | quantidade de comida armazenada |
 | Peças | ícone e número | quantas peças podem ser usadas em reparos |
 | Moral | ícone, número e barra | estado emocional dos sobreviventes |
-| Mensagem do sistema | texto no painel da direita | eventos, avisos e o resultado das ações |
+| Próxima ação | faixa textual compacta | tarefa ativa, ação concreta e cômodo de destino |
 
 ## Barras de recursos
 
@@ -44,48 +44,48 @@ no inventário de assets.
 | Zona | Conteúdo |
 | --- | --- |
 | Topo | dia, quantos estão a bordo e os seis indicadores de recurso |
-| Coluna direita | painel de alertas e eventos |
-| Centro | o mapa macro da nave, ou a cena 2D jogável do cômodo aberto |
-| Rodapé | "Passar dia" e o botão de voltar |
+| Centro | sala 2D jogável usando toda a largura |
+| Faixa de orientação | tarefa ativa e uma única próxima ação concreta |
+| Rodapé | botão `MAPA` e orientação de controles |
+| Sobreposição | mapa, diálogos, painéis técnicos, eventos e resumo do fim do dia |
 
-O cartão de evento ocupa o painel da direita, e a tela de trás continua visível.
-Transmissões da Terra aparecem em um cartão modal sobre a tela atual; o clique fecha o cartão sem consumir tarefa, ação, recurso ou tempo. A consequência é mostrada antes do evento seguinte. A mensagem de Marte fica dentro da tela de vitória.
+O mapa abre pelo botão `MAPA`, mostra `VOCÊ ESTÁ AQUI` e permite consultar a
+ficha de cada cômodo. Fechá-lo retorna à mesma sala e posição.
 
-## Botões
+## Controles de alto nível
 
-### Passar dia
+### Mapa
 
-Avanca a viagem em um dia. O botão fica no rodapé, acionado com o mouse. Ao ser
-acionado:
+O botão `MAPA` abre uma sobreposição consultável. Clicar num cômodo mostra
+ocupante, sistemas, alertas e se a etapa atual passa por ali. O clique nunca
+transporta o técnico.
 
-1. Os recursos são consumidos.
-2. A moral é atualizada.
-3. O numero do dia é atualizado.
-4. O jogo verifica as condições de vitoria e derrota.
-5. O dia seguinte abre com o evento sorteado, em cartão sobre a tela.
+### Encerrar o dia
 
-Não existe tecla para passar o dia: é uma ação que fecha o dia e não deve
-acontecer por engano.
+Não existe botão persistente `Passar dia`. O técnico precisa chegar ao próprio
+beliche no Dormitório e interagir. Antes da confirmação, um resumo modal mostra:
 
-### Voltar para a nave
+1. consumo previsto dos recursos;
+2. falhas e estados ativos;
+3. tarefa concluída ou pendente;
+4. `ENCERRAR DIA` e `VOLTAR`.
 
-Retorna da visualização de um comodo para a tela geral da espaconave. Também é
-botão de rodapé, com o mouse.
-
-Cada cômodo é uma área clicável no mapa macro. Ao clicar nele, o jogador
-entra na cena correspondente; a execução da tarefa acontece pela
-movimentação e pela interação do técnico, não apenas por botões.
-Os pontos de interação de cada cômodo estão em `interface/ROOMS.md`.
+Confirmar processa recursos, moral, vitória ou derrota e abre o novo dia no
+Dormitório.
 
 ## Estados da interface
 
-- **Visão da nave:** mostra o mapa macro e permite escolher um cômodo.
-- **Salas de interior:** mostram uma cena 2D jogável, o técnico controlável,
-  três conveses ligados por duas escadas, pontos de interação e o briefing do dia.
-- **Evento:** mostra uma mensagem e as alternativas disponíveis; bloqueia a exploração até ser respondido.
-- **Transmissão externa:** mostra uma mensagem da Terra ou de Marte em cartão modal; bloqueia a exploração até o clique.
-- **Vitória:** informa que a nave chegou a Marte e incorpora a mensagem correspondente da base.
-- **Derrota:** informa qual recurso ou sistema causou o fim da viagem em um desfecho modal.
+- **Salas de interior:** formam uma sequência conectada por portas e usam toda a
+  largura disponível.
+- **Diálogo de NPC:** retrato sobre a cena e caixa inferior; bloqueia movimento e
+  interação até avançar ou fechar.
+- **Painel técnico:** usa a caixa inferior sem retrato para briefing, sistemas e
+  resumo do fim do dia.
+- **Coleta e conclusão:** exibem aviso breve sem interromper a exploração.
+- **Mapa:** sobreposição consultável que preserva sala e posição.
+- **Evento:** modal técnico sem retrato sobre a sala, com título, situação e duas
+  alternativas acompanhadas das consequências; bloqueia a exploração até a escolha.
+- **Transmissão e desfecho:** permanecem modais.
 
 ## Avisos
 
@@ -94,23 +94,16 @@ um **ícone de aviso** ao lado do número e a **borda do cartão piscando** (mei
 segundo aceso, meio apagado). A cor sozinha deixa quem não a distingue sem
 nenhuma pista.
 
-O painel SISTEMA não é modal. Os cartões, as cores e os ícones identificam o
-estado; a linha curta indica a próxima ação ou confirma um estado ativo.
+Alertas críticos usam os cartões de recurso: cor, ícone de aviso e borda
+piscando. Falhas e mudanças de estado aparecem como avisos temporários com uma
+ação concreta, por exemplo `REPARAR MOTOR` ou `VÁ À SALA DE ENERGIA`.
 
-| Estado | Linha do painel |
-| --- | --- |
-| Energia crítica | `IR: ENERGIA` |
-| Oxigênio crítico | `VER SISTEMAS` |
-| Estoques baixos | `IR: DEPÓSITO` |
-| Moral baixa | `IR: DORMITÓRIO` |
-| Motor danificado | `REPARAR MOTOR` |
-| Vazamento ativo | `REPARAR CASCO` |
-| Suporte em emergência | `REPARAR SUPORTE` |
-| Falha no sistema de energia | `REPARAR ENERGIA` |
-| Comunicações em silêncio | `REPARAR COMUNICAÇÕES` |
-| Modo economia | `ECONOMIA ATIVA` |
-| Racionamento | `RACIONAMENTO ATIVO` |
-| Ação usada | `AÇÃO JÁ USADA` |
+A faixa de orientação não acumula histórico nem usa termos internos como
+`passos livres` ou `ponto final`. Ela mostra somente:
 
-As linhas devem caber em uma linha curta na grade de 16 px. Alertas críticos
-mantêm a borda piscando e o ícone de aviso nos cartões de recurso.
+1. nome da tarefa ativa;
+2. próxima ação concreta;
+3. cômodo onde a ação acontece;
+4. custo e efeito, quando relevantes para a decisão.
+
+Exemplo: `AUMENTAR POTÊNCIA — VÁ AO REATOR, SALA DE ENERGIA`.

@@ -1,19 +1,13 @@
-/* Last Horizon - prototipo jogavel
-   Processing 4.5.6, modo Java. Estilo do exemplo do professor: codigo em ingles,
-   sketch plano, sem classes, pares update e draw separados e um PNG por quadro.
-   Abas: ui (widgets), hud, screens (menus), ship (nave e salas), game (dia e eventos),
-   capture (prova por PNG e teste do clique). Numeros: mechanics/ACTIONS.md. */
-
 /* canvas */
 final int BASE_W = 640;
 final int BASE_H = 360;
 final int WINDOW_W = BASE_W * 2;
 final int WINDOW_H = BASE_H * 2;
 
-/* telas */
+/* screens */
 final int SCREEN_INIT = 0;
 final int SCREEN_VIGNETTE = 1;
-final int SCREEN_SHIP = 2;
+final int SCREEN_NONE = -1;
 final int SCREEN_COMMAND = 3;
 final int SCREEN_ENERGY = 4;
 final int SCREEN_DEPOT = 5;
@@ -21,17 +15,19 @@ final int SCREEN_DORMITORY = 6;
 final int SCREEN_VICTORY = 7;
 final int SCREEN_GAME_OVER = 8;
 
-/* acoes dos botoes */
+/* actions */
 final int ACTION_NONE = 0;
 final int ACTION_START_GAME = 1;
 final int ACTION_QUIT_GAME = 2;
 final int ACTION_VIGNETTE_NEXT = 3;
-final int ACTION_OPEN_COMMAND = 10;
-final int ACTION_OPEN_ENERGY = 11;
-final int ACTION_OPEN_DEPOT = 12;
-final int ACTION_OPEN_DORMITORY = 13;
-final int ACTION_BACK_TO_SHIP = 14;
-final int ACTION_PASS_DAY = 15;
+final int ACTION_INSPECT_COMMAND = 10;
+final int ACTION_INSPECT_ENERGY = 11;
+final int ACTION_INSPECT_DEPOT = 12;
+final int ACTION_INSPECT_DORMITORY = 13;
+final int ACTION_OPEN_MAP = 14;
+final int ACTION_CLOSE_MODAL = 15;
+final int ACTION_END_DAY = 16;
+final int ACTION_CONFIRM_SWITCH = 17;
 final int ACTION_EVENT_A = 30;
 final int ACTION_EVENT_B = 31;
 final int ACTION_RESUME = 40;
@@ -39,7 +35,7 @@ final int ACTION_RESTART = 41;
 final int ACTION_MAIN_MENU = 42;
 final int ACTION_NEW_GAME = 43;
 
-/* sala jogável - interface/ROOMS.md */
+/* playable room - interface/ROOMS.md */
 final int PLAYER_W = 16;
 final int PLAYER_H = 24;
 final float PLAYER_SPEED = 1.5;
@@ -48,9 +44,9 @@ final float GRAVITY = 0.5;
 final float LADDER_SPEED = 1.0;
 final float INTERACTION_RANGE = 12;
 final float ROOM_LEFT = 8;
-final float ROOM_RIGHT = 462;
-final float ROOM_TOP = 62;
-final float ROOM_BOTTOM = 330;
+final float ROOM_RIGHT = 632;
+final float ROOM_TOP = 56;
+final float ROOM_BOTTOM = 294;
 
 final int ITEM_NONE = 0;
 final int ITEM_ENGINE_PARTS = 1;
@@ -61,7 +57,7 @@ final int ITEM_FUSE = 5;
 final int ITEM_CABLE = 6;
 final int ITEM_COOLANT = 7;
 
-/* regras - mechanics/ACTIONS.md */
+/* rules - mechanics/ACTIONS.md */
 final int RESOURCE_MAX = 100;
 final int RESOURCE_GREEN = 60;
 final int RESOURCE_RED = 30;
@@ -113,19 +109,19 @@ final int EVENT_POWER_ENERGY = 10;
 final int EVENT_POWER_MORALE = 10;
 final int EVENT_COMMS_PARTS = 1;
 
-/* falha no sistema de energia - variants */
+/* power repair variants */
 final int POWER_VARIANT_NONE = -1;
 final int POWER_VARIANT_FUSE = 0;
 final int POWER_VARIANT_CABLE = 1;
 final int POWER_VARIANT_COOLANT = 2;
 final int POWER_VARIANT_COUNT = 3;
 
-/* motor */
+/* engine */
 final int ENGINE_WORKING = 0;
 final int ENGINE_DAMAGED = 1;
 final int ENGINE_DESTROYED = 2;
 
-/* fim de jogo */
+/* end states */
 final int REASON_NONE = 0;
 final int REASON_OXYGEN = 1;
 final int REASON_ENERGY = 2;
@@ -133,7 +129,7 @@ final int REASON_MORALE = 3;
 final int REASON_ENGINE = 4;
 final int REASON_CREW = 5;
 
-/* paleta - assets/concept_arts/HUD_CONCEPT_ART.png */
+/* palette */
 final int COL_BG = 0xFF060B16;
 final int COL_ROOM = 0xFF0A1422;
 final int COL_PANEL = 0xFF0D1B2B;
@@ -157,15 +153,12 @@ final float HUD_GAP = 3;
 final int HUD_CARDS = 8;
 final float HUD_CARD_W = (BASE_W - HUD_X * 2 - HUD_GAP * (HUD_CARDS - 1)) / HUD_CARDS;
 
-final float SIDE_X = 470;
-final float SIDE_Y = 56;
-final float SIDE_W = BASE_W - SIDE_X - 6;
-final float SIDE_H = 270;
-
+final float OBJECTIVE_Y = 294;
+final float OBJECTIVE_H = 36;
 final float FOOTER_Y = 330;
 final float FOOTER_H = BASE_H - FOOTER_Y;
 
-/* estado da partida */
+/* run state */
 String player_name = "";
 int screen = SCREEN_INIT;
 boolean paused = false;
@@ -194,8 +187,11 @@ boolean action_used = false;
 int boost_count = 0;
 int game_over_reason = REASON_NONE;
 String system_message = "";
-/* estado da sala jogável */
-int current_room = SCREEN_SHIP;
+String last_system_message = "";
+int system_message_until = 0;
+
+/* room state */
+int current_room = SCREEN_COMMAND;
 float player_x = ROOM_LEFT + 24;
 float player_y = 276;
 float player_velocity_y = 0;
@@ -205,15 +201,24 @@ boolean ladder_vertical_release_required = false;
 boolean jump_queued = false;
 boolean interact_queued = false;
 int held_item = ITEM_NONE;
-boolean first_interaction_done = false;
 
-/* interface base */
+/* overlays */
+boolean map_open = false;
+int map_selected_room = 0;
+boolean dialog_open = false;
+String dialog_name = "";
+String dialog_text = "";
+boolean technical_open = false;
+String technical_title = "";
+String technical_text = "";
+int pending_switch_point = -1;
+boolean end_day_open = false;
+
+/* input */
 boolean move_left_held = false;
 boolean move_right_held = false;
 boolean move_up_held = false;
 boolean move_down_held = false;
-
-/* interface base */
 PGraphics base;
 PFont pixel_font;
 int view_scale = 1;
@@ -287,16 +292,7 @@ void drawBase(){
 
   if (!isMenuScreen()){
     drawHud(base);
-
-    if (event_open){
-      draw_layer = LAYER_EVENT;
-      drawEventCard(base);
-    }
-
-    if (paused){
-      draw_layer = LAYER_PAUSE;
-      drawPauseCard(base);
-    }
+    drawModalLayer(base);
   }
 
   base.endDraw();
@@ -369,7 +365,11 @@ void handleClick(float x, float y){
 
 
 void handleEscape(){
-  if (isMenuScreen() || screen == SCREEN_VICTORY || screen == SCREEN_GAME_OVER){
+  if (isMenuScreen()){
+    return;
+  }
+
+  if (closeTopModal()){
     return;
   }
 

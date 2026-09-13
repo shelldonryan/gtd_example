@@ -1,10 +1,9 @@
 # Cômodos jogáveis
 
-Este documento fecha o que `mechanics/ACTIONS.md` deixava em aberto: o objetivo,
-os passos e os pontos de interação de cada cômodo. O layout é **um só esqueleto
-para os quatro**: três conveses ligados por duas escadas, dentro da área de
-470 × 280 px da base 640×360 (o HUD do topo, o painel da direita e o rodapé
-continuam visíveis). A sala inteira cabe na tela — **não existe câmera**.
+Os quatro cômodos formam uma sequência contínua inspirada na composição lateral
+de `COMMAND_ROOM_CONCEPT_ART.png`. Cada um conserva três conveses e duas escadas,
+mas passa a usar a largura liberada pela remoção do painel lateral. Portas nas
+extremidades conectam as salas; não existe câmera nem teletransporte pelo mapa.
 
 ```
   convés superior  y≈164   [ estação ]        [ estação ]
@@ -19,13 +18,14 @@ cada estação fique alcançável andando ou subindo escada. O pulo de 48 px
 
 ## Pontos de interação
 
-| Tipo | Gasta o dia | O que faz |
+| Tipo | Interrompe movimento | O que faz |
 | --- | --- | --- |
-| Leitura | não | mostra estado (rota, recursos, motor, diagnóstico) |
-| Coleta | não | põe um item na mão do técnico |
-| Conversa | não | o sobrevivente entrega o item ou aponta o alvo da tarefa |
-| Interruptor | não | liga ou desliga um estado (economia, racionamento) |
-| Conclusão | **sim** | fecha a tarefa do dia e cobra o custo |
+| Leitura técnica | sim | abre painel inferior sem retrato |
+| Coleta | não | põe um item na mão e mostra aviso breve |
+| Conversa | sim | abre retrato e caixa inferior do sobrevivente |
+| Interruptor | sim | explica a consequência e pede confirmação |
+| Ação final | não | cobra o custo, fecha a tarefa e mostra o resultado |
+| Porta | não | troca para a sala adjacente pela entrada correspondente |
 
 Regras que valem em todos os cômodos:
 
@@ -33,58 +33,63 @@ Regras que valem em todos os cômodos:
   técnico entra no alcance.
 - O técnico carrega **um item por vez**. O item não se perde ao virar o dia:
   continua na mão até ser entregue ou trocado por outro.
-- Tarefa não concluída não custa nada; o dia vira normalmente.
-- Todo ponto de conclusão cobra o custo da tarefa e usa a única ação do dia.
+- Tarefa não concluída não custa nada; o item continua com o técnico.
+- Toda ação final cobra o custo da tarefa e usa a única tarefa do dia.
+- O mapa não altera `current_room`, posição, tarefa ou item carregado.
+- Indicações para portas, escadas e pontos próximos usam ações concretas, nunca
+  os termos `passos livres` ou `ponto final`.
 
 ## Sala de comando
 
-O cômodo é leitura e briefing; a antena é o ponto de conclusão das comunicações.
+O cômodo concentra planejamento e leitura da viagem. O console de briefing é a
+única origem da escolha da tarefa do dia.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
-| superior | console do briefing — urgência do dia e onde está cada sobrevivente | leitura |
-| superior | Vera — assina o briefing, entrega o cabo de derivação e diagnostica as comunicações | conversa (passos de "aumentar potência", "reparar sistema de energia" e "reparar comunicações") |
-| superior | antena — reparo das comunicações | conclusão |
-| médio | console da rota — dia, jornada percorrida, dias restantes | leitura |
-| inferior | painel de status — recursos, motor e vazamento | leitura |
+| superior | console do briefing — lista tarefas disponíveis com custo, efeito e rota; exige confirmação | leitura técnica |
+| superior | Vera — conversas da piloto, cabo de derivação e diagnóstico das comunicações | conversa |
+| superior | antena — reparo das comunicações | ação final |
+| médio | console da rota — dia, jornada percorrida, dias restantes | leitura técnica |
+| inferior | painel de status — recursos, motor e vazamento | leitura técnica |
 
-No **dia 1** o briefing faz o papel de tutorial: duas frases sobre o loop, a
-tarefa sugerida destacada e as teclas no rodapé até a primeira interação.
+No primeiro dia, o técnico começa na Sala de comando. O console apresenta a
+escolha explícita e ensina que a nave é atravessada pelas portas.
 
 ## Sala de energia
 
 | Convés | Ponto | Tipo | Tarefa |
 | --- | --- | --- | --- |
-| inferior | bancada do motor | conclusão | reparar motor — 2 peças; variante "resfriar regulador" — 5 água |
-| médio | Sílvia — diagnóstico do motor, do suporte de vida e do sistema de energia | conversa | passos de "reparar motor", "reparar suporte de vida", "reparar sistema de energia" e "aumentar potência" |
-| médio | painel de distribuição | interruptor e conclusão | modo economia; variante "trocar fusível" — 1 peça |
-| superior | reator | conclusão | aumentar potência — 20 energia; variante "reforçar circuito" — 10 energia |
-| superior | painel de suporte de vida | conclusão | reparar suporte de vida — 2 peças |
+| inferior | bancada do motor | ação final | reparar motor — 2 peças; variante "resfriar regulador" — 5 água |
+| médio | Sílvia — diagnóstico do motor, do suporte de vida e do sistema de energia | conversa | etapas de "reparar motor", "reparar suporte de vida", "reparar sistema de energia" e "aumentar potência" |
+| médio | painel de distribuição | interruptor e ação final | modo economia; variante "trocar fusível" — 1 peça |
+| superior | reator | ação final | aumentar potência — 20 energia; variante "reforçar circuito" — 10 energia |
+| superior | painel de suporte de vida | ação final | reparar suporte de vida — 2 peças |
 
 ## Depósito
 
 | Convés | Ponto | Tipo | Tarefa |
 | --- | --- | --- | --- |
-| inferior | prateleira do kit de vedação | coleta | passo de "reparar casco" |
-| inferior | ponto do casco | conclusão | reparar casco — 1 peça |
-| médio | Bento — entrega peças, água e itens das tarefas em andamento | conversa | passos de "reparar motor", "socorrer sobrevivente", "reparar suporte de vida", "reparar comunicações" e da variante "trocar fusível" |
+| inferior | prateleira do kit de vedação | coleta | etapa de "reparar casco" |
+| inferior | ponto do casco | ação final | reparar casco — 1 peça |
+| médio | Bento — entrega peças, água e itens das tarefas em andamento | conversa | etapas de "reparar motor", "socorrer sobrevivente", "reparar suporte de vida", "reparar comunicações" e da variante "trocar fusível" |
 | médio | alavanca de racionamento | interruptor | racionamento |
-| superior | prateleira de reserva | leitura | — |
+| superior | prateleira de reserva | leitura técnica | — |
 
 ## Dormitório
 
 | Convés | Ponto | Tipo | Tarefa |
 | --- | --- | --- | --- |
-| inferior | beliche do sobrevivente | conclusão | socorrer sobrevivente — 5 água |
-| médio | Neusa — quem está mal, onde o casco vaza e o cartucho refrigerante | conversa | passos de "descanso e organização", "reparar casco" e da variante "resfriar regulador" |
-| superior | mesa comum | conclusão | descanso e organização — 8 energia |
+| inferior | beliche do sobrevivente | ação final | socorrer sobrevivente — 5 água |
+| médio | Neusa — quem está mal, onde o casco vaza e o cartucho refrigerante | conversa | etapas de "descanso e organização", "reparar casco" e da variante "resfriar regulador" |
+| superior | mesa comum | ação final | descanso e organização — 8 energia |
+| superior | beliche do técnico | leitura técnica | resumo do consumo, falhas e tarefa; confirmação para encerrar o dia |
 
 ## As oito tarefas
 
-Todas passam por um sobrevivente e por pelo menos uma troca de cômodo. Só o
-passo marcado como conclusão gasta o dia.
+Todas passam por um sobrevivente e por deslocamento entre cômodos. Somente a ação
+final gasta a tarefa do dia.
 
-| Tarefa | Passos livres | Conclusão | Custo |
+| Tarefa | Etapas de preparação | Ação final | Custo |
 | --- | --- | --- | --- |
 | Reparar motor | Sílvia dá o diagnóstico (energia) → Bento entrega 2 peças (depósito) | bancada do motor | 2 peças |
 | Aumentar potência | Vera recalcula a rota (comando) | reator | 20 energia |
@@ -110,22 +115,22 @@ De onde cada tarefa vem:
 
 Interruptores (**modo economia** e **racionamento**) não gastam o dia: ligam e
 desligam na visita ao cômodo, e a moral cobra o preço por dia enquanto estiverem
-ativos. O painel de distribuição acumula as duas funções: a conclusão da variante
+ativos. O painel de distribuição acumula as duas funções: a ação final da variante
 do fusível vale quando o técnico chega com o fusível na mão; sem o item, o ponto
 continua sendo o interruptor do modo economia.
 
 ## Leitura do jogador
 
-O briefing do comando aponta a urgência e sugere uma tarefa, mas **nenhuma
-estação fica travada**: o jogador escolhe qual cadeia cumprir hoje e paga o preço
-dela. É essa escolha que `history/CONTEXT.md` chama de decidir qual perda é
-aceitável.
+O console do comando apresenta somente tarefas disponíveis e mostra custo,
+efeito e rota antes da confirmação. Depois da escolha, a faixa de orientação
+mostra uma única próxima ação concreta. Conversar com um sobrevivente sem tarefa
+ativa nunca inicia uma cadeia.
 
 ## Implementação
 
 A tabela de tarefas vive em `tasks.pde`, como dado: rótulo, estado que a abre
-(gate), cômodo da conclusão, custo, passo intermediário e efeito. Somar uma
-tarefa nova é somar uma linha na tabela e uma estação em um dos cômodos acima.
+(gate), cômodo da ação final, custo, etapas e efeito. Somar uma tarefa nova é
+somar uma linha na tabela e uma estação em um dos cômodos acima.
 Detalhes de estilo em `code/SKETCH_ARCHITECTURE.md`.
 
 No jogo, as estações usam rótulos curtos na tela: **SUPORTE** para o painel de

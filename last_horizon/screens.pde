@@ -1,5 +1,3 @@
-/* telas - maquina de estados, menus, pausa e despacho das acoes */
-
 final int VIGNETTE_PAGES = 3;
 
 String[][] vignette_lines = {
@@ -19,16 +17,18 @@ boolean isRoomScreen(){
 }
 
 
+boolean modalOpen(){
+  return event_open || map_open || task_choice_open || dialog_open
+    || technical_open || end_day_open;
+}
+
+
 int uiLayer(){
   if (paused){
     return LAYER_PAUSE;
   }
 
-  if (event_open && !isMenuScreen()){
-    return LAYER_EVENT;
-  }
-
-  return LAYER_SCENE;
+  return modalOpen() ? LAYER_MODAL : LAYER_SCENE;
 }
 
 
@@ -55,6 +55,61 @@ void drawScreen(PGraphics g){
 
   drawShipArea(g);
 }
+void drawModalLayer(PGraphics g){
+  if (paused){
+    draw_layer = LAYER_PAUSE;
+    drawPauseCard(g);
+    return;
+  }
+
+  if (!modalOpen()){
+    return;
+  }
+
+  draw_layer = LAYER_MODAL;
+
+  if (event_open){
+    drawEventCard(g);
+  } else if (map_open){
+    drawMapOverlay(g);
+  } else if (task_choice_open){
+    drawTaskChoice(g);
+  } else if (dialog_open){
+    drawDialogue(g);
+  } else if (technical_open){
+    drawTechnicalPanel(g);
+  } else if (end_day_open){
+    drawEndDayPanel(g);
+  }
+}
+
+
+boolean closeTopModal(){
+  if (paused){
+    paused = false;
+    return true;
+  }
+
+  if (event_open){
+    return false;
+  }
+
+  if (task_choice_open){
+    task_choice_open = false;
+    return true;
+  }
+
+  if (map_open || dialog_open || technical_open || end_day_open){
+    map_open = false;
+    dialog_open = false;
+    technical_open = false;
+    end_day_open = false;
+    pending_switch_point = -1;
+    return true;
+  }
+
+  return false;
+}
 
 
 void doAction(int action){
@@ -73,33 +128,29 @@ void doAction(int action){
     return;
   }
 
-  if (action == ACTION_OPEN_COMMAND){
-    enterRoom(SCREEN_COMMAND);
+  if (action >= ACTION_INSPECT_COMMAND && action <= ACTION_INSPECT_DORMITORY){
+    map_selected_room = action - ACTION_INSPECT_COMMAND;
     return;
   }
 
-  if (action == ACTION_OPEN_ENERGY){
-    enterRoom(SCREEN_ENERGY);
+  if (action == ACTION_OPEN_MAP){
+    map_open = true;
+    map_selected_room = roomIndex(screen);
     return;
   }
 
-  if (action == ACTION_OPEN_DEPOT){
-    enterRoom(SCREEN_DEPOT);
+  if (action == ACTION_CLOSE_MODAL){
+    closeTopModal();
     return;
   }
 
-  if (action == ACTION_OPEN_DORMITORY){
-    enterRoom(SCREEN_DORMITORY);
+  if (action == ACTION_END_DAY){
+    end_day_open = false;
+    endDay();
     return;
   }
-
-  if (action == ACTION_BACK_TO_SHIP){
-    leaveRoom();
-    return;
-  }
-
-  if (action == ACTION_PASS_DAY){
-    passDay();
+  if (action == ACTION_CONFIRM_SWITCH){
+    applySwitchPoint();
     return;
   }
 
@@ -121,8 +172,8 @@ void doAction(int action){
 
   if (action == ACTION_RESTART){
     resetRun();
+    enterRoom(SCREEN_COMMAND);
     openDay();
-    screen = SCREEN_SHIP;
     return;
   }
 
@@ -140,7 +191,7 @@ void nextVignettePage(){
     return;
   }
 
-  screen = SCREEN_SHIP;
+  enterRoom(SCREEN_COMMAND);
   openDay();
 }
 

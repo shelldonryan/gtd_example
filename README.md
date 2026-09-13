@@ -22,13 +22,14 @@ Durante o percurso, o jogador precisa manter a nave funcionando, administrar os 
 
 ## Mecanica principal
 
-A partida representa uma viagem de dez dias. Em cada dia, o jogador entra em um
-cômodo, controla o técnico numa cena 2D lateral e conclui uma tarefa. Cada tarefa
-é uma cadeia de poucos passos — ir até o lugar, falar com um sobrevivente, pegar
-o item, instalar — e passa por mais de um cômodo. Andar, pular, usar escada e
-cumprir os passos intermediários não consomem a ação; só a interação que conclui
-a tarefa usa a única ação do dia. Depois, o jogador avança o tempo pelo botão
-"Passar dia". Ao final do dia, os recursos são consumidos.
+A partida representa uma viagem de dez dias por quatro cômodos conectados. O
+técnico atravessa portas, consulta o mapa sem ser transportado e escolhe
+explicitamente uma tarefa no console da Sala de comando. O painel mostra custo,
+efeito e rota antes da confirmação.
+
+Cada tarefa tem etapas concretas — conversar, coletar e executar a ação final.
+Somente a ação final usa a tarefa do dia. Para encerrar o dia, o técnico retorna
+ao próprio beliche no Dormitório, confere o consumo previsto e confirma.
 
 O jogador deve equilibrar os seguintes recursos:
 

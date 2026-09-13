@@ -21,12 +21,12 @@ quatro áreas principais:
 - Sala de energia, onde fica o motor.
 - Depósito.
 - Dormitório.
-A visão geral da nave é o mapa macro da viagem. Ao selecionar um cômodo nesse
-mapa, o jogador entra numa cena 2D lateral própria, com três conveses ligados por
-duas escadas.
+Os quatro cômodos formam um espaço contínuo: o técnico atravessa portas para ir
+de um ao outro. O mapa macro é uma consulta da nave; mostra a posição real do
+técnico e permite abrir a ficha de cada cômodo, mas nunca transporta o jogador.
 
-Dentro do cômodo, o técnico é controlável: pode andar, pular, usar escadas,
-atravessar plataformas e interagir com os pontos do cômodo.
+Dentro dos cômodos, o técnico pode andar, pular, usar escadas, atravessar
+plataformas e interagir com pessoas, sistemas e objetos.
 
 Quatro sobreviventes viajam a bordo, além do técnico: **Vera**, a piloto, no
 comando; **Bento**, o intendente, no depósito; **Neusa**, a enfermeira, no
@@ -40,15 +40,19 @@ falhas que podem surgir durante o percurso.
 
 ## Desenvolvimento da viagem
 
-A viagem é representada por dez dias de jogo. Em cada dia, o técnico explora os
-cômodos com movimentação livre e conclui uma tarefa. Cada tarefa é uma cadeia de
-poucos passos — falar com um sobrevivente, pegar o item, instalar — e atravessa
-mais de um cômodo. Andar, pular, usar escada e cumprir os passos intermediários
-não consomem a ação; só a interação que conclui a tarefa usa a única ação do dia.
-Depois, o jogador decide quando avançar o tempo. Ao final do dia, a nave consome
-água, comida, oxigênio e energia. Eventos como falhas no motor, chuva de
-meteoros, falta de comida, conflitos entre os sobreviventes e as falhas de
-suporte de vida, de energia e de comunicações podem alterar o estado da missão.
+A viagem é representada por dez dias de jogo. O primeiro começa na Sala de
+comando; os seguintes começam no Dormitório. O técnico vai ao console de
+briefing no comando, compara as tarefas disponíveis e escolhe explicitamente uma
+delas conhecendo custo, efeito e rota.
+
+Cada tarefa tem poucas etapas concretas — falar com um sobrevivente, pegar o item
+e executar a ação final — e atravessa mais de um cômodo. Andar, pular, usar
+escada e concluir as etapas de preparação não consomem a ação; somente a ação
+final usa a única tarefa do dia. Depois, o jogador decide quando encerrar o dia.
+Ao final dele, a nave consome água, comida, oxigênio e energia. Eventos como
+falhas no motor, chuva de meteoros, falta de comida, conflitos entre os
+sobreviventes e falhas de suporte de vida, energia e comunicações podem alterar
+o estado da missão.
 
 As decisões não possuem uma solução perfeita. Reparar o motor pode gastar as
 últimas peças, manter o consumo normal pode deixar os estoques vazios e aplicar

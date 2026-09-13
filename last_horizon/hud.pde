@@ -1,8 +1,6 @@
-/* hud - cartoes do topo, painel de alertas e rodape (interface/HUD.md) */
-
 void drawHud(PGraphics g){
   drawHeader(g);
-  drawAlertPanel(g);
+  drawObjectiveStrip(g);
   drawFooter(g);
 }
 
@@ -126,51 +124,26 @@ void drawWarningIcon(PGraphics g, float x, float y){
 }
 
 
-void drawAlertPanel(PGraphics g){
-  drawPanel(g, SIDE_X, SIDE_Y, SIDE_W, SIDE_H, COL_BORDER);
-  text(g, "SISTEMA", SIDE_X + 8, SIDE_Y + 7, 16, COL_CYAN);
+void drawObjectiveStrip(PGraphics g){
+  drawPanel(g, 6, OBJECTIVE_Y, BASE_W - 12, OBJECTIVE_H - 2, COL_BORDER);
 
-  if (event_open){
-    return;
+  if (!system_message.equals(last_system_message)){
+    last_system_message = system_message;
+    system_message_until = frameCount + 180;
   }
 
-  /* a tarefa do dia fica no alto: o espaço dos alertas e da mensagem é fixo */
-  String task_line = active_task == TASK_NONE ? "LIVRE" : task_label[active_task];
-  text(g, "TAREFA", SIDE_X + 8, SIDE_Y + 26, 16, COL_CYAN);
-  drawTextWrapped(g, task_line, SIDE_X + 8, SIDE_Y + 44, SIDE_W - 16, 16, 18, COL_TEXT);
+  boolean show_notice = system_message.length() > 0 && frameCount < system_message_until;
+  String title = active_task == TASK_NONE
+    ? (action_used ? "DIA CONCLUÍDO" : "SEM TAREFA")
+    : task_label[active_task];
+  String value = show_notice ? system_message : taskNextInstruction();
+  int colour = show_notice ? COL_ORANGE : COL_TEXT;
 
-  float y = SIDE_Y + 90;
-
-  y = drawAlert(g, y, energy < RESOURCE_RED, "IR: ENERGIA");
-  y = drawAlert(g, y, oxygen < RESOURCE_RED, "VER SISTEMAS");
-  y = drawAlert(g, y, water < RESOURCE_RED || food < RESOURCE_RED, "IR: DEPÓSITO");
-  y = drawAlert(g, y, morale < RESOURCE_RED, "IR: DORMITÓRIO");
-  y = drawAlert(g, y, engine_state == ENGINE_DAMAGED, "REPARAR MOTOR");
-  y = drawAlert(g, y, leak_on, "REPARAR CASCO");
-  y = drawAlert(g, y, life_support_emergency, "REPARAR SUPORTE");
-  y = drawAlert(g, y, power_fault_on, "REPARAR ENERGIA");
-  y = drawAlert(g, y, comms_silent, "REPARAR COMUNICAÇÕES");
-  y = drawAlert(g, y, saving_on, "ECONOMIA ATIVA");
-  y = drawAlert(g, y, rationing_on, "RACIONAMENTO ATIVO");
-  y = drawAlert(g, y, action_used, "AÇÃO JÁ USADA");
-
-  if (y == SIDE_Y + 90){
-    drawTextWrapped(g, "SISTEMAS ESTÁVEIS. ESCOLHA UM CÔMODO.", SIDE_X + 8, y, SIDE_W - 16, 16, 18, COL_MUTED);
-  }
-
-  if (system_message.length() > 0){
-    drawTextWrapped(g, system_message, SIDE_X + 8, SIDE_Y + SIDE_H - 60, SIDE_W - 16, 16, 18, COL_CYAN);
-  }
+  text(g, title, 16, OBJECTIVE_Y + 4, 16, COL_CYAN);
+  text(g, value, 210, OBJECTIVE_Y + 4, 16, colour);
 }
 
 
-float drawAlert(PGraphics g, float y, boolean show, String value){
-  if (!show){
-    return y;
-  }
-
-  return drawTextWrapped(g, value, SIDE_X + 8, y, SIDE_W - 16, 9, 12, COL_TEXT) + 4;
-}
 
 
 void drawFooter(PGraphics g){
@@ -178,14 +151,9 @@ void drawFooter(PGraphics g){
   g.fill(COL_PANEL_2);
   g.rect(0, FOOTER_Y, BASE_W, FOOTER_H);
 
-  boolean scene_controls_on = !event_open && !paused;
-
-  drawButton(g, 6, FOOTER_Y + 4, 90, 19, "VOLTAR", ACTION_BACK_TO_SHIP, isRoomScreen() && scene_controls_on);
-  drawButton(g, BASE_W - 6 - 166, FOOTER_Y + 4, 166, 19, "PASSAR DIA", ACTION_PASS_DAY, scene_controls_on);
-
-  if (!paused){
-    String hint = event_open ? "RESPONDA O EVENTO" : "ESC = PAUSA";
-    int hint_colour = event_open ? COL_ORANGE : COL_DIM;
-    textCentered(g, hint, (BASE_W + 106) / 2.0, FOOTER_Y + 8, 9, hint_colour);
-  }
+  boolean controls_on = !modalOpen() && !paused;
+  drawButton(g, 6, FOOTER_Y + 4, 112, 22, "MAPA", ACTION_OPEN_MAP, controls_on);
+  textCentered(g, "A/D ANDAR  W/S ESCADA  ESPAÇO PULAR  E INTERAGIR",
+    370, FOOTER_Y + 7, 16, controls_on ? COL_MUTED : COL_DIM);
+  text(g, "ESC PAUSA", 536, FOOTER_Y + 7, 16, COL_DIM);
 }

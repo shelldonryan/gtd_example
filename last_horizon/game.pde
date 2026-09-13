@@ -1,6 +1,3 @@
-/* jogo - recursos, acoes das salas, ciclo do dia e eventos
-   Todos os valores vem de mechanics/ACTIONS.md. */
-
 final int EVENT_NONE = -1;
 final int EVENT_ENGINE = 0;
 final int EVENT_METEOR = 1;
@@ -49,6 +46,25 @@ String[] event_b_label = {
   "EMERGÊNCIA (ENERGIA -10)",
   "DESLIGAR SETORES (MORAL -10)",
   "SILÊNCIO (MORAL -1/DIA)"
+};
+String[] event_a_effect = {
+  "MOTOR OPERANTE; -2 PEÇAS",
+  "CASCO PROTEGIDO; -15 ENERGIA",
+  "CONSUMO NORMAL",
+  "MORAL -10",
+  "SUPORTE ESTÁVEL; -2 PEÇAS",
+  "FALHA ATIVA; ENERGIA -10",
+  "CONTATO RESTAURADO; -1 PEÇA"
+};
+
+String[] event_b_effect = {
+  "MOTOR DANIFICADO; VIAGEM +1 DIA",
+  "OXIGÊNIO -15; VAZAMENTO -3/DIA",
+  "MORAL -8; CONSUMO REDUZIDO",
+  "MORAL +10; ENERGIA -10",
+  "ENERGIA -10; OXIGÊNIO -3/DIA",
+  "FALHA ATIVA; MORAL -10",
+  "MORAL -1/DIA; SEM TERRA"
 };
 
 int event_index = EVENT_NONE;
@@ -138,9 +154,7 @@ boolean eventAllowed(int event){
 }
 
 
-/* Sorteio uniforme entre os eventos permitidos, sem repetir o anterior.
-   A falha ativa fica fora do sorteio; o sorteio so volta a valer quando ela
-   for resolvida (mechanics/ACTIONS.md). */
+/* Active failures leave the uniform draw until repaired. */
 int pickEvent(){
   int[] candidates = new int[EVENT_COUNT];
   int total = 0;
@@ -171,7 +185,7 @@ int pickEvent(){
 }
 
 
-void passDay(){
+void endDay(){
   consumeResources();
 
   if (food <= 0 && survivors > 0){
@@ -207,73 +221,69 @@ void passDay(){
 
   day++;
   action_used = false;
+  enterRoom(SCREEN_DORMITORY);
   openDay();
-  screen = SCREEN_SHIP;
+}
+
+
+int dailyEnergyCost(){
+  return (saving_on ? ENERGY_PER_DAY_SAVING : ENERGY_PER_DAY)
+    + (power_fault_on ? ENERGY_PER_DAY_POWER_FAULT : 0);
+}
+
+
+int dailyOxygenCost(){
+  return (energy < RESOURCE_LOW_ENERGY ? OXYGEN_PER_DAY_LOW_ENERGY : OXYGEN_PER_DAY)
+    + (leak_on ? LEAK_PER_DAY : 0)
+    + (life_support_emergency ? OXYGEN_PER_DAY_EMERGENCY : 0);
+}
+
+
+int dailyWaterCost(){
+  return rationing_on ? WATER_PER_DAY_RATIONING : WATER_PER_DAY;
+}
+
+
+int dailyFoodCost(){
+  return rationing_on ? FOOD_PER_DAY_RATIONING : FOOD_PER_DAY;
+}
+
+
+int dailyMoraleCost(){
+  float next_energy = max(0, energy - dailyEnergyCost());
+  float next_oxygen = max(0, oxygen - dailyOxygenCost());
+  float next_water = max(0, water - dailyWaterCost());
+  float next_food = max(0, food - dailyFoodCost());
+  int red = 0;
+
+  if (isRed(next_energy)) red++;
+  if (isRed(next_oxygen)) red++;
+  if (isRed(next_water)) red++;
+  if (isRed(next_food)) red++;
+
+  return MORALE_PER_DAY + red * MORALE_PER_RED_RESOURCE
+    + (saving_on ? MORALE_PER_DAY_SAVING : 0)
+    + (rationing_on ? MORALE_PER_DAY_RATIONING : 0)
+    + (comms_silent ? MORALE_PER_DAY_NO_COMMS : 0);
 }
 
 
 void consumeResources(){
-  boolean low_energy = energy < RESOURCE_LOW_ENERGY;
+  int energy_cost = dailyEnergyCost();
+  int oxygen_cost = dailyOxygenCost();
+  int water_cost = dailyWaterCost();
+  int food_cost = dailyFoodCost();
+  int morale_cost = dailyMoraleCost();
 
-  energy -= saving_on ? ENERGY_PER_DAY_SAVING : ENERGY_PER_DAY;
-
-  if (power_fault_on){
-    energy -= ENERGY_PER_DAY_POWER_FAULT;
-  }
-
-  oxygen -= low_energy ? OXYGEN_PER_DAY_LOW_ENERGY : OXYGEN_PER_DAY;
-  water -= rationing_on ? WATER_PER_DAY_RATIONING : WATER_PER_DAY;
-  food -= rationing_on ? FOOD_PER_DAY_RATIONING : FOOD_PER_DAY;
-
-  if (leak_on){
-    oxygen -= LEAK_PER_DAY;
-  }
-
-  if (life_support_emergency){
-    oxygen -= OXYGEN_PER_DAY_EMERGENCY;
-  }
-
-  clampResources();
-
-  morale -= MORALE_PER_DAY + redResourceCount() * MORALE_PER_RED_RESOURCE;
-
-  if (saving_on){
-    morale -= MORALE_PER_DAY_SAVING;
-  }
-
-  if (rationing_on){
-    morale -= MORALE_PER_DAY_RATIONING;
-  }
-
-  if (comms_silent){
-    morale -= MORALE_PER_DAY_NO_COMMS;
-  }
-
+  energy -= energy_cost;
+  oxygen -= oxygen_cost;
+  water -= water_cost;
+  food -= food_cost;
+  morale -= morale_cost;
   clampResources();
 }
 
 
-int redResourceCount(){
-  int total = 0;
-
-  if (isRed(energy)){
-    total++;
-  }
-
-  if (isRed(oxygen)){
-    total++;
-  }
-
-  if (isRed(water)){
-    total++;
-  }
-
-  if (isRed(food)){
-    total++;
-  }
-
-  return total;
-}
 
 
 boolean isRed(float value){
@@ -547,13 +557,51 @@ String gameOverMessage(){
 
 
 void drawEventCard(PGraphics g){
-  drawPanel(g, SIDE_X, SIDE_Y, SIDE_W, SIDE_H, COL_ORANGE);
-  text(g, "EVENTO PENDENTE", SIDE_X + 8, SIDE_Y + 7, 9, COL_ORANGE);
-  drawTextWrapped(g, event_title[event_index], SIDE_X + 8, SIDE_Y + 24, SIDE_W - 16, 11, 14, COL_TEXT);
-  drawTextWrapped(g, event_body[event_index], SIDE_X + 8, SIDE_Y + 52, SIDE_W - 16, 9, 12, COL_MUTED);
+  drawModalShade(g);
+  drawPanel(g, 42, 60, 556, 240, COL_ORANGE);
+  text(g, "EVENTO DO DIA", 60, 74, 16, COL_ORANGE);
+  text(g, event_title[event_index], 60, 102, 16, COL_TEXT);
+  drawTextWrapped(g, event_body[event_index], 60, 128, 520, 16, 18, COL_MUTED);
+  drawEventOption(g, 60, 190, 250, event_a_label[event_index],
+    event_a_effect[event_index], ACTION_EVENT_A, eventChoiceOn(0));
+  drawEventOption(g, 330, 190, 250, event_b_label[event_index],
+    event_b_effect[event_index], ACTION_EVENT_B, eventChoiceOn(1));
+}
 
-  text(g, "ESCOLHA UMA ALTERNATIVA", SIDE_X + 8, SIDE_Y + SIDE_H - 86, 9, COL_CYAN);
 
-  drawButton(g, SIDE_X + 8, SIDE_Y + SIDE_H - 66, SIDE_W - 16, 26, event_a_label[event_index], ACTION_EVENT_A, eventChoiceOn(0));
-  drawButton(g, SIDE_X + 8, SIDE_Y + SIDE_H - 36, SIDE_W - 16, 26, event_b_label[event_index], ACTION_EVENT_B, eventChoiceOn(1));
+void drawEventOption(PGraphics g, float x, float y, float w, String label,
+  String effect, int action, boolean on){
+  boolean hover = on && uiLayer() == LAYER_MODAL && isHovering(x, y, w, 82);
+  int border = on ? (hover ? COL_CYAN : COL_BORDER) : COL_DIM;
+  drawPanel(g, x, y, w, 82, border);
+  text(g, label, x + 10, y + 8, 16, on ? COL_TEXT : COL_DIM);
+  drawTextWrapped(g, effect, x + 10, y + 34, w - 20, 16, 18,
+    on ? COL_CYAN : COL_DIM);
+  addButton(x, y, w, 82, action, on);
+}
+
+
+String activeStateSummary(){
+  String value = "";
+  if (engine_state == ENGINE_DAMAGED) value += "MOTOR ";
+  if (leak_on) value += "VAZAMENTO ";
+  if (life_support_emergency) value += "SUPORTE ";
+  if (power_fault_on) value += "ENERGIA ";
+  if (comms_silent) value += "COMUNICAÇÕES ";
+  if (saving_on) value += "ECONOMIA ";
+  if (rationing_on) value += "RACIONAMENTO ";
+  return value.length() == 0 ? "NENHUM" : value.trim();
+}
+
+
+String dayTaskSummary(){
+  if (action_used){
+    return "CONCLUÍDA";
+  }
+
+  if (active_task != TASK_NONE){
+    return "PENDENTE - " + task_label[active_task];
+  }
+
+  return "NÃO ESCOLHIDA";
 }

@@ -1,11 +1,7 @@
-/* ui - paineis, texto, botoes e hit-test
-   Coordenadas do desenho: canto superior esquerdo. O hit-test usa o centro do
-   retangulo, no checkRectOverlap() do professor (AABB por centro). */
-
 final int LAYER_SCENE = 0;
-final int LAYER_EVENT = 1;
+final int LAYER_MODAL = 1;
 final int LAYER_PAUSE = 2;
-final int MAX_BUTTONS = 16;
+final int MAX_BUTTONS = 24;
 final int NAME_MAX_LENGTH = 12;
 final float MIN_TEXT_SIZE = 16;
 final float MIN_WRAP_TEXT_SIZE = 16;
@@ -125,6 +121,86 @@ void drawBackdrop(PGraphics g, float x, float y, float w, float h){
   g.fill(COL_ROOM);
   g.stroke(COL_BORDER);
   g.rect(x, y, w, h, 3);
+}
+void drawModalShade(PGraphics g){
+  g.noStroke();
+  g.fill(0xB8000000);
+  g.rect(0, 0, BASE_W, BASE_H);
+}
+
+
+void openDialogue(String name, String value){
+  dialog_name = name;
+  dialog_text = value;
+  dialog_open = true;
+}
+
+
+void drawDialogue(PGraphics g){
+  drawModalShade(g);
+  drawPortrait(g, dialog_name, 470, 72);
+  drawPanel(g, 24, 210, 592, 126, COL_CYAN);
+  text(g, dialog_name, 40, 220, 16, COL_CYAN);
+  drawTextWrapped(g, dialog_text, 40, 244, 410, 16, 18, COL_TEXT);
+  drawButton(g, 470, 298, 128, 22, "CONTINUAR", ACTION_CLOSE_MODAL, true);
+}
+
+
+void drawPortrait(PGraphics g, String name, float x, float y){
+  int colour = name.equals("VERA") ? COL_CYAN
+    : name.equals("SÍLVIA") ? COL_ORANGE
+    : name.equals("BENTO") ? COL_GREEN : COL_YELLOW;
+
+  g.stroke(COL_BORDER);
+  g.fill(COL_PANEL);
+  g.rect(x, y, 112, 138, 4);
+  g.noStroke();
+  g.fill(colour);
+  g.ellipse(x + 56, y + 40, 46, 46);
+  g.rect(x + 30, y + 66, 52, 60, 6);
+  g.fill(COL_TEXT);
+  g.rect(x + 44, y + 35, 4, 4);
+  g.rect(x + 64, y + 35, 4, 4);
+}
+
+
+void openTechnical(String title, String value){
+  pending_switch_point = -1;
+  technical_title = title;
+  technical_text = value;
+  technical_open = true;
+}
+
+
+void drawTechnicalPanel(PGraphics g){
+  drawModalShade(g);
+  drawPanel(g, 70, 94, 500, 172, COL_CYAN);
+  text(g, technical_title, 88, 108, 16, COL_CYAN);
+  drawTextWrapped(g, technical_text, 88, 138, 464, 16, 18, COL_TEXT);
+
+  if (pending_switch_point >= 0){
+    drawButton(g, 286, 226, 128, 22, "VOLTAR", ACTION_CLOSE_MODAL, true);
+    drawButton(g, 424, 226, 128, 22, "CONFIRMAR", ACTION_CONFIRM_SWITCH, true);
+  } else {
+    drawButton(g, 424, 226, 128, 22, "FECHAR", ACTION_CLOSE_MODAL, true);
+  }
+}
+
+
+void drawEndDayPanel(PGraphics g){
+  drawModalShade(g);
+  drawPanel(g, 54, 68, 532, 232, COL_ORANGE);
+  text(g, "ENCERRAR O DIA", 72, 82, 16, COL_ORANGE);
+  text(g, "CONSUMO PREVISTO", 72, 112, 16, COL_CYAN);
+  text(g, "ENERGIA -" + dailyEnergyCost() + "   OXIGÊNIO -" + dailyOxygenCost(),
+    72, 136, 16, COL_TEXT);
+  text(g, "ÁGUA -" + dailyWaterCost() + "   COMIDA -" + dailyFoodCost()
+    + "   MORAL -" + dailyMoraleCost(), 72, 158, 16, COL_TEXT);
+  text(g, "ESTADOS: " + activeStateSummary(), 72, 188, 16, COL_MUTED);
+  text(g, "TAREFA: " + dayTaskSummary(), 72, 210, 16,
+    action_used ? COL_GREEN : COL_YELLOW);
+  drawButton(g, 72, 254, 208, 26, "VOLTAR", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 306, 254, 262, 26, "ENCERRAR DIA", ACTION_END_DAY, true);
 }
 
 

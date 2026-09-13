@@ -46,11 +46,12 @@ e as fontes afetadas.
 
 ## Contradições conhecidas
 
-- `issue://1` foi sincronizado em 12/09: o loop descrito no mapa já é o das
-  decisões D-008/D-009 (sala 2D jogável, tarefa em cadeia de passos, briefing no
-  comando), a lista de decisões aponta o #14, `interface/ROOMS.md` entrou nas
-  fontes de verdade e o mapa ganhou a seção **Fronteira**. #14, #15 e #16 estão
-  ligados como sub-issues (contador 7/15).
+- `issue://1` foi sincronizado em 12/09 e revisado em 13/09: o loop descrito no
+  mapa já é o das decisões D-008/D-009 (sala 2D jogável, tarefa em cadeia de
+  passos, briefing no comando), a lista de decisões aponta o #14,
+  `interface/ROOMS.md` entrou nas fontes de verdade e o mapa ganhou a seção
+  **Fronteira**. As issues #2 a #17 estão ligadas como sub-issues, com o
+  contador em **13/16 concluídas** em 13/09 (abertas: #7, #8 e #10).
 - `issue://13` registra o que deveria ser ignorado no antigo exemplo de
   plataforma. Física, pulo e teclado deixam de ser itens a ignorar no
   Last Horizon; combate e IA de inimigos continuam fora do escopo.
@@ -78,21 +79,24 @@ plataforma dentro de uma nave espacial. A nave **não tem nome**.
   são ilustrativos — a fonte é `mechanics/ACTIONS.md`.
 - `assets/concept_arts/COMMAND_ROOM_CONCEPT_ART.png` é a linguagem visual das
   salas: cena lateral 2D em três conveses ligados por escadas, com terminais.
-- Clicar em um cômodo no mapa macro abre a sala correspondente; o técnico é
-  controlado diretamente dentro dela (setas/WASD, espaço, E, ESC).
-- Cada tarefa do dia é uma **cadeia de poucos passos** (falar, coletar, instalar)
-  e passa por mais de um cômodo. Movimento e passos intermediários são livres;
-  só a interação que **conclui** a tarefa gasta a ação do dia.
-- Todas as estações ficam ativas; o briefing do comando sugere uma tarefa sem
-  travar nada. O jogador escolhe qual perda aceitar.
+- Os cômodos formam uma sequência contínua; o técnico atravessa portas e entra
+  pela extremidade correspondente da sala adjacente.
+- O mapa abre pelo botão `MAPA`, marca onde o técnico está e permite consultar a
+  ficha de cada cômodo. Clicar nunca transporta o personagem.
+- A tarefa do dia é escolhida explicitamente no console de briefing da Sala de
+  comando, que mostra custo, efeito e rota antes da confirmação.
+- Cada tarefa é uma cadeia de etapas concretas (falar, coletar, executar). A
+  faixa de orientação mostra somente a próxima ação e o cômodo; somente a ação
+  final gasta a tarefa do dia.
+- NPCs usam retrato e caixa inferior modal; sistemas usam painel técnico sem
+  retrato; coletas e conclusões usam avisos breves; portas e escadas usam
+  indicações contextuais.
 - Quatro sobreviventes a bordo, além do técnico: **Vera** (piloto, comando),
   **Bento** (intendente, depósito), **Neusa** (enfermeira, dormitório) e
   **Sílvia** (mecânica, energia). Ficam parados em ponto fixo e são interativos;
   não há rotinas autônomas.
-- Botões existem só para menus, pausa e rodapé ("Passar dia" e "Voltar").
-- A voz textual confirmada no #11 é híbrida por canal: sistema seco; Terra e Marte brevemente humanos, sem monólogos.
-- Transmissões externas reagem à primeira ocorrência de incidentes graves; usam o nome do técnico, são modais e não consomem tempo, ação, recursos ou tarefa.
-- Eventos, transmissões externas e desfechos são modais; alertas, resultados de tarefas e estados operacionais permanecem no painel `SISTEMA`.
+- O painel lateral `SISTEMA / TAREFA` e o botão `Passar dia` saem. O técnico
+  encerra o dia no próprio beliche, no Dormitório, após conferir o resumo modal.
 - O balanceamento confirmou comida inicial em 70; energia, oxigênio, água e moral começam em 100, e as peças em 6.
 - A falha de suporte de vida pode entrar em modo de emergência: custa 10 de energia e acrescenta 3 de consumo de oxigênio por dia até a nova tarefa de reparo.
 - O pool tem sete eventos: falha no motor, chuva de meteoros, falta de comida, conflito no dormitório, falha no suporte de vida, falha no sistema de energia e falha nas comunicações. Falha ativa sai do sorteio até ser reparada; as três variantes de energia não se repetem.
@@ -100,14 +104,16 @@ plataforma dentro de uma nave espacial. A nave **não tem nome**.
 ### Loop de jogo confirmado
 
 1. A partida dura dez dias.
-2. O dia abre com um evento a partir do dia 2; o dia 1 não tem evento e o
-   briefing da Vera faz o papel de tutorial.
+2. O primeiro dia começa na Sala de comando; os seguintes, no Dormitório, com
+   um evento a partir do dia 2.
 3. O jogador responde ao evento; a resposta não consome a tarefa do dia.
-4. O jogador abre um cômodo pelo mapa macro.
-5. Controla o técnico pela cadeia da tarefa e conclui uma tarefa por interação.
-6. Pressiona `Passar dia` (rodapé, mouse).
-7. Recursos, moral, vitória/derrota e avanço do dia são processados.
-8. O próximo evento é sorteado.
+4. O técnico atravessa as portas até o console do comando, compara custo, efeito
+   e rota e confirma uma tarefa.
+5. A faixa textual mostra uma próxima ação concreta por vez.
+6. A ação final cobra o custo e usa a tarefa do dia.
+7. O técnico retorna ao próprio beliche no Dormitório, confere consumo, falhas e
+   estado da tarefa e confirma o encerramento.
+8. Recursos, moral, vitória/derrota e avanço do dia são processados.
 
 Os números e as consequências continuam em `mechanics/ACTIONS.md` até uma nova
 decisão explícita. Os pontos de interação e as oito tarefas estão em
@@ -124,11 +130,12 @@ decisão explícita. Os pontos de interação e as oito tarefas estão em
 - Tarefas são **dado**: tabela em `tasks.pde` (arrays paralelos), pontos de
   interação em lista e um despachante de efeitos. Tarefa nova = 1 linha + 1
   estação.
-- Sala jogável: 470×280 px, três conveses e duas escadas, **sem câmera**.
+- Sala jogável: três conveses, duas escadas, sem câmera e com a largura liberada
+  pela remoção do painel lateral.
 - Movimento: personagem 16×24, andar 1,5 px/quadro, pulo de 48 px, gravidade 0,5,
   escada 1,0, alcance de interação 12 px, plataformas atravessáveis por baixo.
-- Controles: setas e WASD (andar e escada), espaço (pular), E (interagir), ESC
-  (pausa). "Passar dia" e "Voltar" só pelo mouse.
+- Controles: setas e WASD, espaço, E e ESC; o botão `MAPA` usa o mouse. Encerrar
+  o dia exige interação com o beliche do técnico.
 - Tipografia: título 32 px, leitura 16 px, entrelinha 18 px, botão reduz até
   10 px só quando a frase não cabe. HUD com ícones de 16×16 e sem rótulo nos
   cartões de recurso.
@@ -162,7 +169,8 @@ sem decisão do usuário.
 - `issue://14` — decisões D-006 a D-023 (histórico).
 - `issue://11` — decisões D-024 a D-029 (roteiro e textos).
 - `issue://12` — decisões D-030 a D-046 (balanceamento e falhas novas).
-- `issue://17` — implementação das falhas novas no sketch (tarefa aberta).
+- `issue://17` — implementação das falhas novas no sketch e os textos do D-047;
+  CLOSED em 13/09 (histórico, não é trabalho pendente).
 - Issues específicas do ticket escolhido, incluindo seus bloqueadores nativos.
 
 ### Domínio e produto
@@ -312,6 +320,19 @@ também foram confirmadas no #12; D-047 foi confirmada na sessão do
 | D-045 | Os itens novos vêm do NPC da sala: Bento entrega o fusível e as peças; Vera, o cabo; Neusa, o cartucho | CONFIRMADA |
 | D-046 | Falha ativa não é resortada: motor danificado, suporte em emergência, energia ativa e comunicações em silêncio | CONFIRMADA |
 | D-047 | Textos das falhas de suporte, energia e comunicações (cartões, alternativas e linhas do painel) aprovados no formato do #11 | CONFIRMADA |
+| D-048 | O técnico atravessa a nave fisicamente por portas entre cômodos; o mapa continua existindo, mas clicar nele não teletransporta o personagem | CONFIRMADA |
+| D-049 | A tarefa do dia é escolhida explicitamente; conversar com um NPC não inicia uma tarefa sem confirmação | CONFIRMADA |
+| D-050 | Interações usam hierarquia por consequência: NPCs em diálogo modal com retrato e caixa inferior; sistemas em painel técnico sem retrato; coleta e conclusão em avisos breves; portas e escadas em indicações contextuais | CONFIRMADA |
+| D-051 | Depois da vinheta, o técnico começa fisicamente na Sala de comando | CONFIRMADA |
+| D-052 | Clicar num cômodo do mapa abre sua ficha; o mapa marca onde o técnico está, mas não define rota nem desloca o personagem | CONFIRMADA |
+| D-053 | Depois do diálogo, a próxima ação permanece visível somente como texto curto, sem marcador ou seta no cenário | CONFIRMADA |
+| D-054 | A tarefa do dia é escolhida no console de briefing da Sala de comando; o painel técnico mostra opções, custo, efeito e rota antes da confirmação | CONFIRMADA |
+| D-055 | O painel lateral `SISTEMA / TAREFA` sai; mapa e salas usam a largura liberada, a orientação vira uma faixa textual compacta e alertas ficam nos recursos ou em avisos temporários | CONFIRMADA |
+| D-056 | Um botão `MAPA` abre o mapa como sobreposição consultável e retorna o jogador à mesma posição ao fechar | CONFIRMADA |
+| D-057 | Depois do primeiro dia iniciado na Sala de comando, cada novo dia começa fisicamente no Dormitório | CONFIRMADA |
+| D-058 | O botão `Passar dia` sai; o técnico encerra o dia interagindo com um beliche próprio no Dormitório | CONFIRMADA |
+| D-059 | Antes de encerrar o dia, o beliche abre um resumo modal com consumo previsto, falhas ativas e estado da tarefa, seguido da confirmação | CONFIRMADA |
+| D-060 | O evento aleatório continua a partir do dia 2, mas sai do painel lateral: abre como modal técnico sobre a sala, bloqueia a exploração e mostra as duas consequências antes da escolha | CONFIRMADA |
 
 
 ## Decisões que exigem consulta
@@ -359,32 +380,30 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 
 - **Grilling concluído:** D-006 a D-023 em `issue://14`, D-024 a D-029 em
   `issue://11` e D-030 a D-046 em `issue://12`; os três tickets estão CLOSED.
-- **Issues trabalhadas nesta sessão:** [#11](issue://11) e [#12](issue://12)
-  resolvidas; [#17](issue://17) implementada no sketch (`wayfinder:task`) com
-  evidência na captura, textos confirmados (D-047) e ticket CLOSED.
-- **Documentos atualizados nesta sessão:** `SESSION_START.md`,
-  `mechanics/ACTIONS.md`, `interface/ROOMS.md`, `interface/FLOW.md`,
-  `interface/HUD.md`, `interface/MENU_INIT.md`, `interface/MENU_GAME_OVER.md`,
-  `interface/MENU_VICTORY.md`, `events/SYSTEM_FAULTS.md`, `README.md`,
-  `history/CONTEXT.md`, `characters/npcs/NPC_1.md` a `NPC_4.md`,
-  `code/SKETCH_ARCHITECTURE.md` e `AGENTS.md` (este fora do git).
-- **Código:** o sketch tem as três falhas novas, as três tarefas novas, as
-  variantes de energia com sorteio sem reposição, o pool de sete eventos e os
-  três estados novos do painel `SISTEMA`. `FOOD_START = 70` aparece no HUD do
-  dia 1. A tipografia voltou ao piso de 16 px: nenhum texto de leitura é
-  desenhado por fora dos helpers, e o painel `SISTEMA` foi reorganizado
-  (tarefa no alto, alertas em faixa fixa, mensagem com três linhas).
-- **Verificação:** `Processing.exe cli --sketch=.\last_horizon --run --capture`
-  percorre 42 estados e imprime 28 checagens `OK` (falhas novas, custos, item da
-  variante, sorteio, painel de distribuição e antena no alcance); `--hit-test` e
-  `--ladder-test` imprimem 5 `OK` cada. Nenhum `FALHOU`.
-- **Commits da sessão:** `1980d28` (falhas novas no sketch), `afcd44b` (D-047 e
-  fechamento do #17), `23ec078` (sincronização do vault), `8ca4507` (tipografia)
-  — todos empurrados para `origin/prototype/sketch-architecture`.
-- **Mapa #1 sincronizado:** #12 e #17 fechados; disponíveis #7, #8 e #10.
-- **Próximo trabalho recomendado:** a cadeia de arte (#10 → #8), com #7 em
-  paralelo; depois a imposição de uma tarefa por dia (lacuna verificada) e os
-  textos restantes do #11.
+- **Issues trabalhadas nesta sessão:** [#18](issue://18) implementada no sketch
+  com o redesign D-048 a D-060 e pronta para fechamento.
+- **Redesign implementado:** salas conectadas por portas, mapa consultável sem
+  teletransporte, escolha explícita no console, uma tarefa por dia, orientação
+  concreta, diálogos de NPC, painéis técnicos, eventos modais e encerramento do
+  dia no beliche do técnico.
+- **Documentos atualizados para o redesign:** `SESSION_START.md`, `README.md`,
+  `history/CONTEXT.md`, `mechanics/ACTIONS.md`, `interface/FLOW.md`,
+  `interface/HUD.md`, `interface/ROOMS.md` e `code/SKETCH_ARCHITECTURE.md`.
+- **Código:** o painel lateral e os botões `Voltar`/`Passar dia` foram removidos.
+  `screen` permanece na sala real enquanto o mapa abre como sobreposição. O
+  console filtra tarefas disponíveis e mostra custo, efeito e rota; NPCs não
+  iniciam tarefas incidentalmente; `action_used` bloqueia outra escolha. O
+  resumo do beliche usa as mesmas funções de custo que `consumeResources()`.
+- **Organização:** dados e funções obsoletos do briefing antigo foram removidos;
+  comentários redundantes saíram e os invariantes restantes estão em inglês.
+  `capture.pde` foi refeito para o novo fluxo.
+- **Verificação:** `--capture` percorreu 23 estados e imprimiu 26 verificações
+  `OK`; `--hit-test` e `--ladder-test` imprimiram 5 `OK` cada. Nenhum `FALHOU`.
+  Foram inspecionadas as capturas de sala conectada, console, diálogo, mapa,
+  resumo do dia e evento modal.
+- **Commits:** nenhum criado nesta etapa.
+- **Fronteira após #18:** #7, #8 e #10 permanecem disponíveis. O caminho de arte
+  #10 → #8 volta a ser o próximo recomendado.
 
 ### Textos das falhas novas (D-047)
 
@@ -400,7 +419,6 @@ Escritos nesta sessão no formato do #11 e já no código. Os cartões ficam em
 
 Corpos dos cartões: `O SUPORTE PERDEU ESTABILIDADE. A NAVE CONSOME MAIS OXIGÊNIO.`, `A REDE PERDEU ESTABILIDADE E OPERA EM CARGA FORÇADA.` e `O TRANSMISSOR PERDEU O CONTATO COM A TERRA.`
 
-O repositório está com **protótipo jogável executável**: as oito tarefas, os sete
-eventos, os três estados novos do painel e a tipografia no piso de 16 px estão no
-sketch e verificados. O que resta é a cadeia de arte (#10 → #8), a imposição de
-uma tarefa por dia e os textos restantes do #11.
+O repositório está com a **funcionalidade do ticket #18 pronta e verificada**:
+navegação, tarefas, feedback, eventos e ciclo diário seguem D-048 a D-060. A
+arte continua procedural e será tratada na cadeia #10 → #8.

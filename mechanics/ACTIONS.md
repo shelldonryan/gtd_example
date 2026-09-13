@@ -12,7 +12,7 @@ descrevem as escolhas, mas não repetem valores.
 | Sobreviventes | 4 a bordo; o técnico não entra na conta |
 | Duração | 10 dias |
 | Estoques iniciais | 100 em energia, oxigênio, água e moral; 70 de comida; 6 peças |
-| Tarefas por dia | 1 em cadeia, além de "Passar dia" |
+| Tarefas por dia | 1 em cadeia, escolhida explicitamente no console do comando |
 | Eventos | 1 por dia, a partir do dia 2; pool uniforme sem repetição imediata; falha ativa não é resortada |
 
 Decisões fixadas neste arquivo:
@@ -20,13 +20,12 @@ Decisões fixadas neste arquivo:
 - **Energia é um estoque único**, consumido para manter o motor e o suporte de
   vida. Não existe combustível separado: a barra de energia é esse estoque.
 - **Modo economia e racionamento são estados**, ligados e desligados durante a
-  visita ao cômodo. Não gastam a ação do dia; a movimentação e os passos
-  intermediários das tarefas também não. Só a **conclusão** da tarefa em cadeia
-  gasta a única ação do dia.
-- **"Passar dia" fica no rodapé**, visível em qualquer tela. A sala de comando
-  é a tela de leitura da viagem.
+  visita ao cômodo. Não gastam a tarefa do dia; movimento e etapas de preparação
+  também não. Somente a **ação final** da cadeia usa a tarefa.
+- **Encerrar o dia** exige interagir com o beliche do técnico no Dormitório,
+  conferir o resumo do consumo e confirmar. Não existe botão `Passar dia`.
 
-## Consumo ao passar o dia
+## Consumo ao encerrar o dia
 
 | Recurso | Consumo | Observação |
 | --- | --- | --- |
@@ -36,24 +35,27 @@ Decisões fixadas neste arquivo:
 | Comida | 7 | 3 com racionamento |
 | Moral | 2 | mais 1 por recurso em vermelho (de 1 a 29) |
 
-O dia abre com o evento: o jogador responde e depois entra em um cômodo,
-movimenta o técnico pela cadeia da tarefa e conclui a interação final. Andar,
-pular, usar escada e cumprir os passos intermediários não gastam a ação; a
-conclusão gasta a única ação do dia. Ao apertar "Passar dia", os recursos são
-consumidos, a moral é atualizada, o dia avança e o jogo verifica vitória e
-derrota.
+O primeiro dia começa na Sala de comando; os seguintes começam no Dormitório
+com o evento correspondente. Depois de responder ao evento, o técnico vai ao
+console do comando, escolhe uma tarefa e atravessa as salas pelas portas.
+Movimento e etapas de preparação não gastam a tarefa; somente a ação final
+gasta. Confirmar o resumo no beliche consome recursos, atualiza a moral, avança
+o dia e verifica vitória ou derrota.
 
 A resposta do evento **não** gasta a ação do dia.
 
 ## Tarefas por dia
 
-Uma tarefa por dia, em **cadeia**: cada uma passa por um sobrevivente e por pelo
-menos uma troca de cômodo. O item que o técnico carrega não se perde quando o dia
-vira — continua na mão até ser entregue ou trocado por outro. Tarefa não
-concluída não custa nada. O mapa dos pontos de interação de cada cômodo está em
-`interface/ROOMS.md`.
+Uma tarefa por dia, em **cadeia**: o jogador escolhe explicitamente uma das
+tarefas disponíveis no console de briefing da Sala de comando. Antes de
+confirmar, o painel mostra custo, efeito e rota. Cada tarefa passa por um
+sobrevivente e por pelo menos uma troca de cômodo.
 
-| Tarefa | Passos livres | Conclusão | Custo | Efeito |
+O item que o técnico carrega não se perde quando o dia vira: continua na mão até
+ser entregue ou trocado. Tarefa não concluída não custa nada. O mapa dos pontos
+de interação de cada cômodo está em `interface/ROOMS.md`.
+
+| Tarefa | Etapas de preparação | Ação final | Custo | Efeito |
 | --- | --- | --- | --- | --- |
 | Reparar motor | Sílvia dá o diagnóstico (energia) → Bento entrega 2 peças (depósito) | bancada do motor (energia) | 2 peças | motor volta a operante |
 | Aumentar potência | Vera recalcula a rota (comando) | reator (energia) | 20 de energia | viagem encurta 1 dia; no máximo 2 vezes |
@@ -66,7 +68,7 @@ concluída não custa nada. O mapa dos pontos de interação de cada cômodo est
 
 Variantes de `Reparar sistema de energia` — Sílvia sorteia uma, sem repetição:
 
-| Variante | Item | Passo livre | Conclusão | Custo |
+| Variante | Item | Etapa de preparação | Ação final | Custo |
 | --- | --- | --- | --- | --- |
 | Trocar fusível | Fusível reserva | Bento entrega (depósito) | painel de distribuição (energia) | 1 peça |
 | Reforçar circuito | Cabo de derivação | Vera entrega (comando) | reator (energia) | 10 energia |
@@ -91,8 +93,9 @@ que ultrapassa o limite é descartado.
 | Reparar sistema de energia | falha no sistema de energia ativa |
 | Reparar comunicações | comunicação em silêncio |
 
-O jogador escolhe qual cadeia cumprir no dia. O briefing do comando sugere uma
-tarefa, mas não trava as outras estações.
+O briefing não inicia uma tarefa automaticamente. O jogador compara as opções no
+console e confirma uma delas; conversar com um sobrevivente sem tarefa ativa não
+cria uma cadeia por acaso.
 
 ### Estados ligados no cômodo
 

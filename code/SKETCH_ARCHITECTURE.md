@@ -20,31 +20,33 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
 | Aba | O que tem |
 | --- | --- |
 | `last_horizon.pde` | canvas, telas, ações, regras, paleta, estado da partida, viewport, input |
-| `ui.pde` | painéis, texto, texto com quebra de linha, botões, hit-test e AABB |
-| `hud.pde` | cartões do topo, painel de alertas, rodapé |
-| `screens.pde` | máquina de estados, menu inicial, vinheta, pausa, vitória, derrota |
-| `ship.pde` | nave em vista lateral com os 4 cômodos clicáveis e o interior de cada sala |
-| `game.pde` | ciclo do dia, consumo, ações, eventos, fim de jogo |
-| `tasks.pde` | tabela das tarefas, gates, custos, variantes, efeitos e o despachante |
-| `capture.pde` | prova: um PNG por estado e o teste de clique fora da IDE |
+| `ui.pde` | painéis, diálogos, retratos procedurais, texto, botões, hit-test e AABB |
+| `hud.pde` | cartões do topo, faixa da próxima ação e rodapé |
+| `screens.pde` | máquina de estados, camadas modais, menus, vinheta, pausa e desfechos |
+| `ship.pde` | quatro salas conectadas, portas, mapa consultável, plataformas, escadas, NPCs e estações |
+| `game.pde` | ciclo do dia, previsão e consumo, eventos e condições de término |
+| `tasks.pde` | tabela, console de briefing, progressão, custos, variantes e efeitos |
+| `capture.pde` | captura visual e verificações de fluxo, clique e escada |
 
 ## Camadas da revisão
 
-- **Mapa macro:** clique seleciona um cômodo e abre a cena lateral correspondente.
-- **Sala jogável:** teclado controla andar, pulo e uso de escadas; colisões
-  mantêm o técnico nas plataformas. Todos os cômodos usam o mesmo esqueleto de
-  **três conveses e duas escadas**, dentro dos 470×280 px disponíveis, e a sala
-  inteira cabe na tela — **não existe câmera**.
-- **Interação:** estações e sobreviventes parados respondem quando o técnico
-  alcança o ponto correto — 12 px de alcance, na mesma altura, com o ponto
-  destacado. Só a interação que **conclui** a tarefa gasta a ação do dia.
-- **Tarefas como dado:** a tabela de `tasks.pde` declara rótulo, gate, cômodo da
-  conclusão, custo, passo intermediário e efeito. Somar tarefa é somar uma linha
-  e uma estação; só efeito inédito pede código novo. A tarefa de energia é o
-  único caso em que o sorteio escreve na própria linha: a variante sorteada
-  define item, custo, ponto de entrega e estação da conclusão.
-- **Ciclo:** movimento é livre, a tarefa concluída usa a ação do dia e
-  "Passar dia" aplica consumo, eventos e condições de término.
+- **Mapa macro:** sobreposição consultável aberta pelo botão `MAPA`; mostra a
+  posição real e fichas dos cômodos, sem alterar `screen`, posição ou tarefa.
+- **Salas conectadas:** portas laterais trocam para a sala adjacente e posicionam
+  o técnico na entrada correspondente. Os quatro cômodos mantêm três conveses,
+  duas escadas e ausência de câmera.
+- **Interação:** NPCs abrem diálogo modal com retrato e caixa inferior; sistemas
+  abrem painel técnico sem retrato; coletas e ações finais emitem avisos breves.
+- **Tarefas como dado:** o console do comando filtra e apresenta as tarefas
+  disponíveis com custo, efeito e rota. A confirmação define `active_task`; NPC
+  nenhum inicia tarefa incidentalmente. A tabela continua declarando gate,
+  etapas, custo, ação final e efeito.
+- **Orientação:** uma faixa compacta deriva da tarefa ativa somente a próxima
+  ação concreta e seu cômodo. Os termos `passos livres` e `ponto final` não
+  pertencem à interface.
+- **Ciclo:** o primeiro dia começa no comando; os demais, no Dormitório. O
+  beliche do técnico abre o resumo e a confirmação que chamam o processamento
+  diário. Não existe botão `Passar dia`.
 
 Números do movimento (base 640×360): personagem 16×24, andar 1,5 px/quadro, pulo
 de 48 px, gravidade 0,5, escada 1,0, plataformas atravessáveis por baixo.
@@ -81,18 +83,17 @@ balanceamento.
   **fator inteiro** na janela, com letterbox centralizado.
 - `view_scale = max(1, int(min(width / 640, height / 360)))`; a conversão que o exemplo do
   professor não tem: `base = (mouseX - offset) / view_scale`.
-- No mapa macro, o mouse seleciona um cômodo. Dentro da sala, o input de
-  movimento e pulo passa a controlar o técnico; o mesmo viewport converte a
-  posição do personagem e dos pontos de interação para a base.
-- **Camadas de input**: menu, mapa, sala jogável, evento e pausa. O evento e
-  a pausa bloqueiam o movimento e as interações da sala.
+- O mouse aciona apenas controles da interface, como `MAPA` e opções modais. O
+  mapa preserva a sala e a posição; a movimentação entre cômodos usa portas e
+  interação por `E`.
+- **Camadas de input**: menu, sala jogável, mapa, diálogo, painel técnico, evento
+  e pausa. Todas as camadas modais bloqueiam movimento e interação da sala.
 - **ESC** é consumido pelo sketch (`key = 0`) antes de alternar a pausa; não
   encerra mais a janela.
-- Enquanto há evento pendente, a exploração e os objetivos ficam bloqueados,
-  o título vira `EVENTO PENDENTE` e a cena mostra `RESPONDA O EVENTO PARA CONTINUAR`.
-- **Cursor**: `HAND` sobre controles e interações ativas, `WAIT` sobre controles
-  desabilitados e `ARROW` no restante. São cursores padrão do Processing;
-  nenhuma imagem foi adicionada.
+- Enquanto há evento pendente, o modal técnico mostra as duas consequências e
+  bloqueia exploração, mapa e objetivos.
+- **Cursor**: `HAND` sobre controles ativos, `WAIT` sobre controles desabilitados
+  e `ARROW` no restante.
 
 ## Legibilidade
 
@@ -142,12 +143,11 @@ raiz do repositório:
 "C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --ladder-test
 ```
 
-`--capture` percorre 42 estados, salva `output/NN_estado.png` em 640×360 e
-`output/NN_estado_window.png` na janela, e encerra sozinho. `--hit-test` abre
-uma janela de 1400×900 e prova a conversão de clique para a base 640×360.
-`--ladder-test` verifica saída lateral, travessia, encaixe, bloqueio de
-reentrada enquanto a direção vertical está pressionada e rearme posterior;
-também salva `output/ladder_middle_exit.png`.
+`--capture` percorre 23 estados, salva `output/NN_estado.png` em 640×360 e
+`output/NN_estado_window.png` na janela, verifica navegação, mapa, briefing,
+diálogo, tarefa diária, beliche, previsão de consumo, evento e regras de falha,
+e encerra sozinho. `--hit-test` abre 1400×900 e prova as quatro fichas do mapa e
+o letterbox. `--ladder-test` mantém os cinco casos de saída e reentrada.
 
 Limitações observadas:
 
@@ -164,18 +164,14 @@ Limitações observadas:
 
 ## Estado da revisão
 
-- **Código atual:** menus, mapa, salas jogáveis, movimento, escadas, colisão,
-  interação, tarefas declarativas, HUD atualizado e captura automática.
-- As tarefas novas (suporte de vida, sistema de energia e comunicações) e os
-  eventos de falha correspondentes entraram no sketch no #17: oito tarefas, sete
-  eventos e os três estados novos no painel `SISTEMA`. As variantes de energia
-  são sorteadas na conversa com a Sílvia, sem repetição e só entre as pagáveis.
-- **Decisões aplicadas nos documentos em 12/09:** roster (4 sobreviventes + técnico),
-  quinta causa de derrota, tarefas em cadeia, layout de três conveses, números de
-  movimento, nomes dos sobreviventes, vocabulário dos cômodos, ícones do HUD,
-  tipografia e controles. Ver `interface/ROOMS.md` e `SESSION_START.md`.
-- **Textos:** o contrato final de vinheta, transmissões, modais, alertas e
-  derrotas está registrado no `issue://11` e nas fontes de interface. As linhas
-  do painel `SISTEMA` já seguem o contrato de `interface/HUD.md`, incluindo as
-  três falhas novas (D-047); vinheta, transmissões, modais e as telas de
-  vitória/derrota ainda usam os textos antigos.
+- **Código atual:** D-048 a D-060 implementadas. As quatro salas são conectadas
+  por portas; o mapa é uma sobreposição consultável; o console do comando escolhe
+  a tarefa; NPCs, sistemas e eventos usam suas camadas próprias; o beliche do
+  técnico encerra o dia após o resumo previsto.
+- `action_used` agora bloqueia outra escolha no console depois da ação final.
+- O HUD não possui painel lateral: usa cartões de recurso, faixa de próxima ação
+  e botão `MAPA`.
+- As oito tarefas e os sete eventos continuam com as regras de #12 e #17.
+- **Textos:** os alertas operacionais migraram para avisos breves e para os
+  cartões. Vinheta, transmissões e telas de vitória/derrota ainda têm as
+  pendências de conteúdo registradas no #11.
