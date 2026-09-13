@@ -3,7 +3,8 @@
 > Documento obrigatório de abertura e encerramento de toda sessão. Leia antes de
 > analisar, editar ou implementar qualquer coisa.
 
-Atualizado em: 2026-09-13 (após as resoluções dos tickets #11 e #12 e a abertura do #17)
+Atualizado em: 2026-09-13 (após as resoluções dos tickets #11 e #12 e a
+implementação do #17)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Como usar este arquivo
@@ -66,7 +67,7 @@ e as fontes afetadas.
   `events/SYSTEM_FAULTS.md` não dizem mais que a resposta do evento gasta a ação
   do dia.
 - `issue://11` foi resolvida nesta sessão: a voz, a vinheta, as transmissões, os modais, os alertas e as cinco mensagens de derrota agora têm contrato registrado no ticket e nas fontes de interface.
-- `issue://12` foi resolvida nesta sessão: comida inicial 70; pool uniforme de sete eventos, sem repetição imediata e sem resortear falha ativa; falhas de suporte, energia e comunicações com custos, tarefas e variantes não repetíveis. O código ainda não implementa as falhas novas — é o `issue://17`.
+- `issue://12` foi resolvida nesta sessão: comida inicial 70; pool uniforme de sete eventos, sem repetição imediata e sem resortear falha ativa; falhas de suporte, energia e comunicações com custos, tarefas e variantes não repetíveis. O sketch implementa esse contrato desde o `issue://17`.
 
 ## Direção atual do produto
 
@@ -234,7 +235,7 @@ Sincronizado com o grafo nativo de dependências em 2026-09-13, após fechar #4,
 | #12 — Balanceamento | CLOSED | — | resolução registrada nesta sessão |
 | #15 — Sala jogável | CLOSED | — | sala jogável validada |
 | #16 — HUD: ícones, alerta e rótulos | CLOSED | — | HUD validado |
-| #17 — Implementar as falhas novas no sketch | disponível | — | executa o contrato do #12 |
+| #17 — Implementar as falhas novas no sketch | disponível | — | implementado e verificado; falta confirmar os textos novos |
 
 Issues de base já CLOSED: #2, #3, #4, #5, #6, #9, #11, #13, #14, #15 e
 #16.
@@ -247,8 +248,8 @@ arquivo foi alterado: a aceitação e a evidência devem estar no próprio ticke
 
 ### Cadeias de trabalho relevantes
 
-- `#12` (fechado) → `#17`: o balanceamento libera a implementação das falhas
-  novas no sketch.
+- `#12` (fechado) → `#17`: o balanceamento liberou a implementação das falhas
+  novas, já no sketch e verificada pela captura.
 - `#15` e `#16` estão fechados; sala jogável e HUD já estão no protótipo.
 - `#10` → definição segura do pipeline de arte → produção dos assets listados em
   `#8`.
@@ -315,7 +316,14 @@ também foram confirmadas no #12.
 ## Decisões que exigem consulta
 
 - se a tela de vitória permite continuar jogando depois da chegada;
-- textos dos cartões, das alternativas e das linhas de alerta das falhas de suporte, energia e comunicações, no formato do #11;
+- textos dos cartões, das alternativas e das linhas de alerta das falhas de
+  suporte, energia e comunicações: **escritos nesta sessão, já no código como
+  PROVISÓRIA** e listados no quadro do fim deste arquivo — falta confirmar ou
+  trocar;
+- o silêncio das comunicações suspende transmissões que o sketch ainda não tem:
+  o modal de transmissão da Terra (D-026) continua fora do código;
+- a aplicação dos textos do #11 (derrotas, alertas, vitória) no sketch segue
+  sem ticket — o contrato está fechado, o código ainda usa os textos antigos;
 - qualquer nome, retrato ou história de personagem além do registrado em
   `characters/npcs/`.
 
@@ -349,27 +357,40 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 
 - **Grilling concluído:** D-006 a D-023 em `issue://14`, D-024 a D-029 em
   `issue://11` e D-030 a D-046 em `issue://12`; os três tickets estão CLOSED.
-- **Issues resolvidas nesta sessão:** [#11](issue://11) (roteiro e textos) e
-  [#12](issue://12) (balanceamento), ambas com comentário de resolução.
-- **Issue aberta nesta sessão:** [#17](issue://17) — implementar no sketch as
-  falhas de suporte, energia e comunicações (`wayfinder:task`).
+- **Issues trabalhadas nesta sessão:** [#11](issue://11) e [#12](issue://12)
+  resolvidas; [#17](issue://17) implementada no sketch (`wayfinder:task`) com
+  evidência na captura. O ticket segue OPEN até a confirmação dos textos novos.
 - **Documentos atualizados nesta sessão:** `SESSION_START.md`,
   `mechanics/ACTIONS.md`, `interface/ROOMS.md`, `interface/FLOW.md`,
   `interface/HUD.md`, `interface/MENU_INIT.md`, `interface/MENU_GAME_OVER.md`,
-  `interface/MENU_VICTORY.md`, `events/SYSTEM_FAULTS.md` e
-  `code/SKETCH_ARCHITECTURE.md`.
-- **Código:** `FOOD_START = 70` foi aplicado em `last_horizon.pde` e
-  `game.pde`. As falhas novas, as tarefas e as regras de sorteio ainda não
-  estão no sketch — é o trabalho do #17.
+  `interface/MENU_VICTORY.md`, `events/SYSTEM_FAULTS.md`,
+  `code/SKETCH_ARCHITECTURE.md` e `AGENTS.md`.
+- **Código:** o sketch tem as três falhas novas, as três tarefas novas, as
+  variantes de energia com sorteio sem reposição, o pool de sete eventos e os
+  três estados novos do painel `SISTEMA`. `FOOD_START = 70` aparece no HUD do
+  dia 1.
 - **Verificação:** `Processing.exe cli --sketch=.\last_horizon --run --capture`
-  passou com as verificações `OK`; a simulação de balanceamento rodou 200.000
-  partidas por estilo e a rota da quinta derrota foi confirmada no dia 13.
+  percorre 42 estados e imprime 28 checagens `OK` (falhas novas, custos, item da
+  variante, sorteio, painel de distribuição e antena no alcance);
+  `--hit-test` e `--ladder-test` continuam `OK`.
 - **Mapa #1 sincronizado:** #12 fechado, #17 aberto; disponíveis #7, #8, #10 e
   #17.
-- **Commit:** `cf4ec3c` (`feat: comida inicial 70 e contrato das falhas novas`),
-  na branch `prototype/sketch-architecture`.
-- **Próximo trabalho recomendado:** #17; #7, #8 e #10 continuam independentes.
+- **Próximo trabalho recomendado:** confirmar os textos das falhas novas e
+  fechar o #17; depois a cadeia de arte (#10 → #8), com #7 em paralelo.
 
-O repositório está com **protótipo jogável executável** e o balanceamento
-fechado em números; a implementação das falhas novas no sketch é o próximo
-passo.
+### Textos novos das falhas (PROVISÓRIA)
+
+Escritos nesta sessão no formato do #11 e já no código; aguardam confirmação ou
+troca. Os cartões ficam em `game.pde` e as linhas do painel em `hud.pde`.
+
+| Falha | Cartão | Alternativa A | Alternativa B | Painel |
+|---|---|---|---|---|
+| Suporte de vida | `FALHA NO SUPORTE DE VIDA` | `REPARAR (2 PEÇAS)` | `EMERGÊNCIA (ENERGIA -10)` | `REPARAR SUPORTE` |
+| Sistema de energia | `FALHA NO SISTEMA DE ENERGIA` | `FORÇAR A REDE (ENERGIA -10)` | `DESLIGAR SETORES (MORAL -10)` | `REPARAR ENERGIA` |
+| Comunicações | `FALHA NAS COMUNICAÇÕES` | `REPARAR (1 PEÇA)` | `SILÊNCIO (MORAL -1/DIA)` | `REPARAR COMUNICAÇÕES` |
+
+Corpos dos cartões: `O SUPORTE PERDEU ESTABILIDADE. A NAVE CONSOME MAIS OXIGÊNIO.`, `A REDE PERDEU ESTABILIDADE E OPERA EM CARGA FORÇADA.` e `O TRANSMISSOR PERDEU O CONTATO COM A TERRA.`
+
+O repositório está com **protótipo jogável executável**: a implementação das
+falhas novas está pronta e verificada, e o que resta no #17 é a confirmação
+desses textos.

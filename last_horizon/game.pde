@@ -6,34 +6,49 @@ final int EVENT_ENGINE = 0;
 final int EVENT_METEOR = 1;
 final int EVENT_FOOD = 2;
 final int EVENT_CONFLICT = 3;
-final int EVENT_COUNT = 4;
+final int EVENT_LIFE_SUPPORT = 4;
+final int EVENT_POWER = 5;
+final int EVENT_COMMS = 6;
+final int EVENT_COUNT = 7;
 
 String[] event_title = {
   "FALHA NO MOTOR",
   "CHUVA DE METEOROS",
   "ESTOQUE CRÍTICO",
-  "CONFLITO A BORDO"
+  "CONFLITO A BORDO",
+  "FALHA NO SUPORTE DE VIDA",
+  "FALHA NO SISTEMA DE ENERGIA",
+  "FALHA NAS COMUNICAÇÕES"
 };
 
 String[] event_body = {
   "O MOTOR PERDEU RENDIMENTO. A VIAGEM ESTÁ EM RISCO.",
   "IMPACTO IMINENTE: O CASCO PODE CEDER.",
   "A COMIDA ESTÁ ACABANDO E OS SOBREVIVENTES PERCEBERAM.",
-  "UMA DISCUSSÃO DIVIDE OS SOBREVIVENTES."
+  "UMA DISCUSSÃO DIVIDE OS SOBREVIVENTES.",
+  "O SUPORTE PERDEU ESTABILIDADE. A NAVE CONSOME MAIS OXIGÊNIO.",
+  "A REDE PERDEU ESTABILIDADE E OPERA EM CARGA FORÇADA.",
+  "O TRANSMISSOR PERDEU O CONTATO COM A TERRA."
 };
 
 String[] event_a_label = {
   "REPARAR (2 PEÇAS)",
   "ATIVAR ESCUDOS (15)",
   "MANTER AS PORÇÕES",
-  "IGNORAR"
+  "IGNORAR",
+  "REPARAR (2 PEÇAS)",
+  "FORÇAR A REDE (ENERGIA -10)",
+  "REPARAR (1 PEÇA)"
 };
 
 String[] event_b_label = {
   "SEGUIR DANIFICADO",
   "ABSORVER O IMPACTO",
   "RACIONAR (MORAL -8)",
-  "INTERVIR (ENERGIA -10)"
+  "INTERVIR (ENERGIA -10)",
+  "EMERGÊNCIA (ENERGIA -10)",
+  "DESLIGAR SETORES (MORAL -10)",
+  "SILÊNCIO (MORAL -1/DIA)"
 };
 
 int event_index = EVENT_NONE;
@@ -69,7 +84,16 @@ void resetRun(){
   leak_on = false;
   saving_on = false;
   rationing_on = false;
+  life_support_emergency = false;
+  power_fault_on = false;
+  comms_silent = false;
+  power_variant = POWER_VARIANT_NONE;
   action_used = false;
+
+  for (int i = 0; i < POWER_VARIANT_COUNT; i++){
+    power_variant_used[i] = false;
+  }
+
   boost_count = 0;
   game_over_reason = REASON_NONE;
   event_index = EVENT_NONE;
@@ -87,18 +111,61 @@ void openDay(){
 
   if (day > 1){
     event_index = pickEvent();
-    event_open = true;
+    event_open = event_index != EVENT_NONE;
   }
 }
 
 
-int pickEvent(){
-  int next = int(random(EVENT_COUNT));
-
-  if (next == last_event){
-    next = (next + 1) % EVENT_COUNT;
+boolean eventAllowed(int event){
+  if (event == EVENT_ENGINE){
+    return engine_state != ENGINE_DAMAGED;
   }
 
+  if (event == EVENT_LIFE_SUPPORT){
+    return !life_support_emergency;
+  }
+
+  if (event == EVENT_POWER){
+    boolean variantsExhausted = powerVariantsUsed() == POWER_VARIANT_COUNT;
+    return !power_fault_on && !variantsExhausted;
+  }
+
+  if (event == EVENT_COMMS){
+    return !comms_silent;
+  }
+
+  return true;
+}
+
+
+/* Sorteio uniforme entre os eventos permitidos, sem repetir o anterior.
+   A falha ativa fica fora do sorteio; o sorteio so volta a valer quando ela
+   for resolvida (mechanics/ACTIONS.md). */
+int pickEvent(){
+  int[] candidates = new int[EVENT_COUNT];
+  int total = 0;
+
+  for (int i = 0; i < EVENT_COUNT; i++){
+    if (eventAllowed(i) && i != last_event){
+      candidates[total] = i;
+      total++;
+    }
+  }
+
+  if (total == 0){
+    for (int i = 0; i < EVENT_COUNT; i++){
+      if (eventAllowed(i)){
+        candidates[total] = i;
+        total++;
+      }
+    }
+  }
+
+  if (total == 0){
+    return EVENT_NONE;
+  }
+
+  int next = candidates[int(random(total))];
   last_event = next;
   return next;
 }
@@ -149,12 +216,21 @@ void consumeResources(){
   boolean low_energy = energy < RESOURCE_LOW_ENERGY;
 
   energy -= saving_on ? ENERGY_PER_DAY_SAVING : ENERGY_PER_DAY;
+
+  if (power_fault_on){
+    energy -= ENERGY_PER_DAY_POWER_FAULT;
+  }
+
   oxygen -= low_energy ? OXYGEN_PER_DAY_LOW_ENERGY : OXYGEN_PER_DAY;
   water -= rationing_on ? WATER_PER_DAY_RATIONING : WATER_PER_DAY;
   food -= rationing_on ? FOOD_PER_DAY_RATIONING : FOOD_PER_DAY;
 
   if (leak_on){
     oxygen -= LEAK_PER_DAY;
+  }
+
+  if (life_support_emergency){
+    oxygen -= OXYGEN_PER_DAY_EMERGENCY;
   }
 
   clampResources();
@@ -167,6 +243,10 @@ void consumeResources(){
 
   if (rationing_on){
     morale -= MORALE_PER_DAY_RATIONING;
+  }
+
+  if (comms_silent){
+    morale -= MORALE_PER_DAY_NO_COMMS;
   }
 
   clampResources();
@@ -324,6 +404,18 @@ boolean eventChoiceOn(int choice){
     return true;
   }
 
+  if (event_index == EVENT_LIFE_SUPPORT){
+    return (choice == 0) ? parts >= EVENT_LIFE_PARTS : true;
+  }
+
+  if (event_index == EVENT_POWER){
+    return (choice == 0) ? energy >= EVENT_POWER_ENERGY : true;
+  }
+
+  if (event_index == EVENT_COMMS){
+    return (choice == 0) ? parts >= EVENT_COMMS_PARTS : true;
+  }
+
   return false;
 }
 
@@ -361,6 +453,35 @@ void applyEventChoice(int choice){
       morale += EVENT_CONFLICT_MORALE_GAIN;
       energy -= EVENT_CONFLICT_ENERGY;
       system_message = "GRUPO UNIDO DE NOVO.";
+    }
+  } else if (event_index == EVENT_LIFE_SUPPORT){
+    if (choice == 0){
+      parts -= EVENT_LIFE_PARTS;
+      life_support_emergency = false;
+      system_message = "SUPORTE DE VIDA REPARADO.";
+    } else {
+      energy -= EVENT_LIFE_ENERGY;
+      life_support_emergency = true;
+      system_message = "SUPORTE EM EMERGÊNCIA: +3 DE OXIGÊNIO POR DIA.";
+    }
+  } else if (event_index == EVENT_POWER){
+    if (choice == 0){
+      energy -= EVENT_POWER_ENERGY;
+      system_message = "REDE FORÇADA: A FALHA CONTINUA ATIVA.";
+    } else {
+      morale -= EVENT_POWER_MORALE;
+      system_message = "SETORES DESLIGADOS: A FALHA CONTINUA ATIVA.";
+    }
+
+    power_fault_on = true;
+  } else if (event_index == EVENT_COMMS){
+    if (choice == 0){
+      parts -= EVENT_COMMS_PARTS;
+      comms_silent = false;
+      system_message = "COMUNICAÇÕES RESTAURADAS.";
+    } else {
+      comms_silent = true;
+      system_message = "SILÊNCIO: -1 DE MORAL POR DIA.";
     }
   }
 

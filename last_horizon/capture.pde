@@ -21,8 +21,13 @@ String[] capture_label = {
   "task_completed", "ship_after_task", "room_command", "ship_after_command",
   "room_dormitory", "ship_after_dormitory", "event_card", "ship_day2",
   "pause", "ship_day2_resumed", "game_over", "menu_init_again",
-  "ship_last_day", "victory"
+  "ship_last_day", "victory",
+  "fail_life_event", "fail_life_alert", "fail_life_panel", "fail_life_done",
+  "fail_power_event", "fail_power_fault", "fail_power_chain", "fail_power_done",
+  "fail_comms_event", "fail_comms_silent", "fail_comms_antenna", "fail_comms_done"
 };
+
+final int FAILURE_CAPTURE_START = 30;
 
 
 void readArgs(){
@@ -99,8 +104,15 @@ void runCaptureStep(int step){
     return;
   }
 
-  if (step <= 3){
+  if (step <= 2){
     clickAction(ACTION_VIGNETTE_NEXT);
+    return;
+  }
+
+  if (step == 3){
+    clickAction(ACTION_VIGNETTE_NEXT);
+    println("verify: comida inicial 70 no HUD do dia 1 -> "
+      + (day == 1 && food == FOOD_START && FOOD_START == 70 ? "OK" : "FALHOU"));
     return;
   }
 
@@ -121,6 +133,11 @@ void runCaptureStep(int step){
 
   if (step <= 20){
     runRoomCoverageCaptureStep(step);
+    return;
+  }
+
+  if (step >= FAILURE_CAPTURE_START){
+    runFailureCaptureStep(step);
     return;
   }
 
@@ -275,7 +292,271 @@ void runEndgameCaptureStep(int step){
 
   if (step == 28){
     clickAction(ACTION_PASS_DAY);
+    return;
   }
+
+  if (step == 29){
+    setupFailureRun(EVENT_LIFE_SUPPORT);
+  }
+}
+
+
+void setupFailureRun(int event){
+  resetRun();
+  day = 2;
+  screen = SCREEN_SHIP;
+  event_index = event;
+  event_open = true;
+}
+
+
+void runFailureCaptureStep(int step){
+  if (step == 30){
+    float before_energy = energy;
+    clickAction(ACTION_EVENT_B);
+    println("verify: emergência do suporte custa 10 de energia -> "
+      + (energy == before_energy - EVENT_LIFE_ENERGY && life_support_emergency ? "OK" : "FALHOU"));
+    return;
+  }
+
+  if (step == 31){
+    float before_oxygen = oxygen;
+    consumeResources();
+    println("verify: emergência gasta 3 de oxigênio por dia -> "
+      + (before_oxygen - oxygen == OXYGEN_PER_DAY + OXYGEN_PER_DAY_EMERGENCY ? "OK" : "FALHOU"));
+
+    captureReach(SCREEN_ENERGY, POINT_SILVIA);
+    boolean was_used = action_used;
+    interactPoint(POINT_SILVIA);
+    println("verify: passo do suporte não gasta a ação -> "
+      + (!was_used && active_task == TASK_LIFE_SUPPORT ? "OK" : "FALHOU"));
+
+    captureReach(SCREEN_DEPOT, POINT_BENTO);
+    interactPoint(POINT_BENTO);
+    println("verify: 2 peças do suporte na mão -> "
+      + (held_item == ITEM_ENGINE_PARTS && !action_used ? "OK" : "FALHOU"));
+
+    captureReach(SCREEN_ENERGY, POINT_LIFE_SUPPORT);
+    return;
+  }
+
+  if (step == 32){
+    int before_parts = parts;
+    boolean was_used = action_used;
+    interactPoint(POINT_LIFE_SUPPORT);
+    println("verify: reparo do suporte cobra 2 peças na conclusão -> "
+      + (!was_used && action_used && parts == before_parts - 2
+        && !life_support_emergency && active_task == TASK_NONE ? "OK" : "FALHOU"));
+    return;
+  }
+
+  if (step == 33){
+    setupFailureRun(EVENT_POWER);
+    return;
+  }
+
+  if (step == 34){
+    float before_morale = morale;
+    clickAction(ACTION_EVENT_B);
+    println("verify: desligar setores deixa a falha ativa -> "
+      + (power_fault_on && morale == before_morale - EVENT_POWER_MORALE ? "OK" : "FALHOU"));
+    return;
+  }
+
+  if (step == 35){
+    float before_energy = energy;
+    consumeResources();
+    println("verify: falha de energia drena 3 por dia -> "
+      + (before_energy - energy == ENERGY_PER_DAY + ENERGY_PER_DAY_POWER_FAULT ? "OK" : "FALHOU"));
+
+    captureReach(SCREEN_ENERGY, POINT_SILVIA);
+    boolean was_used = action_used;
+    interactPoint(POINT_SILVIA);
+    println("verify: Sílvia sorteia variante ainda não usada e pagável -> "
+      + (!was_used && active_task == TASK_POWER && power_variant >= 0
+        && power_variant_used[power_variant] ? "OK" : "FALHOU"));
+
+    captureReach(task_step_room[TASK_POWER][1], task_step_point[TASK_POWER][1]);
+    interactPoint(task_step_point[TASK_POWER][1]);
+    println("verify: item da variante na mão -> "
+      + (held_item == variant_item[power_variant] && !action_used ? "OK" : "FALHOU")
+      + " (" + variant_title[power_variant] + " -> "
+      + point_label[task_completion_point[TASK_POWER]] + ")");
+
+    captureReach(SCREEN_ENERGY, task_completion_point[TASK_POWER]);
+    return;
+  }
+
+  if (step == 36){
+    int variant = power_variant;
+    float before_total = parts + energy + water;
+    boolean was_used = action_used;
+    interactPoint(task_completion_point[TASK_POWER]);
+    float spent = before_total - (parts + energy + water);
+    println("verify: conclusão da energia cobra a variante e usa a ação -> "
+      + (!was_used && action_used && spent == variant_cost_value[variant]
+        && !power_fault_on && active_task == TASK_NONE ? "OK" : "FALHOU"));
+    return;
+  }
+
+  if (step == 37){
+    setupFailureRun(EVENT_COMMS);
+    /* potência já usada duas vezes: a Vera oferece só a cadeia das comunicações */
+    boost_count = BOOST_LIMIT;
+    return;
+  }
+
+  if (step == 38){
+    clickAction(ACTION_EVENT_B);
+    println("verify: silêncio nas comunicações fica ativo -> "
+      + (comms_silent ? "OK" : "FALHOU"));
+    return;
+  }
+
+  if (step == 39){
+    float before_morale = morale;
+    consumeResources();
+    println("verify: silêncio custa 1 de moral por dia -> "
+      + (before_morale - morale == MORALE_PER_DAY + MORALE_PER_DAY_NO_COMMS ? "OK" : "FALHOU"));
+
+    captureReach(SCREEN_COMMAND, POINT_VERA);
+    boolean was_used = action_used;
+    interactPoint(POINT_VERA);
+    println("verify: passo das comunicações não gasta a ação -> "
+      + (!was_used && active_task == TASK_COMMS ? "OK" : "FALHOU"));
+
+    captureReach(SCREEN_DEPOT, POINT_BENTO);
+    interactPoint(POINT_BENTO);
+    println("verify: 1 peça na mão -> "
+      + (held_item == ITEM_SPARE_PART && !action_used ? "OK" : "FALHOU"));
+
+    captureReach(SCREEN_COMMAND, POINT_ANTENNA);
+    return;
+  }
+
+  if (step == 40){
+    int before_parts = parts;
+    boolean was_used = action_used;
+    interactPoint(POINT_ANTENNA);
+    println("verify: reparo das comunicações cobra 1 peça na conclusão -> "
+      + (!was_used && action_used && parts == before_parts - 1
+        && !comms_silent && active_task == TASK_NONE ? "OK" : "FALHOU"));
+    return;
+  }
+
+  runFailureRuleChecks();
+}
+
+
+void captureReach(int next_screen, int point){
+  if (isRoomScreen()){
+    leaveRoom();
+  }
+
+  if (next_screen != SCREEN_SHIP){
+    enterRoom(next_screen);
+  }
+
+  setCapturePlayerAtPoint(point);
+}
+
+
+void runFailureRuleChecks(){
+  resetRun();
+  engine_state = ENGINE_DAMAGED;
+  life_support_emergency = true;
+  power_fault_on = true;
+  comms_silent = true;
+
+  boolean blocked = !eventAllowed(EVENT_ENGINE) && !eventAllowed(EVENT_LIFE_SUPPORT)
+    && !eventAllowed(EVENT_POWER) && !eventAllowed(EVENT_COMMS);
+  println("verify: falha ativa não volta ao sorteio -> " + (blocked ? "OK" : "FALHOU"));
+
+  resetRun();
+  power_fault_on = true;
+  parts = 0;
+  water = 0;
+  int payable = drawPowerVariant();
+  println("verify: sorteio de energia ignora variante não pagável -> "
+    + (payable == POWER_VARIANT_CABLE ? "OK" : "FALHOU"));
+  println("verify: variante usada não volta ao sorteio -> "
+    + (drawPowerVariant() == POWER_VARIANT_NONE ? "OK" : "FALHOU"));
+
+  resetRun();
+  power_fault_on = true;
+  boolean[] used = new boolean[POWER_VARIANT_COUNT];
+  boolean unique = true;
+
+  for (int i = 0; i < POWER_VARIANT_COUNT; i++){
+    int variant = drawPowerVariant();
+
+    if (variant < 0 || used[variant]){
+      unique = false;
+    } else {
+      used[variant] = true;
+    }
+  }
+
+  println("verify: as três variantes saem sem repetição -> " + (unique ? "OK" : "FALHOU"));
+  println("verify: falha de energia sai do pool depois das três -> "
+    + (!eventAllowed(EVENT_POWER) ? "OK" : "FALHOU"));
+
+  resetRun();
+  boolean no_repeat = true;
+  int previous = EVENT_NONE;
+
+  for (int i = 0; i < 40; i++){
+    int drawn = pickEvent();
+
+    if (previous != EVENT_NONE && drawn == previous){
+      no_repeat = false;
+    }
+
+    previous = drawn;
+  }
+
+  println("verify: sorteio sem repetição imediata -> " + (no_repeat ? "OK" : "FALHOU"));
+
+  checkDistributionPanel();
+  checkNewStationRange();
+}
+
+
+/* a antena precisa responder pelo caminho real do E, não só pela chamada direta */
+void checkNewStationRange(){
+  resetRun();
+  comms_silent = true;
+  boost_count = BOOST_LIMIT;
+  enterRoom(SCREEN_COMMAND);
+  interactPoint(POINT_VERA);
+  captureReach(SCREEN_DEPOT, POINT_BENTO);
+  interactPoint(POINT_BENTO);
+  captureReach(SCREEN_COMMAND, POINT_ANTENNA);
+  println("verify: antena responde no alcance do técnico -> "
+    + (nearestInteractablePoint() == POINT_ANTENNA ? "OK" : "FALHOU"));
+}
+
+
+/* painel de distribuição: interruptor e conclusão no mesmo ponto */
+void checkDistributionPanel(){
+  resetRun();
+  water = 0;
+  energy = 9;
+  power_fault_on = true;
+  enterRoom(SCREEN_ENERGY);
+  interactPoint(POINT_SILVIA);
+  interactPoint(POINT_DISTRIBUTION);
+  println("verify: painel sem o item da variante liga a economia -> "
+    + (saving_on && active_task == TASK_POWER ? "OK" : "FALHOU"));
+
+  captureReach(SCREEN_DEPOT, POINT_BENTO);
+  interactPoint(POINT_BENTO);
+  captureReach(SCREEN_ENERGY, POINT_DISTRIBUTION);
+  int before_parts = parts;
+  boolean was_used = action_used;
+  interactPoint(POINT_DISTRIBUTION);
+  println("verify: painel com o item da variante conclui a tarefa -> "
+    + (!was_used && action_used && !power_fault_on && parts == before_parts - 1 ? "OK" : "FALHOU"));
 }
 
 

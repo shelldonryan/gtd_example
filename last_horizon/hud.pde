@@ -149,6 +149,9 @@ void drawAlertPanel(PGraphics g){
   y = drawAlert(g, y, morale < RESOURCE_RED, "MORAL BAIXA: VISITE O DORMITÓRIO.");
   y = drawAlert(g, y, engine_state == ENGINE_DAMAGED, "MOTOR DANIFICADO: USE 2 PEÇAS NO REPARO.");
   y = drawAlert(g, y, leak_on, "VAZAMENTO NO CASCO: REPARE COM 1 PEÇA.");
+  y = drawAlert(g, y, life_support_emergency, "REPARAR SUPORTE");
+  y = drawAlert(g, y, power_fault_on, "REPARAR ENERGIA");
+  y = drawAlert(g, y, comms_silent, "REPARAR COMUNICAÇÕES");
   y = drawAlert(g, y, saving_on, "MODO ECONOMIA ATIVO.");
   y = drawAlert(g, y, rationing_on, "RACIONAMENTO ATIVO.");
   y = drawAlert(g, y, action_used, "AÇÃO DO DIA JÁ FOI USADA.");

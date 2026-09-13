@@ -105,6 +105,9 @@ estado; a linha curta indica a próxima ação ou confirma um estado ativo.
 | Moral baixa | `IR: DORMITÓRIO` |
 | Motor danificado | `REPARAR MOTOR` |
 | Vazamento ativo | `REPARAR CASCO` |
+| Suporte em emergência | `REPARAR SUPORTE` |
+| Falha no sistema de energia | `REPARAR ENERGIA` |
+| Comunicações em silêncio | `REPARAR COMUNICAÇÕES` |
 | Modo economia | `ECONOMIA ATIVA` |
 | Racionamento | `RACIONAMENTO ATIVO` |
 | Ação usada | `AÇÃO JÁ USADA` |

@@ -58,7 +58,9 @@ o estilo do professor continua valendo: globais agrupadas por seção, funções
 
 Globais planas, todas em `last_horizon.pde`: `day`, `trip_days`, `survivors`, `energy`,
 `oxygen`, `water`, `food`, `morale`, `parts`, `engine_state`, `engine_damaged_days`,
-`leak_on`, `saving_on`, `rationing_on`, `action_used`, `boost_count`, `game_over_reason`,
+`leak_on`, `saving_on`, `rationing_on`, `life_support_emergency`, `power_fault_on`,
+`comms_silent`, `power_variant`, `power_variant_used`, `action_used`, `boost_count`,
+`game_over_reason`,
 `current_room`, `player_x`, `player_y`, `player_velocity_y`, `player_grounded`,
 `player_on_ladder`, `held_item`, `active_task` e `task_step_index`.
 Nenhuma tela recebe parâmetro: todas leem e escrevem as mesmas globais — é assim que o
@@ -112,7 +114,8 @@ As capturas atualizadas ficam em `last_horizon/output/` na branch do protótipo.
 | Moral −1 por recurso em vermelho | energia, oxigênio, água e comida entre 1 e 29 |
 | Oxigênio caro (10/dia) | vale a energia do começo do dia, antes do consumo |
 | Dia final com motor danificado | derrota por motor (`MENU_VICTORY.md` exige motor operante) |
-| Sorteio de eventos | uniforme entre os 4, sem repetir dois dias seguidos (provisório) |
+| Sorteio de eventos | uniforme entre os 7, sem repetir o anterior; falha ativa fica fora do sorteio |
+| Painel de distribuição | interruptor e conclusão no mesmo ponto: a conclusão vale quando o item da variante está na mão |
 | Nome vazio no `MENU_INIT` | `INICIAR` desabilitado; "Técnico" só quando o campo tem espaços |
 
 Nenhum sobrevivente vivo encerra a partida com mensagem própria: é a quinta causa
@@ -133,7 +136,7 @@ raiz do repositório:
 "C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --ladder-test
 ```
 
-`--capture` percorre 30 estados, salva `output/NN_estado.png` em 640×360 e
+`--capture` percorre 42 estados, salva `output/NN_estado.png` em 640×360 e
 `output/NN_estado_window.png` na janela, e encerra sozinho. `--hit-test` abre
 uma janela de 1400×900 e prova a conversão de clique para a base 640×360.
 `--ladder-test` verifica saída lateral, travessia, encaixe, bloqueio de
@@ -158,8 +161,9 @@ Limitações observadas:
 - **Código atual:** menus, mapa, salas jogáveis, movimento, escadas, colisão,
   interação, tarefas declarativas, HUD atualizado e captura automática.
 - As tarefas novas (suporte de vida, sistema de energia e comunicações) e os
-  eventos de falha correspondentes estão decididos no #12, mas ainda não foram
-  implementados no sketch; o código atual mantém as cinco tarefas anteriores.
+  eventos de falha correspondentes entraram no sketch no #17: oito tarefas, sete
+  eventos e os três estados novos no painel `SISTEMA`. As variantes de energia
+  são sorteadas na conversa com a Sílvia, sem repetição e só entre as pagáveis.
 - **Decisões aplicadas nos documentos em 12/09:** roster (4 sobreviventes + técnico),
   quinta causa de derrota, tarefas em cadeia, layout de três conveses, números de
   movimento, nomes dos sobreviventes, vocabulário dos cômodos, ícones do HUD,

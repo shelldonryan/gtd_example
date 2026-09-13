@@ -56,6 +56,10 @@ final int ITEM_NONE = 0;
 final int ITEM_ENGINE_PARTS = 1;
 final int ITEM_WATER = 2;
 final int ITEM_SEAL_KIT = 3;
+final int ITEM_SPARE_PART = 4;
+final int ITEM_FUSE = 5;
+final int ITEM_CABLE = 6;
+final int ITEM_COOLANT = 7;
 
 /* regras - mechanics/ACTIONS.md */
 final int RESOURCE_MAX = 100;
@@ -92,6 +96,9 @@ final int RATIONING_MORALE_COST = 8;
 final int REPAIR_HULL_PARTS = 1;
 final int REST_ENERGY_COST = 8;
 final int REST_MORALE_GAIN = 15;
+final int OXYGEN_PER_DAY_EMERGENCY = 3;
+final int ENERGY_PER_DAY_POWER_FAULT = 3;
+final int MORALE_PER_DAY_NO_COMMS = 1;
 
 final int EVENT_REPAIR_PARTS = 2;
 final int EVENT_METEOR_ENERGY = 15;
@@ -100,6 +107,18 @@ final int EVENT_RATIONING_MORALE = 8;
 final int EVENT_CONFLICT_MORALE_LOSS = 10;
 final int EVENT_CONFLICT_MORALE_GAIN = 10;
 final int EVENT_CONFLICT_ENERGY = 10;
+final int EVENT_LIFE_PARTS = 2;
+final int EVENT_LIFE_ENERGY = 10;
+final int EVENT_POWER_ENERGY = 10;
+final int EVENT_POWER_MORALE = 10;
+final int EVENT_COMMS_PARTS = 1;
+
+/* falha no sistema de energia - variants */
+final int POWER_VARIANT_NONE = -1;
+final int POWER_VARIANT_FUSE = 0;
+final int POWER_VARIANT_CABLE = 1;
+final int POWER_VARIANT_COOLANT = 2;
+final int POWER_VARIANT_COUNT = 3;
 
 /* motor */
 final int ENGINE_WORKING = 0;
@@ -166,6 +185,11 @@ int engine_damaged_days = 0;
 boolean leak_on = false;
 boolean saving_on = false;
 boolean rationing_on = false;
+boolean life_support_emergency = false;
+boolean power_fault_on = false;
+boolean comms_silent = false;
+int power_variant = POWER_VARIANT_NONE;
+boolean[] power_variant_used = new boolean[POWER_VARIANT_COUNT];
 boolean action_used = false;
 int boost_count = 0;
 int game_over_reason = REASON_NONE;
@@ -183,12 +207,7 @@ boolean interact_queued = false;
 int held_item = ITEM_NONE;
 boolean first_interaction_done = false;
 
-/* seleção da tarefa quando uma estação inicia mais de uma cadeia */
-boolean task_choice_open = false;
-int task_choice_cursor = 0;
-int task_choice_count = 0;
-int[] task_choice_indices = new int[5];
-
+/* interface base */
 boolean move_left_held = false;
 boolean move_right_held = false;
 boolean move_up_held = false;
