@@ -38,8 +38,8 @@ void drawHeader(PGraphics g){
 
 void drawHeaderCard(PGraphics g, float x, String label, String value, int accent){
   drawPanel(g, x, HUD_Y, HUD_CARD_W, HUD_H, COL_BORDER);
-  hudText(g, label, x + 5, HUD_Y + 5, 10, COL_MUTED);
-  hudText(g, value, x + 5, HUD_Y + 21, 16, accent);
+  text(g, label, x + 5, HUD_Y + 5, 16, COL_MUTED);
+  text(g, value, x + 5, HUD_Y + 21, 16, accent);
 }
 
 
@@ -50,7 +50,7 @@ void drawResourceCard(PGraphics g, float x, int icon, float value, int accent, f
 
   drawPanel(g, x, HUD_Y, HUD_CARD_W, HUD_H, border);
   drawResourceIcon(g, icon, x + 4, HUD_Y + 5, accent);
-  hudText(g, str(int(value)), x + 24, HUD_Y + 8, 16, accent);
+  text(g, str(int(value)), x + 24, HUD_Y + 8, 16, accent);
 
   if (critical){
     drawWarningIcon(g, x + HUD_CARD_W - 18, HUD_Y + 5);
@@ -69,13 +69,6 @@ void drawResourceCard(PGraphics g, float x, int icon, float value, int accent, f
   g.rect(bar_x, bar_y, bar_w, 4);
   g.fill(accent);
   g.rect(bar_x, bar_y, bar_w * constrain(fill, 0, 1), 4);
-}
-
-
-void hudText(PGraphics g, String value, float x, float y, float size, int colour){
-  g.fill(colour);
-  g.textSize(max(size, 10));
-  g.text(value, x, y);
 }
 
 
@@ -135,39 +128,38 @@ void drawWarningIcon(PGraphics g, float x, float y){
 
 void drawAlertPanel(PGraphics g){
   drawPanel(g, SIDE_X, SIDE_Y, SIDE_W, SIDE_H, COL_BORDER);
-  text(g, "SISTEMA", SIDE_X + 8, SIDE_Y + 7, 9, COL_CYAN);
+  text(g, "SISTEMA", SIDE_X + 8, SIDE_Y + 7, 16, COL_CYAN);
 
   if (event_open){
     return;
   }
 
-  float y = SIDE_Y + 26;
+  /* a tarefa do dia fica no alto: o espaço dos alertas e da mensagem é fixo */
+  String task_line = active_task == TASK_NONE ? "LIVRE" : task_label[active_task];
+  text(g, "TAREFA", SIDE_X + 8, SIDE_Y + 26, 16, COL_CYAN);
+  drawTextWrapped(g, task_line, SIDE_X + 8, SIDE_Y + 44, SIDE_W - 16, 16, 18, COL_TEXT);
 
-  y = drawAlert(g, y, energy < RESOURCE_RED, "ENERGIA CRÍTICA: VISITE A SALA DE ENERGIA.");
-  y = drawAlert(g, y, oxygen < RESOURCE_RED, "OXIGÊNIO CRÍTICO: VERIFIQUE OS SISTEMAS.");
-  y = drawAlert(g, y, water < RESOURCE_RED || food < RESOURCE_RED, "ESTOQUES BAIXOS: VISITE O DEPÓSITO.");
-  y = drawAlert(g, y, morale < RESOURCE_RED, "MORAL BAIXA: VISITE O DORMITÓRIO.");
-  y = drawAlert(g, y, engine_state == ENGINE_DAMAGED, "MOTOR DANIFICADO: USE 2 PEÇAS NO REPARO.");
-  y = drawAlert(g, y, leak_on, "VAZAMENTO NO CASCO: REPARE COM 1 PEÇA.");
+  float y = SIDE_Y + 90;
+
+  y = drawAlert(g, y, energy < RESOURCE_RED, "IR: ENERGIA");
+  y = drawAlert(g, y, oxygen < RESOURCE_RED, "VER SISTEMAS");
+  y = drawAlert(g, y, water < RESOURCE_RED || food < RESOURCE_RED, "IR: DEPÓSITO");
+  y = drawAlert(g, y, morale < RESOURCE_RED, "IR: DORMITÓRIO");
+  y = drawAlert(g, y, engine_state == ENGINE_DAMAGED, "REPARAR MOTOR");
+  y = drawAlert(g, y, leak_on, "REPARAR CASCO");
   y = drawAlert(g, y, life_support_emergency, "REPARAR SUPORTE");
   y = drawAlert(g, y, power_fault_on, "REPARAR ENERGIA");
   y = drawAlert(g, y, comms_silent, "REPARAR COMUNICAÇÕES");
-  y = drawAlert(g, y, saving_on, "MODO ECONOMIA ATIVO.");
-  y = drawAlert(g, y, rationing_on, "RACIONAMENTO ATIVO.");
-  y = drawAlert(g, y, action_used, "AÇÃO DO DIA JÁ FOI USADA.");
-  g.fill(COL_CYAN);
-  g.textSize(10);
-  g.text("TAREFA", SIDE_X + 8, SIDE_Y + SIDE_H - 78);
-  g.fill(COL_TEXT);
-  g.textSize(fitTextSize(g, active_task == TASK_NONE ? "LIVRE" : task_label[active_task], 10, SIDE_W - 16));
-  g.text(active_task == TASK_NONE ? "LIVRE" : task_label[active_task], SIDE_X + 8, SIDE_Y + SIDE_H - 64);
+  y = drawAlert(g, y, saving_on, "ECONOMIA ATIVA");
+  y = drawAlert(g, y, rationing_on, "RACIONAMENTO ATIVO");
+  y = drawAlert(g, y, action_used, "AÇÃO JÁ USADA");
 
-  if (y == SIDE_Y + 26){
-    y = drawTextWrapped(g, "SISTEMAS ESTÁVEIS. ESCOLHA UM CÔMODO.", SIDE_X + 8, y, SIDE_W - 16, 9, 12, COL_MUTED);
+  if (y == SIDE_Y + 90){
+    drawTextWrapped(g, "SISTEMAS ESTÁVEIS. ESCOLHA UM CÔMODO.", SIDE_X + 8, y, SIDE_W - 16, 16, 18, COL_MUTED);
   }
 
   if (system_message.length() > 0){
-    drawTextWrapped(g, system_message, SIDE_X + 8, SIDE_Y + SIDE_H - 40, SIDE_W - 16, 9, 12, COL_CYAN);
+    drawTextWrapped(g, system_message, SIDE_X + 8, SIDE_Y + SIDE_H - 60, SIDE_W - 16, 16, 18, COL_CYAN);
   }
 }
 

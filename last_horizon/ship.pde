@@ -201,9 +201,7 @@ void drawRoom(PGraphics g){
 
 void drawRoomTitle(PGraphics g){
   String title = roomTitle(screen);
-  g.fill(COL_CYAN);
-  g.textSize(12);
-  g.text(title, ROOM_LEFT + 10, ROOM_TOP + 6);
+  text(g, title, ROOM_LEFT + 10, ROOM_TOP + 6, 16, COL_CYAN);
 }
 
 
@@ -227,14 +225,11 @@ void drawCommandBriefing(PGraphics g){
   int suggestion = suggestedTask();
   g.fill(COL_PANEL);
   g.stroke(COL_CYAN_DARK);
-  g.rect(ROOM_LEFT + 8, ROOM_TOP + 28, ROOM_RIGHT - ROOM_LEFT - 16, 34, 2);
-  g.fill(COL_TEXT);
-  g.textSize(10);
-  g.text("BRIEFING DO DIA: " + task_label[suggestion], ROOM_LEFT + 16, ROOM_TOP + 36);
+  g.rect(ROOM_LEFT + 8, ROOM_TOP + 28, ROOM_RIGHT - ROOM_LEFT - 16, 44, 2);
+  text(g, "BRIEFING DO DIA: " + task_label[suggestion], ROOM_LEFT + 16, ROOM_TOP + 34, 16, COL_TEXT);
 
   if (day == 1 && !first_interaction_done){
-    g.textSize(10);
-    g.text("ANDAR  A/D   ESCADA  W/S   PULAR  ESPAÇO   INTERAGIR  E", ROOM_LEFT + 16, ROOM_TOP + 50);
+    text(g, "ANDAR  A/D   ESCADA  W/S   PULAR  ESPAÇO   INTERAGIR  E", ROOM_LEFT + 16, ROOM_TOP + 52, 16, COL_TEXT);
   }
 }
 
@@ -281,21 +276,14 @@ void drawRoomPoint(PGraphics g, int point){
   g.stroke(nearby ? COL_CYAN : COL_BORDER);
   g.fill(nearby ? COL_CYAN_DARK : COL_PANEL);
   g.rect(x - 12, y - 22, 24, 18, 2);
-  g.fill(colour);
-  g.textSize(12);
-  g.text(pointMarker(point_kind[point]), x - 4, y - 20);
-
-  g.fill(colour);
-  g.textSize(10);
-  g.text(point_label[point], x - min(32, g.textWidth(point_label[point]) / 2.0), y - 38);
+  text(g, str(pointMarker(point_kind[point])), x - 3, y - 22, 16, colour);
+  textCentered(g, point_label[point], x, y - 44, 16, colour);
 
   if (nearby){
     g.noFill();
     g.stroke(COL_CYAN);
     g.rect(x - 16, y - 26, 32, 26, 2);
-    g.fill(COL_CYAN);
-    g.textSize(10);
-    g.text("E", x - 3, y + 6);
+    text(g, "E", x - 3, y + 6, 16, COL_CYAN);
   }
 
   if (point_kind[point] == POINT_NPC){
@@ -351,9 +339,7 @@ void drawHeldItem(PGraphics g){
     return;
   }
 
-  g.fill(COL_ORANGE);
-  g.textSize(10);
-  g.text("NA MÃO: " + heldItemLabel(), ROOM_LEFT + 8, ROOM_TOP + 24);
+  text(g, "NA MÃO: " + heldItemLabel(), ROOM_LEFT + 170, ROOM_TOP + 6, 16, COL_ORANGE);
 }
 
 

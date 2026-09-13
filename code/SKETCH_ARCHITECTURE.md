@@ -103,6 +103,10 @@ tentam 16 px e reduzem somente quando a frase não cabe na largura disponível; 
 limite é 10 px. `COL_MUTED` e `COL_DIM` também foram clareados para manter contraste
 com o fundo.
 
+Nenhum desenho de texto chama `g.textSize` direto: o HUD, as salas e os modais
+passam por `text`, `textCentered` ou `drawTextWrapped`, que aplicam o piso de
+16 px. Só `drawButton` reduz, pelo `fitTextSize`, e só quando a frase não cabe.
+
 O HUD implementa os seis cartões de recurso com **ícone de 16×16 + número + barra**,
 sem rótulo de texto; o cartão de quantos estão a bordo usa **A BORDO**; e o recurso
 crítico pisca a borda e ganha ícone de aviso. O mapa macro não imprime nome de nave.
@@ -171,7 +175,7 @@ Limitações observadas:
   movimento, nomes dos sobreviventes, vocabulário dos cômodos, ícones do HUD,
   tipografia e controles. Ver `interface/ROOMS.md` e `SESSION_START.md`.
 - **Textos:** o contrato final de vinheta, transmissões, modais, alertas e
-  derrotas está registrado no `issue://11` e nas fontes de interface. O sketch
-  ainda contém a implementação provisória desses textos. Os cartões e as linhas
-  de painel das três falhas novas são finais desde a D-047
-  (`events/SYSTEM_FAULTS.md` e `interface/HUD.md`).
+  derrotas está registrado no `issue://11` e nas fontes de interface. As linhas
+  do painel `SISTEMA` já seguem o contrato de `interface/HUD.md`, incluindo as
+  três falhas novas (D-047); vinheta, transmissões, modais e as telas de
+  vitória/derrota ainda usam os textos antigos.

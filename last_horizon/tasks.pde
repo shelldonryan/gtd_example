@@ -686,18 +686,13 @@ void updateTaskChoice(){
 
 void drawTaskChoice(PGraphics g){
   drawPanel(g, 40, 98, 390, 120, COL_CYAN);
-  g.fill(COL_CYAN);
-  g.textSize(12);
-  g.text("ESCOLHA A TAREFA", 56, 108);
+  text(g, "ESCOLHA A TAREFA", 56, 106, 16, COL_CYAN);
 
   for (int i = 0; i < task_choice_count; i++){
     int task = task_choice_indices[i];
-    g.fill(i == task_choice_cursor ? COL_CYAN : COL_TEXT);
-    g.textSize(10);
-    g.text((i == task_choice_cursor ? "> " : "  ") + task_label[task], 62, 132 + i * 18);
+    text(g, (i == task_choice_cursor ? "> " : "  ") + task_label[task], 62, 130 + i * 18, 16,
+      i == task_choice_cursor ? COL_CYAN : COL_TEXT);
   }
 
-  g.fill(COL_MUTED);
-  g.textSize(10);
-  g.text("SETAS: ESCOLHER   E: CONFIRMAR", 56, 202);
+  text(g, "SETAS: ESCOLHER   E: CONFIRMAR", 56, 196, 16, COL_MUTED);
 }

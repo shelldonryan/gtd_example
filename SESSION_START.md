@@ -319,8 +319,9 @@ também foram confirmadas no #12; D-047 foi confirmada na sessão do
 - se a tela de vitória permite continuar jogando depois da chegada;
 - o silêncio das comunicações suspende transmissões que o sketch ainda não tem:
   o modal de transmissão da Terra (D-026) continua fora do código;
-- a aplicação dos textos do #11 (derrotas, alertas, vitória) no sketch segue
-  sem ticket — o contrato está fechado, o código ainda usa os textos antigos;
+- a aplicação dos textos do #11 segue sem ticket: as linhas do painel `SISTEMA`
+  já estão no código (`interface/HUD.md`), e faltam vinheta, transmissões,
+  modais e as telas de vitória/derrota;
 - **uma tarefa por dia não está imposta no código:** `action_used` só é escrito,
   nunca lido como bloqueio, então uma segunda cadeia pode ser iniciada e
   concluída no mesmo dia. Verificado em 13/09; falta decidir onde bloquear (na
