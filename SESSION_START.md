@@ -380,8 +380,8 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 
 - **Grilling concluído:** D-006 a D-023 em `issue://14`, D-024 a D-029 em
   `issue://11` e D-030 a D-046 em `issue://12`; os três tickets estão CLOSED.
-- **Issues trabalhadas nesta sessão:** [#18](issue://18) implementada no sketch
-  com o redesign D-048 a D-060 e pronta para fechamento.
+- **Issues trabalhadas nesta sessão:** [#18](issue://18) implementada,
+  verificada e CLOSED com o redesign D-048 a D-060.
 - **Redesign implementado:** salas conectadas por portas, mapa consultável sem
   teletransporte, escolha explícita no console, uma tarefa por dia, orientação
   concreta, diálogos de NPC, painéis técnicos, eventos modais e encerramento do
@@ -401,7 +401,8 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
   `OK`; `--hit-test` e `--ladder-test` imprimiram 5 `OK` cada. Nenhum `FALHOU`.
   Foram inspecionadas as capturas de sala conectada, console, diálogo, mapa,
   resumo do dia e evento modal.
-- **Commits:** nenhum criado nesta etapa.
+- **Commits:** `0ee7050` (implementação e documentação) e `c82065b` (evidências
+  visuais), enviados para `origin/prototype/sketch-architecture`.
 - **Fronteira após #18:** #7, #8 e #10 permanecem disponíveis. O caminho de arte
   #10 → #8 volta a ser o próximo recomendado.
 
