@@ -329,9 +329,11 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
   `SESSION_START.md` e `code/SKETCH_ARCHITECTURE.md`.
 - **Verificação:** executados `Processing.exe cli --run --capture`,
   `Processing.exe cli --run --hit-test` e `Processing.exe cli --run --ladder-test`.
-  A regressão da escada confirmou saída lateral, captura da travessia, encaixe
-  ao parar, bloqueio da reentrada enquanto a direção vertical permanece
-  pressionada e rearme depois de soltá-la. A prova visual está em
+  A captura gerou 30 estados com PNG base e PNG da janela, incluindo comando,
+  energia, depósito e dormitório. O hit-test confirmou os quatro cômodos e o
+  letterbox. A regressão da escada confirmou saída lateral, travessia, encaixe,
+  bloqueio da reentrada e rearme; o CLI emitiu apenas avisos AWT não fatais.
+  O modo headless não foi validado. A prova visual está em
   `last_horizon/output/ladder_middle_exit.png`.
 - **Mapa #1 sincronizado:** #4, #15 e #16 foram fechadas após validação do usuário.
   Permanecem disponíveis #7, #8, #10 e #11; #12 continua bloqueada por #11.
@@ -340,7 +342,7 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 - **Issues concluídas nesta sessão:** #4 (execução e captura), #15 (sala jogável)
   e #16 (HUD).
 - **Commits:** `5c3f682` (`feat: adicionar harness de captura do CLI do
-  Processing`) e `b732fd6` (`docs: sincronizar fronteira Wayfinder após issue 4`).
+  Processing`) e `19dedb4` (`docs: sincronizar fronteira Wayfinder após issue 4`).
 - **Próximo trabalho recomendado:** seguir para #11; #7, #8 e #10 continuam
   independentes. Depois de #11, liberar o balanceamento #12.
 
