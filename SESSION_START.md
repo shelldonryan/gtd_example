@@ -3,7 +3,7 @@
 > Documento obrigatório de abertura e encerramento de toda sessão. Leia antes de
 > analisar, editar ou implementar qualquer coisa.
 
-Atualizado em: 2026-09-13 (após a resolução do ticket #12 de balanceamento)
+Atualizado em: 2026-09-13 (após as resoluções dos tickets #11 e #12 e a abertura do #17)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Como usar este arquivo
@@ -66,6 +66,7 @@ e as fontes afetadas.
   `events/SYSTEM_FAULTS.md` não dizem mais que a resposta do evento gasta a ação
   do dia.
 - `issue://11` foi resolvida nesta sessão: a voz, a vinheta, as transmissões, os modais, os alertas e as cinco mensagens de derrota agora têm contrato registrado no ticket e nas fontes de interface.
+- `issue://12` foi resolvida nesta sessão: comida inicial 70; pool uniforme de sete eventos, sem repetição imediata e sem resortear falha ativa; falhas de suporte, energia e comunicações com custos, tarefas e variantes não repetíveis. O código ainda não implementa as falhas novas — é o `issue://17`.
 
 ## Direção atual do produto
 
@@ -94,6 +95,7 @@ plataforma dentro de uma nave espacial. A nave **não tem nome**.
 - Eventos, transmissões externas e desfechos são modais; alertas, resultados de tarefas e estados operacionais permanecem no painel `SISTEMA`.
 - O balanceamento confirmou comida inicial em 70; energia, oxigênio, água e moral começam em 100, e as peças em 6.
 - A falha de suporte de vida pode entrar em modo de emergência: custa 10 de energia e acrescenta 3 de consumo de oxigênio por dia até a nova tarefa de reparo.
+- O pool tem sete eventos: falha no motor, chuva de meteoros, falta de comida, conflito no dormitório, falha no suporte de vida, falha no sistema de energia e falha nas comunicações. Falha ativa sai do sorteio até ser reparada; as três variantes de energia não se repetem.
 
 ### Loop de jogo confirmado
 
@@ -157,7 +159,10 @@ sem decisão do usuário.
 
 - `issue://1` — destino, fronteira e decisões gerais do projeto.
 - `issue://?state=all` — inventário atual de issues.
-- `issue://14` — decisões D-006 a D-023, já fechado (registro histórico).
+- `issue://14` — decisões D-006 a D-023 (histórico).
+- `issue://11` — decisões D-024 a D-029 (roteiro e textos).
+- `issue://12` — decisões D-030 a D-046 (balanceamento e falhas novas).
+- `issue://17` — implementação das falhas novas no sketch (tarefa aberta).
 - Issues específicas do ticket escolhido, incluindo seus bloqueadores nativos.
 
 ### Domínio e produto
@@ -310,6 +315,7 @@ também foram confirmadas no #12.
 ## Decisões que exigem consulta
 
 - se a tela de vitória permite continuar jogando depois da chegada;
+- textos dos cartões, das alternativas e das linhas de alerta das falhas de suporte, energia e comunicações, no formato do #11;
 - qualquer nome, retrato ou história de personagem além do registrado em
   `characters/npcs/`.
 
@@ -360,6 +366,8 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
   partidas por estilo e a rota da quinta derrota foi confirmada no dia 13.
 - **Mapa #1 sincronizado:** #12 fechado, #17 aberto; disponíveis #7, #8, #10 e
   #17.
+- **Commit:** `cf4ec3c` (`feat: comida inicial 70 e contrato das falhas novas`),
+  na branch `prototype/sketch-architecture`.
 - **Próximo trabalho recomendado:** #17; #7, #8 e #10 continuam independentes.
 
 O repositório está com **protótipo jogável executável** e o balanceamento
