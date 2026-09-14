@@ -30,6 +30,18 @@ O texto visível usa **Segoe UI** instalada no Windows, com suavização. Assets
 pixel art devem ser desenhados sem interpolação. Essa separação não altera a
 resolução do render nem cria uma fonte alternativa.
 
+## Personagem e assets
+
+O técnico usa uma spritesheet única em `last_horizon/data/player/player_sheet.png`
+com o metadado correspondente em `player_sheet.json`. A exportação tem dez
+quadros de 64×64: `idle` usa os quadros 0–1 e `walk` usa os quadros 2–9.
+
+O sketch preserva as durações do JSON, repete as duas animações em loop e
+espelha o quadro conforme a direção do movimento. A aparência é desenhada em
+32×32 na grade lógica, enquanto a caixa de colisão continua em 16×24. Não há
+exportação de um PNG separado para cada quadro do jogador.
+
+
 
 ## Mecanica principal
 

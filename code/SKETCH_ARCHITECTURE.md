@@ -30,20 +30,25 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
 
 ## Pipeline de assets
 
-- A origem portátil permanece em `last_horizon/data/`, com o `.aseprite` junto
-  dos PNGs exportados. A convenção de produção é um PNG por quadro, no padrão
-  ASCII `entidade_frame_N.png`.
-- O sketch carrega assets de produção com `loadImage()` em `loadPlayerAssets()`
-  durante `setup()`; o JSON correspondente é lido com `loadJSONObject()`. A
-  pasta `data/` é o diretório de assets do Processing.
-- `player_sheet.png` contém 10 frames de 64×64 e
-  `player_sheet.json` registra as tags `idle` (frames 0–1) e `walk`
-  (frames 2–9), incluindo a duração de cada frame.
+- A origem Aseprite, quando disponível, pode permanecer em `last_horizon/data/`
+  junto das exportações. O runtime não depende do arquivo `.aseprite`.
+- Para animações do jogo, a exportação oficial usa uma spritesheet única em PNG
+  com JSON de metadados; não há PNG separado por quadro para o jogador.
+- O sketch carrega os assets de produção com `loadImage()` e
+  `loadJSONObject()` em `loadPlayerAssets()` durante `setup()`. A pasta `data/`
+  é o diretório de assets do Processing.
+- `player_sheet.png` mede 640×64 e contém 10 quadros de 64×64.
+- `player_sheet.json` registra `idle` nos quadros 0–1 e `walk` nos quadros 2–9,
+  com 500 ms por quadro parado e 100 ms por quadro em movimento.
+- `playerCurrentFrame()` soma as durações da faixa selecionada e usa módulo
+  pelo total para repetir `idle` e `walk` continuamente.
 - A física mantém o personagem em 16×24 na grade lógica. O quadro visual é
   desenhado em 32×32 lógicos e centralizado sobre a caixa de colisão.
 - A direção usa `player_facing`: `1` para a direita e `-1` para a esquerda.
   O valor acompanha A/D e setas, é espelhado na camada sem interpolação e é
   redefinido conforme a entrada pela porta ou o reinício da sala.
+- Se o carregamento falhar, `drawPlayerFallback()` preserva a execução e a
+  caixa física, sem alterar o contrato de movimento.
 - O modo de prova `--asset-pipeline-test` continua separado dos assets do jogo.
 - `pipeline_probe.aseprite` e `pipeline_probe_frame_1.png` são o fixture do
   ticket #10, não assets finais de jogo. O probe tem 16×16 pixels e é exibido
@@ -205,11 +210,12 @@ Limitações observadas:
 
 ## Estado da revisão
 
-- **Código atual:** D-048 a D-068 implementadas. As quatro salas são conectadas
+- **Código atual:** D-048 a D-071 implementadas. As quatro salas são conectadas
   por portas; o mapa é uma sobreposição consultável; o console do comando escolhe
   a tarefa; NPCs, sistemas e eventos usam suas camadas próprias; o beliche do
-  técnico encerra o dia após o resumo previsto; a interface usa Segoe UI e os
-  assets pixel art permanecem separados da suavização do texto.
+  técnico encerra o dia após o resumo previsto; a interface usa Segoe UI, os
+  assets pixel art permanecem separados da suavização do texto e o jogador usa
+  spritesheet + JSON.
 - `action_used` agora bloqueia outra escolha no console depois da ação final.
 - O HUD não possui painel lateral: usa cartões de recurso, faixa de próxima ação
   e botão `MAPA`.

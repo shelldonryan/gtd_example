@@ -23,6 +23,23 @@ gestão: só a interação que conclui a tarefa usa a ação do dia.
 O técnico carrega um item por vez. O item não se perde quando o dia vira:
 continua com ele até ser entregue ou trocado por outro.
 
+## Representação visual
+
+O técnico é carregado a partir de uma spritesheet única em
+`last_horizon/data/player/player_sheet.png`, com as faixas definidas por
+`last_horizon/data/player/player_sheet.json`. O PNG tem 640×64 e dez quadros de
+64×64:
+
+- `idle`: quadros 0–1, 500 ms por quadro;
+- `walk`: quadros 2–9, 100 ms por quadro.
+
+As durações do JSON controlam o loop no runtime. O quadro visual é desenhado em
+32×32 na grade lógica e centralizado sobre a caixa física original de 16×24.
+Uma única arte atende as duas direções: `player_facing` espelha o personagem
+quando o técnico anda para a esquerda ou para a direita, inclusive ao entrar
+por uma porta. Os assets pixel art são amostrados sem interpolação.
+
+
 ## Controles
 
 | Ação | Tecla |

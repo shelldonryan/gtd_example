@@ -3,7 +3,7 @@
 > Documento obrigatório de abertura e encerramento de toda sessão. Leia antes de
 > analisar, editar ou implementar qualquer coisa.
 
-Atualizado em: 2026-09-14 (reconciliação da fronteira Wayfinder e do contrato visual do pipeline)
+Atualizado em: 2026-09-14 (documentação da integração visual do jogador)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Como usar este arquivo
@@ -47,15 +47,16 @@ e as fontes afetadas.
 ## Contradições conhecidas
 
 - `issue://1` é o mapa de coordenação e mantém o corpo original como histórico;
-  os comentários mais recentes registram o contrato D-048 a D-068 e superam as
+  os comentários mais recentes registram o contrato D-048 a D-071 e superam as
   referências antigas a mapa-teleporte, botão `Passar dia`, 640×360 como render
   e m5x7. As issues #2 a #18 estão ligadas como sub-issues, com **15/17
   concluídas** (abertas: #7 e #8). A #18 foi reaberta e fechada novamente após
-  os ajustes de interação, mapa e atalhos; D-063 a D-068 consolidam a
+  os ajustes de interação, mapa e atalhos; D-063 a D-071 consolidam a
   apresentação visual.
 - `issue://13` registra convenções históricas do exemplo de plataforma. O m5x7 e
-  o render 640×360 não são decisões atuais; permanecem válidos apenas os nomes
-  ASCII, um PNG por quadro e o `.aseprite` portátil.
+  o render 640×360 não são decisões atuais; continuam válidos apenas os nomes
+  ASCII e o `.aseprite` portátil quando a fonte for versionada. A regra antiga
+  de um PNG por quadro não se aplica ao jogador, que usa spritesheet + JSON.
 - `issue://9` e o sketch atual descrevem uma prova de menus e botões. Eles são
   evidência da implementação existente, não da jogabilidade final.
 - Os conflitos do código foram resolvidos no sketch: as salas agora são jogáveis,
@@ -150,8 +151,10 @@ decisão explícita. Os pontos de interação e as oito tarefas estão em
 - Tipografia: Segoe UI instalada no Windows, título 32 px, leitura 16 px,
   entrelinha 18 px, botão reduz até 10 px só quando a frase não cabe. HUD com
   ícones de 16×16 e sem rótulo nos cartões de recurso.
-- Um PNG por quadro, no padrão `entidade_frame_N.png`, com o `.aseprite` junto
-  do sketch para manter a entrega portátil.
+- Para animações, a convenção atual é uma spritesheet única em PNG com JSON de
+  metadados, mantendo as durações e as tags exportadas pelo Aseprite. Não
+  exportar PNG separado para cada quadro do jogador; o `.aseprite` de origem
+  pode acompanhar a exportação quando estiver disponível.
 - Áudio offline sem biblioteca externa: `javax.sound.sampled`, WAV PCM 16 bits em
   `data/`.
 
@@ -244,7 +247,7 @@ Sincronizado com o grafo nativo de dependências em 2026-09-14, após fechar #10
 |---|---|---|---|
 | #4 — Executar e capturar o sketch | CLOSED | — | execução e captura aceitas |
 | #7 — Documento de entrega | disponível | — | independente |
-| #8 — Inventário de assets | disponível | — | liberado pelo #10; dimensões finais ainda abertas |
+| #8 — Inventário de assets | disponível | — | jogador integrado; inventário dos demais assets ainda aberto |
 | #10 — Pipeline Aseprite → Processing | CLOSED | — | pipeline implementado, reexportado e aceito |
 | #11 — Roteiro e textos | CLOSED | — | resolução registrada em 13/09 |
 | #12 — Balanceamento | CLOSED | — | resolução registrada nesta sessão |
@@ -269,8 +272,9 @@ arquivo foi alterado: a aceitação e a evidência devem estar no próprio ticke
 - `#15` e `#16` estão fechados; sala jogável e HUD já estão no protótipo.
 - `#18` foi reaberta, implementada e fechada novamente com evidência para as
   confirmações por teclado em modais e a apresentação do destino no mapa.
-- `#10` (fechado) → produção dos assets listados no `#8`; o pipeline foi
-  implementado e provado sem decidir dimensões finais.
+- `#10` (fechado) → produção dos assets listados no `#8`; o pipeline está
+  implementado e o jogador já tem exportação com dimensões registradas. O
+  inventário dos demais assets permanece aberto.
 - `#7` é independente e pode ser fechado sem bloquear o protótipo.
 
 ## Decisões confirmadas
@@ -284,7 +288,8 @@ playtest e do redesign implementado no [issue://18](issue://18). D-061 e D-062
 foram confirmadas na reabertura do [issue://18](issue://18); D-063 e D-064 foram
 confirmadas nas decisões visuais anteriores; D-065 a D-067 foram confirmadas
 nesta sessão pelo usuário; D-068 foi confirmada nesta sessão para os rótulos
-de botões e atalhos visíveis.
+de botões e atalhos visíveis; D-069 a D-071 foram confirmadas na integração
+visual do jogador.
 
 | ID | Decisão | Estado |
 |---|---|---|
@@ -356,6 +361,9 @@ de botões e atalhos visíveis.
 | D-066 | O texto visível usa Segoe UI instalada no Windows, com suavização; m5x7 e m6x11 não são fontes visíveis do jogo | CONFIRMADA |
 | D-067 | A suavização pertence ao texto; assets pixel art usam amostragem sem interpolação, sem criar resolução alternativa | CONFIRMADA |
 | D-068 | Botões exibem no próprio rótulo o atalho de teclado já disponível; dicas redundantes de `ENTER` são removidas quando o botão já o informa | CONFIRMADA |
+| D-069 | O jogador usa uma spritesheet única em PNG + JSON para `idle` e `walk`; não há PNG separado por quadro | CONFIRMADA |
+| D-070 | A spritesheet do jogador tem 10 quadros de 64×64; `idle` usa 0–1, `walk` usa 2–9 e o loop preserva as durações do JSON | CONFIRMADA |
+| D-071 | O visual do jogador é 32×32 sobre colisão 16×24; `player_facing` espelha esquerda/direita sem duplicar a arte | CONFIRMADA |
 
 
 ## Decisões que exigem consulta
@@ -415,7 +423,8 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 - **Código:** `last_horizon.pde` usa `ui_font` com Segoe UI e `RENDER_W`/`RENDER_H`;
   `ui.pde` mede e desenha texto em alta resolução; `capture.pde` converte o mouse
   pela escala física; o fluxo funcional D-048 a D-062 permanece intacto, e
-  D-063 a D-068 atualizam renderização, amostragem e rótulos sem alterar o loop.
+  D-063 a D-071 atualizam renderização, amostragem, rótulos e representação
+  visual do jogador.
 - **Documentos atualizados nesta sessão:** `README.md`, `interface/TEXT_FONTS.md`,
   `code/SKETCH_ARCHITECTURE.md`, `AGENTS.md` e `SESSION_START.md`.
 - **Artefatos removidos:** `prototype/font_preview/` e
@@ -435,16 +444,15 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
   `pipeline_probe.aseprite` e `pipeline_probe_frame_1.png`; o sketch carrega
   o PNG via `loadImage()` no modo `--asset-pipeline-test`, renderiza a camada
   de pixel art sem interpolação e preserva texto suavizado.
-- **Integração visual do jogador:** `player_sheet.png` e
-  `player_sheet.json` são carregados no `setup()`; as tags `idle` (frames 0–1)
-  e `walk` (frames 2–9) controlam a animação, e `player_facing` espelha o
-  personagem para acompanhar esquerda/direita sem alterar a caixa de colisão.
-- **Verificação da integração:** `--capture` concluiu o fluxo com todos os
-  checks em `OK`; `--hit-test` validou 5 casos e `--ladder-test` validou 5
-  casos após a troca do desenho procedural pelo spritesheet.
-- **Correção da animação:** `playerCurrentFrame()` agora aplica o tempo
-  decorrido em módulo pela duração total da faixa; `idle` e `walk` retornam ao
-  primeiro frame continuamente, preservando as durações do JSON.
+- **Integração visual do jogador:** `player_sheet.png` (640×64) e
+  `player_sheet.json` são carregados no `setup()`; `idle` usa os quadros 0–1
+  (500 ms por quadro) e `walk` usa os quadros 2–9 (100 ms por quadro).
+- **Contrato físico e direção:** o desenho visual ocupa 32×32 na grade lógica,
+  mas a caixa de colisão continua 16×24. `player_facing` espelha a mesma arte
+  para acompanhar esquerda/direita e é redefinido ao entrar por uma porta.
+- **Correção da animação:** `playerCurrentFrame()` aplica o módulo pela duração
+  total da faixa selecionada; `idle` e `walk` retornam ao primeiro frame
+  continuamente. Se os assets falharem, o fallback procedural preserva a física.
 
 - **Sincronização Wayfinder desta sessão:** a fronteira foi rechecada em
   2026-09-14; a implementação e o fechamento do #10 foram publicados em
@@ -470,6 +478,17 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
   `settings()` usa diretamente `RENDER_W` e `RENDER_H`, sem alterar o fluxo.
 - **Interface nesta sessão:** botões com atalho passaram a exibir a tecla no
   próprio rótulo; as dicas redundantes do início e dos diálogos foram removidas.
+- **Documentação desta atualização:** `README.md`, `characters/PLAYER.md`,
+  `code/SKETCH_ARCHITECTURE.md` e `SESSION_START.md` registram o contrato da
+  spritesheet + JSON, o fallback, o loop por duração e a separação entre o
+  visual 32×32 e a colisão 16×24.
+- **Publicação:** os commits `4db65cd` (integração do jogador) e `ad27952`
+  (interface, documentação e evidências) foram enviados para
+  `prototype/sketch-architecture`.
+- **Verificação desta atualização documental:** `git diff --check` foi executado;
+  não houve nova execução do sketch nesta atualização, e permanecem válidas as
+  verificações funcionais registradas acima.
+
 
 ### Textos das falhas novas (D-047)
 
@@ -487,5 +506,6 @@ Corpos dos cartões: `O SUPORTE PERDEU ESTABILIDADE. A NAVE CONSOME MAIS OXIGÊN
 
 O repositório está com a **funcionalidade do ticket #18 pronta e verificada**:
 navegação, tarefas, feedback, eventos, ciclo diário e renderização em 720p
-seguem implementados. A arte continua procedural e será tratada na cadeia
-`#10 → #8`, agora sob o contrato D-065 a D-068.
+seguem implementados. O jogador agora usa a spritesheet integrada e verificada;
+a arte restante das salas e dos NPCs continua procedural e será tratada na cadeia
+`#10 → #8`, agora com o contrato de spritesheet + JSON registrado acima.
