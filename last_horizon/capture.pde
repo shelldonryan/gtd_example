@@ -1,6 +1,13 @@
 boolean capture_mode = false;
 boolean hit_test_mode = false;
 boolean ladder_test_mode = false;
+boolean pipeline_test_mode = false;
+PImage pipeline_probe_image;
+PGraphics pipeline_probe_layer;
+final int PIPELINE_TEST_FRAME = 4;
+final int PIPELINE_PROBE_SIZE = 16;
+final String PIPELINE_PROBE_FILE = "pipeline_probe_frame_1.png";
+
 int capture_step = 0;
 int capture_next_frame = 0;
 final int CAPTURE_FIRST_FRAME = 4;
@@ -26,15 +33,48 @@ void readArgs(){
     capture_mode |= args[i].equals("--capture");
     hit_test_mode |= args[i].equals("--hit-test");
     ladder_test_mode |= args[i].equals("--ladder-test");
+    pipeline_test_mode |= args[i].equals("--asset-pipeline-test");
   }
 
-  if (capture_mode || ladder_test_mode){
+  if (pipeline_test_mode){
+    pipeline_probe_image = loadImage(PIPELINE_PROBE_FILE);
+    preparePipelineProbe();
+  }
+
+  if (capture_mode || ladder_test_mode || pipeline_test_mode){
     new File(sketchPath("output")).mkdirs();
   }
 }
 
+void preparePipelineProbe(){
+  pipeline_probe_layer = createGraphics(
+    PIPELINE_PROBE_SIZE * RENDER_SCALE,
+    PIPELINE_PROBE_SIZE * RENDER_SCALE
+  );
+  pipeline_probe_layer.noSmooth();
+  pipeline_probe_layer.beginDraw();
+  pipeline_probe_layer.clear();
+  pipeline_probe_layer.imageMode(CENTER);
+  if (pipeline_probe_image != null){
+    pipeline_probe_layer.image(
+      pipeline_probe_image,
+      PIPELINE_PROBE_SIZE * RENDER_SCALE / 2,
+      PIPELINE_PROBE_SIZE * RENDER_SCALE / 2,
+      PIPELINE_PROBE_SIZE * RENDER_SCALE,
+      PIPELINE_PROBE_SIZE * RENDER_SCALE
+    );
+  }
+  pipeline_probe_layer.endDraw();
+}
+
+
 
 void updateCapture(){
+  if (pipeline_test_mode && frameCount == PIPELINE_TEST_FRAME){
+    runPipelineProbe();
+    return;
+  }
+
   if (hit_test_mode && frameCount == HIT_TEST_FRAME){
     runHitTest();
     return;
@@ -63,6 +103,49 @@ void updateCapture(){
 }
 
 
+void runPipelineProbe(){
+  boolean loaded = pipeline_probe_image != null
+    && pipeline_probe_image.width == PIPELINE_PROBE_SIZE
+    && pipeline_probe_image.height == PIPELINE_PROBE_SIZE;
+
+  base.save(sketchPath("output/pipeline_probe.png"));
+  saveFrame(sketchPath("output/pipeline_probe_window.png"));
+
+  if (loaded){
+    println("pipeline: OK - " + PIPELINE_PROBE_FILE
+      + " carregado via loadImage()");
+  } else {
+    println("pipeline: FALHOU - " + PIPELINE_PROBE_FILE
+      + " não foi carregado");
+  }
+
+  exit();
+}
+
+
+void drawPipelineProbe(PGraphics target){
+  target.background(COL_BG);
+  target.fill(COL_CYAN);
+  target.textSize(16);
+  target.text("ASSET PIPELINE", 24, 24);
+  target.fill(COL_TEXT);
+  target.textSize(12);
+  target.text("ASEPRITE -> PNG -> loadImage()", 24, 48);
+
+  target.fill(COL_PANEL);
+  target.rect(244, 96, 152, 152);
+  if (pipeline_probe_layer != null){
+    target.image(pipeline_probe_layer, BASE_W / 2, 172,
+      PIPELINE_PROBE_SIZE, PIPELINE_PROBE_SIZE);
+  }
+
+  target.fill(COL_TEXT);
+  target.text("16 x 16 PNG / render lógico 2x", 24, 278);
+  target.fill(COL_MUTED);
+  target.text("pixel art sem interpolação", 24, 300);
+}
+
+
 void saveCanvas(int step){
   String name = "output/" + nf(step + 1, 2) + "_" + capture_label[step];
   base.save(sketchPath(name + ".png"));
@@ -85,22 +168,26 @@ void runCaptureStep(int step){
     interactPoint(POINT_COMMAND_BRIEFING);
   } else if (step == 5){
     verify("console lista tarefas disponíveis", task_choice_open && task_choice_count > 0);
-    interact_queued = true;
-    updateTaskChoice();
+    pressRoomKey('e');
+    verify("E não confirma briefing", task_choice_open && active_task == TASK_NONE);
+    pressEnter();
   } else if (step == 6){
     verify("console exige escolha explícita", active_task != TASK_NONE && !action_used);
     captureReach(task_step_room[active_task][0], task_step_point[active_task][0]);
     interactPoint(task_step_point[active_task][0]);
   } else if (step == 7){
     verify("NPC abre diálogo modal", dialog_open);
-    dialog_open = false;
+    pressEnter();
+    verify("ENTER fecha diálogo", !dialog_open);
 
     while (task_step_index < task_step_count[active_task]){
       int room = task_step_room[active_task][task_step_index];
       int point = task_step_point[active_task][task_step_index];
       captureReach(room, point);
       interactPoint(point);
-      dialog_open = false;
+      if (dialog_open){
+        pressEnter();
+      }
     }
 
     enterRoomFrom(task_completion_room[active_task], -1);
@@ -114,6 +201,8 @@ void runCaptureStep(int step){
     verify("mapa não transporta o técnico", screen == before_screen && player_x == before_x);
   } else if (step == 10){
     verify("mapa mostra a ficha escolhida", map_open && map_selected_room == 3);
+    verify("mapa mostra somente destino", mapTaskDestinationLabel().equals(
+      "DESTINO DA TAREFA: " + roomTitle(task_completion_room[active_task])));
     clickAction(ACTION_CLOSE_MODAL);
   } else if (step == 11){
     captureReach(task_completion_room[active_task], task_completion_point[active_task]);
@@ -174,8 +263,48 @@ void runRuleChecks(){
   checkConnectedDoors();
   checkMapState();
   checkTaskRules();
+  checkPlayerFacing();
+  checkPlayerAnimationLoop();
+  checkKeyboardModalButtons();
   checkEndDayForecast();
   checkFailureRules();
+}
+
+void checkPlayerFacing(){
+  resetRun();
+  move_left_held = true;
+  updatePlayerFacing();
+  verify("jogador olha para a esquerda", player_facing == -1);
+
+  move_left_held = false;
+  move_right_held = true;
+  updatePlayerFacing();
+  verify("jogador olha para a direita", player_facing == 1);
+
+  move_right_held = false;
+  enterRoomFrom(SCREEN_ENERGY, 1);
+  verify("entrada pela direita olha para a esquerda", player_facing == -1);
+}
+
+void checkPlayerAnimationLoop(){
+  if (!player_assets_loaded){
+    verify("spritesheet do jogador carregada", false);
+    return;
+  }
+
+  move_left_held = false;
+  move_right_held = false;
+  move_up_held = false;
+  move_down_held = false;
+  player_animation_moving = false;
+  player_animation_started_at = millis() - 1000;
+  verify("idle entra em loop", playerCurrentFrame() == player_idle_start);
+
+  move_right_held = true;
+  player_animation_moving = true;
+  player_animation_started_at = millis() - 800;
+  verify("walk entra em loop", playerCurrentFrame() == player_walk_start);
+  move_right_held = false;
 }
 
 
@@ -242,13 +371,14 @@ void checkTaskRules(){
   enterRoom(SCREEN_COMMAND);
   interactPoint(POINT_VERA);
   verify("conversa não inicia tarefa", active_task == TASK_NONE && dialog_open);
-  dialog_open = false;
+  pressEnter();
 
   openTaskConsole();
   int selected = task_choice_indices[0];
-  task_choice_open = false;
-  beginTask(selected);
-  verify("console inicia tarefa confirmada", active_task == selected);
+  pressRoomKey('e');
+  verify("E não confirma briefing", task_choice_open && active_task == TASK_NONE);
+  pressEnter();
+  verify("ENTER inicia tarefa confirmada", active_task == selected && !action_used);
 
   action_used = true;
   active_task = TASK_NONE;
@@ -261,6 +391,30 @@ void checkTaskRules(){
     && taskNextInstruction().indexOf("PONTO FINAL") < 0);
 }
 
+
+void checkKeyboardModalButtons(){
+  resetRun();
+  enterRoom(SCREEN_ENERGY);
+  setCapturePlayerAtPoint(POINT_DISTRIBUTION);
+  interactPoint(POINT_DISTRIBUTION);
+  verify("distribuição abre confirmação", technical_open
+    && pending_switch_point == POINT_DISTRIBUTION);
+  handleEscape();
+  verify("ESC cancela distribuição", !technical_open && !saving_on);
+
+  interactPoint(POINT_DISTRIBUTION);
+  pressEnter();
+  verify("ENTER confirma distribuição", !technical_open && saving_on);
+
+  resetRun();
+  enterRoom(SCREEN_DORMITORY);
+  setCapturePlayerAtPoint(POINT_TECH_BUNK);
+  interactPoint(POINT_TECH_BUNK);
+  verify("beliche abre encerramento", end_day_open);
+  pressEnter();
+  verify("ENTER encerra o dia", !end_day_open && day == 2
+    && screen == SCREEN_DORMITORY);
+}
 
 void checkFailureRules(){
   resetRun();
@@ -304,8 +458,8 @@ void runHitTest(){
     int before_screen = screen;
     float room_cx = room_x[i] + MAP_ROOM_W / 2.0;
     float room_cy = MAP_ROOM_Y + MAP_ROOM_H / 2.0;
-    mouseX = int(room_cx * view_scale + view_offset_x);
-    mouseY = int(room_cy * view_scale + view_offset_y);
+    mouseX = int(room_cx * RENDER_SCALE * view_scale + view_offset_x);
+    mouseY = int(room_cy * RENDER_SCALE * view_scale + view_offset_y);
     mouse_pressed = true;
     updateInput();
     verify("hit-test ficha " + room_label[i], map_selected_room == i
@@ -430,6 +584,24 @@ void clickAction(int action){
     }
   }
   println("capture: botão " + action + " indisponível -> FALHOU");
+}
+void pressEnter(){
+  enter_pressed = true;
+  updateInput();
+  if (isRoomScreen()){
+    updateRoom();
+  }
+}
+
+
+void pressRoomKey(char value){
+  key = value;
+  keyCode = value;
+  keyPressed();
+  keyReleased();
+  if (isRoomScreen()){
+    updateRoom();
+  }
 }
 
 

@@ -28,15 +28,46 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
 | `tasks.pde` | tabela, console de briefing, progressão, custos, variantes e efeitos |
 | `capture.pde` | captura visual e verificações de fluxo, clique e escada |
 
+## Pipeline de assets
+
+- A origem portátil permanece em `last_horizon/data/`, com o `.aseprite` junto
+  dos PNGs exportados. A convenção de produção é um PNG por quadro, no padrão
+  ASCII `entidade_frame_N.png`.
+- O sketch carrega assets de produção com `loadImage()` em `loadPlayerAssets()`
+  durante `setup()`; o JSON correspondente é lido com `loadJSONObject()`. A
+  pasta `data/` é o diretório de assets do Processing.
+- `player_sheet.png` contém 10 frames de 64×64 e
+  `player_sheet.json` registra as tags `idle` (frames 0–1) e `walk`
+  (frames 2–9), incluindo a duração de cada frame.
+- A física mantém o personagem em 16×24 na grade lógica. O quadro visual é
+  desenhado em 32×32 lógicos e centralizado sobre a caixa de colisão.
+- A direção usa `player_facing`: `1` para a direita e `-1` para a esquerda.
+  O valor acompanha A/D e setas, é espelhado na camada sem interpolação e é
+  redefinido conforme a entrada pela porta ou o reinício da sala.
+- O modo de prova `--asset-pipeline-test` continua separado dos assets do jogo.
+- `pipeline_probe.aseprite` e `pipeline_probe_frame_1.png` são o fixture do
+  ticket #10, não assets finais de jogo. O probe tem 16×16 pixels e é exibido
+  duas vezes na grade lógica, no render físico 1280×720.
+- O modo de prova prepara uma camada `PGraphics` sem interpolação antes de
+  `beginDraw()`. A camada é composta no buffer principal, preservando a
+  suavização do texto.
+- A prova do pipeline é:
+  `"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --asset-pipeline-test`
+  Ela salva `last_horizon/output/pipeline_probe.png` e
+  `pipeline_probe_window.png`.
+
+
 ## Camadas da revisão
 
 - **Mapa macro:** sobreposição consultável aberta pelo botão `MAPA`; mostra a
-  posição real e fichas dos cômodos, sem alterar `screen`, posição ou tarefa.
+  posição real, fichas dos cômodos e somente o destino final da tarefa ativa,
+  sem alterar `screen`, posição ou tarefa.
 - **Salas conectadas:** portas laterais trocam para a sala adjacente e posicionam
   o técnico na entrada correspondente. Os quatro cômodos mantêm três conveses,
   duas escadas e ausência de câmera.
-- **Interação:** NPCs abrem diálogo modal com retrato e caixa inferior; sistemas
-  abrem painel técnico sem retrato; coletas e ações finais emitem avisos breves.
+- **Interação:** NPCs abrem diálogo modal com retrato e caixa inferior; `ENTER`
+  avança diálogos e confirma o briefing; sistemas abrem painel técnico sem
+  retrato; coletas e ações finais emitem avisos breves.
 - **Tarefas como dado:** o console do comando filtra e apresenta as tarefas
   disponíveis com custo, efeito e rota. A confirmação define `active_task`; NPC
   nenhum inicia tarefa incidentalmente. A tabela continua declarando gate,
@@ -48,7 +79,7 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
   beliche do técnico abre o resumo e a confirmação que chamam o processamento
   diário. Não existe botão `Passar dia`.
 
-Números do movimento (base 640×360): personagem 16×24, andar 1,5 px/quadro, pulo
+Números do movimento (grade lógica 640×360; render 1280×720 / 720p): personagem 16×24, andar 1,5 px/quadro, pulo
 de 48 px, gravidade 0,5, escada 1,0, plataformas atravessáveis por baixo.
 
 O código contém as camadas de sala jogável, movimento, colisão, interação e a
@@ -79,13 +110,19 @@ balanceamento.
 
 ## Viewport e input
 
-- Desenho num `PGraphics` de 640×360 (`noSmooth()`, `pixelDensity(1)`) ampliado por
-  **fator inteiro** na janela, com letterbox centralizado.
-- `view_scale = max(1, int(min(width / 640, height / 360)))`; a conversão que o exemplo do
-  professor não tem: `base = (mouseX - offset) / view_scale`.
+- O buffer de render é 1280×720 (720p). A grade lógica 640×360 é usada apenas
+  para posicionamento e é transformada por 2×; a janela mantém ampliação inteira
+  e letterbox centralizado.
+- `view_scale = max(1, int(min(width / 1280, height / 720)))`; a conversão da
+  janela para a grade lógica divide também pelo fator 2.
 - O mouse aciona apenas controles da interface, como `MAPA` e opções modais. O
   mapa preserva a sala e a posição; a movimentação entre cômodos usa portas e
   interação por `E`.
+- **Teclas modais:** `ENTER` avança diálogos e confirma a tarefa selecionada no
+  briefing; `E` interage com pontos da sala e não confirma o briefing.
+- Os botões repetem no próprio rótulo os atalhos disponíveis: `INICIAR (ENTER)`,
+  `CONTINUAR (ENTER)`, `CONTINUAR (ESC)`, `CONFIRMAR (ENTER)`,
+  `ENCERRAR DIA (ENTER)`, `VOLTAR (ESC)` e `FECHAR (ESC)`.
 - **Camadas de input**: menu, sala jogável, mapa, diálogo, painel técnico, evento
   e pausa. Todas as camadas modais bloqueiam movimento e interação da sala.
 - **ESC** é consumido pelo sketch (`key = 0`) antes de alternar a pausa; não
@@ -97,12 +134,16 @@ balanceamento.
 
 ## Legibilidade
 
-O playtest inicial mostrou que 8–10 px na base eram microtexto na janela 2×. A fonte
-`m5x7` e a base 640×360 continuam iguais, mas os helpers tipográficos agora usam
-**16 px** para rótulos e textos quebrados, com **entrelinha de 18 px**. Os botões
-tentam 16 px e reduzem somente quando a frase não cabe na largura disponível; o
-limite é 10 px. `COL_MUTED` e `COL_DIM` também foram clareados para manter contraste
-com o fundo.
+O playtest inicial mostrou que 8–10 px na base eram microtexto na janela 2×. A
+tipografia visível é **Segoe UI**, instalada no Windows, criada com suavização e
+renderizada no buffer 1280×720 (720p); a grade lógica 640×360 continua
+organizando as posições.
+Assets pixel art, quando entrarem, devem usar amostragem sem interpolação. A
+regra de suavização do texto não se aplica a esses assets.
+Os helpers tipográficos usam **16 px** para leitura, com **entrelinha de 18 px**.
+Os botões tentam 16 px e reduzem somente quando a frase não cabe na largura
+disponível; o limite é 10 px. `COL_MUTED` e `COL_DIM` também foram clareados
+para manter contraste com o fundo.
 
 Nenhum desenho de texto chama `g.textSize` direto: o HUD, as salas e os modais
 passam por `text`, `textCentered` ou `drawTextWrapped`, que aplicam o piso de
@@ -143,7 +184,7 @@ raiz do repositório:
 "C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --ladder-test
 ```
 
-`--capture` percorre 23 estados, salva `output/NN_estado.png` em 640×360 e
+`--capture` percorre 23 estados, salva `output/NN_estado.png` em 1280×720 (720p) e
 `output/NN_estado_window.png` na janela, verifica navegação, mapa, briefing,
 diálogo, tarefa diária, beliche, previsão de consumo, evento e regras de falha,
 e encerra sozinho. `--hit-test` abre 1400×900 e prova as quatro fichas do mapa e
@@ -156,18 +197,19 @@ Limitações observadas:
   nesta instalação é `False`; portanto não há comando manual executável de
   compilação usando esse runtime. O launcher suportado é o CLI do Processing.
 - A captura não usa bibliotecas externas do sketch: usa somente o core carregado
-  pelo CLI e `data/m5x7.ttf`. Não há biblioteca adicional ausente bloqueando o
-  harness.
+  pelo CLI e a família Segoe UI instalada no Windows. Não há biblioteca adicional
+  ausente bloqueando o harness.
 - O CLI emite os avisos `display count needs to be implemented for non-AWT` e
   `AWT disabled`, mas compila, executa, salva as imagens e encerra com sucesso.
   A execução headless não foi validada nesta sessão.
 
 ## Estado da revisão
 
-- **Código atual:** D-048 a D-060 implementadas. As quatro salas são conectadas
+- **Código atual:** D-048 a D-068 implementadas. As quatro salas são conectadas
   por portas; o mapa é uma sobreposição consultável; o console do comando escolhe
   a tarefa; NPCs, sistemas e eventos usam suas camadas próprias; o beliche do
-  técnico encerra o dia após o resumo previsto.
+  técnico encerra o dia após o resumo previsto; a interface usa Segoe UI e os
+  assets pixel art permanecem separados da suavização do texto.
 - `action_used` agora bloqueia outra escolha no console depois da ação final.
 - O HUD não possui painel lateral: usa cartões de recurso, faixa de próxima ação
   e botão `MAPA`.

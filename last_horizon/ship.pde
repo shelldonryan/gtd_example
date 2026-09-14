@@ -105,7 +105,7 @@ void drawMapOverlay(PGraphics g){
   }
 
   drawMapRoomDetails(g);
-  drawButton(g, 466, 262, 124, 22, "FECHAR", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 466, 262, 124, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
 }
 
 
@@ -151,9 +151,14 @@ void drawMapRoomDetails(PGraphics g){
   }
 
   text(g, detail, 50, 222, 16, COL_TEXT);
-  text(g, taskVisitsRoom(room_screen[index])
-    ? "A TAREFA ATUAL PASSA POR ESTE CÔMODO."
-    : "SEM ETAPA ATUAL NESTE CÔMODO.", 50, 242, 16, COL_MUTED);
+  text(g, mapTaskDestinationLabel(), 50, 242, 16, COL_MUTED);
+}
+String mapTaskDestinationLabel(){
+  if (active_task == TASK_NONE){
+    return "SEM TAREFA ATIVA.";
+  }
+
+  return "DESTINO DA TAREFA: " + roomTitle(task_completion_room[active_task]);
 }
 
 
@@ -338,6 +343,24 @@ void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
 
 
 void drawPlayer(PGraphics g){
+  if (!player_assets_loaded){
+    drawPlayerFallback(g);
+    return;
+  }
+
+  int frame = playerCurrentFrame();
+  updatePlayerFrameLayer(frame);
+  g.imageMode(CENTER);
+  g.image(player_frame_layer,
+    player_x + PLAYER_W / 2.0,
+    player_y + PLAYER_H / 2.0,
+    PLAYER_DRAW_W,
+    PLAYER_DRAW_H
+  );
+}
+
+
+void drawPlayerFallback(PGraphics g){
   g.noStroke();
   g.fill(player_on_ladder ? COL_CYAN : COL_ORANGE);
   g.rect(player_x, player_y, PLAYER_W, PLAYER_H);
@@ -345,6 +368,150 @@ void drawPlayer(PGraphics g){
   g.rect(player_x + 4, player_y + 5, 2, 2);
   g.rect(player_x + 10, player_y + 5, 2, 2);
   g.rect(player_x + 4, player_y + 17, 8, 2);
+}
+
+
+void loadPlayerAssets(){
+  player_sheet = loadImage(PLAYER_SHEET_FILE);
+  player_sheet_data = loadJSONObject(PLAYER_SHEET_DATA_FILE);
+
+  if (player_sheet == null || player_sheet_data == null){
+    println("player: assets not loaded");
+    return;
+  }
+
+  player_sheet_frames = player_sheet_data.getJSONArray("frames");
+  if (player_sheet_frames == null || player_sheet_frames.size() == 0){
+    println("player: no frames in JSON");
+    return;
+  }
+
+  int frame_count = player_sheet_frames.size();
+  player_frame_images = new PImage[frame_count];
+  player_frame_durations = new int[frame_count];
+
+  for (int i = 0; i < frame_count; i++){
+    JSONObject frame_data = player_sheet_frames.getJSONObject(i);
+    JSONObject frame_rect = frame_data.getJSONObject("frame");
+    player_frame_images[i] = player_sheet.get(
+      frame_rect.getInt("x"),
+      frame_rect.getInt("y"),
+      frame_rect.getInt("w"),
+      frame_rect.getInt("h")
+    );
+    player_frame_durations[i] = max(1, frame_data.getInt("duration"));
+  }
+
+  player_idle_start = 0;
+  player_idle_end = 0;
+  player_walk_start = 0;
+  player_walk_end = frame_count - 1;
+
+  JSONObject meta = player_sheet_data.getJSONObject("meta");
+  if (meta != null && meta.hasKey("frameTags")){
+    JSONArray tags = meta.getJSONArray("frameTags");
+    for (int i = 0; i < tags.size(); i++){
+      JSONObject tag = tags.getJSONObject(i);
+      String name = tag.getString("name");
+      if (name.equals("idle")){
+        player_idle_start = tag.getInt("from");
+        player_idle_end = tag.getInt("to");
+      } else if (name.equals("walk")){
+        player_walk_start = tag.getInt("from");
+        player_walk_end = tag.getInt("to");
+      }
+    }
+  }
+
+  player_frame_layer = createGraphics(
+    PLAYER_DRAW_W * RENDER_SCALE,
+    PLAYER_DRAW_H * RENDER_SCALE
+  );
+  player_frame_layer.noSmooth();
+  player_animation_started_at = millis();
+  player_assets_loaded = true;
+}
+
+
+void updatePlayerFacing(){
+  if (move_left_held && !move_right_held){
+    player_facing = -1;
+  } else if (move_right_held && !move_left_held){
+    player_facing = 1;
+  }
+}
+
+
+boolean playerIsMoving(){
+  return move_left_held || move_right_held || move_up_held || move_down_held;
+}
+
+
+int playerCurrentFrame(){
+  if (!player_assets_loaded){
+    return 0;
+  }
+
+  boolean moving = playerIsMoving();
+  if (moving != player_animation_moving){
+    player_animation_moving = moving;
+    player_animation_started_at = millis();
+  }
+
+  int first = moving ? player_walk_start : player_idle_start;
+  int last = moving ? player_walk_end : player_idle_end;
+  int total_duration = 0;
+
+  for (int index = first; index <= last; index++){
+    total_duration += max(1, player_frame_durations[index]);
+  }
+
+  int frame = first;
+  int elapsed = total_duration > 0
+    ? max(0, millis() - player_animation_started_at) % total_duration
+    : 0;
+
+  while (frame < last){
+    int duration = max(1, player_frame_durations[frame]);
+    if (elapsed < duration){
+      break;
+    }
+    elapsed -= duration;
+    frame++;
+  }
+
+  return frame;
+}
+
+
+void updatePlayerFrameLayer(int frame){
+  if (player_frame_layer == null
+    || frame == player_rendered_frame
+    && player_facing == player_rendered_facing){
+    return;
+  }
+
+  player_frame_layer.beginDraw();
+  player_frame_layer.clear();
+  player_frame_layer.imageMode(CENTER);
+  player_frame_layer.pushMatrix();
+  player_frame_layer.translate(
+    PLAYER_DRAW_W * RENDER_SCALE / 2.0,
+    PLAYER_DRAW_H * RENDER_SCALE / 2.0
+  );
+  player_frame_layer.scale(player_facing, 1);
+  player_frame_layer.image(
+    player_frame_images[frame],
+    0,
+    0,
+    PLAYER_DRAW_W * RENDER_SCALE,
+    PLAYER_DRAW_H * RENDER_SCALE
+  );
+  player_frame_layer.popMatrix();
+  player_frame_layer.endDraw();
+
+  player_rendered_frame = frame;
+  player_rendered_facing = player_facing;
 }
 
 
@@ -365,6 +532,7 @@ void enterRoom(int next_screen){
 void enterRoomFrom(int next_screen, int entry_side){
   screen = next_screen;
   current_room = next_screen;
+  player_facing = entry_side > 0 ? -1 : 1;
   player_x = entry_side > 0 ? ROOM_RIGHT - 28 - PLAYER_W : ROOM_LEFT + 28;
   player_y = deck_y[DECK_COUNT - 1] - PLAYER_H;
   player_velocity_y = 0;
@@ -378,6 +546,7 @@ void enterRoomFrom(int next_screen, int entry_side){
 
 void resetRoomState(){
   current_room = SCREEN_COMMAND;
+  player_facing = 1;
   player_x = ROOM_LEFT + 28;
   player_y = deck_y[DECK_COUNT - 1] - PLAYER_H;
   player_velocity_y = 0;
@@ -460,6 +629,7 @@ void updateRoom(){
     }
   }
 
+  updatePlayerFacing();
   if (player_on_ladder){
     updatePlayerOnLadder();
   } else {

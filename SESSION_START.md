@@ -3,7 +3,7 @@
 > Documento obrigatório de abertura e encerramento de toda sessão. Leia antes de
 > analisar, editar ou implementar qualquer coisa.
 
-Atualizado em: 2026-09-13 (após as resoluções dos tickets #11, #12 e #17)
+Atualizado em: 2026-09-14 (reconciliação da fronteira Wayfinder e do contrato visual do pipeline)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Como usar este arquivo
@@ -46,12 +46,16 @@ e as fontes afetadas.
 
 ## Contradições conhecidas
 
-- `issue://1` está sincronizado com o redesign D-048 a D-060. As issues #2 a
-  #18 estão ligadas como sub-issues, com **14/17 concluídas** em 13/09
-  (abertas: #7, #8 e #10). A #18 está CLOSED com evidência de execução.
-- `issue://13` registra o que deveria ser ignorado no antigo exemplo de
-  plataforma. Física, pulo e teclado deixam de ser itens a ignorar no
-  Last Horizon; combate e IA de inimigos continuam fora do escopo.
+- `issue://1` é o mapa de coordenação e mantém o corpo original como histórico;
+  os comentários mais recentes registram o contrato D-048 a D-068 e superam as
+  referências antigas a mapa-teleporte, botão `Passar dia`, 640×360 como render
+  e m5x7. As issues #2 a #18 estão ligadas como sub-issues, com **15/17
+  concluídas** (abertas: #7 e #8). A #18 foi reaberta e fechada novamente após
+  os ajustes de interação, mapa e atalhos; D-063 a D-068 consolidam a
+  apresentação visual.
+- `issue://13` registra convenções históricas do exemplo de plataforma. O m5x7 e
+  o render 640×360 não são decisões atuais; permanecem válidos apenas os nomes
+  ASCII, um PNG por quadro e o `.aseprite` portátil.
 - `issue://9` e o sketch atual descrevem uma prova de menus e botões. Eles são
   evidência da implementação existente, não da jogabilidade final.
 - Os conflitos do código foram resolvidos no sketch: as salas agora são jogáveis,
@@ -60,6 +64,9 @@ e as fontes afetadas.
   como identificador interno de regra.
 - As referências visuais usam o caminho real `assets/concept_arts/`; as artes
   continuam sendo referência de linguagem visual, não fonte de nomes.
+- A resolução canônica é 1280×720 (720p); 640×360 é apenas a grade lógica de
+  posicionamento. A tipografia visível é Segoe UI suavizada, e assets pixel art
+  usam amostragem sem interpolação.
 - Os documentos do vault foram sincronizados em 12/09: `events/CREW_ISSUES.md` e
   `events/SYSTEM_FAULTS.md` não dizem mais que a resposta do evento gasta a ação
   do dia.
@@ -82,6 +89,10 @@ plataforma dentro de uma nave espacial. A nave **não tem nome**.
   ficha de cada cômodo. Clicar nunca transporta o personagem.
 - A tarefa do dia é escolhida explicitamente no console de briefing da Sala de
   comando, que mostra custo, efeito e rota antes da confirmação.
+- Diálogos de NPC avançam com `ENTER` ou `CONTINUAR (ENTER)`; o console de briefing
+  confirma a tarefa com `ENTER` e não com `E`.
+- A ficha do mapa mostra apenas o destino final da tarefa ativa, nunca as salas
+  intermediárias da rota.
 - Cada tarefa é uma cadeia de etapas concretas (falar, coletar, executar). A
   faixa de orientação mostra somente a próxima ação e o cômodo; somente a ação
   final gasta a tarefa do dia.
@@ -119,9 +130,11 @@ decisão explícita. Os pontos de interação e as oito tarefas estão em
 ## Restrições técnicas confirmadas
 
 - Processing 4.5.6, modo Java, sketch `.pde`.
-- Resolução-base 640×360, proporção 16:9, janela escalável com ampliação inteira;
-  2× (1280×720) é o padrão.
-- `noSmooth()` e `pixelDensity(1)` para preservar pixel art.
+- Resolução canônica do render em **1280×720 (720p)**, proporção 16:9, janela
+  escalável com ampliação inteira; a grade lógica de layout permanece em 640×360
+  apenas para posicionamento.
+- A tipografia visível usa Segoe UI instalada no Windows, com suavização. Assets
+  pixel art usam amostragem sem interpolação; uma regra não altera a outra.
 - Código em inglês, sketch plano, sem hierarquia de classes desnecessária,
   funções curtas e separação `update`/`draw`.
 - Tarefas são **dado**: tabela em `tasks.pde` (arrays paralelos), pontos de
@@ -131,11 +144,12 @@ decisão explícita. Os pontos de interação e as oito tarefas estão em
   pela remoção do painel lateral.
 - Movimento: personagem 16×24, andar 1,5 px/quadro, pulo de 48 px, gravidade 0,5,
   escada 1,0, alcance de interação 12 px, plataformas atravessáveis por baixo.
-- Controles: setas e WASD, espaço, E e ESC; o botão `MAPA` usa o mouse. Encerrar
+- Controles: setas e WASD, espaço e E para interação em sala; ENTER avança
+  diálogos e confirma o briefing; ESC pausa; o botão `MAPA` usa o mouse. Encerrar
   o dia exige interação com o beliche do técnico.
-- Tipografia: título 32 px, leitura 16 px, entrelinha 18 px, botão reduz até
-  10 px só quando a frase não cabe. HUD com ícones de 16×16 e sem rótulo nos
-  cartões de recurso.
+- Tipografia: Segoe UI instalada no Windows, título 32 px, leitura 16 px,
+  entrelinha 18 px, botão reduz até 10 px só quando a frase não cabe. HUD com
+  ícones de 16×16 e sem rótulo nos cartões de recurso.
 - Um PNG por quadro, no padrão `entidade_frame_N.png`, com o `.aseprite` junto
   do sketch para manter a entrega portátil.
 - Áudio offline sem biblioteca externa: `javax.sound.sampled`, WAV PCM 16 bits em
@@ -224,25 +238,23 @@ Uma issue está disponível quando está **OPEN** e não possui nenhum bloqueado
 nativo **OPEN**. Bloqueadores CLOSED não impedem o trabalho. Recalcule esta
 regra nas issues no início de cada sessão; não confie apenas na tabela abaixo.
 
-### Snapshot atual da fronteira
-
-Sincronizado com o grafo nativo de dependências em 2026-09-13, após fechar #4,
-#11, #12, #14, #15, #16 e #17:
+Sincronizado com o grafo nativo de dependências em 2026-09-14, após fechar #10:
 
 | Issue | Estado | Bloqueadores abertos | Relação relevante |
 |---|---|---|---|
 | #4 — Executar e capturar o sketch | CLOSED | — | execução e captura aceitas |
 | #7 — Documento de entrega | disponível | — | independente |
-| #8 — Inventário de assets | disponível | — | depende apenas de #5/#6 CLOSED |
-| #10 — Pipeline Aseprite → Processing | disponível | — | depende apenas de #6 CLOSED |
+| #8 — Inventário de assets | disponível | — | liberado pelo #10; dimensões finais ainda abertas |
+| #10 — Pipeline Aseprite → Processing | CLOSED | — | pipeline implementado, reexportado e aceito |
 | #11 — Roteiro e textos | CLOSED | — | resolução registrada em 13/09 |
 | #12 — Balanceamento | CLOSED | — | resolução registrada nesta sessão |
 | #15 — Sala jogável | CLOSED | — | sala jogável validada |
 | #16 — HUD: ícones, alerta e rótulos | CLOSED | — | HUD validado |
 | #17 — Implementar as falhas novas no sketch | CLOSED | — | implementado, verificado e aceito; textos confirmados (D-047) |
+| #18 — Ajustes de navegação, tarefas e feedback | CLOSED | — | ENTER em modais e destino final no mapa; aceito |
 
-Issues de base já CLOSED: #2, #3, #4, #5, #6, #9, #11, #13, #14, #15, #16 e
-#17.
+Issues de base já CLOSED: #2, #3, #4, #5, #6, #9, #10, #11, #13, #14,
+#15, #16, #17 e #18.
 A issue #1 permanece OPEN como mapa de coordenação.
 
 O grafo Wayfinder é a fonte da disponibilidade; a ordem recomendada pode mudar
@@ -255,8 +267,10 @@ arquivo foi alterado: a aceitação e a evidência devem estar no próprio ticke
 - `#12` (fechado) → `#17` (fechado): o balanceamento liberou a implementação das
   falhas novas no sketch, verificada pela captura e aceita.
 - `#15` e `#16` estão fechados; sala jogável e HUD já estão no protótipo.
-- `#10` → definição segura do pipeline de arte → produção dos assets listados em
-  `#8`.
+- `#18` foi reaberta, implementada e fechada novamente com evidência para as
+  confirmações por teclado em modais e a apresentação do destino no mapa.
+- `#10` (fechado) → produção dos assets listados no `#8`; o pipeline foi
+  implementado e provado sem decidir dimensões finais.
 - `#7` é independente e pode ser fechado sem bloquear o protótipo.
 
 ## Decisões confirmadas
@@ -266,7 +280,11 @@ da sessão de grilling registrada em [issue://14](issue://14); D-024 a D-029 sa�
 da sessão de grilling registrada em [issue://11](issue://11); D-030 a D-046
 saíram da validação de balanceamento registrada em [issue://12](issue://12);
 D-047 foi confirmada no [issue://17](issue://17); D-048 a D-060 vieram do
-playtest e do redesign implementado no [issue://18](issue://18).
+playtest e do redesign implementado no [issue://18](issue://18). D-061 e D-062
+foram confirmadas na reabertura do [issue://18](issue://18); D-063 e D-064 foram
+confirmadas nas decisões visuais anteriores; D-065 a D-067 foram confirmadas
+nesta sessão pelo usuário; D-068 foi confirmada nesta sessão para os rótulos
+de botões e atalhos visíveis.
 
 | ID | Decisão | Estado |
 |---|---|---|
@@ -330,6 +348,14 @@ playtest e do redesign implementado no [issue://18](issue://18).
 | D-058 | O botão `Passar dia` sai; o técnico encerra o dia interagindo com um beliche próprio no Dormitório | CONFIRMADA |
 | D-059 | Antes de encerrar o dia, o beliche abre um resumo modal com consumo previsto, falhas ativas e estado da tarefa, seguido da confirmação | CONFIRMADA |
 | D-060 | O evento aleatório continua a partir do dia 2, mas sai do painel lateral: abre como modal técnico sobre a sala, bloqueia a exploração e mostra as duas consequências antes da escolha | CONFIRMADA |
+| D-061 | `ENTER` avança diálogos de NPC; o briefing confirma a tarefa com `ENTER`, e `E` não confirma o briefing | CONFIRMADA |
+| D-062 | A ficha do mapa mostra somente o destino final da tarefa ativa, não as salas intermediárias da rota | CONFIRMADA |
+| D-063 | A interface usa Segoe UI instalada no Windows, com suavização; o m5x7 deixa de ser a fonte visível do sketch | CONFIRMADA |
+| D-064 | O sketch renderiza nativamente em 1280×720; a grade lógica 640×360 permanece apenas para posicionamento e o pixel art fica restrito aos assets | CONFIRMADA |
+| D-065 | A resolução canônica do projeto é 1280×720 (720p); 640×360 é apenas a grade lógica de posicionamento | CONFIRMADA |
+| D-066 | O texto visível usa Segoe UI instalada no Windows, com suavização; m5x7 e m6x11 não são fontes visíveis do jogo | CONFIRMADA |
+| D-067 | A suavização pertence ao texto; assets pixel art usam amostragem sem interpolação, sem criar resolução alternativa | CONFIRMADA |
+| D-068 | Botões exibem no próprio rótulo o atalho de teclado já disponível; dicas redundantes de `ENTER` são removidas quando o botão já o informa | CONFIRMADA |
 
 
 ## Decisões que exigem consulta
@@ -373,31 +399,77 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 
 - **Grilling concluído:** D-006 a D-023 em `issue://14`, D-024 a D-029 em
   `issue://11` e D-030 a D-046 em `issue://12`; os três tickets estão CLOSED.
-- **Issues trabalhadas nesta sessão:** [#18](issue://18) implementada,
-  verificada e CLOSED com o redesign D-048 a D-060.
-- **Redesign implementado:** salas conectadas por portas, mapa consultável sem
-  teletransporte, escolha explícita no console, uma tarefa por dia, orientação
-  concreta, diálogos de NPC, painéis técnicos, eventos modais e encerramento do
-  dia no beliche do técnico.
-- **Documentos atualizados para o redesign:** `SESSION_START.md`, `README.md`,
-  `history/CONTEXT.md`, `mechanics/ACTIONS.md`, `interface/FLOW.md`,
-  `interface/HUD.md`, `interface/ROOMS.md` e `code/SKETCH_ARCHITECTURE.md`.
-- **Código:** o painel lateral e os botões `Voltar`/`Passar dia` foram removidos.
-  `screen` permanece na sala real enquanto o mapa abre como sobreposição. O
-  console filtra tarefas disponíveis e mostra custo, efeito e rota; NPCs não
-  iniciam tarefas incidentalmente; `action_used` bloqueia outra escolha. O
-  resumo do beliche usa as mesmas funções de custo que `consumeResources()`.
-- **Organização:** dados e funções obsoletos do briefing antigo foram removidos;
-  comentários redundantes saíram e os invariantes restantes estão em inglês.
-  `capture.pde` foi refeito para o novo fluxo.
-- **Verificação:** `--capture` percorreu 23 estados e imprimiu 26 verificações
-  `OK`; `--hit-test` e `--ladder-test` imprimiram 5 `OK` cada. Nenhum `FALHOU`.
-  Foram inspecionadas as capturas de sala conectada, console, diálogo, mapa,
-  resumo do dia e evento modal.
-- **Commits:** `0ee7050` (implementação e documentação) e `c82065b` (evidências
-  visuais), enviados para `origin/prototype/sketch-architecture`.
-- **Fronteira após #18:** #7, #8 e #10 permanecem disponíveis. O caminho de arte
-  #10 → #8 volta a ser o próximo recomendado.
+- **Issues trabalhadas nesta sessão:** [#18](issue://18) foi reaberta,
+  implementada, verificada e fechada novamente com os ajustes D-061 e D-062.
+- **Decisão visual:** D-063 e D-066 confirmam Segoe UI instalada no Windows,
+  com suavização; m5x7 e o protótipo comparativo não são a tipografia atual.
+- **Renderização:** D-064 e D-065 confirmam o buffer físico em 1280×720 (720p);
+  a grade lógica 640×360 permanece apenas para posicionamento.
+- **Amostragem:** D-067 separa texto suavizado de assets pixel art sem
+  interpolação.
+- **Ajustes implementados anteriormente:** `ENTER` avança e fecha diálogos de NPC;
+  o briefing confirma a tarefa com `ENTER` e `E` não confirma a seleção; a ficha
+  do mapa mostra somente o destino final da tarefa.
+- **Atalhos implementados nesta sessão:** `ENTER` confirma switches técnicos e
+  encerra o dia; `ESC` cancela/fecha esses modais e continua na pausa.
+- **Código:** `last_horizon.pde` usa `ui_font` com Segoe UI e `RENDER_W`/`RENDER_H`;
+  `ui.pde` mede e desenha texto em alta resolução; `capture.pde` converte o mouse
+  pela escala física; o fluxo funcional D-048 a D-062 permanece intacto, e
+  D-063 a D-068 atualizam renderização, amostragem e rótulos sem alterar o loop.
+- **Documentos atualizados nesta sessão:** `README.md`, `interface/TEXT_FONTS.md`,
+  `code/SKETCH_ARCHITECTURE.md`, `AGENTS.md` e `SESSION_START.md`.
+- **Artefatos removidos:** `prototype/font_preview/` e
+  `last_horizon/data/m5x7.ttf`; o probe do pipeline e o spritesheet do jogador
+  foram adicionados, enquanto os demais assets finais seguem pendentes.
+- **Verificação:** `--capture` percorreu 23 estados; todas as verificações
+  imprimiram `OK` e nenhuma imprimiu `FALHOU`. `--hit-test` e `--ladder-test`
+  imprimiram 5 `OK` cada.
+- **Arquivos alterados nesta sessão:** `last_horizon/last_horizon.pde`,
+  `last_horizon/ui.pde`, `last_horizon/hud.pde`, `last_horizon/capture.pde`,
+  `interface/TEXT_FONTS.md`, `code/SKETCH_ARCHITECTURE.md`, `AGENTS.md` e
+  `SESSION_START.md`.
+- **Fronteira atualizada em 2026-09-14:** #7 e #8 estão OPEN e sem bloqueador
+  nativo OPEN; #10 está CLOSED com evidência no próprio ticket. O próximo
+  caminho recomendado é `#8`; #7 permanece independente.
+- **Implementação do #10:** `last_horizon/data/` contém o fixture portátil
+  `pipeline_probe.aseprite` e `pipeline_probe_frame_1.png`; o sketch carrega
+  o PNG via `loadImage()` no modo `--asset-pipeline-test`, renderiza a camada
+  de pixel art sem interpolação e preserva texto suavizado.
+- **Integração visual do jogador:** `player_sheet.png` e
+  `player_sheet.json` são carregados no `setup()`; as tags `idle` (frames 0–1)
+  e `walk` (frames 2–9) controlam a animação, e `player_facing` espelha o
+  personagem para acompanhar esquerda/direita sem alterar a caixa de colisão.
+- **Verificação da integração:** `--capture` concluiu o fluxo com todos os
+  checks em `OK`; `--hit-test` validou 5 casos e `--ladder-test` validou 5
+  casos após a troca do desenho procedural pelo spritesheet.
+- **Correção da animação:** `playerCurrentFrame()` agora aplica o tempo
+  decorrido em módulo pela duração total da faixa; `idle` e `walk` retornam ao
+  primeiro frame continuamente, preservando as durações do JSON.
+
+- **Sincronização Wayfinder desta sessão:** a fronteira foi rechecada em
+  2026-09-14; a implementação e o fechamento do #10 foram publicados em
+  `issue://10`, e a nova fronteira foi publicada em `issue://1`.
+- **Arquivos da implementação do #10:** `last_horizon/capture.pde`,
+  `last_horizon/last_horizon.pde`, `code/SKETCH_ARCHITECTURE.md`,
+  `last_horizon/data/pipeline_probe.aseprite`,
+  `last_horizon/data/pipeline_probe_frame_1.png` e os PNGs de prova em
+  `last_horizon/output/`.
+- **Arquivos da integração do jogador:** `last_horizon/ship.pde`,
+  `last_horizon/last_horizon.pde`, `last_horizon/data/player/player_sheet.png`,
+  `last_horizon/data/player/player_sheet.json` e as capturas atualizadas em
+  `last_horizon/output/`.
+- **Arquivos desta correção:** `last_horizon/screens.pde`,
+  `last_horizon/ui.pde`, `last_horizon/ship.pde`,
+  `last_horizon/last_horizon.pde`, `last_horizon/capture.pde`,
+  `interface/FLOW.md`, `interface/HUD.md` e `interface/MENU_INIT.md`.
+- **Verificação desta correção:** `--capture` concluiu todas as verificações após
+  a simplificação, incluindo distribuição, cancelamento por `ESC` e encerramento
+  por `ENTER`, com `OK` e sem `FALHOU`. Permaneceram apenas os avisos conhecidos
+  do modo não-AWT.
+- **Simplificação desta sessão:** `WINDOW_W` e `WINDOW_H` foram removidos;
+  `settings()` usa diretamente `RENDER_W` e `RENDER_H`, sem alterar o fluxo.
+- **Interface nesta sessão:** botões com atalho passaram a exibir a tecla no
+  próprio rótulo; as dicas redundantes do início e dos diálogos foram removidas.
 
 ### Textos das falhas novas (D-047)
 
@@ -414,5 +486,6 @@ Escritos nesta sessão no formato do #11 e já no código. Os cartões ficam em
 Corpos dos cartões: `O SUPORTE PERDEU ESTABILIDADE. A NAVE CONSOME MAIS OXIGÊNIO.`, `A REDE PERDEU ESTABILIDADE E OPERA EM CARGA FORÇADA.` e `O TRANSMISSOR PERDEU O CONTATO COM A TERRA.`
 
 O repositório está com a **funcionalidade do ticket #18 pronta e verificada**:
-navegação, tarefas, feedback, eventos e ciclo diário seguem D-048 a D-060. A
-arte continua procedural e será tratada na cadeia #10 → #8.
+navegação, tarefas, feedback, eventos, ciclo diário e renderização em 720p
+seguem implementados. A arte continua procedural e será tratada na cadeia
+`#10 → #8`, agora sob o contrato D-065 a D-068.

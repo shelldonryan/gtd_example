@@ -1,8 +1,9 @@
-/* canvas */
+/* logical design grid and physical render target */
 final int BASE_W = 640;
 final int BASE_H = 360;
-final int WINDOW_W = BASE_W * 2;
-final int WINDOW_H = BASE_H * 2;
+final int RENDER_SCALE = 2;
+final int RENDER_W = BASE_W * RENDER_SCALE;
+final int RENDER_H = BASE_H * RENDER_SCALE;
 
 /* screens */
 final int SCREEN_INIT = 0;
@@ -38,6 +39,10 @@ final int ACTION_NEW_GAME = 43;
 /* playable room - interface/ROOMS.md */
 final int PLAYER_W = 16;
 final int PLAYER_H = 24;
+final String PLAYER_SHEET_FILE = "player/player_sheet.png";
+final String PLAYER_SHEET_DATA_FILE = "player/player_sheet.json";
+final int PLAYER_DRAW_W = 32;
+final int PLAYER_DRAW_H = 32;
 final float PLAYER_SPEED = 1.5;
 final float JUMP_HEIGHT = 48;
 final float GRAVITY = 0.5;
@@ -220,7 +225,23 @@ boolean move_right_held = false;
 boolean move_up_held = false;
 boolean move_down_held = false;
 PGraphics base;
-PFont pixel_font;
+PFont ui_font;
+PImage player_sheet;
+JSONObject player_sheet_data;
+JSONArray player_sheet_frames;
+PImage[] player_frame_images;
+int[] player_frame_durations;
+PGraphics player_frame_layer;
+boolean player_assets_loaded = false;
+int player_facing = 1;
+boolean player_animation_moving = false;
+int player_animation_started_at = 0;
+int player_rendered_frame = -1;
+int player_rendered_facing = 0;
+int player_idle_start = 0;
+int player_idle_end = 0;
+int player_walk_start = 0;
+int player_walk_end = 0;
 int view_scale = 1;
 float view_offset_x = 0;
 float view_offset_y = 0;
@@ -235,7 +256,7 @@ char key_char = ' ';
 
 
 void settings(){
-  size(WINDOW_W, WINDOW_H);
+  size(RENDER_W, RENDER_H);
   noSmooth();
   pixelDensity(1);
 }
@@ -245,13 +266,14 @@ void setup(){
   surface.setResizable(true);
   surface.setTitle("Last Horizon");
 
-  base = createGraphics(BASE_W, BASE_H);
-  base.noSmooth();
-  pixel_font = createFont("m5x7.ttf", 16, false);
+  base = createGraphics(RENDER_W, RENDER_H);
+  base.smooth(4);
+  ui_font = createFont("Segoe UI", 64, true);
 
   frameRate(60);
   cursor(ARROW);
   readArgs();
+  loadPlayerAssets();
 
   if (hit_test_mode){
     surface.setSize(1400, 900);
@@ -277,9 +299,11 @@ void draw(){
 
 void drawBase(){
   base.beginDraw();
-  base.noSmooth();
+  base.smooth(4);
+  base.resetMatrix();
   base.background(COL_BG);
-  base.textFont(pixel_font);
+  base.scale(RENDER_SCALE);
+  base.textFont(ui_font);
   base.textAlign(LEFT, TOP);
   base.imageMode(CENTER);
   base.rectMode(CORNER);
@@ -288,11 +312,15 @@ void drawBase(){
   resetButtons();
 
   draw_layer = LAYER_SCENE;
-  drawScreen(base);
+  if (pipeline_test_mode){
+    drawPipelineProbe(base);
+  } else {
+    drawScreen(base);
 
-  if (!isMenuScreen()){
-    drawHud(base);
-    drawModalLayer(base);
+    if (!isMenuScreen()){
+      drawHud(base);
+      drawModalLayer(base);
+    }
   }
 
   base.endDraw();
@@ -303,20 +331,20 @@ void drawWindow(){
   background(0);
   noSmooth();
   imageMode(CORNER);
-  image(base, view_offset_x, view_offset_y, BASE_W * view_scale, BASE_H * view_scale);
+  image(base, view_offset_x, view_offset_y, RENDER_W * view_scale, RENDER_H * view_scale);
 }
 
 
 void updateViewport(){
-  view_scale = max(1, int(min(width / (float) BASE_W, height / (float) BASE_H)));
-  view_offset_x = (width - BASE_W * view_scale) / 2.0;
-  view_offset_y = (height - BASE_H * view_scale) / 2.0;
+  view_scale = max(1, int(min(width / (float) RENDER_W, height / (float) RENDER_H)));
+  view_offset_x = (width - RENDER_W * view_scale) / 2.0;
+  view_offset_y = (height - RENDER_H * view_scale) / 2.0;
 }
 
 
 void updateMouseToBase(){
-  base_mouse_x = (mouseX - view_offset_x) / view_scale;
-  base_mouse_y = (mouseY - view_offset_y) / view_scale;
+  base_mouse_x = (mouseX - view_offset_x) / view_scale / RENDER_SCALE;
+  base_mouse_y = (mouseY - view_offset_y) / view_scale / RENDER_SCALE;
 }
 
 
@@ -378,6 +406,26 @@ void handleEscape(){
 
 
 void handleEnter(){
+  if (dialog_open){
+    doAction(ACTION_CLOSE_MODAL);
+    return;
+  }
+
+  if (task_choice_open){
+    interact_queued = true;
+    return;
+  }
+
+  if (technical_open && pending_switch_point >= 0){
+    doAction(ACTION_CONFIRM_SWITCH);
+    return;
+  }
+
+  if (end_day_open){
+    doAction(ACTION_END_DAY);
+    return;
+  }
+
   if (screen == SCREEN_INIT && player_name.trim().length() > 0){
     doAction(ACTION_START_GAME);
     return;
@@ -450,7 +498,9 @@ void keyPressed(){
     }
 
     if (key == 'e' || key == 'E'){
-      interact_queued = true;
+      if (!task_choice_open){
+        interact_queued = true;
+      }
       return;
     }
 
