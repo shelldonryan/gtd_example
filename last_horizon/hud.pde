@@ -154,6 +154,6 @@ void drawFooter(PGraphics g){
   boolean controls_on = !modalOpen() && !paused;
   drawButton(g, 6, FOOTER_Y + 4, 112, 22, "MAPA", ACTION_OPEN_MAP, controls_on);
   textCentered(g, "A/D ANDAR  W/S ESCADA  ESPAÇO PULAR  E INTERAGIR",
-    370, FOOTER_Y + 7, 16, controls_on ? COL_MUTED : COL_DIM);
+    360, FOOTER_Y + 7, 16, controls_on ? COL_MUTED : COL_DIM);
   text(g, "ESC PAUSA", 536, FOOTER_Y + 7, 16, COL_DIM);
 }

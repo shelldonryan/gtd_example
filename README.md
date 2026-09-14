@@ -20,6 +20,17 @@ Durante o percurso, o jogador precisa manter a nave funcionando, administrar os 
 - Cômodos laterais exploráveis
 - Interface com indicadores de recursos
 
+## Resolução e tipografia
+
+O render do projeto é **1280×720 (720p)**, com janela redimensionável e
+ampliação inteira. A grade lógica 640×360 serve apenas para posicionamento; não é
+uma resolução alternativa do jogo.
+
+O texto visível usa **Segoe UI** instalada no Windows, com suavização. Assets
+pixel art devem ser desenhados sem interpolação. Essa separação não altera a
+resolução do render nem cria uma fonte alternativa.
+
+
 ## Mecanica principal
 
 A partida representa uma viagem de dez dias por quatro cômodos conectados. O

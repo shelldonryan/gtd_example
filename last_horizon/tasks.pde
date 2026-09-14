@@ -354,23 +354,6 @@ String pointActionLabel(int point){
 }
 
 
-boolean taskVisitsRoom(int room){
-  if (active_task == TASK_NONE){
-    return false;
-  }
-
-  if (task_completion_room[active_task] == room){
-    return true;
-  }
-
-  for (int i = task_step_index; i < task_step_count[active_task]; i++){
-    if (task_step_room[active_task][i] == room){
-      return true;
-    }
-  }
-
-  return false;
-}
 
 
 String taskCostLabel(int task){
@@ -776,5 +759,5 @@ void drawTaskChoice(PGraphics g){
   text(g, "CUSTO: " + taskCostLabel(selected), 334, 132, 16, COL_TEXT);
   drawTextWrapped(g, "EFEITO: " + task_effect[selected], 334, 158, 254, 16, 18, COL_TEXT);
   drawTextWrapped(g, "ROTA: " + taskRouteLabel(selected), 334, 204, 254, 16, 18, COL_MUTED);
-  text(g, "SETAS: ESCOLHER   E: ACEITAR   ESC: VOLTAR", 36, 278, 16, COL_MUTED);
+  text(g, "SETAS: ESCOLHER   ENTER: ACEITAR   ESC: VOLTAR", 36, 278, 16, COL_MUTED);
 }

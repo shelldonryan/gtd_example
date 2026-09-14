@@ -2,27 +2,36 @@
 
 ## HUD
 
-- Fonte **m5x7** (CC0), 16 px na resolução base, entrelinha de 18 px.
-- Os seis cartões de recurso usam ícone de 16×16 + número + barra, **sem rótulo de texto** — os únicos cartões com rótulo são DIA e A BORDO. O número é o destaque do cartão.
-- Nunca 24 px: não fecha na grade de 16.
+- Fonte **Segoe UI**, instalada no Windows, 16 px no render nativo, entrelinha
+  de 18 px.
+- Os seis cartões de recurso usam ícone de 16×16 + número + barra, **sem rótulo
+  de texto** — os únicos cartões com rótulo são DIA e A BORDO. O número é o
+  destaque do cartão.
 
 ## MENU
 
-- Títulos de tela em m5x7 a 32 px. Corpo em 16 px.
-- Botões podem reduzir até 10 px apenas quando a frase não cabe na largura disponível.
-- Alternativa de voz para título: Press Start 2P a 16 px (OFL).
+- Títulos de tela em Segoe UI a 32 px. Corpo em 16 px.
+- Botões podem reduzir até 10 px apenas quando a frase não cabe na largura
+  disponível.
 
 ## DIALOGS
 
-- Texto de evento e avisos: m5x7 a 16 px. Em 480 px de largura cabem cerca de 85 caracteres; manter as linhas com até 60.
-- Pontuação disponível: `-`, `...`, `"`, `'`. A fonte **não** tem travessão, reticências curtas, aspas curvas nem crase.
+- Texto de evento, diálogos e avisos em Segoe UI a 16 px.
+- A fonte cobre o vocabulário PT-BR e a pontuação usada pelo jogo sem substituir
+  caracteres por quadrados.
 
 ## Escala
 
-- Resolução base escolhida: **640×360** (16:9). A janela pode ampliar por fator inteiro, como 2× para 1280×720.
-- Desenhar tudo num buffer na resolução base, com `noSmooth()` e `pixelDensity(1)`, e ampliar de uma vez em **fator inteiro**.
-- Com `noSmooth()` o resultado fica idêntico à ampliação por vizinho mais próximo; sem ele, todo o texto borra.
+- Resolução canônica do render: **1280×720 (720p)**, proporção 16:9. A janela
+  pode ampliar por fator inteiro.
+- A grade lógica 640×360 serve apenas para posicionamento; não define uma
+  resolução alternativa do render ou dos assets.
+- Desenhar tudo num buffer físico de 1280×720. A tipografia visível usa Segoe UI
+  com suavização; assets pixel art usam amostragem sem interpolação.
+- As regras de suavização do texto e de amostragem dos assets são independentes.
+- O sketch usa a família instalada no sistema; não há arquivo de fonte adicional
+  nem biblioteca externa.
 
 ## Evidência
 
-`research/FONTE_ACENTOS.md` (branch `research/fonte-acentos`) e o ticket de fonte no mapa.
+A fonte foi validada visualmente no sketch e na captura de estados da interface.

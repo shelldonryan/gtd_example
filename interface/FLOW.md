@@ -11,7 +11,7 @@
 | Depósito | por uma porta adjacente | cena 2D jogável: peças, kit de vedação, ponto do casco e Bento |
 | Dormitório | por uma porta adjacente e no início de cada novo dia | cena 2D jogável: beliches, mesa comum, Neusa e beliche do técnico |
 | Mapa | botão `MAPA` | sobreposição com a posição real do técnico e fichas consultáveis dos cômodos; nunca transporta o jogador |
-| Diálogo | interação com sobrevivente | retrato sobre a cena e caixa inferior modal |
+| Diálogo | interação com sobrevivente | retrato sobre a cena e caixa inferior modal; avança com `ENTER` ou `CONTINUAR` |
 | Evento | quando o dia abre | cartão modal sobre a sala atual, com o problema e duas alternativas |
 | Pausa | ESC nas salas | continuar, reiniciar ou sair |
 | Vitória | fim da viagem, com motor operante e sobrevivente vivo | ver `MENU_VICTORY.md` |
@@ -61,9 +61,10 @@ graph LR
 | Andar | ← → ou A/D |
 | Usar escada | ↑ ↓ ou W/S |
 | Pular | espaço |
-| Interagir, abrir portas e avançar diálogo | E |
+| Interagir e abrir portas | E |
+| Continuar diálogos, confirmar briefing, confirmar modal e encerrar dia | ENTER |
 | Abrir o mapa | botão `MAPA`, com o mouse |
-| Pausa | ESC |
+| Pausa, fechar/voltar modal e continuar na pausa | ESC |
 
 O dia não avança por tecla ou botão persistente. Encerrá-lo exige chegar ao
 beliche do técnico no Dormitório e confirmar o resumo.
@@ -74,14 +75,17 @@ beliche do técnico no Dormitório e confirmar o resumo.
   atravessar uma porta; a posição de entrada corresponde à porta usada.
 - O mapa é uma sobreposição consultável. Marca `VOCÊ ESTÁ AQUI`; clicar num
   cômodo abre sua ficha, mas não move nem define rota para o técnico.
+- A ficha consultada mostra o destino final da tarefa ativa, quando houver. Ela
+  não marca as salas intermediárias da rota.
 - Fechar o mapa retorna à mesma sala e à mesma posição.
 - O console de briefing da Sala de comando é a única origem da escolha diária.
   Ele apresenta custo, efeito e rota antes de confirmar.
 - Depois da escolha, a interface mostra uma única próxima ação concreta, como
   `VÁ AO REATOR — SALA DE ENERGIA`.
-- NPCs usam retrato e caixa inferior modal. Sistemas usam painel técnico sem
-  retrato. Coletas e conclusões usam avisos breves; portas e escadas, indicações
-  contextuais.
+- NPCs usam retrato e caixa inferior modal; o botão `CONTINUAR (ENTER)` avança
+  o diálogo. Sistemas usam painel técnico sem retrato. Coletas e conclusões usam
+  avisos breves; portas e escadas, indicações contextuais.
+
 - Uma ação final consome a única tarefa do dia; movimento e etapas de preparação
   não consomem.
 - A partir do dia 2, um evento aleatório abre como modal técnico sobre a sala,
@@ -95,3 +99,8 @@ beliche do técnico no Dormitório e confirmar o resumo.
 - O cartão de transmissão externa não consome a tarefa, a ação, recursos ou tempo. Ele é fechado com clique.
 - Se uma transmissão e um evento do próximo dia coincidirem, a transmissão da consequência aparece primeiro; depois do clique, o evento abre.
 - Marte só envia mensagem na vitória; ela fica incorporada à tela de vitória, sem um cartão adicional.
+
+Os botões exibem no próprio rótulo o atalho de teclado que já controla a ação:
+`INICIAR (ENTER)`, `CONTINUAR (ENTER)`, `CONTINUAR (ESC)`, `CONFIRMAR (ENTER)`,
+`ENCERRAR DIA (ENTER)`, `VOLTAR (ESC)` e `FECHAR (ESC)`. Botões sem atalho de
+teclado permanecem acionados pelo mouse.

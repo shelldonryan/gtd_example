@@ -100,11 +100,12 @@ void drawButton(PGraphics g, float x, float y, float w, float h, String label, i
   int border = on ? (hover ? COL_CYAN : COL_BORDER) : COL_DIM;
   int colour = on ? (hover ? COL_CYAN : COL_TEXT) : COL_DIM;
   float text_size = fitTextSize(g, label, MIN_TEXT_SIZE, w - 16);
+  float render_size = renderTextSize(text_size);
 
   drawPanel(g, x, y, w, h, border);
   g.fill(colour);
-  g.textSize(text_size);
-  g.text(label, x + 8, y + (h - text_size) / 2.0);
+  g.textSize(render_size);
+  g.text(label, x + 8, y + (h - render_size) / 2.0);
 
   addButton(x, y, w, h, action, on);
 }
@@ -142,7 +143,7 @@ void drawDialogue(PGraphics g){
   drawPanel(g, 24, 210, 592, 126, COL_CYAN);
   text(g, dialog_name, 40, 220, 16, COL_CYAN);
   drawTextWrapped(g, dialog_text, 40, 244, 410, 16, 18, COL_TEXT);
-  drawButton(g, 470, 298, 128, 22, "CONTINUAR", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 470, 298, 128, 22, "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true);
 }
 
 
@@ -179,10 +180,10 @@ void drawTechnicalPanel(PGraphics g){
   drawTextWrapped(g, technical_text, 88, 138, 464, 16, 18, COL_TEXT);
 
   if (pending_switch_point >= 0){
-    drawButton(g, 286, 226, 128, 22, "VOLTAR", ACTION_CLOSE_MODAL, true);
-    drawButton(g, 424, 226, 128, 22, "CONFIRMAR", ACTION_CONFIRM_SWITCH, true);
+    drawButton(g, 286, 226, 128, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
+    drawButton(g, 424, 226, 128, 22, "CONFIRMAR (ENTER)", ACTION_CONFIRM_SWITCH, true);
   } else {
-    drawButton(g, 424, 226, 128, 22, "FECHAR", ACTION_CLOSE_MODAL, true);
+    drawButton(g, 424, 226, 128, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
   }
 }
 
@@ -199,8 +200,8 @@ void drawEndDayPanel(PGraphics g){
   text(g, "ESTADOS: " + activeStateSummary(), 72, 188, 16, COL_MUTED);
   text(g, "TAREFA: " + dayTaskSummary(), 72, 210, 16,
     action_used ? COL_GREEN : COL_YELLOW);
-  drawButton(g, 72, 254, 208, 26, "VOLTAR", ACTION_CLOSE_MODAL, true);
-  drawButton(g, 306, 254, 262, 26, "ENCERRAR DIA", ACTION_END_DAY, true);
+  drawButton(g, 72, 254, 208, 26, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 306, 254, 262, 26, "ENCERRAR DIA (ENTER)", ACTION_END_DAY, true);
 }
 
 
@@ -217,14 +218,17 @@ void drawStars(PGraphics g){
 }
 float fitTextSize(PGraphics g, String value, float desired_size, float max_width){
   float size = desired_size;
-  g.textSize(size);
+  g.textSize(renderTextSize(size));
 
   while (size > 10 && g.textWidth(value) > max_width){
     size -= 1;
-    g.textSize(size);
+    g.textSize(renderTextSize(size));
   }
 
   return size;
+}
+float renderTextSize(float size){
+  return size / RENDER_SCALE;
 }
 float readableTextSize(float size){
   return max(size, MIN_TEXT_SIZE);
@@ -240,7 +244,7 @@ void text(PGraphics g, String value, float x, float y, float size, int colour){
   float actual_size = readableTextSize(size);
 
   g.fill(colour);
-  g.textSize(actual_size);
+  g.textSize(renderTextSize(actual_size));
   g.text(value, x, y);
 }
 
@@ -249,7 +253,7 @@ void textCentered(PGraphics g, String value, float cx, float y, float size, int 
   float actual_size = readableTextSize(size);
 
   g.fill(colour);
-  g.textSize(actual_size);
+  g.textSize(renderTextSize(actual_size));
   g.text(value, cx - g.textWidth(value) / 2.0, y);
 }
 
@@ -259,9 +263,11 @@ float drawTextWrapped(PGraphics g, String value, float x, float y, float w, floa
   String line = "";
   float actual_size = readableWrapSize(size);
   float actual_line_h = max(line_h, actual_size + 2);
+  float render_size = renderTextSize(actual_size);
+  float render_line_h = renderTextSize(actual_line_h);
 
   g.fill(colour);
-  g.textSize(actual_size);
+  g.textSize(render_size);
 
   float line_y = y;
 
@@ -271,7 +277,7 @@ float drawTextWrapped(PGraphics g, String value, float x, float y, float w, floa
     if (line.length() > 0 && g.textWidth(candidate) > w){
       g.text(line, x, line_y);
       line = words[i];
-      line_y += actual_line_h;
+      line_y += render_line_h;
     } else {
       line = candidate;
     }
@@ -281,5 +287,5 @@ float drawTextWrapped(PGraphics g, String value, float x, float y, float w, floa
     g.text(line, x, line_y);
   }
 
-  return line_y + actual_line_h;
+  return line_y + render_line_h;
 }

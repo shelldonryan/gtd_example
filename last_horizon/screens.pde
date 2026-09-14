@@ -206,10 +206,9 @@ void drawInitScreen(PGraphics g){
   text(g, "TÉCNICO", 228, 144, 9, COL_MUTED);
   text(g, player_name + "_", 228, 158, 13, COL_TEXT);
 
-  drawButton(g, 220, 196, 95, 24, "INICIAR", ACTION_START_GAME, player_name.trim().length() > 0);
-  drawButton(g, 325, 196, 95, 24, "SAIR", ACTION_QUIT_GAME, true);
+  drawButton(g, 198, 196, 150, 24, "INICIAR (ENTER)", ACTION_START_GAME, player_name.trim().length() > 0);
+  drawButton(g, 354, 196, 90, 24, "SAIR", ACTION_QUIT_GAME, true);
 
-  textCentered(g, "ENTER TAMBÉM INICIA", BASE_W / 2.0, 236, 9, COL_DIM);
   textCentered(g, "PROTÓTIPO - TEXTO PROVISÓRIO", BASE_W / 2.0, 320, 9, COL_DIM);
 }
 
@@ -224,7 +223,7 @@ void drawVignetteScreen(PGraphics g){
     y += 24;
   }
 
-  textCentered(g, "CLIQUE PARA CONTINUAR", BASE_W / 2.0, 268, 10, COL_CYAN);
+  textCentered(g, "CLIQUE OU ENTER PARA CONTINUAR", BASE_W / 2.0, 268, 10, COL_CYAN);
   textCentered(g, (vignette_page + 1) + "/" + VIGNETTE_PAGES, BASE_W / 2.0, 300, 9, COL_DIM);
 
   addButton(0, 0, BASE_W, BASE_H, ACTION_VIGNETTE_NEXT, true);
@@ -269,7 +268,7 @@ void drawPauseCard(PGraphics g){
   drawPanel(g, 200, 104, 240, 152, COL_CYAN);
   textCentered(g, "PAUSA", BASE_W / 2.0, 122, 16, COL_CYAN);
 
-  drawButton(g, 216, 160, 208, 22, "CONTINUAR", ACTION_RESUME, true);
+  drawButton(g, 216, 160, 208, 22, "CONTINUAR (ESC)", ACTION_RESUME, true);
   drawButton(g, 216, 188, 208, 22, "REINICIAR PARTIDA", ACTION_RESTART, true);
   drawButton(g, 216, 216, 208, 22, "SAIR PARA O MENU", ACTION_MAIN_MENU, true);
 }

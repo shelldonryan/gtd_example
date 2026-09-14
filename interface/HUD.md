@@ -57,8 +57,18 @@ ficha de cada cômodo. Fechá-lo retorna à mesma sala e posição.
 ### Mapa
 
 O botão `MAPA` abre uma sobreposição consultável. Clicar num cômodo mostra
-ocupante, sistemas, alertas e se a etapa atual passa por ali. O clique nunca
-transporta o técnico.
+ocupante, sistemas, alertas e, quando houver tarefa ativa, seu destino final. A
+ficha não detalha as salas intermediárias da rota. O clique nunca transporta o
+técnico.
+### Diálogos e briefing
+
+- Diálogos de NPC avançam com `ENTER` ou clique em `CONTINUAR (ENTER)`.
+- O console de briefing confirma a tarefa selecionada com `ENTER`; `E` continua
+  reservado à interação na sala.
+
+Os botões de modais repetem o atalho no rótulo: `FECHAR (ESC)`, `VOLTAR (ESC)`,
+`CONFIRMAR (ENTER)` e `ENCERRAR DIA (ENTER)`. O botão de pausa é
+`CONTINUAR (ESC)`.
 
 ### Encerrar o dia
 
@@ -68,7 +78,7 @@ beliche no Dormitório e interagir. Antes da confirmação, um resumo modal most
 1. consumo previsto dos recursos;
 2. falhas e estados ativos;
 3. tarefa concluída ou pendente;
-4. `ENCERRAR DIA` e `VOLTAR`.
+4. `ENCERRAR DIA (ENTER)` e `VOLTAR (ESC)`.
 
 Confirmar processa recursos, moral, vitória ou derrota e abre o novo dia no
 Dormitório.

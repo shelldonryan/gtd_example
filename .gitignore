@@ -1,0 +1,27 @@
+# Processing export artifacts
+last_horizon/application.windows32/
+last_horizon/application.windows64/
+last_horizon/application.macosx/
+last_horizon/application.linux32/
+last_horizon/application.linux64/
+last_horizon/*.class
+
+# Java build artifacts
+*.class
+*.jar
+
+# GitNexus local index
+.gitnexus/
+.claude/
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor temporary files
+*.swp
+*~
+
+AGENTS.md
+CLAUDE.md
