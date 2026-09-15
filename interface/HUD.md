@@ -2,10 +2,9 @@
 
 ## Objetivo
 
-O HUD apresenta apenas o que o jogador precisa acompanhar enquanto atravessa a
-nave. O painel lateral `SISTEMA / TAREFA` foi removido: mapa e salas usam a
-largura liberada. A tarefa ativa fica numa faixa textual compacta, e alertas
-aparecem nos cartões de recurso ou como avisos temporários.
+O HUD apresenta recursos e a urgência que o jogador precisa acompanhar enquanto
+atravessa a nave. Não há lista lateral de tarefas: a faixa compacta destaca o
+problema com menor prazo, e o mapa reúne todos os problemas ativos por sala.
 
 ## Informações exibidas
 
@@ -19,7 +18,7 @@ aparecem nos cartões de recurso ou como avisos temporários.
 | Comida | ícone, número e barra | quantidade de comida armazenada |
 | Peças | ícone e número | quantas peças podem ser usadas em reparos |
 | Moral | ícone, número e barra | estado emocional dos sobreviventes |
-| Próxima ação | faixa textual compacta | tarefa ativa, ação concreta e cômodo de destino |
+| Problema urgente | faixa textual compacta | menor prazo, sala responsável e quantidade de outros problemas |
 
 ## Barras de recursos
 
@@ -45,56 +44,59 @@ no inventário de assets.
 | --- | --- |
 | Topo | dia, quantos estão a bordo e os seis indicadores de recurso |
 | Centro | sala 2D jogável usando toda a largura |
-| Faixa de orientação | tarefa ativa e uma única próxima ação concreta |
+| Faixa de urgência | problema com menor prazo e quantidade dos demais |
 | Rodapé | botão `MAPA` e orientação de controles |
-| Sobreposição | mapa, diálogos, painéis técnicos, eventos e resumo do fim do dia |
+| Sobreposição | mapa, diálogos, painéis técnicos, incidentes e resumo ao dormir |
 
-O mapa abre pelo botão `MAPA`, mostra `VOCÊ ESTÁ AQUI` e permite consultar a
-ficha de cada cômodo. Fechá-lo retorna à mesma sala e posição.
+O mapa abre pelo botão `MAPA`, mostra `VOCÊ ESTÁ AQUI` e marca todas as salas
+afetadas. Fechá-lo retorna à mesma sala e posição.
 
 ## Controles de alto nível
 
 ### Mapa
 
 O botão `MAPA` abre uma sobreposição consultável. Clicar num cômodo mostra
-ocupante, sistemas, alertas e, quando houver tarefa ativa, seu destino final. A
-ficha não detalha as salas intermediárias da rota. O clique nunca transporta o
+ocupante, sistemas e todos os problemas locais. Cada problema informa perda
+diária, prazo restante e consequência da crise. O clique nunca transporta o
 técnico.
-### Diálogos e briefing
+
+### Diálogos e pontos
 
 - Diálogos de NPC avançam com `ENTER` ou clique em `CONTINUAR (ENTER)`.
-- O console de briefing confirma a tarefa selecionada com `ENTER`; `E` continua
-  reservado à interação na sala.
+- Problemas já nascem ativos; não existe briefing nem confirmação de tarefa.
+- Recursos comuns são pagos no ponto da intervenção. Coleta física fica
+  reservada a componentes especiais.
 
 Os botões de modais repetem o atalho no rótulo: `FECHAR (ESC)`, `VOLTAR (ESC)`,
-`CONFIRMAR (ENTER)` e `ENCERRAR DIA (ENTER)`. O botão de pausa é
+`CONFIRMAR (ENTER)` e o botão de dormir. O botão de pausa é
 `CONTINUAR (ESC)`.
 
 ### Encerrar o dia
 
 Não existe botão persistente `Passar dia`. O técnico precisa chegar ao próprio
-beliche no Dormitório e interagir. Antes da confirmação, um resumo modal mostra:
+beliche no Dormitório e interagir. Antes de dormir, o resumo modal mostra:
 
 1. consumo previsto dos recursos;
-2. falhas e estados ativos;
-3. tarefa concluída ou pendente;
-4. `ENCERRAR DIA (ENTER)` e `VOLTAR (ESC)`.
+2. perdas e políticas persistentes;
+3. problemas ativos, prazos e crises iminentes;
+4. intervenção principal concluída ou ausente;
+5. confirmação para dormir e opção de voltar.
 
-Confirmar processa recursos, moral, vitória ou derrota e abre o novo dia no
-Dormitório.
+Dormir processa recursos, moral, perdas, prazos, crises, vitória ou derrota e
+abre o novo dia no Dormitório.
 
 ## Estados da interface
 
-- **Salas de interior:** formam uma sequência conectada por portas e usam toda a
-  largura disponível.
+- **Salas de interior:** o Comando é o hub; Dormitório, Depósito e Máquinas
+  ligam-se somente a ele.
 - **Diálogo de NPC:** retrato sobre a cena e caixa inferior; bloqueia movimento e
   interação até avançar ou fechar.
-- **Painel técnico:** usa a caixa inferior sem retrato para briefing, sistemas e
-  resumo do fim do dia.
+- **Painel técnico:** usa a caixa inferior sem retrato para sistemas e resumo do
+  fim do dia.
 - **Coleta e conclusão:** exibem aviso breve sem interromper a exploração.
-- **Mapa:** sobreposição consultável que preserva sala e posição.
-- **Evento:** modal técnico sem retrato sobre a sala, com título, situação e duas
-  alternativas acompanhadas das consequências; bloqueia a exploração até a escolha.
+- **Mapa:** preserva sala e posição e reúne os problemas por cômodo.
+- **Incidente:** modal técnico com duas contenções; bloqueia a exploração até a
+  escolha, mas deixa o problema ativo para correção física.
 - **Transmissão e desfecho:** permanecem modais.
 
 ## Avisos
@@ -105,15 +107,16 @@ segundo aceso, meio apagado). A cor sozinha deixa quem não a distingue sem
 nenhuma pista.
 
 Alertas críticos usam os cartões de recurso: cor, ícone de aviso e borda
-piscando. Falhas e mudanças de estado aparecem como avisos temporários com uma
-ação concreta, por exemplo `REPARAR MOTOR` ou `VÁ À SALA DE ENERGIA`.
+piscando. A faixa de urgência mostra:
 
-A faixa de orientação não acumula histórico nem usa termos internos como
-`passos livres` ou `ponto final`. Ela mostra somente:
+1. problema ativo com menor prazo;
+2. prazo restante;
+3. sala onde a intervenção deve ocorrer;
+4. quantidade de outros problemas ativos.
 
-1. nome da tarefa ativa;
-2. próxima ação concreta;
-3. cômodo onde a ação acontece;
-4. custo e efeito, quando relevantes para a decisão.
+Exemplo: `MOTOR DANIFICADO — 2 DIAS — MÁQUINAS | +2 PROBLEMAS`.
 
-Exemplo: `AUMENTAR POTÊNCIA — VÁ AO REATOR, SALA DE ENERGIA`.
+O mapa contém a comparação completa. A ficha da sala mostra, para cada problema,
+a perda diária, o prazo e a consequência quando ele chegar a zero. Para dano no
+casco, a ficha pertence ao cômodo que contém o local alcançável sorteado naquela
+ocorrência. Valores e textos finais serão fixados no ticket de balanceamento.

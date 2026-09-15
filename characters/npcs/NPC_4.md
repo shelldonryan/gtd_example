@@ -4,26 +4,19 @@
 | --- | --- |
 | Nome | Sílvia |
 | Papel | Mecânica |
-| Onde fica | Sala de energia, em ponto fixo junto ao motor |
+| Onde fica | Sala de máquinas, em ponto fixo junto aos sistemas |
 | Temperamento | Direta, sem paciência para desculpa |
-| Função nas tarefas | Dá o diagnóstico do motor, do suporte de vida e do sistema de energia; sorteia a variante do reparo de energia, que o NPC da sala entrega; comenta a potência extra |
+| Função nas intervenções | Motor, energia e suporte de vida; sua presença concede um benefício ainda a balancear |
 
 ## Papel no jogo
 
-Sílvia responde pelo motor. Ela lê o estado da máquina e diz ao técnico o que
-está quebrado e o que ainda aguenta. Na tarefa de reparar motor, dá o
-diagnóstico e aponta o que o reparo de 2 peças resolve. No suporte de vida, vê o
-que a emergência está custando; no sistema de energia, sorteia qual das três
-soluções o técnico vai buscar — fusível, cabo ou cartucho — e não repete uma
-variante já usada. Na de aumentar potência, comenta a potência extra: o que a
-nave ganha em dias e o que o motor paga por isso. Ela não suaviza a resposta.
+Sílvia acompanha motor, energia e suporte de vida na Sala de máquinas. Ela
+interpreta falhas técnicas, mas não é uma etapa obrigatória de toda correção.
+Recursos comuns são pagos diretamente na estação; somente componentes especiais
+justificam busca no Depósito.
 
-## Como o técnico interage
-
-- Reparar motor: Sílvia dá o diagnóstico e aponta o que o reparo resolve.
-- Reparar suporte de vida: aponta o que a emergência consome por dia.
-- Reparar sistema de energia: sorteia a variante e diz onde buscar o item.
-- Aumentar potência: comenta a potência extra e o que ela cobra do motor.
+Se Sílvia morrer, as correções técnicas continuam possíveis com custo ou risco
+maior, definido no próximo balanceamento.
 
 ## Vínculos
 
@@ -34,6 +27,6 @@ nave ganha em dias e o que o motor paga por isso. Ela não suaviza a resposta.
 
 ## Limitações
 
-- Não anda sozinha: fica no ponto fixo da Sala de energia.
+- Não anda sozinha: fica no ponto fixo da Sala de máquinas.
 - Não combate e não sai da nave.
 - Depende das decisões do técnico sobre potência e reparo.

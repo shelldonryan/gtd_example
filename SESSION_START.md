@@ -3,7 +3,7 @@
 > Documento obrigatório de abertura e encerramento de toda sessão. Leia antes de
 > analisar, editar ou implementar qualquer coisa.
 
-Atualizado em: 2026-09-14 (documentação da integração visual do jogador)
+Atualizado em: 2026-09-15 (balanceamento: dano no casco em local aleatório)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Como usar este arquivo
@@ -46,33 +46,29 @@ e as fontes afetadas.
 
 ## Contradições conhecidas
 
-- `issue://1` é o mapa de coordenação e mantém o corpo original como histórico;
-  os comentários mais recentes registram o contrato D-048 a D-071 e superam as
-  referências antigas a mapa-teleporte, botão `Passar dia`, 640×360 como render
-  e m5x7. As issues #2 a #18 estão ligadas como sub-issues, com **15/17
-  concluídas** (abertas: #7 e #8). A #18 foi reaberta e fechada novamente após
-  os ajustes de interação, mapa e atalhos; D-063 a D-071 consolidam a
-  apresentação visual.
-- `issue://13` registra convenções históricas do exemplo de plataforma. O m5x7 e
-  o render 640×360 não são decisões atuais; continuam válidos apenas os nomes
-  ASCII e o `.aseprite` portátil quando a fonte for versionada. A regra antiga
-  de um PNG por quadro não se aplica ao jogador, que usa spritesheet + JSON.
-- `issue://9` e o sketch atual descrevem uma prova de menus e botões. Eles são
-  evidência da implementação existente, não da jogabilidade final.
-- Os conflitos do código foram resolvidos no sketch: as salas agora são jogáveis,
-  o HUD usa ícones e **A BORDO**, e o mapa macro não imprime nome de nave.
-- O vocabulário visível do código usa **sobreviventes**; `CREW` permanece apenas
-  como identificador interno de regra.
-- As referências visuais usam o caminho real `assets/concept_arts/`; as artes
-  continuam sendo referência de linguagem visual, não fonte de nomes.
-- A resolução canônica é 1280×720 (720p); 640×360 é apenas a grade lógica de
-  posicionamento. A tipografia visível é Segoe UI suavizada, e assets pixel art
-  usam amostragem sem interpolação.
-- Os documentos do vault foram sincronizados em 12/09: `events/CREW_ISSUES.md` e
-  `events/SYSTEM_FAULTS.md` não dizem mais que a resposta do evento gasta a ação
-  do dia.
-- `issue://11` foi resolvida nesta sessão: a voz, a vinheta, as transmissões, os modais, os alertas e as cinco mensagens de derrota agora têm contrato registrado no ticket e nas fontes de interface.
-- `issue://12` foi resolvida nesta sessão: comida inicial 70; pool uniforme de sete eventos, sem repetição imediata e sem resortear falha ativa; falhas de suporte, energia e comunicações com custos, tarefas e variantes não repetíveis. O sketch implementa esse contrato desde o `issue://17`.
+- `issue://1` é o mapa de coordenação. A fronteira atual possui
+  `Balancear problemas persistentes e intervenções` e `Documento de entrega e
+  como o jogo roda na apresentação` disponíveis; `Inventário de assets` e
+  `Implementar problemas persistentes e hub central` estão bloqueados pelo novo
+  balanceamento.
+- `issue://19` registra o contrato D-073 a D-096 e supera as regras antigas de
+  briefing diário, tarefa aceita, rota universal por NPC, evento diário e mapa
+  com apenas um destino de tarefa.
+- O sketch atual continua sendo a implementação comprovada de D-048 a D-072. Ele
+  ainda usa salas lineares, `active_task`, itens comuns carregados e eventos
+  diários; portanto é evidência do protótipo anterior, não do novo ciclo.
+- Os custos e textos de D-030 a D-047 permanecem como linha de base histórica.
+  O novo modelo de perdas, prazos, crises e contenções exige revalidação no
+  ticket de balanceamento antes de qualquer migração do código.
+- O sketch ainda fixa o reparo do casco no Depósito. A decisão D-097 substitui
+  esse ponto fixo por um local aleatório alcançável em qualquer cômodo.
+- A resolução canônica continua 1280×720; 640×360 é somente a grade lógica.
+  Texto usa Segoe UI suavizada, e assets pixel art usam amostragem sem
+  interpolação.
+- Todo asset animado usa uma spritesheet PNG única com JSON; nomes permanecem
+  ASCII e o `.aseprite` acompanha a exportação quando disponível.
+- A nave não tem nome. As concept arts orientam linguagem visual e composição,
+  nunca nomes ou números.
 
 ## Direção atual do produto
 
@@ -84,49 +80,44 @@ plataforma dentro de uma nave espacial. A nave **não tem nome**.
   são ilustrativos — a fonte é `mechanics/ACTIONS.md`.
 - `assets/concept_arts/COMMAND_ROOM_CONCEPT_ART.png` é a linguagem visual das
   salas: cena lateral 2D em três conveses ligados por escadas, com terminais.
-- Os cômodos formam uma sequência contínua; o técnico atravessa portas e entra
-  pela extremidade correspondente da sala adjacente.
-- O mapa abre pelo botão `MAPA`, marca onde o técnico está e permite consultar a
-  ficha de cada cômodo. Clicar nunca transporta o personagem.
-- A tarefa do dia é escolhida explicitamente no console de briefing da Sala de
-  comando, que mostra custo, efeito e rota antes da confirmação.
-- Diálogos de NPC avançam com `ENTER` ou `CONTINUAR (ENTER)`; o console de briefing
-  confirma a tarefa com `ENTER` e não com `E`.
-- A ficha do mapa mostra apenas o destino final da tarefa ativa, nunca as salas
-  intermediárias da rota.
-- Cada tarefa é uma cadeia de etapas concretas (falar, coletar, executar). A
-  faixa de orientação mostra somente a próxima ação e o cômodo; somente a ação
-  final gasta a tarefa do dia.
-- NPCs usam retrato e caixa inferior modal; sistemas usam painel técnico sem
-  retrato; coletas e conclusões usam avisos breves; portas e escadas usam
-  indicações contextuais.
-- Quatro sobreviventes a bordo, além do técnico: **Vera** (piloto, comando),
-  **Bento** (intendente, depósito), **Neusa** (enfermeira, dormitório) e
-  **Sílvia** (mecânica, energia). Ficam parados em ponto fixo e são interativos;
-  não há rotinas autônomas.
-- O painel lateral `SISTEMA / TAREFA` e o botão `Passar dia` saem. O técnico
-  encerra o dia no próprio beliche, no Dormitório, após conferir o resumo modal.
-- O balanceamento confirmou comida inicial em 70; energia, oxigênio, água e moral começam em 100, e as peças em 6.
-- A falha de suporte de vida pode entrar em modo de emergência: custa 10 de energia e acrescenta 3 de consumo de oxigênio por dia até a nova tarefa de reparo.
-- O pool tem sete eventos: falha no motor, chuva de meteoros, falta de comida, conflito no dormitório, falha no suporte de vida, falha no sistema de energia e falha nas comunicações. Falha ativa sai do sorteio até ser reparada; as três variantes de energia não se repetem.
+- A Sala de comando é o único hub: uma porta por convés leva ao Dormitório
+  (superior), ao Depósito (médio) e à Sala de máquinas (inferior). As salas
+  periféricas não se conectam entre si.
+- `COMMAND_ROOM_CONCEPT_ART.png` orienta a composição espacial, sem importar
+  nomes ou números ilustrativos.
+- Incidentes surgem em dias alternados. O cartão escolhe uma contenção, mas
+  sempre deixa um problema local persistente.
+- Cada problema possui perda diária, prazo visível e crise específica.
+- Dano no casco surge em um local aleatório alcançável da nave, em qualquer um
+  dos quatro cômodos; não pertence a um ponto fixo do Depósito.
+- Não existe aceite de tarefa nem briefing diário. HUD destaca o menor prazo; o
+  mapa mostra todos os problemas por sala sem transportar o técnico.
+- Uma intervenção principal por dia pode corrigir, recuperar ou acelerar.
+  Diagnósticos, conversas, componentes especiais e políticas são livres.
+- Recursos comuns são pagos no ponto final. Apenas componentes especiais são
+  carregados fisicamente.
+- Dormir no beliche do técnico encerra o turno. Dormir sem intervir é permitido,
+  mas aplica perdas e reduz todos os prazos.
+- `Aumentar potência` elimina um dia futuro completo de consumo e incidente.
+- `Cuidar do grupo` recupera moral; `Socorrer [nome]` estabiliza uma pessoa em
+  risco. Morte remove um benefício da especialidade, nunca uma ação necessária.
+- Economia e racionamento são políticas persistentes de Máquinas e Depósito,
+  com custo inicial e diário de moral.
 
 ### Loop de jogo confirmado
 
 1. A partida dura dez dias.
-2. O primeiro dia começa na Sala de comando; os seguintes, no Dormitório, com
-   um evento a partir do dia 2.
-3. O jogador responde ao evento; a resposta não consome a tarefa do dia.
-4. O técnico atravessa as portas até o console do comando, compara custo, efeito
-   e rota e confirma uma tarefa.
-5. A faixa textual mostra uma próxima ação concreta por vez.
-6. A ação final cobra o custo e usa a tarefa do dia.
-7. O técnico retorna ao próprio beliche no Dormitório, confere consumo, falhas e
-   estado da tarefa e confirma o encerramento.
-8. Recursos, moral, vitória/derrota e avanço do dia são processados.
+2. O primeiro dia começa no Comando; os seguintes, no Dormitório.
+3. Em dias alternados, o jogador escolhe uma contenção para o incidente; o
+   problema nasce ativo na sala responsável.
+4. HUD e mapa mostram urgências, perdas, prazos e crises.
+5. O jogador explora e prepara qualquer problema sem aceitar uma tarefa.
+6. Uma correção, recuperação ou aceleração principal pode ser concluída.
+7. O técnico retorna ao próprio beliche, confere o resumo e dorme.
+8. Consumos, perdas, prazos, crises e condições de término são processados.
 
-Os números e as consequências continuam em `mechanics/ACTIONS.md` até uma nova
-decisão explícita. Os pontos de interação e as oito tarefas estão em
-`interface/ROOMS.md`.
+`mechanics/ACTIONS.md` registra o contrato e as pendências numéricas.
+`interface/ROOMS.md` registra topologia, responsabilidades e intervenções.
 
 ## Restrições técnicas confirmadas
 
@@ -138,34 +129,31 @@ decisão explícita. Os pontos de interação e as oito tarefas estão em
   pixel art usam amostragem sem interpolação; uma regra não altera a outra.
 - Código em inglês, sketch plano, sem hierarquia de classes desnecessária,
   funções curtas e separação `update`/`draw`.
-- Tarefas são **dado**: tabela em `tasks.pde` (arrays paralelos), pontos de
-  interação em lista e um despachante de efeitos. Tarefa nova = 1 linha + 1
-  estação.
-- Sala jogável: três conveses, duas escadas, sem câmera e com a largura liberada
-  pela remoção do painel lateral.
+- O novo modelo deve substituir `active_task` por problemas locais persistentes
+  depois do balanceamento; a arquitetura concreta ainda não foi implementada.
+- Sala jogável: três conveses, duas escadas, sem câmera.
 - Movimento: personagem 16×24, andar 1,5 px/quadro, pulo de 48 px, gravidade 0,5,
   escada 1,0, alcance de interação 12 px, plataformas atravessáveis por baixo.
 - Controles: setas e WASD, espaço e E para interação em sala; ENTER avança
-  diálogos e confirma o briefing; ESC pausa; o botão `MAPA` usa o mouse. Encerrar
-  o dia exige interação com o beliche do técnico.
+  diálogos e confirma modais; ESC pausa; o botão `MAPA` usa o mouse. Dormir
+  exige interação com o beliche do técnico.
 - Tipografia: Segoe UI instalada no Windows, título 32 px, leitura 16 px,
   entrelinha 18 px, botão reduz até 10 px só quando a frase não cabe. HUD com
   ícones de 16×16 e sem rótulo nos cartões de recurso.
-- Para animações, a convenção atual é uma spritesheet única em PNG com JSON de
-  metadados, mantendo as durações e as tags exportadas pelo Aseprite. Não
-  exportar PNG separado para cada quadro do jogador; o `.aseprite` de origem
-  pode acompanhar a exportação quando estiver disponível.
+- Para qualquer animação do jogo, a convenção atual é uma spritesheet única em
+  PNG com JSON de metadados, mantendo as durações e as tags exportadas pelo
+  Aseprite. Não exportar PNG separado por quadro. O `.aseprite` de origem pode
+  acompanhar a spritesheet quando estiver disponível.
 - Áudio offline sem biblioteca externa: `javax.sound.sampled`, WAV PCM 16 bits em
   `data/`.
 
-O sketch em `last_horizon/` implementa menus, mapa, salas jogáveis, movimento,
-gravidade, pulo, escadas, colisão de plataformas, pontos de interação, tarefas
-em cadeia, NPCs fixos, HUD com ícones e captura automática.
-O contrato textual do #11 está resolvido; o sketch ainda contém textos provisórios e precisa de uma etapa posterior de implementação.
+O sketch em `last_horizon/` continua executável e verificado para o ciclo
+anterior: menus, salas lineares, movimento, tarefas aceitas, eventos diários e
+encerramento no beliche. Nenhum código foi alterado nesta sessão.
 
-`code/SKETCH_ARCHITECTURE.md` registra a implementação atual. As capturas em
-`last_horizon/output/` incluem estados de exploração e a verificação de que só
-a conclusão da tarefa consome a ação do dia.
+`code/SKETCH_ARCHITECTURE.md` separa explicitamente implementação atual e
+contrato futuro. As capturas existentes continuam válidas apenas como evidência
+de D-048 a D-072.
 Os tickets [#15](issue://15) e [#16](issue://16) estão CLOSED após a validação
 da evidência na aceitação nativa de cada issue.
 
@@ -182,9 +170,11 @@ sem decisão do usuário.
 - `issue://?state=all` — inventário atual de issues.
 - `issue://14` — decisões D-006 a D-023 (histórico).
 - `issue://11` — decisões D-024 a D-029 (roteiro e textos).
-- `issue://12` — decisões D-030 a D-046 (balanceamento e falhas novas).
-- `issue://17` — implementação das falhas novas no sketch e os textos do D-047;
-  CLOSED em 13/09 (histórico, não é trabalho pendente).
+- `issue://12` — decisões D-030 a D-046 (balanceamento anterior).
+- `issue://17` — implementação anterior das falhas novas e D-047.
+- `issue://19` — decisões D-073 a D-096 do novo ciclo.
+- `issue://20` — próximo protótipo de balanceamento.
+- `issue://21` — implementação bloqueada pelo balanceamento.
 - Issues específicas do ticket escolhido, incluindo seus bloqueadores nativos.
 
 ### Domínio e produto
@@ -241,81 +231,66 @@ Uma issue está disponível quando está **OPEN** e não possui nenhum bloqueado
 nativo **OPEN**. Bloqueadores CLOSED não impedem o trabalho. Recalcule esta
 regra nas issues no início de cada sessão; não confie apenas na tabela abaixo.
 
-Sincronizado com o grafo nativo de dependências em 2026-09-14, após fechar #10:
+Sincronizado com o grafo nativo de dependências em 2026-09-15:
 
 | Issue | Estado | Bloqueadores abertos | Relação relevante |
 |---|---|---|---|
-| #4 — Executar e capturar o sketch | CLOSED | — | execução e captura aceitas |
-| #7 — Documento de entrega | disponível | — | independente |
-| #8 — Inventário de assets | disponível | — | jogador integrado; inventário dos demais assets ainda aberto |
-| #10 — Pipeline Aseprite → Processing | CLOSED | — | pipeline implementado, reexportado e aceito |
-| #11 — Roteiro e textos | CLOSED | — | resolução registrada em 13/09 |
-| #12 — Balanceamento | CLOSED | — | resolução registrada nesta sessão |
-| #15 — Sala jogável | CLOSED | — | sala jogável validada |
-| #16 — HUD: ícones, alerta e rótulos | CLOSED | — | HUD validado |
-| #17 — Implementar as falhas novas no sketch | CLOSED | — | implementado, verificado e aceito; textos confirmados (D-047) |
-| #18 — Ajustes de navegação, tarefas e feedback | CLOSED | — | ENTER em modais e destino final no mapa; aceito |
+| Documento de entrega e como o jogo roda na apresentação | disponível | — | independente |
+| Balancear problemas persistentes e intervenções | disponível | — | próximo caminho crítico |
+| Inventário de assets | bloqueada | Balancear problemas persistentes e intervenções | depende dos estados e pontos finais |
+| Implementar problemas persistentes e hub central | bloqueada | Balancear problemas persistentes e intervenções | migração posterior do sketch |
+| Redesenhar o ciclo diário e a origem das tarefas | CLOSED | — | D-073 a D-096 confirmadas |
 
-Issues de base já CLOSED: #2, #3, #4, #5, #6, #9, #10, #11, #13, #14,
-#15, #16, #17 e #18.
-A issue #1 permanece OPEN como mapa de coordenação.
+As issues de base até `Reestruturar navegação, tarefas e feedback` permanecem
+CLOSED como histórico e evidência do protótipo anterior. O mapa continua OPEN.
 
-O grafo Wayfinder é a fonte da disponibilidade; a ordem recomendada pode mudar
-conforme o prazo e os riscos. Não declarar uma issue concluída apenas porque um
-arquivo foi alterado: a aceitação e a evidência devem estar no próprio ticket.
-
+O grafo Wayfinder é a fonte da disponibilidade. Não declarar implementação
+concluída apenas porque o contrato foi documentado.
 
 ### Cadeias de trabalho relevantes
 
-- `#12` (fechado) → `#17` (fechado): o balanceamento liberou a implementação das
-  falhas novas no sketch, verificada pela captura e aceita.
-- `#15` e `#16` estão fechados; sala jogável e HUD já estão no protótipo.
-- `#18` foi reaberta, implementada e fechada novamente com evidência para as
-  confirmações por teclado em modais e a apresentação do destino no mapa.
-- `#10` (fechado) → produção dos assets listados no `#8`; o pipeline está
-  implementado e o jogador já tem exportação com dimensões registradas. O
-  inventário dos demais assets permanece aberto.
-- `#7` é independente e pode ser fechado sem bloquear o protótipo.
+- `Redesenhar o ciclo diário e a origem das tarefas` (fechada) →
+  `Balancear problemas persistentes e intervenções` (disponível) →
+  `Implementar problemas persistentes e hub central` (bloqueada).
+- `Balancear problemas persistentes e intervenções` também libera `Inventário
+  de assets`.
+- `Documento de entrega e como o jogo roda na apresentação` permanece
+  independente.
 
 ## Decisões confirmadas
 
-As decisões D-001 a D-005 são da primeira sessão de 12/09; D-006 a D-023 saíram
-da sessão de grilling registrada em [issue://14](issue://14); D-024 a D-029 saíram
-da sessão de grilling registrada em [issue://11](issue://11); D-030 a D-046
-saíram da validação de balanceamento registrada em [issue://12](issue://12);
-D-047 foi confirmada no [issue://17](issue://17); D-048 a D-060 vieram do
-playtest e do redesign implementado no [issue://18](issue://18). D-061 e D-062
-foram confirmadas na reabertura do [issue://18](issue://18); D-063 e D-064 foram
-confirmadas nas decisões visuais anteriores; D-065 a D-067 foram confirmadas
-nesta sessão pelo usuário; D-068 foi confirmada nesta sessão para os rótulos
-de botões e atalhos visíveis; D-069 a D-071 foram confirmadas na integração
-visual do jogador.
+As decisões D-001 a D-072 registram a formação e a implementação do protótipo
+anterior. D-073 a D-096 foram confirmadas no grilling de
+[Redesenhar o ciclo diário e a origem das tarefas](issue://19), e D-097 foi
+confirmada no balanceamento [#20](issue://20). Quando houver conflito, D-073 a
+D-097 superam decisões anteriores sobre briefing, tarefas, eventos, rotas,
+coleta, mapa, prioridades e localização do dano no casco.
 
 | ID | Decisão | Estado |
 |---|---|---|
 | D-001 | Interpretação anterior: o mapa macro abre as salas jogáveis | SUPERSEDED |
 | D-002 | O técnico é controlável dentro das salas | CONFIRMADA |
 | D-003 | A sala usa plataforma básica: andar, pular, escadas, colisão e interação | CONFIRMADA |
-| D-004 | Uma tarefa por dia; movimento é livre e a interação concluída consome a ação | CONFIRMADA |
+| D-004 | Interpretação anterior: uma tarefa aceita por dia e sua conclusão consome a ação | SUPERSEDED |
 | D-005 | Sobreviventes ficam parados e interativos, sem rotinas autônomas | CONFIRMADA |
 | D-006 | O técnico não entra na conta dos quatro sobreviventes | CONFIRMADA |
 | D-007 | Sem sobreviventes vivos é derrota imediata (quinta causa) | CONFIRMADA |
-| D-008 | Uma tarefa por dia, em cadeia de passos; só a conclusão gasta o dia | CONFIRMADA |
+| D-008 | Interpretação anterior: tarefa aceita em cadeia; só a conclusão gasta o dia | SUPERSEDED |
 | D-009 | Interpretação anterior: todas as estações ativas e briefing apenas sugestivo | SUPERSEDED |
-| D-010 | Cinco tarefas, todas com NPC e troca de cômodo | CONFIRMADA |
-| D-011 | Tarefas como dado: tabela em `tasks.pde` + despachante de efeitos | CONFIRMADA |
+| D-010 | Interpretação anterior: todas as tarefas passam por NPC e troca de cômodo | SUPERSEDED |
+| D-011 | Interpretação anterior: tarefa singular em `tasks.pde` governa o ciclo | SUPERSEDED |
 | D-012 | Três conveses e duas escadas em todos os cômodos | CONFIRMADA |
 | D-013 | Números de movimento (16×24, 1,5 / 48 / 0,5 / 1,0 / 12, sem câmera) | CONFIRMADA |
 | D-014 | Vera, Bento, Neusa e Sílvia, um por cômodo | CONFIRMADA |
 | D-015 | A nave não tem nome | CONFIRMADA |
-| D-016 | Vocabulário: sobreviventes, Sala de comando/energia, Depósito, Dormitório, A BORDO | CONFIRMADA |
+| D-016 | Interpretação anterior: vocabulário com `Sala de energia`; os demais termos permanecem vigentes | SUPERSEDED |
 | D-017 | Seis ícones de 16×16 no HUD | CONFIRMADA |
 | D-018 | Tipografia 16 px / entrelinha 18 / título 32 / botão até 10 | CONFIRMADA |
 | D-019 | Alerta com borda piscando e ícone de aviso | CONFIRMADA |
 | D-020 | Interpretação anterior: setas + WASD, espaço, E, ESC e controles de navegação no rodapé | SUPERSEDED |
-| D-021 | O dia 1 ensina pelo briefing, sem tela de tutorial | CONFIRMADA |
+| D-021 | Interpretação anterior: o dia 1 ensina pelo briefing | SUPERSEDED |
 | D-022 | Playtest com checklist de seis perguntas | CONFIRMADA |
-| D-023 | Tarefa não concluída não custa nada; o item fica com o técnico | CONFIRMADA |
+| D-023 | Interpretação anterior: qualquer item de tarefa persiste com o técnico | SUPERSEDED |
 | D-024 | Voz híbrida por canal: sistema seco; Terra e Marte brevemente humanos | CONFIRMADA |
 | D-025 | Vinheta em três telas, com objetivo explícito e sem tutorial de controles | CONFIRMADA |
 | D-026 | Terra reage uma vez a cada primeiro incidente grave; Marte fala só na vitória | CONFIRMADA |
@@ -324,7 +299,7 @@ visual do jogador.
 | D-029 | Cinco derrotas usam causa e consequência em texto seco | CONFIRMADA |
 | D-030 | Comida inicial em 70; as demais barras começam em 100 e as peças em 6 | CONFIRMADA |
 | D-031 | Eventos uniformes, sem repetição imediata, durante a viagem | CONFIRMADA |
-| D-032 | `Socorrer sobrevivente` recupera 10 de moral por 5 de água | CONFIRMADA |
+| D-032 | Interpretação anterior: `Socorrer sobrevivente` troca 5 de água por 10 de moral | SUPERSEDED |
 | D-033 | Falha de suporte: 2 peças ou emergência com 10 de energia e +3 O₂/dia | CONFIRMADA |
 | D-034 | Nova tarefa declarativa de reparo, concluível no mesmo dia do evento | CONFIRMADA |
 | D-035 | Falha de suporte entra no pool uniforme de cinco eventos, sem repetição imediata | CONFIRMADA |
@@ -341,20 +316,20 @@ visual do jogador.
 | D-046 | Falha ativa não é resortada: motor danificado, suporte em emergência, energia ativa e comunicações em silêncio | CONFIRMADA |
 | D-047 | Textos das falhas de suporte, energia e comunicações (cartões, alternativas e linhas do painel) aprovados no formato do #11 | CONFIRMADA |
 | D-048 | O técnico atravessa a nave fisicamente por portas entre cômodos; o mapa continua existindo, mas clicar nele não teletransporta o personagem | CONFIRMADA |
-| D-049 | A tarefa do dia é escolhida explicitamente; conversar com um NPC não inicia uma tarefa sem confirmação | CONFIRMADA |
+| D-049 | Interpretação anterior: a tarefa do dia exige escolha e confirmação | SUPERSEDED |
 | D-050 | Interações usam hierarquia por consequência: NPCs em diálogo modal com retrato e caixa inferior; sistemas em painel técnico sem retrato; coleta e conclusão em avisos breves; portas e escadas em indicações contextuais | CONFIRMADA |
 | D-051 | Depois da vinheta, o técnico começa fisicamente na Sala de comando | CONFIRMADA |
 | D-052 | Clicar num cômodo do mapa abre sua ficha; o mapa marca onde o técnico está, mas não define rota nem desloca o personagem | CONFIRMADA |
-| D-053 | Depois do diálogo, a próxima ação permanece visível somente como texto curto, sem marcador ou seta no cenário | CONFIRMADA |
-| D-054 | A tarefa do dia é escolhida no console de briefing da Sala de comando; o painel técnico mostra opções, custo, efeito e rota antes da confirmação | CONFIRMADA |
+| D-053 | Interpretação anterior: a faixa mostra a próxima ação de uma tarefa singular | SUPERSEDED |
+| D-054 | Interpretação anterior: o console de briefing é a origem da tarefa diária | SUPERSEDED |
 | D-055 | O painel lateral `SISTEMA / TAREFA` sai; mapa e salas usam a largura liberada, a orientação vira uma faixa textual compacta e alertas ficam nos recursos ou em avisos temporários | CONFIRMADA |
 | D-056 | Um botão `MAPA` abre o mapa como sobreposição consultável e retorna o jogador à mesma posição ao fechar | CONFIRMADA |
 | D-057 | Depois do primeiro dia iniciado na Sala de comando, cada novo dia começa fisicamente no Dormitório | CONFIRMADA |
 | D-058 | O botão `Passar dia` sai; o técnico encerra o dia interagindo com um beliche próprio no Dormitório | CONFIRMADA |
 | D-059 | Antes de encerrar o dia, o beliche abre um resumo modal com consumo previsto, falhas ativas e estado da tarefa, seguido da confirmação | CONFIRMADA |
-| D-060 | O evento aleatório continua a partir do dia 2, mas sai do painel lateral: abre como modal técnico sobre a sala, bloqueia a exploração e mostra as duas consequências antes da escolha | CONFIRMADA |
-| D-061 | `ENTER` avança diálogos de NPC; o briefing confirma a tarefa com `ENTER`, e `E` não confirma o briefing | CONFIRMADA |
-| D-062 | A ficha do mapa mostra somente o destino final da tarefa ativa, não as salas intermediárias da rota | CONFIRMADA |
+| D-060 | Interpretação anterior: um evento abre em todo dia a partir do segundo | SUPERSEDED |
+| D-061 | Interpretação anterior: `ENTER` também confirma o briefing | SUPERSEDED |
+| D-062 | Interpretação anterior: o mapa mostra apenas o destino da tarefa ativa | SUPERSEDED |
 | D-063 | A interface usa Segoe UI instalada no Windows, com suavização; o m5x7 deixa de ser a fonte visível do sketch | CONFIRMADA |
 | D-064 | O sketch renderiza nativamente em 1280×720; a grade lógica 640×360 permanece apenas para posicionamento e o pixel art fica restrito aos assets | CONFIRMADA |
 | D-065 | A resolução canônica do projeto é 1280×720 (720p); 640×360 é apenas a grade lógica de posicionamento | CONFIRMADA |
@@ -364,6 +339,32 @@ visual do jogador.
 | D-069 | O jogador usa uma spritesheet única em PNG + JSON para `idle` e `walk`; não há PNG separado por quadro | CONFIRMADA |
 | D-070 | A spritesheet do jogador tem 10 quadros de 64×64; `idle` usa 0–1, `walk` usa 2–9 e o loop preserva as durações do JSON | CONFIRMADA |
 | D-071 | O visual do jogador é 32×32 sobre colisão 16×24; `player_facing` espelha esquerda/direita sem duplicar a arte | CONFIRMADA |
+| D-072 | Todos os assets animados do projeto usam uma spritesheet única em PNG + JSON; não há PNG separado por quadro | CONFIRMADA |
+| D-073 | Eventos geram problemas locais: cada incidente cria uma necessidade concreta no sistema ou cômodo afetado, sem exigir briefing diário na Sala de comando; a função e a necessidade das manutenções permanecem ABERTAS | CONFIRMADA |
+| D-074 | Todo incidente deixa um problema local persistente; a resposta define a contenção imediata, a tarefa corrige a causa e ignorar o problema mantém perdas, permite agravamento e pode levar à derrota | CONFIRMADA |
+| D-075 | Problemas locais já nascem ativos após o evento; não existe etapa de aceitar tarefa. O mapa/HUD indica onde agir e os pontos relacionados respondem imediatamente; a correção final consome o trabalho do dia | CONFIRMADA |
+| D-076 | O técnico pode concluir uma intervenção principal por dia; inspeções, conversas, coletas e contenções são livres, e problemas não corrigidos continuam ativos para os dias seguintes | CONFIRMADA |
+| D-077 | Encerrar o dia continua exigindo dormir no beliche do técnico no Dormitório; para reduzir a travessia repetitiva, a nave deixa de ser uma sequência linear e passa a ter a Sala de comando como ponto central, com a topologia exata ainda ABERTA | CONFIRMADA |
+| D-078 | A nave mantém quatro salas jogáveis: Sala de comando no centro, com acesso direto à Sala de máquinas, ao Depósito e ao Dormitório; a organização espacial se baseia na composição de `assets/concept_arts/COMMAND_ROOM_CONCEPT_ART.png`, sem adotar nomes ou números ilustrativos da arte | CONFIRMADA |
+| D-079 | A Sala de comando é o único hub: Dormitório, Depósito e Sala de máquinas possuem ligação direta apenas com ela, sem portas entre as três salas periféricas | CONFIRMADA |
+| D-080 | A Sala de comando possui uma porta por convés: Dormitório no superior, Depósito no médio e Sala de máquinas no inferior; as escadas do hub fazem parte das rotas entre funções | CONFIRMADA |
+| D-081 | As intervenções principais se dividem em correção (remove problema persistente), recuperação (restaura margem crítica) e aceleração (reduz exposição aos próximos dias); economia e racionamento são contenções livres com custo próprio; `Socorrer sobrevivente` deve afetar sobrevivência real, com efeito exato ainda ABERTO | CONFIRMADA |
+| D-082 | Cada problema ativo exibe custo por dia, prazo restante e consequência do agravamento; a perda é aplicada ao encerrar o dia e o prazo visível permite comparar prioridades antes de escolher a intervenção | CONFIRMADA |
+| D-083 | Quando o prazo chega a zero, o problema aplica uma crise específica e coerente com seu domínio, não uma derrota universal; motor pode ser fatal, enquanto estoque, conflito, casco e comunicações causam perdas próprias e podem continuar ativos | CONFIRMADA |
+| D-084 | O padrão geral dos eventos é `risco agora, correção depois`: o cartão escolhe entre contenções com custos e riscos diferentes, mas o problema permanece até uma intervenção física no cômodo correspondente | CONFIRMADA |
+| D-085 | Sequências de correção variam conforme o problema e contêm apenas passos com função concreta: descobrir informação, obter algo realmente necessário ou aplicar a correção; NPC e troca de cômodo não são requisitos universais | CONFIRMADA |
+| D-086 | Recursos comuns já contabilizados no HUD, como peças, água e energia, são pagos diretamente no ponto da intervenção; não exigem retirada com NPC. Apenas componentes especiais justificam uma etapa física de busca | CONFIRMADA |
+| D-087 | O Depósito é a sala de logística: guarda componentes especiais usados por correções específicas e concentra controle de estoques e racionamento; não é passagem obrigatória para consumir recursos comuns | CONFIRMADA |
+| D-088 | A Sala de comando concentra navegação e comunicações: rota, previsão de chegada, aumento de potência, antena e transmissões; Vera interpreta a situação geral, mas não exige conversa diária | CONFIRMADA |
+| D-089 | Responsabilidades das salas: Comando cuida de navegação e comunicações; Máquinas, de motor, energia e suporte de vida; Depósito, de estoques, racionamento e componentes especiais; Dormitório, de descanso, saúde, moral e encerramento do dia | CONFIRMADA |
+| D-090 | O HUD destaca o problema ativo com menor prazo e informa quantos outros existem; o mapa marca todas as salas afetadas, e cada ficha detalha perda diária, prazo e consequência da crise | CONFIRMADA |
+| D-091 | Uma crise pode colocar um sobrevivente nomeado em risco com prazo visível; `Socorrer sobrevivente` é uma intervenção principal no Dormitório que consome recursos e estabiliza essa pessoa, enquanto prazo zerado causa sua morte e reduz `A BORDO` | CONFIRMADA |
+| D-092 | A morte de um sobrevivente remove o benefício mecânico ligado à sua especialidade, mas nunca bloqueia uma ação necessária; a mesma ação continua possível com custo ou risco maior | CONFIRMADA |
+| D-093 | Novos incidentes surgem em dias alternados, com dias sem evento entre eles; problemas anteriores continuam ativos, e os dias livres abrem espaço para correção, recuperação ou aceleração | CONFIRMADA |
+| D-094 | `Aumentar potência` elimina um dia completo de exposição: reduz a duração da viagem e evita o consumo diário e o incidente que ocorreriam nesse dia futuro | CONFIRMADA |
+| D-095 | No Dormitório, dormir apenas encerra o turno; `Cuidar do grupo` é uma intervenção principal que recupera moral; `Socorrer [nome]` é outra intervenção principal que estabiliza um sobrevivente em risco | CONFIRMADA |
+| D-096 | Economia de energia e racionamento são políticas persistentes ativadas localmente em Máquinas e Depósito; não consomem a intervenção principal, reduzem consumo e cobram moral ao ativar e a cada dia mantidas | CONFIRMADA |
+| D-097 | O dano no casco causado por meteoros não pertence a um ponto fixo: cada ocorrência escolhe um local aleatório alcançável pelo jogador em qualquer um dos quatro cômodos | CONFIRMADA |
 
 
 ## Decisões que exigem consulta
@@ -405,107 +406,21 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 
 ## Estado desta sessão
 
-- **Grilling concluído:** D-006 a D-023 em `issue://14`, D-024 a D-029 em
-  `issue://11` e D-030 a D-046 em `issue://12`; os três tickets estão CLOSED.
-- **Issues trabalhadas nesta sessão:** [#18](issue://18) foi reaberta,
-  implementada, verificada e fechada novamente com os ajustes D-061 e D-062.
-- **Decisão visual:** D-063 e D-066 confirmam Segoe UI instalada no Windows,
-  com suavização; m5x7 e o protótipo comparativo não são a tipografia atual.
-- **Renderização:** D-064 e D-065 confirmam o buffer físico em 1280×720 (720p);
-  a grade lógica 640×360 permanece apenas para posicionamento.
-- **Amostragem:** D-067 separa texto suavizado de assets pixel art sem
-  interpolação.
-- **Ajustes implementados anteriormente:** `ENTER` avança e fecha diálogos de NPC;
-  o briefing confirma a tarefa com `ENTER` e `E` não confirma a seleção; a ficha
-  do mapa mostra somente o destino final da tarefa.
-- **Atalhos implementados nesta sessão:** `ENTER` confirma switches técnicos e
-  encerra o dia; `ESC` cancela/fecha esses modais e continua na pausa.
-- **Código:** `last_horizon.pde` usa `ui_font` com Segoe UI e `RENDER_W`/`RENDER_H`;
-  `ui.pde` mede e desenha texto em alta resolução; `capture.pde` converte o mouse
-  pela escala física; o fluxo funcional D-048 a D-062 permanece intacto, e
-  D-063 a D-071 atualizam renderização, amostragem, rótulos e representação
-  visual do jogador.
-- **Documentos atualizados nesta sessão:** `README.md`, `interface/TEXT_FONTS.md`,
-  `code/SKETCH_ARCHITECTURE.md`, `AGENTS.md` e `SESSION_START.md`.
-- **Artefatos removidos:** `prototype/font_preview/` e
-  `last_horizon/data/m5x7.ttf`; o probe do pipeline e o spritesheet do jogador
-  foram adicionados, enquanto os demais assets finais seguem pendentes.
-- **Verificação:** `--capture` percorreu 23 estados; todas as verificações
-  imprimiram `OK` e nenhuma imprimiu `FALHOU`. `--hit-test` e `--ladder-test`
-  imprimiram 5 `OK` cada.
-- **Arquivos alterados nesta sessão:** `last_horizon/last_horizon.pde`,
-  `last_horizon/ui.pde`, `last_horizon/hud.pde`, `last_horizon/capture.pde`,
-  `interface/TEXT_FONTS.md`, `code/SKETCH_ARCHITECTURE.md`, `AGENTS.md` e
-  `SESSION_START.md`.
-- **Fronteira atualizada em 2026-09-14:** #7 e #8 estão OPEN e sem bloqueador
-  nativo OPEN; #10 está CLOSED com evidência no próprio ticket. O próximo
-  caminho recomendado é `#8`; #7 permanece independente.
-- **Implementação do #10:** `last_horizon/data/` contém o fixture portátil
-  `pipeline_probe.aseprite` e `pipeline_probe_frame_1.png`; o sketch carrega
-  o PNG via `loadImage()` no modo `--asset-pipeline-test`, renderiza a camada
-  de pixel art sem interpolação e preserva texto suavizado.
-- **Integração visual do jogador:** `player_sheet.png` (640×64) e
-  `player_sheet.json` são carregados no `setup()`; `idle` usa os quadros 0–1
-  (500 ms por quadro) e `walk` usa os quadros 2–9 (100 ms por quadro).
-- **Contrato físico e direção:** o desenho visual ocupa 32×32 na grade lógica,
-  mas a caixa de colisão continua 16×24. `player_facing` espelha a mesma arte
-  para acompanhar esquerda/direita e é redefinido ao entrar por uma porta.
-- **Correção da animação:** `playerCurrentFrame()` aplica o módulo pela duração
-  total da faixa selecionada; `idle` e `walk` retornam ao primeiro frame
-  continuamente. Se os assets falharem, o fallback procedural preserva a física.
+- **Issue em andamento:** [Balancear problemas persistentes e intervenções](issue://20)
+  foi reivindicada; o restante do modelo numérico continua ABERTO.
+- **Decisão confirmada:** D-097 remove o ponto fixo do casco no Depósito. Cada
+  dano por meteoros surge em um local aleatório alcançável pelo jogador em
+  qualquer um dos quatro cômodos.
+- **Fontes atualizadas:** `README.md`, `history/CONTEXT.md`,
+  `mechanics/ACTIONS.md`, `interface/FLOW.md`, `interface/ROOMS.md`,
+  `interface/HUD.md`, `events/HAZARDS.md`, `characters/npcs/NPC_2.md`,
+  `code/SKETCH_ARCHITECTURE.md` e `SESSION_START.md`.
+- **Código:** nenhum `.pde` foi alterado. O sketch ainda mantém o ponto antigo do
+  casco no Depósito e continua sendo a implementação do ciclo anterior.
+- **Wayfinder:** #20 permanece OPEN e bloqueia [Inventário de assets](issue://8)
+  e [Implementar problemas persistentes e hub central](issue://21);
+  [Documento de entrega](issue://7) permanece disponível e independente.
+- **Verificação desta sessão:** consistência documental reverificada; não houve
+  execução do sketch porque a decisão ainda não deve migrar para o código.
 
-- **Sincronização Wayfinder desta sessão:** a fronteira foi rechecada em
-  2026-09-14; a implementação e o fechamento do #10 foram publicados em
-  `issue://10`, e a nova fronteira foi publicada em `issue://1`.
-- **Arquivos da implementação do #10:** `last_horizon/capture.pde`,
-  `last_horizon/last_horizon.pde`, `code/SKETCH_ARCHITECTURE.md`,
-  `last_horizon/data/pipeline_probe.aseprite`,
-  `last_horizon/data/pipeline_probe_frame_1.png` e os PNGs de prova em
-  `last_horizon/output/`.
-- **Arquivos da integração do jogador:** `last_horizon/ship.pde`,
-  `last_horizon/last_horizon.pde`, `last_horizon/data/player/player_sheet.png`,
-  `last_horizon/data/player/player_sheet.json` e as capturas atualizadas em
-  `last_horizon/output/`.
-- **Arquivos desta correção:** `last_horizon/screens.pde`,
-  `last_horizon/ui.pde`, `last_horizon/ship.pde`,
-  `last_horizon/last_horizon.pde`, `last_horizon/capture.pde`,
-  `interface/FLOW.md`, `interface/HUD.md` e `interface/MENU_INIT.md`.
-- **Verificação desta correção:** `--capture` concluiu todas as verificações após
-  a simplificação, incluindo distribuição, cancelamento por `ESC` e encerramento
-  por `ENTER`, com `OK` e sem `FALHOU`. Permaneceram apenas os avisos conhecidos
-  do modo não-AWT.
-- **Simplificação desta sessão:** `WINDOW_W` e `WINDOW_H` foram removidos;
-  `settings()` usa diretamente `RENDER_W` e `RENDER_H`, sem alterar o fluxo.
-- **Interface nesta sessão:** botões com atalho passaram a exibir a tecla no
-  próprio rótulo; as dicas redundantes do início e dos diálogos foram removidas.
-- **Documentação desta atualização:** `README.md`, `characters/PLAYER.md`,
-  `code/SKETCH_ARCHITECTURE.md` e `SESSION_START.md` registram o contrato da
-  spritesheet + JSON, o fallback, o loop por duração e a separação entre o
-  visual 32×32 e a colisão 16×24.
-- **Publicação:** os commits `4db65cd` (integração do jogador) e `ad27952`
-  (interface, documentação e evidências) foram enviados para
-  `prototype/sketch-architecture`.
-- **Verificação desta atualização documental:** `git diff --check` foi executado;
-  não houve nova execução do sketch nesta atualização, e permanecem válidas as
-  verificações funcionais registradas acima.
-
-
-### Textos das falhas novas (D-047)
-
-Escritos nesta sessão no formato do #11 e já no código. Os cartões ficam em
-`game.pde` e as linhas do painel em `hud.pde`; a fonte de domínio é
-`events/SYSTEM_FAULTS.md` e a de interface, `interface/HUD.md`.
-
-| Falha | Cartão | Alternativa A | Alternativa B | Painel |
-|---|---|---|---|---|
-| Suporte de vida | `FALHA NO SUPORTE DE VIDA` | `REPARAR (2 PEÇAS)` | `EMERGÊNCIA (ENERGIA -10)` | `REPARAR SUPORTE` |
-| Sistema de energia | `FALHA NO SISTEMA DE ENERGIA` | `FORÇAR A REDE (ENERGIA -10)` | `DESLIGAR SETORES (MORAL -10)` | `REPARAR ENERGIA` |
-| Comunicações | `FALHA NAS COMUNICAÇÕES` | `REPARAR (1 PEÇA)` | `SILÊNCIO (MORAL -1/DIA)` | `REPARAR COMUNICAÇÕES` |
-
-Corpos dos cartões: `O SUPORTE PERDEU ESTABILIDADE. A NAVE CONSOME MAIS OXIGÊNIO.`, `A REDE PERDEU ESTABILIDADE E OPERA EM CARGA FORÇADA.` e `O TRANSMISSOR PERDEU O CONTATO COM A TERRA.`
-
-O repositório está com a **funcionalidade do ticket #18 pronta e verificada**:
-navegação, tarefas, feedback, eventos, ciclo diário e renderização em 720p
-seguem implementados. O jogador agora usa a spritesheet integrada e verificada;
-a arte restante das salas e dos NPCs continua procedural e será tratada na cadeia
-`#10 → #8`, agora com o contrato de spritesheet + JSON registrado acima.
+O repositório está com o **novo ciclo documentado e ainda não implementado**.

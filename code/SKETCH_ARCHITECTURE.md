@@ -5,9 +5,9 @@ Ele continua válido para o viewport, o HUD e o estado global. O mapa macro agor
 abre salas 2D jogáveis, e o técnico é controlável dentro delas.
 
 
-A especificação das salas — pontos de interação, as oito tarefas e os números de
-movimento — está em `interface/ROOMS.md`. A implementação permanece plana e
-registra esse contrato nas abas do sketch.
+A especificação vigente das salas e intervenções está em `interface/ROOMS.md`.
+O sketch permanece plano, mas ainda implementa o ciclo anterior às decisões
+D-073 a D-096.
 
 ## Onde o código mora
 
@@ -32,8 +32,8 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
 
 - A origem Aseprite, quando disponível, pode permanecer em `last_horizon/data/`
   junto das exportações. O runtime não depende do arquivo `.aseprite`.
-- Para animações do jogo, a exportação oficial usa uma spritesheet única em PNG
-  com JSON de metadados; não há PNG separado por quadro para o jogador.
+- Para qualquer animação do jogo, a exportação oficial usa uma spritesheet única
+  em PNG com JSON de metadados; não há PNG separado por quadro.
 - O sketch carrega os assets de produção com `loadImage()` e
   `loadJSONObject()` em `loadPlayerAssets()` durante `setup()`. A pasta `data/`
   é o diretório de assets do Processing.
@@ -51,8 +51,8 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
   caixa física, sem alterar o contrato de movimento.
 - O modo de prova `--asset-pipeline-test` continua separado dos assets do jogo.
 - `pipeline_probe.aseprite` e `pipeline_probe_frame_1.png` são o fixture do
-  ticket #10, não assets finais de jogo. O probe tem 16×16 pixels e é exibido
-  duas vezes na grade lógica, no render físico 1280×720.
+  ticket #10, não assets finais nem convenção de produção. O probe tem 16×16
+  pixels e é exibido duas vezes na grade lógica, no render físico 1280×720.
 - O modo de prova prepara uma camada `PGraphics` sem interpolação antes de
   `beginDraw()`. A camada é composta no buffer principal, preservando a
   suavização do texto.
@@ -62,7 +62,25 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
   `pipeline_probe_window.png`.
 
 
-## Camadas da revisão
+## Contrato de gameplay ainda não implementado
+
+O próximo ciclo remove o briefing e o `active_task` como porta de entrada do
+trabalho. Incidentes alternados criam problemas locais persistentes; cada um
+possui perda diária, prazo e crise. Uma intervenção principal por dia pode
+corrigir, recuperar ou acelerar, enquanto diagnóstico, componente especial e
+políticas permanecem livres.
+
+A Sala de comando vira o hub com uma porta por convés: Dormitório no superior,
+Depósito no médio e Sala de máquinas no inferior. O HUD mostra o problema mais
+urgente e o mapa reúne todos por sala. Recursos comuns são pagos na intervenção;
+somente componentes especiais são carregados.
+O dano no casco não usa um ponto fixo: cada ocorrência escolhe um local aleatório
+alcançável pelo jogador em qualquer um dos quatro cômodos.
+
+Perdas, prazos, crises, custos e benefícios dos sobreviventes ainda dependem do
+protótipo de balanceamento. Nenhum símbolo do sketch foi migrado nesta decisão.
+
+## Implementação atual anterior ao redesign
 
 - **Mapa macro:** sobreposição consultável aberta pelo botão `MAPA`; mostra a
   posição real, fichas dos cômodos e somente o destino final da tarefa ativa,
@@ -108,10 +126,10 @@ dia, os recursos e o motor atravessam as telas.
 
 ## Números
 
-`mechanics/ACTIONS.md` continua a fonte única. O código copia os valores numa seção
-`/* regras - mechanics/ACTIONS.md */` no topo de `last_horizon.pde`, em constantes
-`UPPER_SNAKE` — mexeu no vault, mexe no código. O ajuste fino é do ticket de
-balanceamento.
+`mechanics/ACTIONS.md` continua sendo a fonte de regras, mas agora contém o
+contrato futuro e marca os números que exigem novo balanceamento. As constantes
+atuais do sketch ainda correspondem ao protótipo anterior; não devem ser
+tratadas como implementação das decisões D-073 a D-096.
 
 ## Viewport e input
 
@@ -210,16 +228,20 @@ Limitações observadas:
 
 ## Estado da revisão
 
-- **Código atual:** D-048 a D-071 implementadas. As quatro salas são conectadas
-  por portas; o mapa é uma sobreposição consultável; o console do comando escolhe
-  a tarefa; NPCs, sistemas e eventos usam suas camadas próprias; o beliche do
-  técnico encerra o dia após o resumo previsto; a interface usa Segoe UI, os
-  assets pixel art permanecem separados da suavização do texto e o jogador usa
-  spritesheet + JSON.
-- `action_used` agora bloqueia outra escolha no console depois da ação final.
-- O HUD não possui painel lateral: usa cartões de recurso, faixa de próxima ação
-  e botão `MAPA`.
-- As oito tarefas e os sete eventos continuam com as regras de #12 e #17.
-- **Textos:** os alertas operacionais migraram para avisos breves e para os
-  cartões. Vinheta, transmissões e telas de vitória/derrota ainda têm as
+- **Código atual:** D-048 a D-072 continuam implementadas. As salas ainda formam
+  a sequência linear Comando → Energia → Depósito → Dormitório; o console do
+  Comando ainda escolhe `active_task`; NPCs e coletas ainda compõem cadeias
+  universais; eventos continuam diários e algumas respostas resolvem a falha no
+  cartão.
+- **Contrato confirmado, ainda ausente do código:** D-073 a D-097 definem
+  problemas persistentes, incidentes alternados, intervenção principal,
+  topologia em hub, recursos pagos no ponto, recuperação e socorro separados,
+  aceleração real, prioridades no HUD/mapa e dano no casco em local aleatório
+  alcançável.
+- O beliche já encerra o dia após o resumo, mas ainda não processa perdas, prazos
+  e crises do novo modelo.
+- Os números atuais, `active_task`, `held_item`, `action_used`, a tabela de
+  tarefas e as verificações de captura precisam ser redesenhados somente depois
+  do balanceamento.
+- **Textos:** vinheta, transmissões e telas de vitória/derrota continuam com as
   pendências de conteúdo registradas no #11.

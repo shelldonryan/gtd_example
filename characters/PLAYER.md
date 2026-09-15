@@ -11,17 +11,17 @@
 ## Papel no jogo
 
 O protagonista é o jogador dentro da nave. Ele controla diretamente o técnico
-durante a exploração dos cômodos. No mapa geral, seleciona um cômodo; dentro
-dele, move-se pela cena 2D lateral, alcança os três conveses, as escadas, as
-estações e os sobreviventes, e interage com o ponto que fecha a tarefa do dia.
+pelos quatro cômodos. A Sala de comando é o hub; suas portas por convés levam
+ao Dormitório, ao Depósito e à Sala de máquinas. O mapa apenas consulta posição
+e problemas.
 
-Cada tarefa é uma cadeia de poucos passos e atravessa mais de um cômodo: o
-técnico fala com um sobrevivente, pega o item no lugar certo e instala. A
-movimentação e os passos intermediários são livres e não substituem a decisão de
-gestão: só a interação que conclui a tarefa usa a ação do dia.
+Incidentes criam problemas locais persistentes. O técnico escolhe a prioridade
+deslocando-se até os pontos relacionados, sem aceitar uma tarefa. Diagnósticos,
+conversas, componentes especiais e políticas são livres; uma correção,
+recuperação ou aceleração principal pode ser concluída por dia.
 
-O técnico carrega um item por vez. O item não se perde quando o dia vira:
-continua com ele até ser entregue ou trocado por outro.
+Recursos comuns são pagos no ponto final. O técnico carrega apenas um componente
+especial por vez, que persiste entre dias até ser usado ou trocado.
 
 ## Representação visual
 
@@ -63,7 +63,7 @@ por uma porta. Os assets pixel art são amostrados sem interpolação.
 O personagem possui acesso a:
 
 - Sala de comando.
-- Sala de energia e motor.
+- Sala de máquinas, com motor, energia e suporte de vida.
 - Depósito.
 - Dormitório.
 - Painel de informações da nave.

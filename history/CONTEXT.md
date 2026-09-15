@@ -17,22 +17,24 @@ essenciais para a viagem.
 O jogador assume o controle da espacionave logo após a partida. A nave possui
 quatro áreas principais:
 
-- Sala de comando.
-- Sala de energia, onde fica o motor.
-- Depósito.
-- Dormitório.
-Os quatro cômodos formam um espaço contínuo: o técnico atravessa portas para ir
-de um ao outro. O mapa macro é uma consulta da nave; mostra a posição real do
-técnico e permite abrir a ficha de cada cômodo, mas nunca transporta o jogador.
+- Sala de comando, centro de navegação e comunicações.
+- Sala de máquinas, onde ficam motor, energia e suporte de vida.
+- Depósito, responsável por estoques e componentes especiais.
+- Dormitório, responsável por descanso, saúde e moral.
+
+A Sala de comando é o hub: uma porta em cada convés leva diretamente a uma das
+três salas periféricas, que não se conectam entre si. O mapa macro mostra a
+posição e os problemas de cada cômodo, mas nunca transporta o jogador.
 
 Dentro dos cômodos, o técnico pode andar, pular, usar escadas, atravessar
 plataformas e interagir com pessoas, sistemas e objetos.
 
 Quatro sobreviventes viajam a bordo, além do técnico: **Vera**, a piloto, no
 comando; **Bento**, o intendente, no depósito; **Neusa**, a enfermeira, no
-dormitório; e **Sílvia**, a mecânica, na sala de energia. Eles ficam parados em
+dormitório; e **Sílvia**, a mecânica, na Sala de máquinas. Eles ficam parados em
 pontos dos cômodos e respondem quando o técnico interage com eles. Não possuem
-rotinas autônomas nesta versão.
+rotinas autônomas. Se uma pessoa morrer, sua especialidade deixa de facilitar as
+ações relacionadas, mas nenhuma intervenção necessária fica bloqueada.
 
 Os sistemas estão funcionando, mas não foram preparados para uma viagem sem
 problemas. A nave precisa economizar energia, controlar os estoques e lidar com
@@ -41,23 +43,29 @@ falhas que podem surgir durante o percurso.
 ## Desenvolvimento da viagem
 
 A viagem é representada por dez dias de jogo. O primeiro começa na Sala de
-comando; os seguintes começam no Dormitório. O técnico vai ao console de
-briefing no comando, compara as tarefas disponíveis e escolhe explicitamente uma
-delas conhecendo custo, efeito e rota.
+comando e os seguintes, no Dormitório. Incidentes surgem em dias alternados. A
+resposta escolhe uma contenção imediata, mas o problema permanece no sistema ou
+cômodo afetado até ser corrigido fisicamente.
+Quando meteoros danificam o casco, o ponto atingido é sorteado entre locais
+alcançáveis dos quatro cômodos e permanece ali até a correção.
 
-Cada tarefa tem poucas etapas concretas — falar com um sobrevivente, pegar o item
-e executar a ação final — e atravessa mais de um cômodo. Andar, pular, usar
-escada e concluir as etapas de preparação não consomem a ação; somente a ação
-final usa a única tarefa do dia. Depois, o jogador decide quando encerrar o dia.
-Ao final dele, a nave consome água, comida, oxigênio e energia. Eventos como
-falhas no motor, chuva de meteoros, falta de comida, conflitos entre os
-sobreviventes e falhas de suporte de vida, energia e comunicações podem alterar
-o estado da missão.
+Cada problema informa o que perde por dia, quanto tempo resta e qual crise
+ocorrerá se for ignorado. O técnico não aceita uma lista de tarefas: escolhe a
+prioridade andando até os pontos da nave. Conversas, diagnósticos, componentes
+especiais e políticas são preparação livre; somente uma correção, recuperação
+ou aceleração principal pode ser concluída por dia.
 
-As decisões não possuem uma solução perfeita. Reparar o motor pode gastar as
-últimas peças, manter o consumo normal pode deixar os estoques vazios e aplicar
-o racionamento pode reduzir a moral. O jogador precisa escolher qual perda é
-aceitável para manter a viagem em andamento.
+O jogador também pode cuidar do grupo, socorrer uma pessoa em risco ou aumentar
+a potência para eliminar um dia futuro de consumo e incidentes. Economia e
+racionamento persistem enquanto ativos: preservam recursos, mas cobram moral.
+
+O turno termina quando o técnico volta ao próprio beliche no Dormitório e
+dorme. Consumos, perdas e prazos são então processados. Dormir sem intervir é
+permitido, mas aproxima os problemas de suas crises e pode levar à derrota.
+
+As decisões não possuem solução perfeita. Corrigir uma falha deixa outra ativa;
+recuperar o grupo adia um reparo; acelerar a viagem reduz a exposição futura,
+mas consome recursos agora. O jogador escolhe qual risco aceita manter.
 
 ## Objetivo
 

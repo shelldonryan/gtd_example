@@ -1,38 +1,30 @@
 # Problemas dos sobreviventes
 
-Eventos humanos: os sobreviventes sentem o estoque acabando e a convivência
-pesa. O recurso em jogo aqui é a moral — resolver custa recursos, ignorar custa
-gente.
-
-Todo evento desta pasta precisa de pelo menos duas alternativas, cada uma
-sacrificando um recurso diferente. Os valores ficam em `mechanics/ACTIONS.md`.
+Eventos humanos criam problemas persistentes ligados ao Dormitório ou ao
+Depósito. O cartão escolhe uma contenção imediata; `Cuidar do grupo`, `Socorrer
+[nome]` ou uma correção logística resolve a causa depois no espaço jogável.
+Perdas, prazos, crises e custos serão definidos no próximo balanceamento.
 
 ## Falta de comida
 
-O estoque entra em nível crítico e os sobreviventes percebem.
+O estoque entra em risco e os sobreviventes percebem. As duas contenções devem
+trocar gasto imediato por prazo, mas nenhuma elimina a causa no cartão.
 
-| Alternativa | O que se perde | O que se mantém |
-| --- | --- | --- |
-| Manter as porções normais | os estoques, que continuam caindo | a moral |
-| Iniciar o racionamento | moral | os estoques, que passam a cair pela metade |
-
-É a decisão que mais se repete na viagem: cada dia de racionamento compra
-estoque e cobra moral, e a moral baixa reduz a capacidade de lidar com os
-próximos eventos.
+O problema permanece ligado ao Depósito, aplica perda diária e pode levar uma
+pessoa a estado de risco quando sua crise ocorre. Racionamento é uma política
+persistente: preserva comida e água, mas cobra moral enquanto estiver ativo.
 
 ## Conflito no dormitório
 
-Uma discussão entre os sobreviventes escala e divide o grupo.
+Uma discussão escala e cria um problema de convivência no Dormitório. A escolha
+do cartão contém a situação com custos e riscos diferentes; a tensão permanece
+até uma intervenção de cuidado.
 
-| Alternativa | O que se perde | O que se mantém |
-| --- | --- | --- |
-| Ignorar | moral | o tempo e a energia do dia |
-| Intervir | 10 de energia | o grupo, que sai mais unido do que antes do conflito |
+`Cuidar do grupo` recupera moral. Se a crise colocar uma pessoa em risco,
+`Socorrer [nome]` é uma intervenção separada. Dormir sem agir reduz o prazo e
+aplica a perda prevista.
 
-Intervir custa energia e devolve moral, sem consumir a tarefa do dia: o reparo
-e a potência extra continuam disponíveis.
+## Pendências de balanceamento
 
-## Pendências
-
-- Doença e acidente entre os sobreviventes.
-- Limites do racionamento: quantos dias seguidos antes de virar crise.
+- Definir as duas contenções, perdas, prazos e crises de falta de comida e conflito.
+- Definir quando uma crise humana coloca um sobrevivente nomeado em risco.

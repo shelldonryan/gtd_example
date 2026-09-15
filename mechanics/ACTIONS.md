@@ -1,7 +1,8 @@
 # Ações e custos
 
-Números do protótipo. Este arquivo é a fonte única: as telas e os eventos
-descrevem as escolhas, mas não repetem valores.
+Este arquivo registra o contrato mecânico vigente. Os estoques e custos ainda
+presentes são a linha de base do protótipo; perdas, prazos, crises e bônus serão
+recalculados no próximo ticket de balanceamento antes de voltar ao código.
 
 ## Regras base
 
@@ -12,18 +13,19 @@ descrevem as escolhas, mas não repetem valores.
 | Sobreviventes | 4 a bordo; o técnico não entra na conta |
 | Duração | 10 dias |
 | Estoques iniciais | 100 em energia, oxigênio, água e moral; 70 de comida; 6 peças |
-| Tarefas por dia | 1 em cadeia, escolhida explicitamente no console do comando |
-| Eventos | 1 por dia, a partir do dia 2; pool uniforme sem repetição imediata; falha ativa não é resortada |
+| Intervenções principais por dia | 1 correção, recuperação ou aceleração |
+| Incidentes | em dias alternados; problema ativo não é sorteado novamente |
 
 Decisões fixadas neste arquivo:
 
 - **Energia é um estoque único**, consumido para manter o motor e o suporte de
   vida. Não existe combustível separado: a barra de energia é esse estoque.
-- **Modo economia e racionamento são estados**, ligados e desligados durante a
-  visita ao cômodo. Não gastam a tarefa do dia; movimento e etapas de preparação
-  também não. Somente a **ação final** da cadeia usa a tarefa.
-- **Encerrar o dia** exige interagir com o beliche do técnico no Dormitório,
-  conferir o resumo do consumo e confirmar. Não existe botão `Passar dia`.
+- **Modo economia e racionamento são políticas persistentes locais.** Podem ser
+  ligados ou desligados em Máquinas e no Depósito sem gastar a intervenção
+  principal. Reduzem consumo e cobram moral ao ativar e em cada dia mantidos.
+- **Encerrar o dia** continua exigindo dormir no beliche do técnico no
+  Dormitório, conferir o resumo do consumo e confirmar. Não existe botão
+  `Passar dia`.
 
 ## Consumo ao encerrar o dia
 
@@ -35,109 +37,88 @@ Decisões fixadas neste arquivo:
 | Comida | 7 | 3 com racionamento |
 | Moral | 2 | mais 1 por recurso em vermelho (de 1 a 29) |
 
-O primeiro dia começa na Sala de comando; os seguintes começam no Dormitório
-com o evento correspondente. Depois de responder ao evento, o técnico vai ao
-console do comando, escolhe uma tarefa e atravessa as salas pelas portas.
-Movimento e etapas de preparação não gastam a tarefa; somente a ação final
-gasta. Confirmar o resumo no beliche consome recursos, atualiza a moral, avança
-o dia e verifica vitória ou derrota.
+O primeiro dia começa no Comando e os seguintes, no Dormitório. Incidentes
+surgem em dias alternados. A resposta escolhe quanto risco aceitar naquele
+momento, mas não resolve a causa: o problema nasce ativo no cômodo afetado.
 
-A resposta do evento **não** gasta a ação do dia.
+O técnico pode explorar, diagnosticar, coletar componentes especiais — itens
+únicos exigidos por correções específicas — e ajustar políticas sem gastar a
+intervenção principal. Uma correção, recuperação ou aceleração pode ser
+concluída por dia. Dormir processa consumo, perdas diárias,
+prazos, crises, vitória ou derrota. Dormir sem intervir é permitido, mas todos
+os problemas ativos continuam cobrando perdas e avançando para suas crises.
 
-## Tarefas por dia
+## Intervenções e problemas ativos
 
-Uma tarefa por dia, em **cadeia**: o jogador escolhe explicitamente uma das
-tarefas disponíveis no console de briefing da Sala de comando. Antes de
-confirmar, o painel mostra custo, efeito e rota. Cada tarefa passa por um
-sobrevivente e por pelo menos uma troca de cômodo.
+Não existe aceite diário de tarefa nem briefing obrigatório. O evento já cria
+um problema ativo; HUD e mapa indicam onde agir, e os pontos relacionados passam
+a responder imediatamente.
 
-O item que o técnico carrega não se perde quando o dia vira: continua na mão até
-ser entregue ou trocado. Tarefa não concluída não custa nada. O mapa dos pontos
-de interação de cada cômodo está em `interface/ROOMS.md`.
+Cada problema mostra três informações antes do encerramento do dia:
 
-| Tarefa | Etapas de preparação | Ação final | Custo | Efeito |
-| --- | --- | --- | --- | --- |
-| Reparar motor | Sílvia dá o diagnóstico (energia) → Bento entrega 2 peças (depósito) | bancada do motor (energia) | 2 peças | motor volta a operante |
-| Aumentar potência | Vera recalcula a rota (comando) | reator (energia) | 20 de energia | viagem encurta 1 dia; no máximo 2 vezes |
-| Reparar casco | Neusa aponta o vazamento (dormitório) → kit de vedação (depósito) | ponto do casco (depósito) | 1 peça | estanca o vazamento de oxigênio |
-| Descanso e organização | Neusa indica quem está mal (dormitório) | mesa comum (dormitório) | 8 de energia | moral +15, até o limite de 100 |
-| Socorrer sobrevivente | Bento entrega a água (depósito) | beliche do sobrevivente (dormitório) | 5 de água | moral +10 |
-| Reparar suporte de vida | Sílvia diagnostica (energia) → Bento entrega 2 peças (depósito) | painel de suporte de vida (energia) | 2 peças | encerra o modo de emergência |
-| Reparar sistema de energia | Sílvia sorteia a variante (energia) → NPC da variante entrega o item | estação da variante (energia) | conforme a variante | encerra a falha de energia |
-| Reparar comunicações | Vera diagnostica (comando) → Bento entrega 1 peça (depósito) | antena (Sala de comando) | 1 peça | restaura as transmissões e encerra o silêncio |
+1. perda aplicada por dia;
+2. prazo restante;
+3. consequência específica quando o prazo chega a zero.
 
-Variantes de `Reparar sistema de energia` — Sílvia sorteia uma, sem repetição:
+O cartão do incidente segue o padrão **risco agora, correção depois**: suas duas
+contenções trocam custo imediato por segurança, mas nenhuma encerra o problema.
+A causa só desaparece com uma intervenção física no cômodo correspondente.
 
-| Variante | Item | Etapa de preparação | Ação final | Custo |
-| --- | --- | --- | --- | --- |
-| Trocar fusível | Fusível reserva | Bento entrega (depósito) | painel de distribuição (energia) | 1 peça |
-| Reforçar circuito | Cabo de derivação | Vera entrega (comando) | reator (energia) | 10 energia |
-| Resfriar regulador | Cartucho refrigerante | Neusa entrega (dormitório) | bancada do motor (energia) | 5 água |
-
-O sorteio considera apenas variantes ainda não usadas e pagáveis; depois das
-três, a falha sai do pool de eventos.
-
-Limites: nenhum recurso fica negativo e nenhuma barra passa de 100 — o efeito
-que ultrapassa o limite é descartado.
-
-### Quando cada tarefa aparece
-
-| Tarefa | Só aparece quando |
+| Tipo de intervenção principal | Função |
 | --- | --- |
-| Reparar motor | motor danificado |
-| Aumentar potência | até duas vezes na viagem |
-| Reparar casco | vazamento ativo |
-| Descanso e organização | sempre |
-| Socorrer sobrevivente | oxigênio ou moral em vermelho |
-| Reparar suporte de vida | suporte de vida em emergência |
-| Reparar sistema de energia | falha no sistema de energia ativa |
-| Reparar comunicações | comunicação em silêncio |
+| Correção | remove um problema persistente e seu prazo |
+| Recuperação | restaura uma margem crítica ou estabiliza um sobrevivente |
+| Aceleração | reduz a exposição aos próximos dias da viagem |
 
-O briefing não inicia uma tarefa automaticamente. O jogador compara as opções no
-console e confirma uma delas; conversar com um sobrevivente sem tarefa ativa não
-cria uma cadeia por acaso.
+`Aumentar potência` elimina um dia futuro completo: consumo e eventual incidente
+daquele dia deixam de ocorrer. No Dormitório, dormir apenas encerra o turno;
+`Cuidar do grupo` recupera moral e `Socorrer [nome]` estabiliza uma pessoa em
+risco. As duas últimas são intervenções principais distintas.
 
-### Estados ligados no cômodo
+As sequências variam conforme o problema. Um passo só existe para descobrir
+informação, obter algo realmente necessário ou aplicar a correção. NPC e troca
+de cômodo não são requisitos universais. Recursos já contabilizados no HUD são
+pagos diretamente no ponto final; somente componentes especiais precisam ser
+buscados e carregados fisicamente.
 
-| Cômodo | Interruptor | Efeito |
+Problemas e responsabilidades permanecem distribuídos assim:
+
+| Origem | Local de correção |
+| --- | --- |
+| Motor, energia e suporte de vida | Sala de máquinas |
+| Comunicações e rota | Sala de comando |
+| Falta de comida, estoque e componentes | Depósito |
+| Conflito, saúde e moral | Dormitório |
+| Dano no casco por meteoros | local aleatório alcançável em qualquer um dos quatro cômodos |
+
+Os valores de perda, prazos, crises, custos das intervenções e benefícios dos
+sobreviventes serão definidos e simulados no ticket de balanceamento.
+
+### Políticas de contenção
+
+| Sala | Política | Efeito atual a revalidar |
 | --- | --- | --- |
-| Energia | Modo economia | consumo de energia cai para 3; moral −5 e −1 por dia enquanto ativo |
-| Depósito | Racionamento | comida e água pela metade; moral −8 e −1 por dia enquanto ativo |
+| Máquinas | Modo economia | reduz consumo de energia; cobra moral ao ativar e por dia |
+| Depósito | Racionamento | reduz consumo de comida e água; cobra moral ao ativar e por dia |
 
-## Estado do motor
+## Agravamento
 
-| Estado | Efeito | Como sai |
-| --- | --- | --- |
-| Operante | consumo normal | a falha no motor leva a danificado |
-| Danificado | viagem +1 dia; 3 dias sem reparo destroem o motor | reparar com 2 peças |
-| Destruído | derrota imediata | — |
+Todo problema cobra sua perda ao encerrar o dia e reduz o prazo visível. Quando
+o prazo chega a zero, aplica uma crise coerente com seu domínio, não uma derrota
+universal. O motor pode ser destruído; crises de estoque, conflito, casco ou
+comunicações produzem perdas próprias e podem continuar ativas.
 
-A vitória exige o motor operante no dia final.
-## Estado do suporte de vida
-
-| Estado | Efeito | Como sai |
-| --- | --- | --- |
-| Estável | consumo normal de oxigênio | a falha leva à emergência |
-| Emergência | energia −10 na escolha ou +3 de oxigênio por dia até reparar | reparar com 2 peças |
-
-
-## Consequências dos eventos
-
-| Evento | Alternativa A | Alternativa B |
-| --- | --- | --- |
-| Falha no motor | reparar: 2 peças | seguir: viagem +1 dia, motor danificado |
-| Chuva de meteoros | escudos: 15 de energia | impacto: oxigênio −15 e vazamento de 3 por dia até reparar o casco |
-| Falta de comida | porções normais: consumo normal | racionamento: moral −8 |
-| Conflito no dormitório | ignorar: moral −10 | intervir: moral +10, energia −10 |
-| Falha no suporte de vida | reparar: 2 peças | modo de emergência: energia −10 e oxigênio +3 por dia até reparar |
-| Falha no sistema de energia | forçar a rede: energia −10 | desligar setores: moral −10; a falha fica ativa com +3 de energia por dia até reparar |
-| Falha nas comunicações | reparar: 1 peça | silêncio: moral −1 por dia e as transmissões da Terra suspensas até reparar |
+Uma crise pode colocar um sobrevivente nomeado em risco. Essa pessoa recebe um
+prazo visível; `Socorrer [nome]` a estabiliza, enquanto deixar o prazo chegar a
+zero causa sua morte. A perda reduz `A BORDO` e remove o benefício da
+especialidade daquela pessoa, mas nunca bloqueia uma intervenção necessária:
+a mesma ação continua possível com custo ou risco maior.
 
 ## Sobreviventes e fim de jogo
 
 | Situação | Efeito |
 | --- | --- |
-| Comida em zero ao fim do dia | morre 1 sobrevivente e a moral cai 15 |
+| Sobrevivente em risco chega ao prazo zero | a pessoa morre e `A BORDO` diminui |
 | Sem sobreviventes vivos | derrota imediata — quinta causa, com mensagem própria |
 | Oxigênio em zero | derrota imediata |
 | Energia em zero | derrota imediata |
@@ -145,6 +126,10 @@ A vitória exige o motor operante no dia final.
 | Motor destruído | derrota imediata |
 | Dia final com motor operante e 1 ou mais sobreviventes vivos | vitória |
 
-## Pendências
+## Pendências de balanceamento
 
-- Nenhuma falha de sistema pendente nesta versão.
+- Fixar calendário exato dos dias de incidente.
+- Definir perdas diárias, prazos e crises dos sete problemas.
+- Definir custos e efeitos das contenções e intervenções.
+- Definir o benefício de Vera, Bento, Neusa e Sílvia e a penalidade de perdê-los.
+- Simular os caminhos de correção, recuperação, aceleração e omissão.

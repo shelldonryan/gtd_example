@@ -1,9 +1,9 @@
 # Cômodos jogáveis
 
-Os quatro cômodos formam uma sequência contínua inspirada na composição lateral
-de `COMMAND_ROOM_CONCEPT_ART.png`. Cada um conserva três conveses e duas escadas,
-mas passa a usar a largura liberada pela remoção do painel lateral. Portas nas
-extremidades conectam as salas; não existe câmera nem teletransporte pelo mapa.
+Os quatro cômodos formam uma topologia em estrela inspirada na composição
+lateral de `COMMAND_ROOM_CONCEPT_ART.png`. A Sala de comando é o hub central:
+uma porta por convés leva ao Dormitório, ao Depósito e à Sala de máquinas. As
+três salas periféricas não possuem portas entre si. O mapa é apenas consultável.
 
 ```
   convés superior  y≈164   [ estação ]        [ estação ]
@@ -21,118 +21,126 @@ cada estação fique alcançável andando ou subindo escada. O pulo de 48 px
 | Tipo | Interrompe movimento | O que faz |
 | --- | --- | --- |
 | Leitura técnica | sim | abre painel inferior sem retrato |
-| Coleta | não | põe um item na mão e mostra aviso breve |
+| Coleta | não | põe um componente especial na mão e mostra aviso breve |
 | Conversa | sim | abre retrato e caixa inferior do sobrevivente |
 | Interruptor | sim | explica a consequência e pede confirmação |
-| Ação final | não | cobra o custo, fecha a tarefa e mostra o resultado |
-| Porta | não | troca para a sala adjacente pela entrada correspondente |
+| Intervenção principal | não | cobra o custo, remove ou altera o estado e usa a intervenção do dia |
+| Porta | não | troca entre o Comando e uma sala periférica |
 
 Regras que valem em todos os cômodos:
 
 - Alcance de interação de 12 px, na mesma altura, e o ponto se destaca quando o
   técnico entra no alcance.
-- O técnico carrega **um item por vez**. O item não se perde ao virar o dia:
-  continua na mão até ser entregue ou trocado por outro.
-- Tarefa não concluída não custa nada; o item continua com o técnico.
-- Toda ação final cobra o custo da tarefa e usa a única tarefa do dia.
-- O mapa não altera `current_room`, posição, tarefa ou item carregado.
-- Indicações para portas, escadas e pontos próximos usam ações concretas, nunca
-  os termos `passos livres` ou `ponto final`.
+- O técnico carrega **um componente especial por vez**. Recursos comuns do HUD
+  são pagos diretamente no ponto da intervenção e não viram itens carregados.
+- Diagnóstico, conversa, coleta de componente especial e mudança de política não
+  gastam a intervenção principal.
+- Uma correção, recuperação ou aceleração concluída usa a intervenção do dia.
+- Problemas não corrigidos atravessam o dia, aplicam perdas e reduzem seus prazos.
+- Cada dano no casco cria um ponto de correção temporário em um local aleatório
+  alcançável pelo jogador, em qualquer um dos quatro cômodos.
+- O mapa não altera sala, posição, problemas ou componente carregado.
+- Indicações usam ações concretas, nunca termos internos.
 
 ## Sala de comando
 
-O cômodo concentra planejamento e leitura da viagem. O console de briefing é a
-única origem da escolha da tarefa do dia.
+O cômodo é o hub físico e concentra navegação e comunicações. Não existe console
+de aceite diário nem conversa obrigatória com Vera.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
-| superior | console do briefing — lista tarefas disponíveis com custo, efeito e rota; exige confirmação | leitura técnica |
-| superior | Vera — conversas da piloto, cabo de derivação e diagnóstico das comunicações | conversa |
-| superior | antena — reparo das comunicações | ação final |
-| médio | console da rota — dia, jornada percorrida, dias restantes | leitura técnica |
-| inferior | painel de status — recursos, motor e vazamento | leitura técnica |
+| superior | porta do Dormitório | porta |
+| superior | Vera — navegação, comunicações e benefício de piloto | conversa |
+| superior | antena — correção das comunicações | intervenção principal |
+| médio | porta do Depósito | porta |
+| médio | console da rota — jornada, previsão e aumento de potência | leitura técnica e intervenção principal |
+| inferior | porta da Sala de máquinas | porta |
+| inferior | painel de situação — visão geral dos problemas | leitura técnica |
 
-No primeiro dia, o técnico começa na Sala de comando. O console apresenta a
-escolha explícita e ensina que a nave é atravessada pelas portas.
+No primeiro dia, o técnico começa no Comando. Nos demais, chega ao hub pela
+porta superior vinda do Dormitório. `Aumentar potência` elimina um dia futuro
+completo, incluindo consumo e eventual incidente daquele dia.
 
-## Sala de energia
+## Sala de máquinas
 
-| Convés | Ponto | Tipo | Tarefa |
-| --- | --- | --- | --- |
-| inferior | bancada do motor | ação final | reparar motor — 2 peças; variante "resfriar regulador" — 5 água |
-| médio | Sílvia — diagnóstico do motor, do suporte de vida e do sistema de energia | conversa | etapas de "reparar motor", "reparar suporte de vida", "reparar sistema de energia" e "aumentar potência" |
-| médio | painel de distribuição | interruptor e ação final | modo economia; variante "trocar fusível" — 1 peça |
-| superior | reator | ação final | aumentar potência — 20 energia; variante "reforçar circuito" — 10 energia |
-| superior | painel de suporte de vida | ação final | reparar suporte de vida — 2 peças |
+O cômodo concentra motor, energia e suporte de vida.
+
+| Convés | Ponto | Tipo |
+| --- | --- | --- |
+| inferior | bancada do motor — correção do motor | intervenção principal |
+| médio | Sílvia — diagnóstico e benefício de mecânica | conversa |
+| médio | painel de distribuição — falha elétrica e modo economia | intervenção principal e política |
+| superior | reator — potência e sistema de energia | intervenção principal |
+| superior | painel de suporte de vida | intervenção principal |
+| acesso | porta única para o convés inferior do Comando | porta |
 
 ## Depósito
 
-| Convés | Ponto | Tipo | Tarefa |
-| --- | --- | --- | --- |
-| inferior | prateleira do kit de vedação | coleta | etapa de "reparar casco" |
-| inferior | ponto do casco | ação final | reparar casco — 1 peça |
-| médio | Bento — entrega peças, água e itens das tarefas em andamento | conversa | etapas de "reparar motor", "socorrer sobrevivente", "reparar suporte de vida", "reparar comunicações" e da variante "trocar fusível" |
-| médio | alavanca de racionamento | interruptor | racionamento |
-| superior | prateleira de reserva | leitura técnica | — |
+O cômodo concentra logística, estoques, componentes especiais e racionamento.
+
+| Convés | Ponto | Tipo |
+| --- | --- | --- |
+| inferior | componentes especiais, incluindo kit de vedação | coleta |
+| médio | Bento — leitura dos estoques e benefício de intendente | conversa |
+| médio | alavanca de racionamento | política |
+| superior | prateleira de reserva — componentes disponíveis | leitura técnica |
+| acesso | porta única para o convés médio do Comando | porta |
 
 ## Dormitório
 
-| Convés | Ponto | Tipo | Tarefa |
-| --- | --- | --- | --- |
-| inferior | beliche do sobrevivente | ação final | socorrer sobrevivente — 5 água |
-| médio | Neusa — quem está mal, onde o casco vaza e o cartucho refrigerante | conversa | etapas de "descanso e organização", "reparar casco" e da variante "resfriar regulador" |
-| superior | mesa comum | ação final | descanso e organização — 8 energia |
-| superior | beliche do técnico | leitura técnica | resumo do consumo, falhas e tarefa; confirmação para encerrar o dia |
+O cômodo concentra descanso, saúde, moral e encerramento do turno.
 
-## As oito tarefas
+| Convés | Ponto | Tipo |
+| --- | --- | --- |
+| inferior | beliche de sobrevivente em risco | intervenção principal de socorro |
+| médio | Neusa — estado do grupo e benefício de enfermeira | conversa |
+| superior | mesa comum — `Cuidar do grupo` | intervenção principal de recuperação |
+| superior | beliche do técnico — resumo e dormir | leitura técnica e encerramento |
+| acesso | porta única para o convés superior do Comando | porta |
 
-Todas passam por um sobrevivente e por deslocamento entre cômodos. Somente a ação
-final gasta a tarefa do dia.
+## Intervenções
 
-| Tarefa | Etapas de preparação | Ação final | Custo |
-| --- | --- | --- | --- |
-| Reparar motor | Sílvia dá o diagnóstico (energia) → Bento entrega 2 peças (depósito) | bancada do motor | 2 peças |
-| Aumentar potência | Vera recalcula a rota (comando) | reator | 20 energia |
-| Reparar casco | Neusa aponta o vazamento (dormitório) → kit de vedação (depósito) | ponto do casco | 1 peça |
-| Descanso e organização | Neusa indica quem está mal (dormitório) | mesa comum | 8 energia |
-| Socorrer sobrevivente | Bento entrega a água (depósito) | beliche do sobrevivente | 5 água |
-| Reparar suporte de vida | Sílvia dá o diagnóstico (energia) → Bento entrega 2 peças (depósito) | painel de suporte de vida | 2 peças |
-| Reparar sistema de energia | Sílvia sorteia a variante (energia) → NPC da variante entrega o item | estação da variante (energia) | conforme a variante |
-| Reparar comunicações | Vera dá o diagnóstico (comando) → Bento entrega 1 peça (depósito) | antena (comando) | 1 peça |
+Problemas já nascem ativos após os incidentes; não são aceitos numa lista. HUD e
+mapa indicam a sala afetada, e os pontos relacionados respondem imediatamente.
 
-De onde cada tarefa vem:
+As sequências variam. Um passo existe somente para descobrir informação, obter
+um componente especial ou aplicar a correção. Não há obrigação universal de
+falar com NPC ou trocar de cômodo.
 
-| Tarefa | Só aparece quando |
-| --- | --- |
-| Reparar motor | motor danificado |
-| Aumentar potência | até duas vezes na viagem |
-| Reparar casco | vazamento ativo |
-| Descanso e organização | sempre |
-| Socorrer sobrevivente | oxigênio ou moral em vermelho |
-| Reparar suporte de vida | suporte de vida em emergência |
-| Reparar sistema de energia | falha no sistema de energia ativa |
-| Reparar comunicações | comunicação em silêncio |
+| Intervenção | Tipo | Onde conclui |
+| --- | --- | --- |
+| Reparar motor | correção | bancada do motor, Máquinas |
+| Aumentar potência | aceleração | console da rota, Comando |
+| Reparar casco | correção | local aleatório alcançável indicado pelo problema |
+| Cuidar do grupo | recuperação | mesa comum, Dormitório |
+| Socorrer sobrevivente | recuperação | beliche da pessoa em risco, Dormitório |
+| Reparar suporte de vida | correção | painel de suporte, Máquinas |
+| Reparar sistema de energia | correção | estação correspondente, Máquinas |
+| Reparar comunicações | correção | antena, Comando |
 
-Interruptores (**modo economia** e **racionamento**) não gastam o dia: ligam e
-desligam na visita ao cômodo, e a moral cobra o preço por dia enquanto estiverem
-ativos. O painel de distribuição acumula as duas funções: a ação final da variante
-do fusível vale quando o técnico chega com o fusível na mão; sem o item, o ponto
-continua sendo o interruptor do modo economia.
+Economia e racionamento são políticas persistentes locais. Não usam a
+intervenção principal, mas cobram moral ao ativar e em cada dia mantidas.
+
+Uma crise pode colocar Vera, Bento, Neusa ou Sílvia em risco. Socorrer estabiliza
+a pessoa; a morte remove o benefício da especialidade, mas não bloqueia nenhuma
+ação necessária.
 
 ## Leitura do jogador
 
-O console do comando apresenta somente tarefas disponíveis e mostra custo,
-efeito e rota antes da confirmação. Depois da escolha, a faixa de orientação
-mostra uma única próxima ação concreta. Conversar com um sobrevivente sem tarefa
-ativa nunca inicia uma cadeia.
+O HUD mostra o problema com menor prazo e quantos outros existem. O mapa agrupa
+todos por sala; cada ficha mostra perda diária, prazo e consequência da crise.
+Quando o dano no casco estiver ativo, ele pertence ao cômodo sorteado para
+aquela ocorrência, não ao Depósito por definição.
+O jogador escolhe sua prioridade pelo deslocamento e pela intervenção, não por
+um aceite abstrato.
 
 ## Implementação
 
-A tabela de tarefas vive em `tasks.pde`, como dado: rótulo, estado que a abre
-(gate), cômodo da ação final, custo, etapas e efeito. Somar uma tarefa nova é
-somar uma linha na tabela e uma estação em um dos cômodos acima.
-Detalhes de estilo em `code/SKETCH_ARCHITECTURE.md`.
+O sketch atual ainda implementa a topologia linear, o briefing obrigatório, a
+tarefa singular em `tasks.pde`, as rotas universais por NPC e os recursos
+carregados. Esse código descreve o protótipo anterior e diverge das decisões
+D-073 a D-096.
 
-No jogo, as estações usam rótulos curtos na tela: **SUPORTE** para o painel de
-suporte de vida, **DISTRIBUIÇÃO** para o painel de distribuição e **ANTENA**
-para a antena das comunicações.
+A implementação do novo contrato só deve começar depois que o ticket de
+balanceamento fixar perdas, prazos, crises, custos e benefícios. Os nomes curtos
+das estações serão revalidados nessa etapa.
