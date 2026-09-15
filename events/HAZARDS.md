@@ -2,7 +2,7 @@
 
 Eventos externos criam problemas persistentes na nave. O cartão escolhe uma
 contenção imediata com custo e risco diferentes; a correção física acontece
-depois. Os valores abaixo são a proposta **PROVISÓRIA** da issue #20.
+depois. Os valores abaixo foram confirmados na issue #20.
 
 ## Chuva de meteoros
 
@@ -17,5 +17,5 @@ crise perde mais 15 e reinicia o prazo em 2. Reparar exige o kit de vedação e
 
 ## Estado
 
-Valores provisórios implementados em `prototype/balance-model.mjs`; aguardam
-validação antes de migrar para o sketch.
+Valores confirmados e comprovados em `prototype/balance-model.mjs`; a migração
+para o sketch pertence à issue #21.

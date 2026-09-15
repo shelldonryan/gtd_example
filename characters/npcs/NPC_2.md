@@ -17,7 +17,7 @@ contabilizados no HUD.
 Componentes especiais podem ser coletados fisicamente nos pontos do Depósito.
 Racionamento é uma política persistente local. Com Bento, cada política custa 2
 de moral ao ativar e 1 por dia; sem ele, custa 4 e 2. Reorganizar comida passa
-de custo zero para 3 de comida. Valores provisórios da issue #20.
+de custo zero para 3 de comida. Valores confirmados na issue #20.
 
 ## Vínculos
 

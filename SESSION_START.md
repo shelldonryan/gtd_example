@@ -58,9 +58,9 @@ e as fontes afetadas.
   agora com D-097 aplicada isoladamente. Ele ainda usa salas lineares,
   `active_task`, itens comuns carregados e eventos diários; portanto continua
   sendo evidência do protótipo anterior, não do novo ciclo completo.
-- A linha de base D-030 a D-047 permanece histórica. A issue #20 agora possui
-  um modelo numérico PROVISÓRIO executável; ele ainda exige validação do usuário
-  antes de virar contrato ou migrar para o sketch.
+- A linha de base D-030 a D-047 permanece histórica. O modelo numérico da issue
+  #20 foi confirmado pelo usuário e passa a ser a entrada obrigatória da
+  implementação #21.
 - D-097 já sorteia o dano no casco entre pontos alcançáveis dos quatro cômodos;
   o restante de D-073 a D-096 continua ausente do sketch.
 - A resolução canônica continua 1280×720; 640×360 é somente a grade lógica.
@@ -174,8 +174,8 @@ sem decisão do usuário.
 - `issue://12` — decisões D-030 a D-046 (balanceamento anterior).
 - `issue://17` — implementação anterior das falhas novas e D-047.
 - `issue://19` — decisões D-073 a D-096 do novo ciclo.
-- `issue://20` — protótipo numérico ativo, aguardando validação do usuário.
-- `issue://21` — implementação bloqueada pela validação do balanceamento.
+- `issue://20` — balanceamento confirmado e concluído.
+- `issue://21` — implementação liberada pelo balanceamento.
 - Issues específicas do ticket escolhido, incluindo seus bloqueadores nativos.
 
 ### Domínio e produto
@@ -237,9 +237,9 @@ Sincronizado com o grafo nativo de dependências em 2026-09-15:
 | Issue | Estado | Bloqueadores abertos | Relação relevante |
 |---|---|---|---|
 | Documento de entrega e como o jogo roda na apresentação | disponível | — | independente |
-| Balancear problemas persistentes e intervenções | disponível | — | próximo caminho crítico |
-| Inventário de assets | bloqueada | Balancear problemas persistentes e intervenções | depende dos estados e pontos finais |
-| Implementar problemas persistentes e hub central | bloqueada | Balancear problemas persistentes e intervenções | migração posterior do sketch |
+| Balancear problemas persistentes e intervenções | CLOSED | — | D-098 confirmada |
+| Inventário de assets | disponível | — | liberada pelo balanceamento |
+| Implementar problemas persistentes e hub central | disponível | — | próximo caminho crítico |
 | Redesenhar o ciclo diário e a origem das tarefas | CLOSED | — | D-073 a D-096 confirmadas |
 
 As issues de base até `Reestruturar navegação, tarefas e feedback` permanecem
@@ -251,10 +251,9 @@ concluída apenas porque o contrato foi documentado.
 ### Cadeias de trabalho relevantes
 
 - `Redesenhar o ciclo diário e a origem das tarefas` (fechada) →
-  `Balancear problemas persistentes e intervenções` (disponível) →
-  `Implementar problemas persistentes e hub central` (bloqueada).
-- `Balancear problemas persistentes e intervenções` também libera `Inventário
-  de assets`.
+  `Balancear problemas persistentes e intervenções` (fechada) →
+  `Implementar problemas persistentes e hub central` (disponível).
+- `Inventário de assets` também está disponível após o balanceamento.
 - `Documento de entrega e como o jogo roda na apresentação` permanece
   independente.
 
@@ -349,7 +348,7 @@ coleta, mapa, prioridades e localização do dano no casco.
 | D-078 | A nave mantém quatro salas jogáveis: Sala de comando no centro, com acesso direto à Sala de máquinas, ao Depósito e ao Dormitório; a organização espacial se baseia na composição de `assets/concept_arts/COMMAND_ROOM_CONCEPT_ART.png`, sem adotar nomes ou números ilustrativos da arte | CONFIRMADA |
 | D-079 | A Sala de comando é o único hub: Dormitório, Depósito e Sala de máquinas possuem ligação direta apenas com ela, sem portas entre as três salas periféricas | CONFIRMADA |
 | D-080 | A Sala de comando possui uma porta por convés: Dormitório no superior, Depósito no médio e Sala de máquinas no inferior; as escadas do hub fazem parte das rotas entre funções | CONFIRMADA |
-| D-081 | As intervenções principais se dividem em correção, recuperação e aceleração; economia e racionamento são contenções livres; o efeito exato de `Socorrer sobrevivente` está PROVISÓRIO na #20 e aguarda validação | CONFIRMADA |
+| D-081 | As intervenções principais se dividem em correção, recuperação e aceleração; economia e racionamento são contenções livres; `Socorrer sobrevivente` estabiliza uma pessoa em risco pelos custos confirmados na D-098 | CONFIRMADA |
 | D-082 | Cada problema ativo exibe custo por dia, prazo restante e consequência do agravamento; a perda é aplicada ao encerrar o dia e o prazo visível permite comparar prioridades antes de escolher a intervenção | CONFIRMADA |
 | D-083 | Quando o prazo chega a zero, o problema aplica uma crise específica e coerente com seu domínio, não uma derrota universal; motor pode ser fatal, enquanto estoque, conflito, casco e comunicações causam perdas próprias e podem continuar ativos | CONFIRMADA |
 | D-084 | O padrão geral dos eventos é `risco agora, correção depois`: o cartão escolhe entre contenções com custos e riscos diferentes, mas o problema permanece até uma intervenção física no cômodo correspondente | CONFIRMADA |
@@ -366,6 +365,7 @@ coleta, mapa, prioridades e localização do dano no casco.
 | D-095 | No Dormitório, dormir apenas encerra o turno; `Cuidar do grupo` é uma intervenção principal que recupera moral; `Socorrer [nome]` é outra intervenção principal que estabiliza um sobrevivente em risco | CONFIRMADA |
 | D-096 | Economia de energia e racionamento são políticas persistentes ativadas localmente em Máquinas e Depósito; não consomem a intervenção principal, reduzem consumo e cobram moral ao ativar e a cada dia mantidas | CONFIRMADA |
 | D-097 | O dano no casco causado por meteoros não pertence a um ponto fixo: cada ocorrência escolhe um local aleatório alcançável pelo jogador em qualquer um dos quatro cômodos | IMPLEMENTADA |
+| D-098 | Modelo numérico da viagem: incidentes nos dias 1, 3, 5, 7 e 9; cinco dos sete problemas sem reposição; ordem de turno, perdas, prazos, crises, contenções, intervenções, políticas e benefícios conforme `mechanics/ACTIONS.md` | CONFIRMADA |
 
 
 ## Decisões que exigem consulta
@@ -407,8 +407,8 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 
 ## Estado desta sessão
 
-- **Issue em andamento:** [Balancear problemas persistentes e intervenções](issue://20)
-  possui protótipo numérico executável e aguarda validação do usuário.
+- **Issue concluída:** [Balancear problemas persistentes e intervenções](issue://20)
+  teve o modelo numérico validado pelo usuário.
 - **Decisão confirmada:** D-097 remove o ponto fixo do casco no Depósito. Cada
   dano por meteoros surge em um local aleatório alcançável pelo jogador em
   qualquer um dos quatro cômodos.
@@ -420,16 +420,16 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
   um ponto livre e alcançável entre os três conveses dos quatro cômodos, atualiza
   o destino da correção e fica fora do sorteio enquanto o vazamento estiver
   ativo. O restante do sketch continua implementando o ciclo anterior.
-- **Wayfinder:** #20 permanece OPEN e bloqueia [Inventário de assets](issue://8)
-  e [Implementar problemas persistentes e hub central](issue://21);
-  [Documento de entrega](issue://7) permanece disponível e independente.
+- **Wayfinder:** #20 está CLOSED; [Inventário de assets](issue://8) e
+  [Implementar problemas persistentes e hub central](issue://21) estão
+  disponíveis; [Documento de entrega](issue://7) permanece independente.
 - **Verificação desta sessão:** `--capture` passou com cinco verificações de
   D-097: ponto oculto antes do dano, localização alcançável, variação entre
   cômodos, exclusão do evento enquanto ativo e remoção após o reparo.
   `--hit-test` e `--ladder-test` também passaram sem regressões.
-- **Protótipo da #20:** `node prototype/balance-model.mjs --simulate` fecha
-  provisoriamente calendário, processamento, sete problemas, contenções,
-  intervenções, políticas e benefícios; correção, recuperação e aceleração
-  vencem, omissão perde, e correção prioritária vence as 2.520 ordens possíveis.
+- **Protótipo da #20:** `node prototype/balance-model.mjs --simulate` confirmou
+  calendário, processamento, sete problemas, contenções, intervenções, políticas
+  e benefícios; correção, recuperação e aceleração vencem, omissão perde, e
+  correção prioritária vence as 2.520 ordens possíveis.
 
-O repositório está com **um protótipo numérico executável da #20 aguardando validação; o novo ciclo ainda não foi migrado para o sketch**.
+O repositório está com **o balanceamento da #20 confirmado e pronto para a migração integral da #21; o novo ciclo ainda não está no sketch**.

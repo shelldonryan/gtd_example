@@ -3,7 +3,7 @@
 Eventos humanos criam problemas persistentes ligados ao Dormitório ou ao
 Depósito. O cartão escolhe uma contenção imediata; `Cuidar do grupo`, `Socorrer
 [nome]` ou uma correção logística resolve a causa depois no espaço jogável. Os
-valores abaixo são a proposta **PROVISÓRIA** da issue #20.
+valores abaixo foram confirmados na issue #20.
 
 ## Falta de comida
 
@@ -27,5 +27,5 @@ em risco; `Socorrer [nome]` é uma intervenção separada.
 
 ## Estado
 
-Valores provisórios implementados em `prototype/balance-model.mjs`; aguardam
-validação antes de migrar para o sketch.
+Valores confirmados e comprovados em `prototype/balance-model.mjs`; a migração
+para o sketch pertence à issue #21.

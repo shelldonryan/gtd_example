@@ -2,7 +2,7 @@
 
 Eventos internos criam problemas persistentes na Sala de máquinas ou no
 Comando. O cartão escolhe uma contenção imediata; nenhuma alternativa corrige a
-causa. Os valores abaixo são a proposta **PROVISÓRIA** da issue #20.
+causa. Os valores abaixo foram confirmados na issue #20.
 
 ## Falha no motor
 
@@ -33,6 +33,5 @@ moral e abre prazo 2. A crise perde 10 de moral e reinicia em 3. Reparar custa
 
 ## Estado
 
-Valores provisórios implementados em `prototype/balance-model.mjs`; aguardam
-validação antes de migrar para o sketch. Os textos D-047 serão adaptados na
-issue #21.
+Valores confirmados e comprovados em `prototype/balance-model.mjs`; a migração
+para o sketch e a adaptação dos textos D-047 pertencem à issue #21.

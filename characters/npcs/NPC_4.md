@@ -16,7 +16,7 @@ Recursos comuns são pagos diretamente na estação; somente componentes especia
 justificam busca no Depósito.
 
 Se Sílvia morrer, as correções técnicas continuam possíveis, mas cada uma custa
-1 peça adicional. Valores provisórios da issue #20.
+1 peça adicional. Valores confirmados na issue #20.
 
 ## Vínculos
 

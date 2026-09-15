@@ -119,5 +119,4 @@ Exemplo: `MOTOR DANIFICADO — 2 DIAS — MÁQUINAS | +2 PROBLEMAS`.
 O mapa contém a comparação completa. A ficha da sala mostra, para cada problema,
 a perda diária, o prazo e a consequência quando ele chegar a zero. Para dano no
 casco, a ficha pertence ao cômodo que contém o local alcançável sorteado naquela
-ocorrência. A proposta numérica está em `mechanics/ACTIONS.md` e permanece
-PROVISÓRIA até a validação do usuário.
+ocorrência. Os valores confirmados estão em `mechanics/ACTIONS.md`.

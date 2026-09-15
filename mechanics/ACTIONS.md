@@ -1,8 +1,8 @@
 # Ações e custos
 
-Este arquivo registra o contrato mecânico vigente. Os estoques e consumos
-confirmados permanecem na linha de base. O modelo numérico abaixo é a proposta
-**PROVISÓRIA** da issue #20 e só vira contrato após validação do usuário.
+Este arquivo registra o contrato mecânico vigente. Os estoques, consumos e o
+modelo numérico da issue #20 foram confirmados pelo usuário após a execução das
+simulações.
 
 ## Regras base
 
@@ -91,7 +91,7 @@ Problemas e responsabilidades permanecem distribuídos assim:
 | Conflito, saúde e moral | Dormitório |
 | Dano no casco por meteoros | local aleatório alcançável em qualquer um dos quatro cômodos |
 
-## Modelo numérico provisório da issue #20
+## Modelo numérico confirmado na issue #20
 
 ### Calendário e ordem do turno
 
@@ -160,7 +160,7 @@ separadamente.
 
 `node prototype/balance-model.mjs --simulate` executa quatro estratégias sobre
 dez dias e as **2.520 ordens possíveis** de cinco problemas distintos para a
-correção prioritária. O modelo permanece isolado do sketch até a validação.
+correção prioritária. Esse modelo confirmado é a entrada numérica da issue #21.
 
 ## Agravamento
 
@@ -190,6 +190,5 @@ a mesma ação continua possível com custo ou risco maior.
 ## Estado do balanceamento
 
 - Calendário, processamento, sete problemas, contenções, correções, recuperação,
-  aceleração, políticas e benefícios possuem valores provisórios executáveis.
-- A simulação precisa ser validada pelo usuário antes de estes números virarem
-  decisões confirmadas e antes da migração da issue #21.
+  aceleração, políticas e benefícios foram confirmados pelo usuário.
+- A issue #21 pode migrar esse contrato integralmente para o sketch.

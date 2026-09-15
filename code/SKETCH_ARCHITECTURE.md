@@ -80,9 +80,9 @@ um dos três conveses, evitando estações fixas. O destino de `Reparar casco`
 acompanha o ponto sorteado, e o evento não volta ao pool enquanto o vazamento
 estiver ativo.
 
-Perdas, prazos, crises, custos e benefícios agora possuem um modelo PROVISÓRIO
-em `prototype/balance-model.mjs`. O restante de D-073 a D-096 não foi migrado e
-aguarda a validação desse modelo.
+Perdas, prazos, crises, custos e benefícios possuem um modelo confirmado em
+`prototype/balance-model.mjs`. O restante de D-073 a D-096 não foi migrado e
+agora segue para a issue #21.
 
 ## Implementação atual anterior ao redesign
 
@@ -130,10 +130,10 @@ dia, os recursos e o motor atravessam as telas.
 
 ## Números
 
-`mechanics/ACTIONS.md` continua sendo a fonte de regras e registra a proposta
-numérica da issue #20 como PROVISÓRIA. As constantes atuais do sketch ainda
-correspondem ao protótipo anterior; não devem ser tratadas como implementação
-das decisões D-073 a D-096.
+`mechanics/ACTIONS.md` continua sendo a fonte de regras e registra os números
+confirmados na issue #20. As constantes atuais do sketch ainda correspondem ao
+protótipo anterior; não devem ser tratadas como implementação das decisões
+D-073 a D-096.
 
 ## Viewport e input
 
@@ -246,7 +246,7 @@ Limitações observadas:
 - O beliche já encerra o dia após o resumo, mas ainda não processa perdas, prazos
   e crises do novo modelo.
 - Os números atuais, `active_task`, `held_item`, `action_used`, a tabela de
-  tarefas e as verificações de captura precisam ser redesenhados somente depois
-  da validação do protótipo numérico da issue #20.
+  tarefas e as verificações de captura serão substituídos na migração integral
+  da issue #21.
 - **Textos:** vinheta, transmissões e telas de vitória/derrota continuam com as
   pendências de conteúdo registradas no #11.

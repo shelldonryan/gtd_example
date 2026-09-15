@@ -114,8 +114,8 @@ cômodos e permanece ali até a correção.
 
 Problemas ignorados aplicam uma perda diária e avançam para uma crise específica.
 Uma crise pode destruir um sistema, causar uma grande perda ou colocar um
-sobrevivente nomeado em risco. A issue #20 contém uma proposta numérica
-executável, ainda PROVISÓRIA até a validação do usuário.
+sobrevivente nomeado em risco. Os valores confirmados estão em
+`mechanics/ACTIONS.md`.
 
 ## Condições de término
 

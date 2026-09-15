@@ -143,6 +143,6 @@ obrigatório, tarefa singular em `tasks.pde`, rotas universais por NPC e recurso
 carregados; esse código continua sendo o protótipo anterior e diverge de D-073 a
 D-096.
 
-A implementação do restante do novo contrato só deve começar depois que o
-usuário validar as perdas, prazos, crises, custos e benefícios propostos na
-issue #20. Os nomes curtos das estações serão revalidados nessa etapa.
+A implementação do restante do novo contrato está liberada com o balanceamento
+confirmado na issue #20. A migração integral, incluindo os nomes curtos das
+estações, pertence à issue #21.

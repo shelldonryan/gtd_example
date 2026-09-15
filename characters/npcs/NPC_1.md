@@ -16,7 +16,7 @@ aceitar uma tarefa.
 
 Ela participa de `Aumentar potência` e dos problemas de comunicação. Se morrer,
 essas ações continuam disponíveis: potência sobe de 10 para 15 de energia e o
-reparo de comunicações, de 1 para 2 peças. Valores provisórios da issue #20.
+reparo de comunicações, de 1 para 2 peças. Valores confirmados na issue #20.
 
 ## Vínculos
 
