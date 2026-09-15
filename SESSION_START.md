@@ -3,7 +3,7 @@
 > Documento obrigatório de abertura e encerramento de toda sessão. Leia antes de
 > analisar, editar ou implementar qualquer coisa.
 
-Atualizado em: 2026-09-15 (protótipo numérico da issue #20)
+Atualizado em: 2026-09-15 (D-098 confirmada; #20 concluída)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Como usar este arquivo
@@ -261,10 +261,10 @@ concluída apenas porque o contrato foi documentado.
 
 As decisões D-001 a D-072 registram a formação e a implementação do protótipo
 anterior. D-073 a D-096 foram confirmadas no grilling de
-[Redesenhar o ciclo diário e a origem das tarefas](issue://19), e D-097 foi
-confirmada no balanceamento [#20](issue://20). Quando houver conflito, D-073 a
-D-097 superam decisões anteriores sobre briefing, tarefas, eventos, rotas,
-coleta, mapa, prioridades e localização do dano no casco.
+[Redesenhar o ciclo diário e a origem das tarefas](issue://19); D-097 e D-098
+foram confirmadas no balanceamento [#20](issue://20). Quando houver conflito,
+D-073 a D-098 superam decisões anteriores sobre briefing, tarefas, eventos,
+rotas, coleta, mapa, prioridades, localização do dano no casco e números.
 
 | ID | Decisão | Estado |
 |---|---|---|
