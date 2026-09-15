@@ -268,6 +268,7 @@ void runRuleChecks(){
   checkKeyboardModalButtons();
   checkEndDayForecast();
   checkFailureRules();
+  checkHullDamageLocation();
 }
 
 void checkPlayerFacing(){
@@ -443,6 +444,50 @@ void checkFailureRules(){
     previous = drawn;
   }
   verify("evento não repete imediatamente", no_repeat);
+}
+
+
+void checkHullDamageLocation(){
+  boolean reachable = true;
+  boolean varied_room = false;
+  int first_room = SCREEN_NONE;
+
+  resetRun();
+  boolean hidden_when_inactive = point_room[POINT_HULL] == SCREEN_NONE;
+  randomSeed(97031);
+
+  for (int sample = 0; sample < 32; sample++){
+    leak_on = false;
+    oxygen = STOCK_START;
+    event_index = EVENT_METEOR;
+    applyEventChoice(1);
+
+    int hull_room = point_room[POINT_HULL];
+    boolean known_room = hull_room == SCREEN_COMMAND || hull_room == SCREEN_ENERGY
+      || hull_room == SCREEN_DEPOT || hull_room == SCREEN_DORMITORY;
+    boolean known_deck = isDeckSurface(point_y[POINT_HULL]);
+    boolean inside_room = point_x[POINT_HULL] >= ROOM_LEFT + 28
+      && point_x[POINT_HULL] <= ROOM_RIGHT - 28;
+
+    reachable &= leak_on && known_room && known_deck && inside_room
+      && task_completion_room[TASK_REPAIR_HULL] == hull_room;
+
+    if (sample == 0){
+      first_room = hull_room;
+    } else if (hull_room != first_room){
+      varied_room = true;
+    }
+  }
+
+  verify("dano no casco fica oculto sem vazamento", hidden_when_inactive);
+  verify("dano no casco surge em ponto alcançável", reachable);
+  verify("dano no casco varia entre cômodos", varied_room);
+
+  leak_on = true;
+  verify("dano no casco ativo não volta ao sorteio", !eventAllowed(EVENT_METEOR));
+  applyTaskEffect(TASK_REPAIR_HULL);
+  verify("reparo remove o ponto do casco", !leak_on
+    && point_room[POINT_HULL] == SCREEN_NONE);
 }
 
 

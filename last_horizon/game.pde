@@ -98,6 +98,7 @@ void resetRun(){
   engine_state = ENGINE_WORKING;
   engine_damaged_days = 0;
   leak_on = false;
+  clearHullDamage();
   saving_on = false;
   rationing_on = false;
   life_support_emergency = false;
@@ -135,6 +136,10 @@ void openDay(){
 boolean eventAllowed(int event){
   if (event == EVENT_ENGINE){
     return engine_state != ENGINE_DAMAGED;
+  }
+
+  if (event == EVENT_METEOR){
+    return !leak_on;
   }
 
   if (event == EVENT_LIFE_SUPPORT){
@@ -444,6 +449,7 @@ void applyEventChoice(int choice){
       system_message = "ESCUDOS SEGURARAM O IMPACTO.";
     } else {
       oxygen -= EVENT_METEOR_OXYGEN;
+      placeHullDamage();
       leak_on = true;
       system_message = "CASCO ROMPIDO: -3 DE OXIGÊNIO POR DIA.";
     }

@@ -85,6 +85,62 @@ int[] point_kind = {
 };
 
 
+void placeHullDamage(){
+  int hull_room = room_screen[int(random(ROOM_COUNT))];
+  int available_slots = 0;
+
+  for (int deck = 0; deck < DECK_COUNT; deck++){
+    for (float x = ROOM_LEFT + 40; x <= ROOM_RIGHT - 40; x += 32){
+      if (hullPointClear(hull_room, deck_y[deck], x)){
+        available_slots++;
+      }
+    }
+  }
+
+  int selected_slot = int(random(available_slots));
+
+  for (int deck = 0; deck < DECK_COUNT; deck++){
+    for (float x = ROOM_LEFT + 40; x <= ROOM_RIGHT - 40; x += 32){
+      if (!hullPointClear(hull_room, deck_y[deck], x)){
+        continue;
+      }
+
+      if (selected_slot == 0){
+        point_room[POINT_HULL] = hull_room;
+        point_x[POINT_HULL] = x;
+        point_y[POINT_HULL] = deck_y[deck];
+        task_completion_room[TASK_REPAIR_HULL] = hull_room;
+        return;
+      }
+
+      selected_slot--;
+    }
+  }
+}
+
+
+void clearHullDamage(){
+  point_room[POINT_HULL] = SCREEN_NONE;
+  task_completion_room[TASK_REPAIR_HULL] = SCREEN_NONE;
+}
+
+
+boolean hullPointClear(int room, float y, float x){
+  for (int point = 0; point < POINT_COUNT; point++){
+    if (point == POINT_HULL || point_room[point] != room
+      || abs(point_y[point] - y) > 3){
+      continue;
+    }
+
+    if (abs(point_x[point] - x) <= INTERACTION_RANGE * 2){
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
 void drawShipArea(PGraphics g){
   g.noStroke();
   g.fill(COL_ROOM);

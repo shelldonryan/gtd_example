@@ -74,11 +74,14 @@ A Sala de comando vira o hub com uma porta por convés: Dormitório no superior,
 Depósito no médio e Sala de máquinas no inferior. O HUD mostra o problema mais
 urgente e o mapa reúne todos por sala. Recursos comuns são pagos na intervenção;
 somente componentes especiais são carregados.
-O dano no casco não usa um ponto fixo: cada ocorrência escolhe um local aleatório
-alcançável pelo jogador em qualquer um dos quatro cômodos.
+D-097 já foi aplicada isoladamente ao protótipo anterior: quando meteoros rompem
+o casco, o sketch sorteia um dos quatro cômodos e um ponto livre alcançável em
+um dos três conveses, evitando estações fixas. O destino de `Reparar casco`
+acompanha o ponto sorteado, e o evento não volta ao pool enquanto o vazamento
+estiver ativo.
 
 Perdas, prazos, crises, custos e benefícios dos sobreviventes ainda dependem do
-protótipo de balanceamento. Nenhum símbolo do sketch foi migrado nesta decisão.
+protótipo de balanceamento. O restante de D-073 a D-096 não foi migrado.
 
 ## Implementação atual anterior ao redesign
 
@@ -209,9 +212,10 @@ raiz do repositório:
 
 `--capture` percorre 23 estados, salva `output/NN_estado.png` em 1280×720 (720p) e
 `output/NN_estado_window.png` na janela, verifica navegação, mapa, briefing,
-diálogo, tarefa diária, beliche, previsão de consumo, evento e regras de falha,
-e encerra sozinho. `--hit-test` abre 1400×900 e prova as quatro fichas do mapa e
-o letterbox. `--ladder-test` mantém os cinco casos de saída e reentrada.
+diálogo, tarefa diária, beliche, previsão de consumo, evento, regras de falha e
+o sorteio alcançável do dano no casco, e encerra sozinho. `--hit-test` abre
+1400×900 e prova as quatro fichas do mapa e o letterbox. `--ladder-test` mantém
+os cinco casos de saída e reentrada.
 
 Limitações observadas:
 
@@ -228,16 +232,16 @@ Limitações observadas:
 
 ## Estado da revisão
 
-- **Código atual:** D-048 a D-072 continuam implementadas. As salas ainda formam
-  a sequência linear Comando → Energia → Depósito → Dormitório; o console do
-  Comando ainda escolhe `active_task`; NPCs e coletas ainda compõem cadeias
-  universais; eventos continuam diários e algumas respostas resolvem a falha no
-  cartão.
-- **Contrato confirmado, ainda ausente do código:** D-073 a D-097 definem
+- **Código atual:** D-048 a D-072 e D-097 estão implementadas. O dano no casco
+  sorteia um ponto livre alcançável nos quatro cômodos e atualiza o destino da
+  correção; enquanto ativo, fica fora do pool. As salas ainda formam a sequência
+  linear Comando → Energia → Depósito → Dormitório; o console do Comando ainda
+  escolhe `active_task`; NPCs e coletas ainda compõem cadeias universais; eventos
+  continuam diários e algumas respostas resolvem a falha no cartão.
+- **Contrato confirmado, ainda ausente do código:** D-073 a D-096 definem
   problemas persistentes, incidentes alternados, intervenção principal,
   topologia em hub, recursos pagos no ponto, recuperação e socorro separados,
-  aceleração real, prioridades no HUD/mapa e dano no casco em local aleatório
-  alcançável.
+  aceleração real e prioridades no HUD/mapa.
 - O beliche já encerra o dia após o resumo, mas ainda não processa perdas, prazos
   e crises do novo modelo.
 - Os números atuais, `active_task`, `held_item`, `action_used`, a tabela de

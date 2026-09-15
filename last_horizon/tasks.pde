@@ -707,6 +707,7 @@ void applyTaskEffect(int task){
     trip_days = max(trip_days - 1, 1);
   } else if (task == TASK_REPAIR_HULL){
     leak_on = false;
+    clearHullDamage();
   } else if (task == TASK_REST_CREW){
     morale += REST_MORALE_GAIN;
   } else if (task == TASK_RESCUE_SURVIVOR){

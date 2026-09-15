@@ -136,11 +136,13 @@ um aceite abstrato.
 
 ## Implementação
 
-O sketch atual ainda implementa a topologia linear, o briefing obrigatório, a
-tarefa singular em `tasks.pde`, as rotas universais por NPC e os recursos
-carregados. Esse código descreve o protótipo anterior e diverge das decisões
-D-073 a D-096.
+O sketch atual já implementa D-097: o dano no casco sorteia um ponto livre e
+alcançável nos três conveses de qualquer um dos quatro cômodos, e o destino da
+correção acompanha esse ponto. O restante ainda usa topologia linear, briefing
+obrigatório, tarefa singular em `tasks.pde`, rotas universais por NPC e recursos
+carregados; esse código continua sendo o protótipo anterior e diverge de D-073 a
+D-096.
 
-A implementação do novo contrato só deve começar depois que o ticket de
-balanceamento fixar perdas, prazos, crises, custos e benefícios. Os nomes curtos
-das estações serão revalidados nessa etapa.
+A implementação do restante do novo contrato só deve começar depois que o ticket
+de balanceamento fixar perdas, prazos, crises, custos e benefícios. Os nomes
+curtos das estações serão revalidados nessa etapa.

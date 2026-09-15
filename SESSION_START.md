@@ -54,14 +54,15 @@ e as fontes afetadas.
 - `issue://19` registra o contrato D-073 a D-096 e supera as regras antigas de
   briefing diário, tarefa aceita, rota universal por NPC, evento diário e mapa
   com apenas um destino de tarefa.
-- O sketch atual continua sendo a implementação comprovada de D-048 a D-072. Ele
-  ainda usa salas lineares, `active_task`, itens comuns carregados e eventos
-  diários; portanto é evidência do protótipo anterior, não do novo ciclo.
+- O sketch atual continua sendo a implementação comprovada de D-048 a D-072,
+  agora com D-097 aplicada isoladamente. Ele ainda usa salas lineares,
+  `active_task`, itens comuns carregados e eventos diários; portanto continua
+  sendo evidência do protótipo anterior, não do novo ciclo completo.
 - Os custos e textos de D-030 a D-047 permanecem como linha de base histórica.
   O novo modelo de perdas, prazos, crises e contenções exige revalidação no
-  ticket de balanceamento antes de qualquer migração do código.
-- O sketch ainda fixa o reparo do casco no Depósito. A decisão D-097 substitui
-  esse ponto fixo por um local aleatório alcançável em qualquer cômodo.
+  ticket de balanceamento antes da migração restante.
+- D-097 já sorteia o dano no casco entre pontos alcançáveis dos quatro cômodos;
+  o restante de D-073 a D-096 continua ausente do sketch.
 - A resolução canônica continua 1280×720; 640×360 é somente a grade lógica.
   Texto usa Segoe UI suavizada, e assets pixel art usam amostragem sem
   interpolação.
@@ -149,11 +150,11 @@ plataforma dentro de uma nave espacial. A nave **não tem nome**.
 
 O sketch em `last_horizon/` continua executável e verificado para o ciclo
 anterior: menus, salas lineares, movimento, tarefas aceitas, eventos diários e
-encerramento no beliche. Nenhum código foi alterado nesta sessão.
+encerramento no beliche. D-097 foi aplicada isoladamente nesse protótipo.
 
 `code/SKETCH_ARCHITECTURE.md` separa explicitamente implementação atual e
-contrato futuro. As capturas existentes continuam válidas apenas como evidência
-de D-048 a D-072.
+contrato futuro. As capturas existentes comprovam D-048 a D-072 e a regressão
+automatizada do local aleatório e alcançável de D-097.
 Os tickets [#15](issue://15) e [#16](issue://16) estão CLOSED após a validação
 da evidência na aceitação nativa de cada issue.
 
@@ -364,7 +365,7 @@ coleta, mapa, prioridades e localização do dano no casco.
 | D-094 | `Aumentar potência` elimina um dia completo de exposição: reduz a duração da viagem e evita o consumo diário e o incidente que ocorreriam nesse dia futuro | CONFIRMADA |
 | D-095 | No Dormitório, dormir apenas encerra o turno; `Cuidar do grupo` é uma intervenção principal que recupera moral; `Socorrer [nome]` é outra intervenção principal que estabiliza um sobrevivente em risco | CONFIRMADA |
 | D-096 | Economia de energia e racionamento são políticas persistentes ativadas localmente em Máquinas e Depósito; não consomem a intervenção principal, reduzem consumo e cobram moral ao ativar e a cada dia mantidas | CONFIRMADA |
-| D-097 | O dano no casco causado por meteoros não pertence a um ponto fixo: cada ocorrência escolhe um local aleatório alcançável pelo jogador em qualquer um dos quatro cômodos | CONFIRMADA |
+| D-097 | O dano no casco causado por meteoros não pertence a um ponto fixo: cada ocorrência escolhe um local aleatório alcançável pelo jogador em qualquer um dos quatro cômodos | IMPLEMENTADA |
 
 
 ## Decisões que exigem consulta
@@ -415,12 +416,16 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
   `mechanics/ACTIONS.md`, `interface/FLOW.md`, `interface/ROOMS.md`,
   `interface/HUD.md`, `events/HAZARDS.md`, `characters/npcs/NPC_2.md`,
   `code/SKETCH_ARCHITECTURE.md` e `SESSION_START.md`.
-- **Código:** nenhum `.pde` foi alterado. O sketch ainda mantém o ponto antigo do
-  casco no Depósito e continua sendo a implementação do ciclo anterior.
+- **Código:** D-097 foi implementada em `game.pde` e `ship.pde`. O dano sorteia
+  um ponto livre e alcançável entre os três conveses dos quatro cômodos, atualiza
+  o destino da correção e fica fora do sorteio enquanto o vazamento estiver
+  ativo. O restante do sketch continua implementando o ciclo anterior.
 - **Wayfinder:** #20 permanece OPEN e bloqueia [Inventário de assets](issue://8)
   e [Implementar problemas persistentes e hub central](issue://21);
   [Documento de entrega](issue://7) permanece disponível e independente.
-- **Verificação desta sessão:** consistência documental reverificada; não houve
-  execução do sketch porque a decisão ainda não deve migrar para o código.
+- **Verificação desta sessão:** `--capture` passou com cinco verificações de
+  D-097: ponto oculto antes do dano, localização alcançável, variação entre
+  cômodos, exclusão do evento enquanto ativo e remoção após o reparo.
+  `--hit-test` e `--ladder-test` também passaram sem regressões.
 
-O repositório está com o **novo ciclo documentado e ainda não implementado**.
+O repositório está com **D-097 implementada no protótipo anterior; o novo ciclo completo continua apenas documentado**.
