@@ -68,9 +68,9 @@ reporte e não escolha silenciosamente.
   1 fica sem incidente), cinco problemas sem reposição, contenções que não
   corrigem a causa, uma intervenção principal por dia e coleta de componente,
   ambas com painel de confirmação, hub por convés, riscos individuais e crises.
-- As alterações das decisões D-108 a D-110 estão no **working tree** da branch
-  `prototype/sketch-architecture`, sem commit; a branch está 6 commits à frente
-  do origin por sessões anteriores.
+- As decisões D-108 a D-110 estão commitadas na branch
+  `prototype/sketch-architecture` (`83f152e` código, `677697f` documentos e
+  `4ac9a12` capturas), sem push; a branch está 9 commits à frente do origin.
 
 ### Fronteira Wayfinder
 
@@ -291,8 +291,11 @@ Código:
   atribuídas e fechadas com decisão, arquivos e evidência; comentário de
   supersessão do calendário na #20; corpo da #1 atualizado.
 - Resultado: protótipo executável com o calendário par e painel de confirmação em
-  toda intervenção principal e na coleta; as alterações estão no working tree,
-  sem commit.
+  toda intervenção principal e na coleta; as alterações estão nos commits
+  `83f152e` (código), `677697f` (documentos) e `4ac9a12` (capturas), sem push.
+- Higiene pendente: `assets/concept_arts/` mantém quatro interiores sem rastreio
+  e `last_horizon/output/` guarda 44 capturas de numeração antiga, sem
+  correspondência com a execução vigente — limpeza depende de autorização.
 
 A fronteira vigente é **#7 e #8 abertos, ambos disponíveis e sem bloqueadores**.
 O próximo caminho crítico é **#8 (inventário de assets)**, com **#7 (documento de
