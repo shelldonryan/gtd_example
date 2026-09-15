@@ -6,7 +6,7 @@
 | Papel | Intendente |
 | Onde fica | Depósito, em ponto fixo junto aos estoques |
 | Temperamento | Ranzinza; guarda o estoque a sete chaves |
-| Função nas intervenções | Logística, componentes especiais, estoques e racionamento; sua presença concede um benefício ainda a balancear |
+| Função nas intervenções | Logística: reduz pela metade o custo moral das políticas e evita 3 de comida na correção do estoque |
 
 ## Papel no jogo
 
@@ -15,9 +15,9 @@ explica o custo logístico das decisões, mas não entrega recursos comuns já
 contabilizados no HUD.
 
 Componentes especiais podem ser coletados fisicamente nos pontos do Depósito.
-Racionamento é uma política persistente local. Se Bento morrer, logística e
-racionamento continuam disponíveis com custo ou risco maior, definido no
-próximo balanceamento.
+Racionamento é uma política persistente local. Com Bento, cada política custa 2
+de moral ao ativar e 1 por dia; sem ele, custa 4 e 2. Reorganizar comida passa
+de custo zero para 3 de comida. Valores provisórios da issue #20.
 
 ## Vínculos
 

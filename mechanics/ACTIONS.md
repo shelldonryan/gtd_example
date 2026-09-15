@@ -1,8 +1,8 @@
 # Ações e custos
 
-Este arquivo registra o contrato mecânico vigente. Os estoques e custos ainda
-presentes são a linha de base do protótipo; perdas, prazos, crises e bônus serão
-recalculados no próximo ticket de balanceamento antes de voltar ao código.
+Este arquivo registra o contrato mecânico vigente. Os estoques e consumos
+confirmados permanecem na linha de base. O modelo numérico abaixo é a proposta
+**PROVISÓRIA** da issue #20 e só vira contrato após validação do usuário.
 
 ## Regras base
 
@@ -91,15 +91,76 @@ Problemas e responsabilidades permanecem distribuídos assim:
 | Conflito, saúde e moral | Dormitório |
 | Dano no casco por meteoros | local aleatório alcançável em qualquer um dos quatro cômodos |
 
-Os valores de perda, prazos, crises, custos das intervenções e benefícios dos
-sobreviventes serão definidos e simulados no ticket de balanceamento.
+## Modelo numérico provisório da issue #20
 
-### Políticas de contenção
+### Calendário e ordem do turno
 
-| Sala | Política | Efeito atual a revalidar |
+Os incidentes ocorrem no início dos dias **1, 3, 5, 7 e 9**. No começo da
+partida, os sete problemas são embaralhados uniformemente e os cinco primeiros
+formam a viagem. Assim, nenhum problema se repete na mesma partida e um problema
+ativo nunca volta ao sorteio.
+
+Ao dormir, o estado é processado nesta ordem:
+
+1. custos diários das políticas;
+2. consumo base de energia, oxigênio, água e comida;
+3. perdas diárias dos problemas ativos;
+4. moral base e penalidade por recursos em vermelho;
+5. prazos de pessoas em risco e eventuais mortes;
+6. prazos dos problemas e crises que chegaram a zero;
+7. derrota, chegada e avanço do calendário.
+
+O prazo exibido inclui a noite atual: um problema que nasce com prazo 2 pode ser
+corrigido no dia do incidente ou no dia seguinte antes da crise. Crises não
+fatais mantêm o problema ativo e reiniciam seu prazo.
+
+### Sete problemas
+
+| Problema | Perda diária | Contenção segura | Contenção arriscada | Crise |
+| --- | --- | --- | --- | --- |
+| Falha no motor | energia −4 | energia −5; prazo 3 | moral −2; prazo 2 | motor destruído; derrota |
+| Dano no casco | oxigênio −5 | energia −5; prazo 3 | oxigênio −4; prazo 2 | oxigênio −15; reinicia em 2 |
+| Falha no suporte de vida | oxigênio −4 | energia −4; prazo 4 | oxigênio −3; prazo 2 | oxigênio −12 e uma pessoa em risco; reinicia em 3 |
+| Falha no sistema de energia | energia −3 | energia −4; prazo 4 | moral −4; prazo 2 | energia −12, desliga economia; reinicia em 3 |
+| Falha nas comunicações | moral −2 | energia −3; prazo 4 | moral −3; prazo 2 | moral −10; reinicia em 3 |
+| Falta de comida | comida −3 | comida −4; prazo 4 | moral −4; prazo 2 | comida −8 e uma pessoa em risco; reinicia em 3 |
+| Conflito no dormitório | moral −4 | água −4; prazo 4 | moral −3; prazo 2 | moral −8 e uma pessoa em risco; reinicia em 3 |
+
+### Intervenções e benefícios
+
+| Intervenção | Com especialista vivo | Sem especialista |
 | --- | --- | --- |
-| Máquinas | Modo economia | reduz consumo de energia; cobra moral ao ativar e por dia |
-| Depósito | Racionamento | reduz consumo de comida e água; cobra moral ao ativar e por dia |
+| Reparar motor — Sílvia | 2 peças | 3 peças |
+| Reparar casco — Sílvia | kit de vedação + 1 peça | kit de vedação + 2 peças |
+| Reparar suporte — Sílvia | 1 peça | 2 peças |
+| Reparar energia — Sílvia | fusível de potência + 1 peça | fusível + 2 peças |
+| Reparar comunicações — Vera | 1 peça | 2 peças |
+| Reorganizar comida — Bento | sem recurso comum | comida −3 |
+| Mediar conflito — Neusa | sem recurso comum | água −3 |
+| Aumentar potência — Vera | energia −10 | energia −15 |
+| Cuidar do grupo — Neusa | água −3, comida −2; moral +20 | mesmo custo; moral +12 |
+| Socorrer pessoa — Neusa | água −6, comida −2 | água −9, comida −3 |
+
+Kit de vedação e fusível de potência são componentes especiais: precisam ser
+coletados, mas a coleta é livre. Os custos comuns são pagos no ponto final.
+Uma pessoa em risco recebe prazo 2. Socorrer remove o risco; prazo zero causa
+morte e remove o benefício da especialidade.
+
+### Políticas
+
+| Política | Efeito | Bento vivo | Bento morto |
+| --- | --- | --- | --- |
+| Modo economia | consumo de energia cai de 6 para 3 | moral −2 ao ativar e −1/dia | moral −4 ao ativar e −2/dia |
+| Racionamento | água cai de 8 para 4; comida de 7 para 3 | moral −2 ao ativar e −1/dia | moral −4 ao ativar e −2/dia |
+
+Desligar uma política não custa moral. Cada política cobra seu custo diário
+separadamente.
+
+### Protótipo executável
+
+`node prototype/balance-model.mjs --simulate` executa quatro estratégias sobre
+dez dias e as **2.520 ordens possíveis** de cinco problemas distintos para a
+correção prioritária. O modelo permanece isolado do sketch até a validação.
 
 ## Agravamento
 
@@ -126,10 +187,9 @@ a mesma ação continua possível com custo ou risco maior.
 | Motor destruído | derrota imediata |
 | Dia final com motor operante e 1 ou mais sobreviventes vivos | vitória |
 
-## Pendências de balanceamento
+## Estado do balanceamento
 
-- Fixar calendário exato dos dias de incidente.
-- Definir perdas diárias, prazos e crises dos sete problemas.
-- Definir custos e efeitos das contenções e intervenções.
-- Definir o benefício de Vera, Bento, Neusa e Sílvia e a penalidade de perdê-los.
-- Simular os caminhos de correção, recuperação, aceleração e omissão.
+- Calendário, processamento, sete problemas, contenções, correções, recuperação,
+  aceleração, políticas e benefícios possuem valores provisórios executáveis.
+- A simulação precisa ser validada pelo usuário antes de estes números virarem
+  decisões confirmadas e antes da migração da issue #21.

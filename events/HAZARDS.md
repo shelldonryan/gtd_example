@@ -2,20 +2,20 @@
 
 Eventos externos criam problemas persistentes na nave. O cartão escolhe uma
 contenção imediata com custo e risco diferentes; a correção física acontece
-depois. Valores, prazos e crises serão definidos no próximo balanceamento.
+depois. Os valores abaixo são a proposta **PROVISÓRIA** da issue #20.
 
 ## Chuva de meteoros
 
-A nave atravessa uma região carregada e sofre dano no casco. A escolha do cartão
-define quanto recurso gastar para conter o impacto e quanto risco aceitar, mas
-o dano permanece ativo.
+A nave atravessa uma região carregada e sofre dano no casco. `Selar anteparas`
+custa 5 de energia e abre prazo 3; `Isolar apenas o setor` perde 4 de oxigênio
+e abre prazo 2. Nenhuma alternativa corrige a causa.
 
 Cada ocorrência escolhe um local aleatório alcançável pelo jogador em qualquer
-um dos quatro cômodos. O dano permanece ligado a esse ponto até ser corrigido,
-aplica perda diária de oxigênio, reduz seu prazo e pode causar uma crise própria.
-Componentes especiais, como o kit de vedação, ainda podem justificar uma etapa
-física de coleta.
+um dos quatro cômodos. Enquanto ativo, o dano perde 5 de oxigênio por dia. A
+crise perde mais 15 e reinicia o prazo em 2. Reparar exige o kit de vedação e
+1 peça com Sílvia viva, ou 2 peças sem o benefício dela.
 
-## Pendências de balanceamento
+## Estado
 
-- Definir as duas contenções, a perda diária, o prazo e a crise do casco.
+Valores provisórios implementados em `prototype/balance-model.mjs`; aguardam
+validação antes de migrar para o sketch.

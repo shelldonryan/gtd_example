@@ -6,7 +6,7 @@
 | Papel | Piloto |
 | Onde fica | Sala de comando, em ponto fixo junto ao painel de rota |
 | Temperamento | Pragmática; fala por números e horas |
-| Função nas intervenções | Navegação, comunicações e aumento de potência; sua presença concede um benefício ainda a balancear, sem ser etapa obrigatória |
+| Função nas intervenções | Navegação e comunicações: potência custa 10 de energia e comunicações, 1 peça; sem Vera, custam 15 e 2 |
 
 ## Papel no jogo
 
@@ -15,8 +15,8 @@ para interpretar a situação geral, mas não precisa falar com ela diariamente 
 aceitar uma tarefa.
 
 Ela participa de `Aumentar potência` e dos problemas de comunicação. Se morrer,
-essas ações continuam disponíveis com custo ou risco maior, definido no próximo
-balanceamento.
+essas ações continuam disponíveis: potência sobe de 10 para 15 de energia e o
+reparo de comunicações, de 1 para 2 peças. Valores provisórios da issue #20.
 
 ## Vínculos
 

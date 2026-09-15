@@ -6,7 +6,7 @@
 | Papel | Mecânica |
 | Onde fica | Sala de máquinas, em ponto fixo junto aos sistemas |
 | Temperamento | Direta, sem paciência para desculpa |
-| Função nas intervenções | Motor, energia e suporte de vida; sua presença concede um benefício ainda a balancear |
+| Função nas intervenções | Mecânica: reduz em 1 peça os reparos de motor, casco, energia e suporte de vida |
 
 ## Papel no jogo
 
@@ -15,8 +15,8 @@ interpreta falhas técnicas, mas não é uma etapa obrigatória de toda correç�
 Recursos comuns são pagos diretamente na estação; somente componentes especiais
 justificam busca no Depósito.
 
-Se Sílvia morrer, as correções técnicas continuam possíveis com custo ou risco
-maior, definido no próximo balanceamento.
+Se Sílvia morrer, as correções técnicas continuam possíveis, mas cada uma custa
+1 peça adicional. Valores provisórios da issue #20.
 
 ## Vínculos
 

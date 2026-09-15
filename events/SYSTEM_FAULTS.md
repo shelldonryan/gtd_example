@@ -2,46 +2,37 @@
 
 Eventos internos criam problemas persistentes na Sala de máquinas ou no
 Comando. O cartão escolhe uma contenção imediata; nenhuma alternativa corrige a
-causa. Perdas, prazos, crises e custos serão definidos no novo balanceamento.
+causa. Os valores abaixo são a proposta **PROVISÓRIA** da issue #20.
 
 ## Falha no motor
 
-O motor perde rendimento no meio do percurso. A contenção mais segura gasta
-recursos para ganhar tempo; a mais arriscada preserva recursos agora e aproxima
-a crise.
+Perda de 4 de energia por dia. `Reduzir rotação` custa 5 de energia e abre prazo
+3; `Manter impulso` custa 2 de moral e abre prazo 2. A crise destrói o motor e
+causa derrota. Reparar custa 2 peças com Sílvia viva ou 3 sem ela.
 
-O problema permanece na Sala de máquinas até a intervenção na bancada. Ele
-aplica perda diária e possui prazo visível; sua crise pode destruir o motor e
-encerrar a viagem.
 ## Falha no suporte de vida
 
-O suporte de vida perde estabilidade. As duas contenções trocam custo imediato
-por prazo, mas o sistema permanece em emergência.
-
-O problema fica ativo na Sala de máquinas até a intervenção no painel de
-suporte. Enquanto existir, aplica perda diária de oxigênio e avança para uma
-crise específica.
+Perda de 4 de oxigênio por dia. `Usar redundância` custa 4 de energia e abre
+prazo 4; `Recircular o ar` custa 3 de oxigênio e abre prazo 2. A crise perde 12
+de oxigênio, põe uma pessoa em risco e reinicia em 3. Reparar custa 1 peça com
+Sílvia viva ou 2 sem ela.
 
 ## Falha no sistema de energia
 
-A rede elétrica perde estabilidade. O jogador escolhe como conter a carga, mas
-a falha continua ativa.
-
-A correção acontece na Sala de máquinas. Componentes especiais podem criar uma
-etapa real no Depósito; recursos comuns são pagos diretamente na estação. As
-variantes, custos, perda diária, prazo e crise serão reavaliados em conjunto.
+Perda de 3 de energia por dia. `Desligar circuitos` custa 4 de energia e abre
+prazo 4; `Distribuir a sobrecarga` custa 4 de moral e abre prazo 2. A crise
+perde 12 de energia, desliga o modo economia e reinicia em 3. Reparar exige o
+fusível de potência e custa 1 peça com Sílvia viva ou 2 sem ela.
 
 ## Falha nas comunicações
 
-O transmissor perde contato com a Terra. A contenção define o custo e o risco
-imediatos, mas o silêncio continua até a intervenção na antena do Comando.
+Perda de 2 de moral por dia e suspensão das transmissões da Terra. `Manter
+escuta` custa 3 de energia e abre prazo 4; `Desligar o transmissor` custa 3 de
+moral e abre prazo 2. A crise perde 10 de moral e reinicia em 3. Reparar custa
+1 peça com Vera viva ou 2 sem ela.
 
-Enquanto ativo, o problema aplica sua perda diária, reduz o prazo e suspende as
-transmissões da Terra. A crise de prazo será definida no balanceamento sem
-transformar toda falha em derrota automática.
+## Estado
 
-## Pendências de balanceamento
-
-- Definir contenções, perdas, prazos, crises e custos das quatro falhas.
-- Revalidar as variantes de energia e quais componentes especiais permanecem.
-- Atualizar os textos D-047 ao novo padrão `risco agora, correção depois`.
+Valores provisórios implementados em `prototype/balance-model.mjs`; aguardam
+validação antes de migrar para o sketch. Os textos D-047 serão adaptados na
+issue #21.

@@ -3,7 +3,7 @@
 > Documento obrigatório de abertura e encerramento de toda sessão. Leia antes de
 > analisar, editar ou implementar qualquer coisa.
 
-Atualizado em: 2026-09-15 (balanceamento: dano no casco em local aleatório)
+Atualizado em: 2026-09-15 (protótipo numérico da issue #20)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Como usar este arquivo
@@ -58,9 +58,9 @@ e as fontes afetadas.
   agora com D-097 aplicada isoladamente. Ele ainda usa salas lineares,
   `active_task`, itens comuns carregados e eventos diários; portanto continua
   sendo evidência do protótipo anterior, não do novo ciclo completo.
-- Os custos e textos de D-030 a D-047 permanecem como linha de base histórica.
-  O novo modelo de perdas, prazos, crises e contenções exige revalidação no
-  ticket de balanceamento antes da migração restante.
+- A linha de base D-030 a D-047 permanece histórica. A issue #20 agora possui
+  um modelo numérico PROVISÓRIO executável; ele ainda exige validação do usuário
+  antes de virar contrato ou migrar para o sketch.
 - D-097 já sorteia o dano no casco entre pontos alcançáveis dos quatro cômodos;
   o restante de D-073 a D-096 continua ausente do sketch.
 - A resolução canônica continua 1280×720; 640×360 é somente a grade lógica.
@@ -174,8 +174,8 @@ sem decisão do usuário.
 - `issue://12` — decisões D-030 a D-046 (balanceamento anterior).
 - `issue://17` — implementação anterior das falhas novas e D-047.
 - `issue://19` — decisões D-073 a D-096 do novo ciclo.
-- `issue://20` — próximo protótipo de balanceamento.
-- `issue://21` — implementação bloqueada pelo balanceamento.
+- `issue://20` — protótipo numérico ativo, aguardando validação do usuário.
+- `issue://21` — implementação bloqueada pela validação do balanceamento.
 - Issues específicas do ticket escolhido, incluindo seus bloqueadores nativos.
 
 ### Domínio e produto
@@ -349,7 +349,7 @@ coleta, mapa, prioridades e localização do dano no casco.
 | D-078 | A nave mantém quatro salas jogáveis: Sala de comando no centro, com acesso direto à Sala de máquinas, ao Depósito e ao Dormitório; a organização espacial se baseia na composição de `assets/concept_arts/COMMAND_ROOM_CONCEPT_ART.png`, sem adotar nomes ou números ilustrativos da arte | CONFIRMADA |
 | D-079 | A Sala de comando é o único hub: Dormitório, Depósito e Sala de máquinas possuem ligação direta apenas com ela, sem portas entre as três salas periféricas | CONFIRMADA |
 | D-080 | A Sala de comando possui uma porta por convés: Dormitório no superior, Depósito no médio e Sala de máquinas no inferior; as escadas do hub fazem parte das rotas entre funções | CONFIRMADA |
-| D-081 | As intervenções principais se dividem em correção (remove problema persistente), recuperação (restaura margem crítica) e aceleração (reduz exposição aos próximos dias); economia e racionamento são contenções livres com custo próprio; `Socorrer sobrevivente` deve afetar sobrevivência real, com efeito exato ainda ABERTO | CONFIRMADA |
+| D-081 | As intervenções principais se dividem em correção, recuperação e aceleração; economia e racionamento são contenções livres; o efeito exato de `Socorrer sobrevivente` está PROVISÓRIO na #20 e aguarda validação | CONFIRMADA |
 | D-082 | Cada problema ativo exibe custo por dia, prazo restante e consequência do agravamento; a perda é aplicada ao encerrar o dia e o prazo visível permite comparar prioridades antes de escolher a intervenção | CONFIRMADA |
 | D-083 | Quando o prazo chega a zero, o problema aplica uma crise específica e coerente com seu domínio, não uma derrota universal; motor pode ser fatal, enquanto estoque, conflito, casco e comunicações causam perdas próprias e podem continuar ativos | CONFIRMADA |
 | D-084 | O padrão geral dos eventos é `risco agora, correção depois`: o cartão escolhe entre contenções com custos e riscos diferentes, mas o problema permanece até uma intervenção física no cômodo correspondente | CONFIRMADA |
@@ -408,7 +408,7 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
 ## Estado desta sessão
 
 - **Issue em andamento:** [Balancear problemas persistentes e intervenções](issue://20)
-  foi reivindicada; o restante do modelo numérico continua ABERTO.
+  possui protótipo numérico executável e aguarda validação do usuário.
 - **Decisão confirmada:** D-097 remove o ponto fixo do casco no Depósito. Cada
   dano por meteoros surge em um local aleatório alcançável pelo jogador em
   qualquer um dos quatro cômodos.
@@ -427,5 +427,9 @@ decisão documentada, com um protótipo executável ou com a funcionalidade pron
   D-097: ponto oculto antes do dano, localização alcançável, variação entre
   cômodos, exclusão do evento enquanto ativo e remoção após o reparo.
   `--hit-test` e `--ladder-test` também passaram sem regressões.
+- **Protótipo da #20:** `node prototype/balance-model.mjs --simulate` fecha
+  provisoriamente calendário, processamento, sete problemas, contenções,
+  intervenções, políticas e benefícios; correção, recuperação e aceleração
+  vencem, omissão perde, e correção prioritária vence as 2.520 ordens possíveis.
 
-O repositório está com **D-097 implementada no protótipo anterior; o novo ciclo completo continua apenas documentado**.
+O repositório está com **um protótipo numérico executável da #20 aguardando validação; o novo ciclo ainda não foi migrado para o sketch**.

@@ -80,8 +80,9 @@ um dos três conveses, evitando estações fixas. O destino de `Reparar casco`
 acompanha o ponto sorteado, e o evento não volta ao pool enquanto o vazamento
 estiver ativo.
 
-Perdas, prazos, crises, custos e benefícios dos sobreviventes ainda dependem do
-protótipo de balanceamento. O restante de D-073 a D-096 não foi migrado.
+Perdas, prazos, crises, custos e benefícios agora possuem um modelo PROVISÓRIO
+em `prototype/balance-model.mjs`. O restante de D-073 a D-096 não foi migrado e
+aguarda a validação desse modelo.
 
 ## Implementação atual anterior ao redesign
 
@@ -129,10 +130,10 @@ dia, os recursos e o motor atravessam as telas.
 
 ## Números
 
-`mechanics/ACTIONS.md` continua sendo a fonte de regras, mas agora contém o
-contrato futuro e marca os números que exigem novo balanceamento. As constantes
-atuais do sketch ainda correspondem ao protótipo anterior; não devem ser
-tratadas como implementação das decisões D-073 a D-096.
+`mechanics/ACTIONS.md` continua sendo a fonte de regras e registra a proposta
+numérica da issue #20 como PROVISÓRIA. As constantes atuais do sketch ainda
+correspondem ao protótipo anterior; não devem ser tratadas como implementação
+das decisões D-073 a D-096.
 
 ## Viewport e input
 
@@ -246,6 +247,6 @@ Limitações observadas:
   e crises do novo modelo.
 - Os números atuais, `active_task`, `held_item`, `action_used`, a tabela de
   tarefas e as verificações de captura precisam ser redesenhados somente depois
-  do balanceamento.
+  da validação do protótipo numérico da issue #20.
 - **Textos:** vinheta, transmissões e telas de vitória/derrota continuam com as
   pendências de conteúdo registradas no #11.
