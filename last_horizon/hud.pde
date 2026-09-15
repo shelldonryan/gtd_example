@@ -133,14 +133,30 @@ void drawObjectiveStrip(PGraphics g){
   }
 
   boolean show_notice = system_message.length() > 0 && frameCount < system_message_until;
-  String title = active_task == TASK_NONE
-    ? (action_used ? "DIA CONCLUÍDO" : "SEM TAREFA")
-    : task_label[active_task];
-  String value = show_notice ? system_message : taskNextInstruction();
-  int colour = show_notice ? COL_ORANGE : COL_TEXT;
+  int urgent = urgentProblem();
+  int risk = urgentRisk();
+  boolean risk_first = risk >= 0 && (urgent == PROBLEM_NONE
+    || crew_risk_deadline[risk] < problem_deadline[urgent]);
+  String title = risk_first ? crew_name[risk] + " EM RISCO"
+    : urgent == PROBLEM_NONE ? "SEM PROBLEMAS" : problem_short[urgent];
+  String value;
 
+  if (risk_first){
+    value = crew_risk_deadline[risk] + " DIA(S) — " + roomTitle(SCREEN_DORMITORY)
+      + (activeProblemCount() > 0 ? " | +" + activeProblemCount() + " PROBLEMA(S)" : "");
+  } else if (urgent == PROBLEM_NONE){
+    value = intervention_used
+      ? "INTERVENÇÃO CONCLUÍDA — VÁ AO SEU BELICHE"
+      : "EXPLORE A NAVE OU ENCERRE O DIA";
+  } else {
+    value = problem_deadline[urgent] + " DIA(S) — " + roomTitle(problem_room[urgent])
+      + (activeProblemCount() > 1 ? " | +" + (activeProblemCount() - 1) + " PROBLEMA(S)" : "")
+      + (risk >= 0 ? " | " + riskCount() + " EM RISCO" : "");
+  }
+
+  if (show_notice) value = system_message;
   text(g, title, 16, OBJECTIVE_Y + 4, 16, COL_CYAN);
-  text(g, value, 210, OBJECTIVE_Y + 4, 16, colour);
+  text(g, value, 210, OBJECTIVE_Y + 4, 16, show_notice ? COL_ORANGE : COL_TEXT);
 }
 
 

@@ -6,8 +6,7 @@ abre salas 2D jogáveis, e o técnico é controlável dentro delas.
 
 
 A especificação vigente das salas e intervenções está em `interface/ROOMS.md`.
-O sketch permanece plano, mas ainda implementa o ciclo anterior às decisões
-D-073 a D-096.
+O sketch permanece plano e implementa D-073 a D-103.
 
 ## Onde o código mora
 
@@ -21,12 +20,12 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
 | --- | --- |
 | `last_horizon.pde` | canvas, telas, ações, regras, paleta, estado da partida, viewport, input |
 | `ui.pde` | painéis, diálogos, retratos procedurais, texto, botões, hit-test e AABB |
-| `hud.pde` | cartões do topo, faixa da próxima ação e rodapé |
+| `hud.pde` | cartões do topo, faixa do problema mais urgente e rodapé |
 | `screens.pde` | máquina de estados, camadas modais, menus, vinheta, pausa e desfechos |
-| `ship.pde` | quatro salas conectadas, portas, mapa consultável, plataformas, escadas, NPCs e estações |
-| `game.pde` | ciclo do dia, previsão e consumo, eventos e condições de término |
-| `tasks.pde` | tabela, console de briefing, progressão, custos, variantes e efeitos |
-| `capture.pde` | captura visual e verificações de fluxo, clique e escada |
+| `ship.pde` | hub, quatro salas, portas por convés, mapa consultável, plataformas, escadas, NPCs e estações |
+| `game.pde` | calendário, turno, incidentes, consumo, crises e condições de término |
+| `tasks.pde` | problemas persistentes, contenções, sobreviventes, políticas, componentes e intervenções |
+| `capture.pde` | captura visual e verificações de ciclo, hub, clique e escada |
 
 ## Pipeline de assets
 
@@ -62,78 +61,67 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
   `pipeline_probe_window.png`.
 
 
-## Contrato de gameplay ainda não implementado
+## Contrato de gameplay implementado
 
-O próximo ciclo remove o briefing e o `active_task` como porta de entrada do
-trabalho. Incidentes alternados criam problemas locais persistentes; cada um
-possui perda diária, prazo e crise. Uma intervenção principal por dia pode
-corrigir, recuperar ou acelerar, enquanto diagnóstico, componente especial e
-políticas permanecem livres.
+Incidentes nos dias 1, 3, 5, 7 e 9 usam cinco dos sete problemas embaralhados
+sem reposição. Toda contenção cria um problema persistente com perda, prazo e
+crise; falta de recursos para ambas as contenções dispara a crise imediatamente.
 
-A Sala de comando vira o hub com uma porta por convés: Dormitório no superior,
-Depósito no médio e Sala de máquinas no inferior. O HUD mostra o problema mais
-urgente e o mapa reúne todos por sala. Recursos comuns são pagos na intervenção;
-somente componentes especiais são carregados.
-D-097 já foi aplicada isoladamente ao protótipo anterior: quando meteoros rompem
-o casco, o sketch sorteia um dos quatro cômodos e um ponto livre alcançável em
-um dos três conveses, evitando estações fixas. O destino de `Reparar casco`
-acompanha o ponto sorteado, e o evento não volta ao pool enquanto o vazamento
-estiver ativo.
+Uma intervenção principal por dia corrige, recupera ou acelera. Políticas,
+conversas e coleta de kit ou fusível são livres. Custos comuns são pagos na
+estação; somente os dois componentes especiais ficam em `held_item`.
 
-Perdas, prazos, crises, custos e benefícios possuem um modelo confirmado em
-`prototype/balance-model.mjs`. O restante de D-073 a D-096 não foi migrado e
-agora segue para a issue #21.
+O Comando é o hub com Dormitório no convés superior, Depósito no médio e
+Máquinas no inferior. HUD e mapa leem o mesmo conjunto de problemas ativos. O
+empate de urgência preserva o problema ativado primeiro.
 
-## Implementação atual anterior ao redesign
+Vera, Bento, Neusa e Sílvia possuem vida e risco individuais. Crises escolhem a
+pessoa pela regra determinística do modelo; o beliche temporário prioriza menor
+prazo e depois ordem de criação. A morte reduz `A BORDO` e remove o benefício,
+sem bloquear a intervenção.
 
-- **Mapa macro:** sobreposição consultável aberta pelo botão `MAPA`; mostra a
-  posição real, fichas dos cômodos e somente o destino final da tarefa ativa,
-  sem alterar `screen`, posição ou tarefa.
-- **Salas conectadas:** portas laterais trocam para a sala adjacente e posicionam
-  o técnico na entrada correspondente. Os quatro cômodos mantêm três conveses,
-  duas escadas e ausência de câmera.
-- **Interação:** NPCs abrem diálogo modal com retrato e caixa inferior; `ENTER`
-  avança diálogos e confirma o briefing; sistemas abrem painel técnico sem
-  retrato; coletas e ações finais emitem avisos breves.
-- **Tarefas como dado:** o console do comando filtra e apresenta as tarefas
-  disponíveis com custo, efeito e rota. A confirmação define `active_task`; NPC
-  nenhum inicia tarefa incidentalmente. A tabela continua declarando gate,
-  etapas, custo, ação final e efeito.
-- **Orientação:** uma faixa compacta deriva da tarefa ativa somente a próxima
-  ação concreta e seu cômodo. Os termos `passos livres` e `ponto final` não
-  pertencem à interface.
-- **Ciclo:** o primeiro dia começa no comando; os demais, no Dormitório. O
-  beliche do técnico abre o resumo e a confirmação que chamam o processamento
-  diário. Não existe botão `Passar dia`.
+D-097 continua integrado: dano no casco recebe ponto livre e alcançável em
+qualquer sala. D-098 fornece todos os números; D-099 a D-103 fecham as decisões
+de implementação confirmadas na #21.
 
-Números do movimento (grade lógica 640×360; render 1280×720 / 720p): personagem 16×24, andar 1,5 px/quadro, pulo
-de 48 px, gravidade 0,5, escada 1,0, plataformas atravessáveis por baixo.
+## Implementação atual
 
-O código contém as camadas de sala jogável, movimento, colisão, interação e a
-tabela de tarefas. Elas substituem o modelo em que cada ação era disparada
-diretamente por um botão dentro da sala.
-**Sem classes e sem hierarquia.** O Processing junta todas as abas numa classe só, então
-o estilo do professor continua valendo: globais agrupadas por seção, funções curtas,
-`update` separado de `draw`, `loadAssets()` centralizado quando a arte entrar.
+- **Mapa:** preserva sala, posição e componente carregado; agrupa todos os
+  problemas por cômodo e mostra perda, prazo e crise.
+- **Hub:** três portas do lado direito do Comando, uma por convés; cada sala
+  periférica possui somente o retorno ao mesmo convés do Comando.
+- **Interação:** os pontos respondem ao estado dos problemas. Não há briefing,
+  aceite ou cadeia universal por NPC.
+- **Intervenções:** reparos pagam o custo na estação; kit e fusível são
+  conferidos e consumidos quando necessários. Cuidado, socorro e potência
+  compartilham o limite de uma intervenção diária.
+- **Políticas:** economia e racionamento podem ser alternados livremente e usam
+  os custos de Bento vivo ou morto.
+- **Ciclo:** dormir aplica políticas, consumo, perdas, moral, riscos, crises e
+  término nessa ordem. `Aumentar potência` elimina o próximo dia completo.
+
+Números do movimento (grade lógica 640×360; render 1280×720 / 720p): personagem
+16×24, andar 1,5 px/quadro, pulo de 48 px, gravidade 0,5, escada 1,0 e
+plataformas atravessáveis por baixo.
+
+**Sem classes e sem hierarquia.** O Processing junta todas as abas numa classe
+só; o estilo permanece em globais agrupadas, funções curtas e `update` separado
+de `draw`.
 
 ## Estado da partida
 
-Globais planas, todas em `last_horizon.pde`: `day`, `trip_days`, `survivors`, `energy`,
-`oxygen`, `water`, `food`, `morale`, `parts`, `engine_state`, `engine_damaged_days`,
-`leak_on`, `saving_on`, `rationing_on`, `life_support_emergency`, `power_fault_on`,
-`comms_silent`, `power_variant`, `power_variant_used`, `action_used`, `boost_count`,
-`game_over_reason`,
-`current_room`, `player_x`, `player_y`, `player_velocity_y`, `player_grounded`,
-`player_on_ladder`, `held_item`, `active_task` e `task_step_index`.
-Nenhuma tela recebe parâmetro: todas leem e escrevem as mesmas globais — é assim que o
-dia, os recursos e o motor atravessam as telas.
+Globais planas mantêm recursos, dia, sala e movimento. `tasks.pde` agrupa
+`problem_active`, `problem_deadline`, ordem de ativação, sequência de incidentes,
+estado individual da tripulação, riscos, `intervention_used`, `skip_next_day` e
+os dois componentes possíveis em `held_item`.
+
+Nenhuma tela recebe parâmetro: as abas compartilham o mesmo estado do sketch.
 
 ## Números
 
-`mechanics/ACTIONS.md` continua sendo a fonte de regras e registra os números
-confirmados na issue #20. As constantes atuais do sketch ainda correspondem ao
-protótipo anterior; não devem ser tratadas como implementação das decisões
-D-073 a D-096.
+`mechanics/ACTIONS.md` é a fonte de regras. As constantes e tabelas de
+`game.pde` e `tasks.pde` implementam os valores confirmados na issue #20 e as
+decisões D-099 a D-103 da #21.
 
 ## Viewport e input
 
@@ -145,8 +133,8 @@ D-073 a D-096.
 - O mouse aciona apenas controles da interface, como `MAPA` e opções modais. O
   mapa preserva a sala e a posição; a movimentação entre cômodos usa portas e
   interação por `E`.
-- **Teclas modais:** `ENTER` avança diálogos e confirma a tarefa selecionada no
-  briefing; `E` interage com pontos da sala e não confirma o briefing.
+- **Teclas modais:** `ENTER` avança diálogos e confirma políticas, potência e
+  sono; `E` interage com os pontos da sala.
 - Os botões repetem no próprio rótulo os atalhos disponíveis: `INICIAR (ENTER)`,
   `CONTINUAR (ENTER)`, `CONTINUAR (ESC)`, `CONFIRMAR (ENTER)`,
   `ENCERRAR DIA (ENTER)`, `VOLTAR (ESC)` e `FECHAR (ESC)`.
@@ -187,10 +175,12 @@ As capturas atualizadas ficam em `last_horizon/output/` na branch do protótipo.
 | Ponto | Leitura adotada |
 | --- | --- |
 | Moral −1 por recurso em vermelho | energia, oxigênio, água e comida entre 1 e 29 |
-| Oxigênio caro (10/dia) | vale a energia do começo do dia, antes do consumo |
-| Dia final com motor danificado | derrota por motor (`MENU_VICTORY.md` exige motor operante) |
-| Sorteio de eventos | uniforme entre os 7, sem repetir o anterior; falha ativa fica fora do sorteio |
-| Painel de distribuição | interruptor e conclusão no mesmo ponto: a conclusão vale quando o item da variante está na mão |
+| Oxigênio caro (10/dia) | verifica a energia após o consumo base de energia, como no modelo aprovado |
+| Chegada | ocorre depois de processar o dia 10; potência pode eliminar um dia futuro completo |
+| Sorteio de incidentes | embaralha os 7 uma vez e usa 5 sem reposição nos dias 1, 3, 5, 7 e 9 |
+| Painel de distribuição | ponto único que abre as opções de reparo e economia quando a falha elétrica está ativa; sem a falha, alterna apenas a economia |
+| Seleção de quem entra em risco | mesma ordem de declaração dos problemas no modelo aprovado, combinada com o dia |
+| Ordem de derrota | energia, oxigênio, moral, motor e, por último, nenhum sobrevivente vivo |
 | Nome vazio no `MENU_INIT` | `INICIAR` desabilitado; "Técnico" só quando o campo tem espaços |
 
 Nenhum sobrevivente vivo encerra a partida com mensagem própria: é a quinta causa
@@ -211,12 +201,14 @@ raiz do repositório:
 "C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --ladder-test
 ```
 
-`--capture` percorre 23 estados, salva `output/NN_estado.png` em 1280×720 (720p) e
-`output/NN_estado_window.png` na janela, verifica navegação, mapa, briefing,
-diálogo, tarefa diária, beliche, previsão de consumo, evento, regras de falha e
-o sorteio alcançável do dano no casco, e encerra sozinho. `--hit-test` abre
-1400×900 e prova as quatro fichas do mapa e o letterbox. `--ladder-test` mantém
-os cinco casos de saída e reentrada.
+`--capture` percorre 23 estados, salva `output/NN_estado.png` em 1280×720
+(720p) e `output/NN_estado_window.png`, e roda 57 verificações: incidente no dia
+1, problema persistente, mapa, hub, intervenção, beliche, socorro, crise
+imediata, empate de urgência, especialista morto, dano no casco, painel de
+distribuição com reparo e economia, risco visível e resumo com vários problemas.
+`--hit-test` abre 1400×900 e prova as quatro fichas do mapa e o letterbox.
+`--ladder-test` mantém os cinco casos de saída e reentrada. As regras também
+geram `output/map_dense.png`, a sala mais carregada possível no mapa.
 
 Limitações observadas:
 
@@ -233,20 +225,13 @@ Limitações observadas:
 
 ## Estado da revisão
 
-- **Código atual:** D-048 a D-072 e D-097 estão implementadas. O dano no casco
-  sorteia um ponto livre alcançável nos quatro cômodos e atualiza o destino da
-  correção; enquanto ativo, fica fora do pool. As salas ainda formam a sequência
-  linear Comando → Energia → Depósito → Dormitório; o console do Comando ainda
-  escolhe `active_task`; NPCs e coletas ainda compõem cadeias universais; eventos
-  continuam diários e algumas respostas resolvem a falha no cartão.
-- **Contrato confirmado, ainda ausente do código:** D-073 a D-096 definem
-  problemas persistentes, incidentes alternados, intervenção principal,
-  topologia em hub, recursos pagos no ponto, recuperação e socorro separados,
-  aceleração real e prioridades no HUD/mapa.
-- O beliche já encerra o dia após o resumo, mas ainda não processa perdas, prazos
-  e crises do novo modelo.
-- Os números atuais, `active_task`, `held_item`, `action_used`, a tabela de
-  tarefas e as verificações de captura serão substituídos na migração integral
-  da issue #21.
-- **Textos:** vinheta, transmissões e telas de vitória/derrota continuam com as
-  pendências de conteúdo registradas no #11.
+- **Código atual:** D-048 a D-103 estão implementadas no protótipo.
+- **Ciclo:** cinco incidentes sem reposição, problemas persistentes, perdas,
+  prazos, crises, riscos individuais e uma intervenção principal por dia.
+- **Espaço:** Comando em hub, mapa consultável com todos os problemas e estações
+  físicas para correção, recuperação, aceleração e políticas.
+- **Evidência:** `--capture` com 57 verificações e nenhuma falha, `--hit-test` e
+  `--ladder-test` com 5 verificações cada, `git diff --check` limpo e
+  `node prototype/balance-model.mjs --simulate` com `BALANCE CHECK: PASS`.
+- **Textos:** transmissões e textos finais ainda possuem pendências de
+  implementação registradas no #11 e em `SESSION_START.md`.

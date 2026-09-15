@@ -99,8 +99,10 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
   cômodo não são requisitos universais.
 - Recursos comuns são pagos no ponto final. Apenas componentes especiais
   precisam ser buscados fisicamente no Depósito.
-- Incidentes surgem em dias alternados e não repetem um problema ainda ativo.
-  O cartão bloqueia a exploração até a contenção ser escolhida.
+- Cinco dos sete problemas são sorteados sem reposição e surgem no início dos
+  dias 1, 3, 5, 7 e 9. O cartão bloqueia a exploração até a contenção ser
+  escolhida. Se nenhuma das duas contenções puder ser paga, a crise daquele
+  problema acontece imediatamente e nenhum cartão aparece.
 - A pausa não consome tempo nem recursos.
 - O beliche do técnico abre o resumo e a confirmação para dormir; não existe
   botão `Passar dia`.

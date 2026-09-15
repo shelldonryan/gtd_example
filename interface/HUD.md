@@ -96,7 +96,8 @@ abre o novo dia no Dormitório.
 - **Coleta e conclusão:** exibem aviso breve sem interromper a exploração.
 - **Mapa:** preserva sala e posição e reúne os problemas por cômodo.
 - **Incidente:** modal técnico com duas contenções; bloqueia a exploração até a
-  escolha, mas deixa o problema ativo para correção física.
+  escolha, mas deixa o problema ativo para correção física. Sem recursos para
+  nenhuma contenção, a crise acontece imediatamente e o modal não aparece.
 - **Transmissão e desfecho:** permanecem modais.
 
 ## Avisos
@@ -115,6 +116,9 @@ piscando. A faixa de urgência mostra:
 4. quantidade de outros problemas ativos.
 
 Exemplo: `MOTOR DANIFICADO — 2 DIAS — MÁQUINAS | +2 PROBLEMAS`.
+
+Se dois problemas tiverem o mesmo prazo, permanece em destaque o que foi
+ativado primeiro. A ordem não muda quando o jogador troca de sala.
 
 O mapa contém a comparação completa. A ficha da sala mostra, para cada problema,
 a perda diária, o prazo e a consequência quando ele chegar a zero. Para dano no

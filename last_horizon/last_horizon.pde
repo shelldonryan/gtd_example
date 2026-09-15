@@ -10,7 +10,7 @@ final int SCREEN_INIT = 0;
 final int SCREEN_VIGNETTE = 1;
 final int SCREEN_NONE = -1;
 final int SCREEN_COMMAND = 3;
-final int SCREEN_ENERGY = 4;
+final int SCREEN_MACHINES = 4;
 final int SCREEN_DEPOT = 5;
 final int SCREEN_DORMITORY = 6;
 final int SCREEN_VICTORY = 7;
@@ -22,13 +22,16 @@ final int ACTION_START_GAME = 1;
 final int ACTION_QUIT_GAME = 2;
 final int ACTION_VIGNETTE_NEXT = 3;
 final int ACTION_INSPECT_COMMAND = 10;
-final int ACTION_INSPECT_ENERGY = 11;
+final int ACTION_INSPECT_MACHINES = 11;
 final int ACTION_INSPECT_DEPOT = 12;
 final int ACTION_INSPECT_DORMITORY = 13;
 final int ACTION_OPEN_MAP = 14;
 final int ACTION_CLOSE_MODAL = 15;
 final int ACTION_END_DAY = 16;
 final int ACTION_CONFIRM_SWITCH = 17;
+final int ACTION_CONFIRM_INTERVENTION = 18;
+final int ACTION_PANEL_REPAIR = 19;
+final int ACTION_PANEL_ECONOMY = 20;
 final int ACTION_EVENT_A = 30;
 final int ACTION_EVENT_B = 31;
 final int ACTION_RESUME = 40;
@@ -52,15 +55,9 @@ final float ROOM_LEFT = 8;
 final float ROOM_RIGHT = 632;
 final float ROOM_TOP = 56;
 final float ROOM_BOTTOM = 294;
-
 final int ITEM_NONE = 0;
-final int ITEM_ENGINE_PARTS = 1;
-final int ITEM_WATER = 2;
-final int ITEM_SEAL_KIT = 3;
-final int ITEM_SPARE_PART = 4;
-final int ITEM_FUSE = 5;
-final int ITEM_CABLE = 6;
-final int ITEM_COOLANT = 7;
+final int ITEM_SEAL_KIT = 1;
+final int ITEM_FUSE = 2;
 
 /* rules - mechanics/ACTIONS.md */
 final int RESOURCE_MAX = 100;
@@ -83,48 +80,10 @@ final int FOOD_PER_DAY = 7;
 final int FOOD_PER_DAY_RATIONING = 3;
 final int MORALE_PER_DAY = 2;
 final int MORALE_PER_RED_RESOURCE = 1;
-final int MORALE_PER_DAY_SAVING = 1;
-final int MORALE_PER_DAY_RATIONING = 1;
-final int LEAK_PER_DAY = 3;
-final int ENGINE_DAMAGED_LIMIT_DAYS = 3;
-final int STARVING_MORALE_LOSS = 15;
-
-final int REPAIR_ENGINE_PARTS = 2;
-final int SAVING_MORALE_COST = 5;
-final int BOOST_ENERGY_COST = 20;
-final int BOOST_LIMIT = 2;
-final int RATIONING_MORALE_COST = 8;
-final int REPAIR_HULL_PARTS = 1;
-final int REST_ENERGY_COST = 8;
-final int REST_MORALE_GAIN = 15;
-final int OXYGEN_PER_DAY_EMERGENCY = 3;
-final int ENERGY_PER_DAY_POWER_FAULT = 3;
-final int MORALE_PER_DAY_NO_COMMS = 1;
-
-final int EVENT_REPAIR_PARTS = 2;
-final int EVENT_METEOR_ENERGY = 15;
-final int EVENT_METEOR_OXYGEN = 15;
-final int EVENT_RATIONING_MORALE = 8;
-final int EVENT_CONFLICT_MORALE_LOSS = 10;
-final int EVENT_CONFLICT_MORALE_GAIN = 10;
-final int EVENT_CONFLICT_ENERGY = 10;
-final int EVENT_LIFE_PARTS = 2;
-final int EVENT_LIFE_ENERGY = 10;
-final int EVENT_POWER_ENERGY = 10;
-final int EVENT_POWER_MORALE = 10;
-final int EVENT_COMMS_PARTS = 1;
-
-/* power repair variants */
-final int POWER_VARIANT_NONE = -1;
-final int POWER_VARIANT_FUSE = 0;
-final int POWER_VARIANT_CABLE = 1;
-final int POWER_VARIANT_COOLANT = 2;
-final int POWER_VARIANT_COUNT = 3;
 
 /* engine */
 final int ENGINE_WORKING = 0;
-final int ENGINE_DAMAGED = 1;
-final int ENGINE_DESTROYED = 2;
+final int ENGINE_DESTROYED = 1;
 
 /* end states */
 final int REASON_NONE = 0;
@@ -179,17 +138,9 @@ float food = STOCK_START;
 float morale = STOCK_START;
 int parts = PARTS_START;
 int engine_state = ENGINE_WORKING;
-int engine_damaged_days = 0;
-boolean leak_on = false;
+int boost_count = 0;
 boolean saving_on = false;
 boolean rationing_on = false;
-boolean life_support_emergency = false;
-boolean power_fault_on = false;
-boolean comms_silent = false;
-int power_variant = POWER_VARIANT_NONE;
-boolean[] power_variant_used = new boolean[POWER_VARIANT_COUNT];
-boolean action_used = false;
-int boost_count = 0;
 int game_over_reason = REASON_NONE;
 String system_message = "";
 String last_system_message = "";
@@ -217,6 +168,8 @@ boolean technical_open = false;
 String technical_title = "";
 String technical_text = "";
 int pending_switch_point = -1;
+int pending_intervention_point = -1;
+int pending_panel_choice = -1;
 boolean end_day_open = false;
 
 /* input */
@@ -411,13 +364,18 @@ void handleEnter(){
     return;
   }
 
-  if (task_choice_open){
-    interact_queued = true;
+  if (technical_open && pending_switch_point >= 0){
+    doAction(ACTION_CONFIRM_SWITCH);
     return;
   }
 
-  if (technical_open && pending_switch_point >= 0){
-    doAction(ACTION_CONFIRM_SWITCH);
+  if (technical_open && pending_panel_choice >= 0){
+    doAction(canRepairPower() ? ACTION_PANEL_REPAIR : ACTION_CLOSE_MODAL);
+    return;
+  }
+
+  if (technical_open && pending_intervention_point >= 0){
+    doAction(ACTION_CONFIRM_INTERVENTION);
     return;
   }
 
@@ -431,9 +389,7 @@ void handleEnter(){
     return;
   }
 
-  if (screen == SCREEN_VIGNETTE){
-    doAction(ACTION_VIGNETTE_NEXT);
-  }
+  if (screen == SCREEN_VIGNETTE) doAction(ACTION_VIGNETTE_NEXT);
 }
 
 
@@ -498,9 +454,7 @@ void keyPressed(){
     }
 
     if (key == 'e' || key == 'E'){
-      if (!task_choice_open){
-        interact_queued = true;
-      }
+      interact_queued = true;
       return;
     }
 

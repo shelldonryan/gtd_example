@@ -1,13 +1,13 @@
 final int ROOM_COUNT = 4;
-final float MAP_ROOM_Y = 112;
+final float MAP_ROOM_Y = 88;
 final float MAP_ROOM_W = 120;
-final float MAP_ROOM_H = 92;
+final float MAP_ROOM_H = 72;
 
-String[] room_label = {"COMANDO", "ENERGIA", "DEPÓSITO", "DORMITÓRIO"};
+String[] room_label = {"COMANDO", "MÁQUINAS", "DEPÓSITO", "DORMITÓRIO"};
 float[] room_x = {60, 184, 308, 432};
-int[] room_screen = {SCREEN_COMMAND, SCREEN_ENERGY, SCREEN_DEPOT, SCREEN_DORMITORY};
+int[] room_screen = {SCREEN_COMMAND, SCREEN_MACHINES, SCREEN_DEPOT, SCREEN_DORMITORY};
 int[] room_action = {
-  ACTION_INSPECT_COMMAND, ACTION_INSPECT_ENERGY,
+  ACTION_INSPECT_COMMAND, ACTION_INSPECT_MACHINES,
   ACTION_INSPECT_DEPOT, ACTION_INSPECT_DORMITORY
 };
 
@@ -23,65 +23,64 @@ final int POINT_SWITCH = 3;
 final int POINT_COMPLETE = 4;
 final int POINT_END_DAY = 5;
 
-final int POINT_COMMAND_BRIEFING = 0;
-final int POINT_VERA = 1;
-final int POINT_ROUTE = 2;
-final int POINT_STATUS = 3;
+final int POINT_VERA = 0;
+final int POINT_ROUTE = 1;
+final int POINT_STATUS = 2;
+final int POINT_ANTENNA = 3;
 final int POINT_ENGINE_BENCH = 4;
 final int POINT_SILVIA = 5;
 final int POINT_DISTRIBUTION = 6;
 final int POINT_REACTOR = 7;
-final int POINT_SEAL_KIT = 8;
-final int POINT_HULL = 9;
-final int POINT_BENTO = 10;
-final int POINT_RATIONING = 11;
-final int POINT_RESERVE = 12;
-final int POINT_BUNK = 13;
-final int POINT_NEUSA = 14;
-final int POINT_COMMON_TABLE = 15;
-final int POINT_LIFE_SUPPORT = 16;
-final int POINT_ANTENNA = 17;
-final int POINT_TECH_BUNK = 18;
-final int POINT_COUNT = 19;
+final int POINT_LIFE_SUPPORT = 8;
+final int POINT_SEAL_KIT = 9;
+final int POINT_FUSE = 10;
+final int POINT_BENTO = 11;
+final int POINT_RATIONING = 12;
+final int POINT_RESERVE = 13;
+final int POINT_STOCK = 14;
+final int POINT_RISK_BUNK = 15;
+final int POINT_NEUSA = 16;
+final int POINT_CONFLICT = 17;
+final int POINT_COMMON_TABLE = 18;
+final int POINT_TECH_BUNK = 19;
+final int POINT_HULL = 20;
+final int POINT_COUNT = 21;
 
 int[] point_room = {
   SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND,
-  SCREEN_ENERGY, SCREEN_ENERGY, SCREEN_ENERGY, SCREEN_ENERGY,
-  SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT,
-  SCREEN_DORMITORY, SCREEN_DORMITORY, SCREEN_DORMITORY,
-  SCREEN_ENERGY, SCREEN_COMMAND, SCREEN_DORMITORY
+  SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_MACHINES,
+  SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT,
+  SCREEN_DORMITORY, SCREEN_DORMITORY, SCREEN_DORMITORY, SCREEN_DORMITORY,
+  SCREEN_DORMITORY, SCREEN_NONE
 };
 
 float[] point_x = {
-  76, 540, 260, 100,
-  90, 340, 230, 520,
-  80, 530, 310, 150, 510,
-  100, 330, 500,
-  80, 400, 120
+  540, 260, 100, 400,
+  90, 540, 90, 520, 80,
+  80, 150, 310, 220, 510, 420,
+  100, 330, 470, 500, 120, 530
 };
 
 float[] point_y = {
-  128, 128, 202, 278,
-  278, 202, 202, 128,
-  278, 278, 202, 202, 128,
-  278, 202, 128,
-  128, 128, 128
+  128, 202, 278, 128,
+  278, 202, 202, 128, 128,
+  278, 278, 202, 202, 128, 128,
+  278, 202, 202, 128, 128, 278
 };
 
 String[] point_label = {
-  "BRIEFING", "VERA", "ROTA", "STATUS",
-  "BANCADA", "SÍLVIA", "DISTRIBUIÇÃO", "REATOR",
-  "KIT", "CASCO", "BENTO", "RACIONAMENTO", "RESERVA",
-  "BELICHE", "NEUSA", "MESA COMUM",
-  "SUPORTE", "ANTENA", "SEU BELICHE"
+  "VERA", "ROTA", "SITUAÇÃO", "ANTENA",
+  "BANCADA", "SÍLVIA", "DISTRIBUIÇÃO", "REATOR", "SUPORTE",
+  "KIT", "FUSÍVEL", "BENTO", "RACIONAMENTO", "RESERVA", "ESTOQUE",
+  "SOCORRO", "NEUSA", "CONFLITO", "MESA COMUM", "SEU BELICHE", "CASCO"
 };
 
 int[] point_kind = {
-  POINT_READ, POINT_NPC, POINT_READ, POINT_READ,
-  POINT_COMPLETE, POINT_NPC, POINT_SWITCH, POINT_COMPLETE,
-  POINT_COLLECT, POINT_COMPLETE, POINT_NPC, POINT_SWITCH, POINT_READ,
-  POINT_COMPLETE, POINT_NPC, POINT_COMPLETE,
-  POINT_COMPLETE, POINT_COMPLETE, POINT_END_DAY
+  POINT_NPC, POINT_COMPLETE, POINT_READ, POINT_COMPLETE,
+  POINT_COMPLETE, POINT_NPC, POINT_SWITCH, POINT_READ, POINT_COMPLETE,
+  POINT_COLLECT, POINT_COLLECT, POINT_NPC, POINT_SWITCH, POINT_READ, POINT_COMPLETE,
+  POINT_COMPLETE, POINT_NPC, POINT_COMPLETE, POINT_COMPLETE, POINT_END_DAY,
+  POINT_COMPLETE
 };
 
 
@@ -109,7 +108,6 @@ void placeHullDamage(){
         point_room[POINT_HULL] = hull_room;
         point_x[POINT_HULL] = x;
         point_y[POINT_HULL] = deck_y[deck];
-        task_completion_room[TASK_REPAIR_HULL] = hull_room;
         return;
       }
 
@@ -121,7 +119,6 @@ void placeHullDamage(){
 
 void clearHullDamage(){
   point_room[POINT_HULL] = SCREEN_NONE;
-  task_completion_room[TASK_REPAIR_HULL] = SCREEN_NONE;
 }
 
 
@@ -152,16 +149,16 @@ void drawShipArea(PGraphics g){
 
 void drawMapOverlay(PGraphics g){
   drawModalShade(g);
-  drawPanel(g, 34, 62, 572, 236, COL_CYAN);
-  text(g, "MAPA DA NAVE", 50, 74, 16, COL_CYAN);
-  text(g, "CLIQUE PARA CONSULTAR. O MAPA NÃO MOVE O TÉCNICO.", 50, 96, 16, COL_MUTED);
+  drawPanel(g, 34, 44, 572, 282, COL_CYAN);
+  text(g, "MAPA DA NAVE", 50, 54, 16, COL_CYAN);
+  text(g, "CLIQUE PARA CONSULTAR. O MAPA NÃO MOVE O TÉCNICO.", 50, 74, 16, COL_MUTED);
 
   for (int i = 0; i < ROOM_COUNT; i++){
     drawMapRoomCard(g, i);
   }
 
   drawMapRoomDetails(g);
-  drawButton(g, 466, 262, 124, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 478, 296, 124, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
 }
 
 
@@ -175,13 +172,13 @@ void drawMapRoomCard(PGraphics g, int index){
 
   drawPanel(g, room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H, border);
   textCentered(g, room_label[index], room_x[index] + MAP_ROOM_W / 2.0,
-    MAP_ROOM_Y + 10, 16, selected ? COL_CYAN : COL_TEXT);
-  textCentered(g, roomStatus(index), room_x[index] + MAP_ROOM_W / 2.0,
-    MAP_ROOM_Y + 34, 16, COL_MUTED);
+    MAP_ROOM_Y + 8, 16, selected ? COL_CYAN : COL_TEXT);
+  textCentered(g, roomProblemCount(room_screen[index]) + " PROBLEMA(S)",
+    room_x[index] + MAP_ROOM_W / 2.0, MAP_ROOM_Y + 28, 16, COL_MUTED);
 
   if (room_screen[index] == screen){
     textCentered(g, "VOCÊ ESTÁ AQUI", room_x[index] + MAP_ROOM_W / 2.0,
-      MAP_ROOM_Y + 58, 16, COL_ORANGE);
+      MAP_ROOM_Y + 48, 16, COL_ORANGE);
   }
 
   addButton(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H,
@@ -200,21 +197,25 @@ int roomIndex(int room_id){
 
 void drawMapRoomDetails(PGraphics g){
   int index = constrain(map_selected_room, 0, ROOM_COUNT - 1);
-  String detail = roomOccupant(index) + " | " + roomStatus(index);
+  int selected_room = room_screen[index];
+  String detail = roomOccupant(index) + " | " + roomSystems(index);
+  if (selected_room == screen) detail += " | VOCÊ ESTÁ AQUI";
+  text(g, detail, 50, 172, 16, COL_TEXT);
+  text(g, "PROBLEMAS: PERDA POR DIA, PRAZO E CRISE", 50, 194, 16, COL_MUTED);
 
-  if (room_screen[index] == screen){
-    detail += " | POSIÇÃO ATUAL";
+  float y = 212;
+  int shown = 0;
+  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
+    if (!problem_active[problem] || problem_room[problem] != selected_room) continue;
+    if (y + 36 > 296){
+      text(g, "E MAIS " + (roomProblemCount(selected_room) - shown) + " PROBLEMA(S).",
+        50, y, 16, COL_MUTED);
+      break;
+    }
+    y = drawTextWrapped(g, problemMapLine(problem), 50, y, 420, 16, 18, COL_TEXT);
+    shown++;
   }
-
-  text(g, detail, 50, 222, 16, COL_TEXT);
-  text(g, mapTaskDestinationLabel(), 50, 242, 16, COL_MUTED);
-}
-String mapTaskDestinationLabel(){
-  if (active_task == TASK_NONE){
-    return "SEM TAREFA ATIVA.";
-  }
-
-  return "DESTINO DA TAREFA: " + roomTitle(task_completion_room[active_task]);
+  if (shown == 0) text(g, "SEM PROBLEMAS ATIVOS.", 50, y, 16, COL_MUTED);
 }
 
 
@@ -224,20 +225,10 @@ String roomOccupant(int index){
 }
 
 
-String roomStatus(int index){
-  if (index == 0){
-    return "DIA " + day + " DE " + trip_days;
-  }
-
-  if (index == 1){
-    return "MOTOR " + engineStateLabel();
-  }
-
-  if (index == 2){
-    return "PEÇAS " + parts;
-  }
-
-  return "MORAL " + str(int(morale));
+String roomSystems(int index){
+  String[] systems = {"ROTA E COMUNICAÇÕES", "MOTOR, ENERGIA E SUPORTE",
+    "ESTOQUES E COMPONENTES", "DESCANSO, SAÚDE E MORAL"};
+  return systems[index];
 }
 
 
@@ -266,18 +257,9 @@ void drawRoomTitle(PGraphics g){
 
 
 String roomTitle(int room_screen){
-  if (room_screen == SCREEN_COMMAND){
-    return "SALA DE COMANDO";
-  }
-
-  if (room_screen == SCREEN_ENERGY){
-    return "SALA DE ENERGIA";
-  }
-
-  if (room_screen == SCREEN_DEPOT){
-    return "DEPÓSITO";
-  }
-
+  if (room_screen == SCREEN_COMMAND) return "SALA DE COMANDO";
+  if (room_screen == SCREEN_MACHINES) return "SALA DE MÁQUINAS";
+  if (room_screen == SCREEN_DEPOT) return "DEPÓSITO";
   return "DORMITÓRIO";
 }
 
@@ -314,26 +296,33 @@ void drawLadders(PGraphics g){
   g.strokeWeight(1);
 }
 void drawDoors(PGraphics g){
-  drawDoor(g, -1, leftRoom(screen), ROOM_LEFT + 5);
-  drawDoor(g, 1, rightRoom(screen), ROOM_RIGHT - 17);
-}
-
-
-void drawDoor(PGraphics g, int direction, int destination, float x){
-  if (destination == SCREEN_NONE){
+  if (screen == SCREEN_COMMAND){
+    drawHubDoor(g, 0, SCREEN_DORMITORY);
+    drawHubDoor(g, 1, SCREEN_DEPOT);
+    drawHubDoor(g, 2, SCREEN_MACHINES);
     return;
   }
+  drawPeripheralDoor(g, roomDoorDeck(screen));
+}
 
-  float y = deck_y[DECK_COUNT - 1];
-  boolean nearby = doorInRange(direction);
+void drawHubDoor(PGraphics g, int deck, int destination){
+  float x = ROOM_RIGHT - 17;
+  float y = deck_y[deck];
+  boolean nearby = doorInRange(1, deck);
   g.fill(nearby ? COL_CYAN_DARK : COL_PANEL_2);
   g.stroke(nearby ? COL_CYAN : COL_BORDER);
   g.rect(x, y - 38, 12, 38);
+  if (nearby) text(g, "E - " + roomTitle(destination), x - 210, y - 58, 16, COL_CYAN);
+}
 
-  if (nearby){
-    String label = "E - " + roomTitle(destination);
-    text(g, label, direction < 0 ? x + 18 : x - 210, y - 58, 16, COL_CYAN);
-  }
+void drawPeripheralDoor(PGraphics g, int deck){
+  float x = ROOM_LEFT + 5;
+  float y = deck_y[deck];
+  boolean nearby = doorInRange(-1, deck);
+  g.fill(nearby ? COL_CYAN_DARK : COL_PANEL_2);
+  g.stroke(nearby ? COL_CYAN : COL_BORDER);
+  g.rect(x, y - 38, 12, 38);
+  if (nearby) text(g, "E - SALA DE COMANDO", x + 18, y - 58, 16, COL_CYAN);
 }
 
 
@@ -348,7 +337,7 @@ void drawRoomPoint(PGraphics g, int point){
   g.fill(nearby ? COL_CYAN_DARK : COL_PANEL);
   g.rect(x - 12, y - 22, 24, 18, 2);
   text(g, str(pointMarker(point_kind[point])), x - 3, y - 22, 16, colour);
-  textCentered(g, point_label[point], x, y - 44, 16, colour);
+  textCentered(g, pointDisplayLabel(point), x, y - 44, 16, colour);
 
   if (nearby){
     g.noFill();
@@ -581,16 +570,15 @@ void drawHeldItem(PGraphics g){
 
 
 void enterRoom(int next_screen){
-  enterRoomFrom(next_screen, -1);
+  enterRoomAtDeck(next_screen, roomDoorDeck(next_screen), -1);
 }
 
-
-void enterRoomFrom(int next_screen, int entry_side){
+void enterRoomAtDeck(int next_screen, int deck, int entry_side){
   screen = next_screen;
   current_room = next_screen;
   player_facing = entry_side > 0 ? -1 : 1;
   player_x = entry_side > 0 ? ROOM_RIGHT - 28 - PLAYER_W : ROOM_LEFT + 28;
-  player_y = deck_y[DECK_COUNT - 1] - PLAYER_H;
+  player_y = deck_y[deck] - PLAYER_H;
   player_velocity_y = 0;
   player_grounded = true;
   player_on_ladder = false;
@@ -615,42 +603,43 @@ void resetRoomState(){
   map_open = false;
   dialog_open = false;
   technical_open = false;
+  pending_switch_point = -1;
+  pending_intervention_point = -1;
   end_day_open = false;
 }
 
 
-int leftRoom(int room_id){
-  int index = roomIndex(room_id);
-  return index > 0 ? room_screen[index - 1] : SCREEN_NONE;
+int roomDoorDeck(int room_id){
+  if (room_id == SCREEN_DORMITORY) return 0;
+  if (room_id == SCREEN_DEPOT) return 1;
+  return 2;
 }
 
-
-int rightRoom(int room_id){
-  int index = roomIndex(room_id);
-  return index < ROOM_COUNT - 1 ? room_screen[index + 1] : SCREEN_NONE;
-}
-
-
-boolean doorInRange(int direction){
+boolean doorInRange(int direction, int deck){
   float center = player_x + PLAYER_W / 2.0;
   float bottom = player_y + PLAYER_H;
-  boolean on_lower_deck = abs(bottom - deck_y[DECK_COUNT - 1]) <= 3;
-  return on_lower_deck && (direction < 0
+  boolean on_deck = abs(bottom - deck_y[deck]) <= 3;
+  return on_deck && (direction < 0
     ? center <= ROOM_LEFT + 38 : center >= ROOM_RIGHT - 38);
 }
 
-
 boolean useNearbyDoor(){
-  if (doorInRange(-1) && leftRoom(screen) != SCREEN_NONE){
-    enterRoomFrom(leftRoom(screen), 1);
-    return true;
+  if (screen == SCREEN_COMMAND){
+    for (int deck = 0; deck < DECK_COUNT; deck++){
+      if (!doorInRange(1, deck)) continue;
+      int destination = deck == 0 ? SCREEN_DORMITORY
+        : deck == 1 ? SCREEN_DEPOT : SCREEN_MACHINES;
+      enterRoomAtDeck(destination, deck, -1);
+      return true;
+    }
+    return false;
   }
 
-  if (doorInRange(1) && rightRoom(screen) != SCREEN_NONE){
-    enterRoomFrom(rightRoom(screen), -1);
+  int deck = roomDoorDeck(screen);
+  if (doorInRange(-1, deck)){
+    enterRoomAtDeck(SCREEN_COMMAND, deck, 1);
     return true;
   }
-
   return false;
 }
 
@@ -662,11 +651,6 @@ void updateRoom(){
     return;
   }
 
-  if (task_choice_open){
-    updateTaskChoice();
-    jump_queued = false;
-    return;
-  }
 
   if (dialog_open){
     if (interact_queued){

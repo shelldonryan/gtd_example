@@ -16,11 +16,11 @@ final int HIT_TEST_FRAME = 5;
 
 String[] capture_label = {
   "menu_init", "vignette_1", "vignette_2", "vignette_3",
-  "command_start", "briefing_console", "task_accepted", "silvia_dialog",
-  "energy_entry", "map_position", "map_details", "energy_room",
-  "task_completed", "task_locked", "dormitory", "end_day_summary",
-  "end_day_cancelled", "end_day_confirm", "event_modal", "event_result",
-  "pause", "game_over", "victory"
+  "incident_day_1", "problem_persistent", "map_position", "map_problems",
+  "command_hub", "machines_entry", "problem_repaired", "dormitory",
+  "end_day_summary", "end_day_cancelled", "day_2", "survivor_at_risk",
+  "survivor_rescued", "pause", "game_over", "victory",
+  "distribution_panel", "risk_visible", "dense_end_day"
 };
 
 
@@ -162,99 +162,96 @@ void runCaptureStep(int step){
     clickAction(ACTION_VIGNETTE_NEXT);
   } else if (step == 4){
     verify("vinheta inicia na Sala de comando", screen == SCREEN_COMMAND);
-    verify("comida inicial 70", day == 1 && food == FOOD_START && FOOD_START == 70);
-    engine_state = ENGINE_DAMAGED;
-    setCapturePlayerAtPoint(POINT_COMMAND_BRIEFING);
-    interactPoint(POINT_COMMAND_BRIEFING);
+    verify("incidente surge no dia 1", day == 1 && event_open);
+    verify("comida inicial 70", food == FOOD_START && FOOD_START == 70);
+    clickAction(eventChoiceOn(0) ? ACTION_EVENT_A : ACTION_EVENT_B);
   } else if (step == 5){
-    verify("console lista tarefas disponíveis", task_choice_open && task_choice_count > 0);
-    pressRoomKey('e');
-    verify("E não confirma briefing", task_choice_open && active_task == TASK_NONE);
-    pressEnter();
-  } else if (step == 6){
-    verify("console exige escolha explícita", active_task != TASK_NONE && !action_used);
-    captureReach(task_step_room[active_task][0], task_step_point[active_task][0]);
-    interactPoint(task_step_point[active_task][0]);
-  } else if (step == 7){
-    verify("NPC abre diálogo modal", dialog_open);
-    pressEnter();
-    verify("ENTER fecha diálogo", !dialog_open);
-
-    while (task_step_index < task_step_count[active_task]){
-      int room = task_step_room[active_task][task_step_index];
-      int point = task_step_point[active_task][task_step_index];
-      captureReach(room, point);
-      interactPoint(point);
-      if (dialog_open){
-        pressEnter();
-      }
-    }
-
-    enterRoomFrom(task_completion_room[active_task], -1);
-  } else if (step == 8){
-    verify("entrada pela esquerda preservada", player_x < ROOM_LEFT + 60);
+    verify("contenção mantém problema persistente",
+      problem_active[event_index] && !intervention_used);
     clickAction(ACTION_OPEN_MAP);
-  } else if (step == 9){
+  } else if (step == 6){
     float before_x = player_x;
     int before_screen = screen;
-    clickAction(ACTION_INSPECT_DORMITORY);
+    clickAction(ACTION_INSPECT_COMMAND + roomIndex(problem_room[event_index]));
     verify("mapa não transporta o técnico", screen == before_screen && player_x == before_x);
-  } else if (step == 10){
-    verify("mapa mostra a ficha escolhida", map_open && map_selected_room == 3);
-    verify("mapa mostra somente destino", mapTaskDestinationLabel().equals(
-      "DESTINO DA TAREFA: " + roomTitle(task_completion_room[active_task])));
+  } else if (step == 7){
+    verify("mapa seleciona sala com problema",
+      map_open && room_screen[map_selected_room] == problem_room[event_index]);
     clickAction(ACTION_CLOSE_MODAL);
-  } else if (step == 11){
-    captureReach(task_completion_room[active_task], task_completion_point[active_task]);
-    interactPoint(task_completion_point[active_task]);
-  } else if (step == 12){
-    verify("ação final usa a tarefa do dia", action_used && active_task == TASK_NONE);
-    enterRoom(SCREEN_COMMAND);
-    setCapturePlayerAtPoint(POINT_COMMAND_BRIEFING);
-    interactPoint(POINT_COMMAND_BRIEFING);
-  } else if (step == 13){
-    verify("segunda tarefa é bloqueada", technical_open && !task_choice_open);
-    technical_open = false;
+    enterRoomAtDeck(SCREEN_COMMAND, 2, -1);
+  } else if (step == 8){
+    player_x = ROOM_RIGHT - 28 - PLAYER_W;
+    verify("hub abre Máquinas pelo convés inferior",
+      useNearbyDoor() && screen == SCREEN_MACHINES);
+  } else if (step == 9){
+    activateProblem(PROBLEM_ENGINE, 3);
+    setCapturePlayerAtPoint(POINT_ENGINE_BENCH);
+    interactPoint(POINT_ENGINE_BENCH);
+  } else if (step == 10){
+    verify("correção remove problema e usa intervenção",
+      !problem_active[PROBLEM_ENGINE] && intervention_used);
     enterRoom(SCREEN_DORMITORY);
-  } else if (step == 14){
+  } else if (step == 11){
     setCapturePlayerAtPoint(POINT_TECH_BUNK);
     interactPoint(POINT_TECH_BUNK);
-  } else if (step == 15){
-    verify("beliche abre resumo previsto", end_day_open
-      && dailyEnergyCost() > 0 && dailyOxygenCost() > 0);
-    int before_day = day;
-    float before_energy = energy;
-    float before_oxygen = oxygen;
-    float before_water = water;
-    float before_food = food;
-    float before_morale = morale;
-    int before_item = held_item;
+  } else if (step == 12){
+    verify("beliche mostra resumo", end_day_open);
     clickAction(ACTION_CLOSE_MODAL);
-    verify("cancelar resumo não altera estado", day == before_day
-      && energy == before_energy && oxygen == before_oxygen
-      && water == before_water && food == before_food && morale == before_morale
-      && held_item == before_item && !end_day_open);
-  } else if (step == 16){
+  } else if (step == 13){
+    verify("cancelar resumo preserva o dia", day == 1 && !end_day_open);
     interactPoint(POINT_TECH_BUNK);
-  } else if (step == 17){
     clickAction(ACTION_END_DAY);
-  } else if (step == 18){
-    verify("novo dia começa no Dormitório", day == 2 && screen == SCREEN_DORMITORY);
-    verify("evento abre como modal", event_open && uiLayer() == LAYER_MODAL);
-    clickAction(eventChoiceOn(0) ? ACTION_EVENT_A : ACTION_EVENT_B);
-  } else if (step == 19){
-    verify("evento devolve a exploração", !event_open && isRoomScreen());
+  } else if (step == 14){
+    verify("dia sem incidente começa no Dormitório",
+      day == 2 && screen == SCREEN_DORMITORY && !event_open);
+    putSurvivorAtRisk(PROBLEM_CONFLICT);
+  } else if (step == 15){
+    setCapturePlayerAtPoint(POINT_RISK_BUNK);
+    interactPoint(POINT_RISK_BUNK);
+  } else if (step == 16){
+    verify("socorro estabiliza pessoa e usa intervenção",
+      riskCount() == 0 && intervention_used);
     handleEscape();
-  } else if (step == 20){
+  } else if (step == 17){
     clickAction(ACTION_RESUME);
     oxygen = 0;
-    endDay();
-  } else if (step == 21){
+    checkEndConditions();
+  } else if (step == 18){
     resetRun();
-    day = trip_days;
-    engine_state = ENGINE_WORKING;
+    event_open = false;
+    resetProblemState();
+    day = TRIP_DAYS;
     enterRoom(SCREEN_DORMITORY);
     endDay();
+  } else if (step == 19){
+    resetRun();
+    event_open = false;
+    resetProblemState();
+    day = 3;
+    activateProblem(PROBLEM_POWER, 4);
+    held_item = ITEM_FUSE;
+    enterRoom(SCREEN_MACHINES);
+    setCapturePlayerAtPoint(POINT_DISTRIBUTION);
+    interactPoint(POINT_DISTRIBUTION);
+  } else if (step == 20){
+    verify("painel de distribuição reúne reparo e economia",
+      technical_open && pending_panel_choice == POINT_DISTRIBUTION);
+    applyPanelRepair();
+    putSurvivorAtRisk(PROBLEM_CONFLICT);
+    enterRoom(SCREEN_DORMITORY);
+  } else if (step == 21){
+    verify("risco aparece na faixa do HUD", urgentRisk() >= 0
+      && pointDisplayLabel(POINT_RISK_BUNK).indexOf("2D") > 0);
+    activateProblem(PROBLEM_CONFLICT, 3);
+    activateProblem(PROBLEM_LIFE_SUPPORT, 4);
+    activateProblem(PROBLEM_FOOD, 4);
+    activateProblem(PROBLEM_HULL, 2);
+    setCapturePlayerAtPoint(POINT_TECH_BUNK);
+    interactPoint(POINT_TECH_BUNK);
+  } else if (step == 22){
+    verify("resumo lista os problemas ativos", end_day_open
+      && activeProblemCount() == 4);
+    clickAction(ACTION_CLOSE_MODAL);
   }
 }
 
@@ -269,6 +266,8 @@ void runRuleChecks(){
   checkEndDayForecast();
   checkFailureRules();
   checkHullDamageLocation();
+  checkInterventionRules();
+  checkCrewRules();
 }
 
 void checkPlayerFacing(){
@@ -283,8 +282,11 @@ void checkPlayerFacing(){
   verify("jogador olha para a direita", player_facing == 1);
 
   move_right_held = false;
-  enterRoomFrom(SCREEN_ENERGY, 1);
-  verify("entrada pela direita olha para a esquerda", player_facing == -1);
+  enterRoomAtDeck(SCREEN_MACHINES, roomDoorDeck(SCREEN_MACHINES), -1);
+  player_x = ROOM_LEFT + 20;
+  useNearbyDoor();
+  verify("retorno ao hub olha para a esquerda",
+    screen == SCREEN_COMMAND && player_facing == -1);
 }
 
 void checkPlayerAnimationLoop(){
@@ -310,57 +312,71 @@ void checkPlayerAnimationLoop(){
 
 
 void checkConnectedDoors(){
-  resetRun();
-  enterRoom(SCREEN_COMMAND);
-  player_x = ROOM_RIGHT - 28 - PLAYER_W;
-  player_y = deck_y[DECK_COUNT - 1] - PLAYER_H;
-  boolean moved_right = useNearbyDoor();
-  boolean right_entry = moved_right && screen == SCREEN_ENERGY && player_x < ROOM_LEFT + 60;
-  verify("porta direita entra pela esquerda", right_entry);
-
-  player_x = ROOM_LEFT + 20;
-  boolean moved_left = useNearbyDoor();
-  boolean left_entry = moved_left && screen == SCREEN_COMMAND && player_x > ROOM_RIGHT - 60;
-  verify("porta esquerda entra pela direita", left_entry);
+  int[] destinations = {SCREEN_DORMITORY, SCREEN_DEPOT, SCREEN_MACHINES};
+  for (int deck = 0; deck < DECK_COUNT; deck++){
+    resetRun();
+    event_open = false;
+    enterRoomAtDeck(SCREEN_COMMAND, deck, -1);
+    player_x = ROOM_RIGHT - 28 - PLAYER_W;
+    verify("hub abre porta do convés " + deck,
+      useNearbyDoor() && screen == destinations[deck]);
+    player_x = ROOM_LEFT + 20;
+    verify("sala periférica retorna ao mesmo convés",
+      useNearbyDoor() && screen == SCREEN_COMMAND
+      && abs(player_y + PLAYER_H - deck_y[deck]) <= 3);
+  }
 }
 
 
 void checkMapState(){
   resetRun();
+  event_open = false;
+  activateProblem(PROBLEM_FOOD, 4);
   enterRoom(SCREEN_DEPOT);
-  active_task = TASK_REPAIR_HULL;
-  task_step_index = 1;
   held_item = ITEM_SEAL_KIT;
   float before_x = player_x;
   int before_room = screen;
-  int before_task = active_task;
   int before_item = held_item;
   map_open = true;
   map_selected_room = 0;
   map_open = false;
-  verify("mapa preserva sala posição tarefa e item", screen == before_room
-    && player_x == before_x && active_task == before_task && held_item == before_item);
+  verify("mapa preserva sala posição e componente", screen == before_room
+    && player_x == before_x && held_item == before_item);
+  verify("mapa agrupa problema pela sala",
+    roomProblemCount(SCREEN_DEPOT) == 1 && problem_room[PROBLEM_FOOD] == SCREEN_DEPOT);
+
+  resetProblemState();
+  activateProblem(PROBLEM_ENGINE, 3);
+  activateProblem(PROBLEM_LIFE_SUPPORT, 4);
+  activateProblem(PROBLEM_POWER, 2);
+  activateProblem(PROBLEM_HULL, 3);
+  problem_room[PROBLEM_HULL] = SCREEN_MACHINES;
+  enterRoom(SCREEN_MACHINES);
+  map_open = true;
+  map_selected_room = roomIndex(SCREEN_MACHINES);
+  drawBase();
+  base.save(sketchPath("output/map_dense.png"));
+  verify("mapa comporta a sala mais carregada", roomProblemCount(SCREEN_MACHINES) == 4);
 }
 void checkEndDayForecast(){
   resetRun();
+  event_open = false;
+  resetProblemState();
   saving_on = true;
   rationing_on = true;
-  leak_on = true;
-  comms_silent = true;
-  int energy_cost = dailyEnergyCost();
-  int oxygen_cost = dailyOxygenCost();
-  int water_cost = dailyWaterCost();
-  int food_cost = dailyFoodCost();
-  int morale_cost = dailyMoraleCost();
+  activateProblem(PROBLEM_HULL, 3);
   float before_energy = energy;
   float before_oxygen = oxygen;
   float before_water = water;
   float before_food = food;
   float before_morale = morale;
-  consumeResources();
-  verify("resumo previsto corresponde ao consumo", energy == before_energy - energy_cost
-    && oxygen == before_oxygen - oxygen_cost && water == before_water - water_cost
-    && food == before_food - food_cost && morale == before_morale - morale_cost);
+  endDay();
+  verify("dormir processa políticas consumo e perdas na ordem",
+    energy == before_energy - 3
+    && oxygen == before_oxygen - 5 - 5
+    && water == before_water - 4
+    && food == before_food - 3
+    && morale == before_morale - 2 - 2);
 }
 
 
@@ -368,82 +384,77 @@ void checkEndDayForecast(){
 
 void checkTaskRules(){
   resetRun();
-  engine_state = ENGINE_DAMAGED;
-  enterRoom(SCREEN_COMMAND);
-  interactPoint(POINT_VERA);
-  verify("conversa não inicia tarefa", active_task == TASK_NONE && dialog_open);
-  pressEnter();
+  openDay();
+  verify("dia 1 abre incidente", event_open && day == 1);
+  int problem = event_index;
+  applyEventChoice(0);
+  verify("contenção cria problema persistente",
+    !event_open && problem_active[problem] && problem_deadline[problem] > 0);
+  verify("problema nasce sem intervenção usada", !intervention_used);
 
-  openTaskConsole();
-  int selected = task_choice_indices[0];
-  pressRoomKey('e');
-  verify("E não confirma briefing", task_choice_open && active_task == TASK_NONE);
-  pressEnter();
-  verify("ENTER inicia tarefa confirmada", active_task == selected && !action_used);
-
-  action_used = true;
-  active_task = TASK_NONE;
-  openTaskConsole();
-  verify("uma tarefa por dia", technical_open && !task_choice_open);
-  technical_open = false;
-
-  system_message = "";
-  verify("orientação não usa jargão", taskNextInstruction().indexOf("PASSOS LIVRES") < 0
-    && taskNextInstruction().indexOf("PONTO FINAL") < 0);
+  intervention_used = true;
+  verify("segunda intervenção é bloqueada", !canUseMainIntervention());
 }
 
 
 void checkKeyboardModalButtons(){
   resetRun();
-  enterRoom(SCREEN_ENERGY);
+  event_open = false;
+  resetProblemState();
+  enterRoom(SCREEN_MACHINES);
   setCapturePlayerAtPoint(POINT_DISTRIBUTION);
   interactPoint(POINT_DISTRIBUTION);
-  verify("distribuição abre confirmação", technical_open
+  verify("distribuição alterna economia sem falha ativa", technical_open
     && pending_switch_point == POINT_DISTRIBUTION);
-  handleEscape();
-  verify("ESC cancela distribuição", !technical_open && !saving_on);
-
-  interactPoint(POINT_DISTRIBUTION);
   pressEnter();
-  verify("ENTER confirma distribuição", !technical_open && saving_on);
+  verify("ENTER confirma economia", !technical_open && saving_on);
 
-  resetRun();
+  activateProblem(PROBLEM_POWER, 4);
+  held_item = ITEM_FUSE;
+  int before_parts = parts;
+  interactPoint(POINT_DISTRIBUTION);
+  verify("distribuição oferece reparo e economia juntos",
+    technical_open && pending_panel_choice == POINT_DISTRIBUTION && canRepairPower());
+  pressEnter();
+  verify("ENTER repara a energia no painel",
+    !technical_open && !problem_active[PROBLEM_POWER]
+    && held_item == ITEM_NONE && parts == before_parts - 1);
+
   enterRoom(SCREEN_DORMITORY);
   setCapturePlayerAtPoint(POINT_TECH_BUNK);
   interactPoint(POINT_TECH_BUNK);
   verify("beliche abre encerramento", end_day_open);
   pressEnter();
-  verify("ENTER encerra o dia", !end_day_open && day == 2
-    && screen == SCREEN_DORMITORY);
+  verify("ENTER encerra o dia", !end_day_open && day == 2);
 }
 
 void checkFailureRules(){
   resetRun();
-  engine_state = ENGINE_DAMAGED;
-  life_support_emergency = true;
-  power_fault_on = true;
-  comms_silent = true;
-  verify("falha ativa não volta ao sorteio", !eventAllowed(EVENT_ENGINE)
-    && !eventAllowed(EVENT_LIFE_SUPPORT) && !eventAllowed(EVENT_POWER)
-    && !eventAllowed(EVENT_COMMS));
-
-  resetRun();
-  power_fault_on = true;
-  parts = 0;
-  water = 0;
-  verify("variante ignora custo impagável", drawPowerVariant() == POWER_VARIANT_CABLE);
-
-  resetRun();
-  boolean no_repeat = true;
-  int previous = EVENT_NONE;
-  for (int i = 0; i < 40; i++){
-    int drawn = pickEvent();
-    if (drawn == previous){
-      no_repeat = false;
+  boolean distinct = true;
+  for (int i = 0; i < incident_sequence.length; i++){
+    for (int j = i + 1; j < incident_sequence.length; j++){
+      if (incident_sequence[i] == incident_sequence[j]) distinct = false;
     }
-    previous = drawn;
   }
-  verify("evento não repete imediatamente", no_repeat);
+  verify("cinco incidentes não repetem", distinct);
+  verify("incidentes usam dias alternados", incidentForDay(1) != PROBLEM_NONE
+    && incidentForDay(2) == PROBLEM_NONE && incidentForDay(9) != PROBLEM_NONE);
+
+  resetProblemState();
+  incident_sequence[0] = PROBLEM_ENGINE;
+  day = 1;
+  energy = 4;
+  morale = 1;
+  openDay();
+  verify("contenção impagável causa crise imediata",
+    engine_state == ENGINE_DESTROYED && !event_open);
+
+  resetRun();
+  event_open = false;
+  resetProblemState();
+  activateProblem(PROBLEM_FOOD, 2);
+  activateProblem(PROBLEM_CONFLICT, 2);
+  verify("empate prioriza problema mais antigo", urgentProblem() == PROBLEM_FOOD);
 }
 
 
@@ -451,43 +462,91 @@ void checkHullDamageLocation(){
   boolean reachable = true;
   boolean varied_room = false;
   int first_room = SCREEN_NONE;
-
   resetRun();
+  event_open = false;
   boolean hidden_when_inactive = point_room[POINT_HULL] == SCREEN_NONE;
   randomSeed(97031);
 
   for (int sample = 0; sample < 32; sample++){
-    leak_on = false;
-    oxygen = STOCK_START;
-    event_index = EVENT_METEOR;
-    applyEventChoice(1);
-
+    clearProblem(PROBLEM_HULL);
+    activateProblem(PROBLEM_HULL, 2);
     int hull_room = point_room[POINT_HULL];
-    boolean known_room = hull_room == SCREEN_COMMAND || hull_room == SCREEN_ENERGY
+    boolean known_room = hull_room == SCREEN_COMMAND || hull_room == SCREEN_MACHINES
       || hull_room == SCREEN_DEPOT || hull_room == SCREEN_DORMITORY;
     boolean known_deck = isDeckSurface(point_y[POINT_HULL]);
     boolean inside_room = point_x[POINT_HULL] >= ROOM_LEFT + 28
       && point_x[POINT_HULL] <= ROOM_RIGHT - 28;
-
-    reachable &= leak_on && known_room && known_deck && inside_room
-      && task_completion_room[TASK_REPAIR_HULL] == hull_room;
-
-    if (sample == 0){
-      first_room = hull_room;
-    } else if (hull_room != first_room){
-      varied_room = true;
-    }
+    reachable &= known_room && known_deck && inside_room
+      && problem_room[PROBLEM_HULL] == hull_room;
+    if (sample == 0) first_room = hull_room;
+    else if (hull_room != first_room) varied_room = true;
   }
 
-  verify("dano no casco fica oculto sem vazamento", hidden_when_inactive);
+  verify("dano no casco fica oculto sem problema", hidden_when_inactive);
   verify("dano no casco surge em ponto alcançável", reachable);
   verify("dano no casco varia entre cômodos", varied_room);
+  held_item = ITEM_SEAL_KIT;
+  parts = 2;
+  intervention_used = false;
+  tryRepairProblem(PROBLEM_HULL);
+  verify("reparo remove o ponto do casco",
+    !problem_active[PROBLEM_HULL] && point_room[POINT_HULL] == SCREEN_NONE);
+}
 
-  leak_on = true;
-  verify("dano no casco ativo não volta ao sorteio", !eventAllowed(EVENT_METEOR));
-  applyTaskEffect(TASK_REPAIR_HULL);
-  verify("reparo remove o ponto do casco", !leak_on
-    && point_room[POINT_HULL] == SCREEN_NONE);
+void checkInterventionRules(){
+  resetRun();
+  event_open = false;
+  resetProblemState();
+  day = 2;
+  enterRoom(SCREEN_COMMAND);
+  interactPoint(POINT_ROUTE);
+  verify("rota pede confirmação antes da aceleração",
+    technical_open && pending_intervention_point == POINT_ROUTE && !intervention_used);
+  pressEnter();
+  verify("aceleração usa intervenção e marca dia eliminado",
+    intervention_used && skip_next_day && energy == 90);
+  endDay();
+  verify("aceleração elimina consumo e incidente do próximo dia",
+    day == 4 && !event_open);
+}
+
+void checkCrewRules(){
+  resetRun();
+  event_open = false;
+  day = 1;
+  putSurvivorAtRisk(PROBLEM_CONFLICT);
+  verify("risco do conflito segue a ordem do modelo", crew_risk_deadline[CREW_SILVIA] == 2);
+  putSurvivorAtRisk(PROBLEM_LIFE_SUPPORT);
+  verify("segundo risco não repete a pessoa", riskCount() == 2
+    && crew_risk_deadline[CREW_VERA] == 2);
+
+  resetRun();
+  event_open = false;
+  crew_risk_deadline[CREW_VERA] = 2;
+  crew_risk_order[CREW_VERA] = 1;
+  crew_risk_deadline[CREW_BENTO] = 1;
+  crew_risk_order[CREW_BENTO] = 2;
+  verify("socorro prioriza menor prazo", urgentRisk() == CREW_BENTO);
+  crew_risk_deadline[CREW_BENTO] = 2;
+  verify("socorro desempata pelo risco mais antigo", urgentRisk() == CREW_VERA);
+
+  resetRun();
+  event_open = false;
+  crew_risk_deadline[CREW_SILVIA] = 1;
+  processSurvivorRisks();
+  activateProblem(PROBLEM_ENGINE, 3);
+  int before_parts = parts;
+  tryRepairProblem(PROBLEM_ENGINE);
+  verify("morte remove benefício sem bloquear reparo",
+    !crew_alive[CREW_SILVIA] && survivors == 3
+    && !problem_active[PROBLEM_ENGINE] && parts == before_parts - 3);
+
+  resetRun();
+  event_open = false;
+  crew_alive[CREW_BENTO] = false;
+  float before_morale = morale;
+  toggleSaving();
+  verify("política custa mais sem Bento", saving_on && morale == before_morale - 4);
 }
 
 
@@ -524,7 +583,7 @@ void runHitTest(){
 
 void runLadderTest(){
   resetRun();
-  enterRoom(SCREEN_ENERGY);
+  enterRoom(SCREEN_MACHINES);
   float middle_y = deck_y[1] - PLAYER_H;
   float ladder_player_x = ladder_x[0] - PLAYER_W / 2.0;
   testLadderLateralExit(middle_y, ladder_player_x);
@@ -600,12 +659,6 @@ void placeLadderTestPlayer(float x, float y){
 }
 
 
-void captureReach(int next_screen, int point){
-  enterRoom(next_screen);
-  setCapturePlayerAtPoint(point);
-}
-
-
 void setCapturePlayerAtPoint(int point){
   move_left_held = false;
   move_right_held = false;
@@ -639,17 +692,6 @@ void pressEnter(){
 }
 
 
-void pressRoomKey(char value){
-  key = value;
-  keyCode = value;
-  keyPressed();
-  keyReleased();
-  if (isRoomScreen()){
-    updateRoom();
-  }
-}
-
-
 void typeText(String value){
   for (int i = 0; i < value.length(); i++){
     handleChar(value.charAt(i));
@@ -666,7 +708,7 @@ String screenName(){
   if (screen == SCREEN_INIT) return "menu_init";
   if (screen == SCREEN_VIGNETTE) return "vinheta";
   if (screen == SCREEN_COMMAND) return "sala_comando";
-  if (screen == SCREEN_ENERGY) return "sala_energia";
+  if (screen == SCREEN_MACHINES) return "sala_maquinas";
   if (screen == SCREEN_DEPOT) return "deposito";
   if (screen == SCREEN_DORMITORY) return "dormitorio";
   if (screen == SCREEN_VICTORY) return "vitoria";

@@ -1,764 +1,586 @@
-final int TASK_NONE = -1;
-final int TASK_REPAIR_ENGINE = 0;
-final int TASK_BOOST_ENGINE = 1;
-final int TASK_REPAIR_HULL = 2;
-final int TASK_REST_CREW = 3;
-final int TASK_RESCUE_SURVIVOR = 4;
-final int TASK_LIFE_SUPPORT = 5;
-final int TASK_POWER = 6;
-final int TASK_COMMS = 7;
-final int TASK_COUNT = 8;
+final int PROBLEM_NONE = -1;
+final int PROBLEM_ENGINE = 0;
+final int PROBLEM_HULL = 1;
+final int PROBLEM_FOOD = 2;
+final int PROBLEM_CONFLICT = 3;
+final int PROBLEM_LIFE_SUPPORT = 4;
+final int PROBLEM_POWER = 5;
+final int PROBLEM_COMMS = 6;
+final int PROBLEM_COUNT = 7;
 
-final int GATE_ENGINE_DAMAGED = 0;
-final int GATE_BOOST_AVAILABLE = 1;
-final int GATE_HULL_LEAK = 2;
-final int GATE_ALWAYS = 3;
-final int GATE_RESOURCE_RED = 4;
-final int GATE_LIFE_SUPPORT_EMERGENCY = 5;
-final int GATE_POWER_FAULT = 6;
-final int GATE_COMMS_SILENT = 7;
+final int RESOURCE_NONE = -1;
+final int RESOURCE_ENERGY = 0;
+final int RESOURCE_OXYGEN = 1;
+final int RESOURCE_WATER = 2;
+final int RESOURCE_FOOD = 3;
+final int RESOURCE_MORALE = 4;
+final int RESOURCE_PARTS = 5;
 
-final int COST_NONE = 0;
-final int COST_PARTS = 1;
-final int COST_ENERGY = 2;
-final int COST_WATER = 3;
+final int CREW_VERA = 0;
+final int CREW_BENTO = 1;
+final int CREW_NEUSA = 2;
+final int CREW_SILVIA = 3;
+final int CREW_COUNT = 4;
 
-String[] task_label = {
-  "REPARAR MOTOR",
-  "AUMENTAR POTENCIA",
-  "REPARAR CASCO",
-  "DESCANSO E ORGANIZAÇÃO",
-  "SOCORRER SOBREVIVENTE",
-  "REPARAR SUPORTE DE VIDA",
-  "REPARAR SISTEMA DE ENERGIA",
-  "REPARAR COMUNICAÇÕES"
+String[] crew_name = {"VERA", "BENTO", "NEUSA", "SÍLVIA"};
+boolean[] crew_alive = new boolean[CREW_COUNT];
+int[] crew_risk_deadline = new int[CREW_COUNT];
+int[] crew_risk_order = new int[CREW_COUNT];
+int risk_order_counter = 0;
+
+String[] problem_title = {
+  "FALHA NO MOTOR", "DANO NO CASCO", "FALTA DE COMIDA",
+  "CONFLITO NO DORMITÓRIO", "FALHA NO SUPORTE DE VIDA",
+  "FALHA NO SISTEMA DE ENERGIA", "FALHA NAS COMUNICAÇÕES"
+};
+String[] problem_short = {
+  "MOTOR", "CASCO", "COMIDA", "CONFLITO", "SUPORTE", "ENERGIA", "COMUNICAÇÕES"
+};
+String[] problem_crisis = {
+  "MOTOR DESTRUÍDO", "OXIGÊNIO -15", "COMIDA -8 E PESSOA EM RISCO",
+  "MORAL -8 E PESSOA EM RISCO", "OXIGÊNIO -12 E PESSOA EM RISCO",
+  "ENERGIA -12 E ECONOMIA DESLIGADA", "MORAL -10"
+};
+int[] problem_room = {
+  SCREEN_MACHINES, SCREEN_NONE, SCREEN_DEPOT, SCREEN_DORMITORY,
+  SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_COMMAND
+};
+int[] problem_loss_resource = {
+  RESOURCE_ENERGY, RESOURCE_OXYGEN, RESOURCE_FOOD, RESOURCE_MORALE,
+  RESOURCE_OXYGEN, RESOURCE_ENERGY, RESOURCE_MORALE
+};
+int[] problem_loss_value = {4, 5, 3, 4, 4, 3, 2};
+int[] problem_crisis_reset = {0, 2, 3, 3, 3, 3, 3};
+int[] problem_specialist = {
+  CREW_SILVIA, CREW_SILVIA, CREW_BENTO, CREW_NEUSA,
+  CREW_SILVIA, CREW_SILVIA, CREW_VERA
+};
+int[] problem_cost_with = {2, 1, 0, 0, 1, 1, 1};
+int[] problem_cost_without = {3, 2, 3, 3, 2, 2, 2};
+int[] problem_cost_resource = {
+  RESOURCE_PARTS, RESOURCE_PARTS, RESOURCE_FOOD, RESOURCE_WATER,
+  RESOURCE_PARTS, RESOURCE_PARTS, RESOURCE_PARTS
+};
+int[] problem_component = {
+  ITEM_NONE, ITEM_SEAL_KIT, ITEM_NONE, ITEM_NONE,
+  ITEM_NONE, ITEM_FUSE, ITEM_NONE
+};
+/* Mesma ordem de declaração dos problemas no modelo aprovado. */
+int[] problem_risk_offset = {0, 1, 5, 6, 2, 3, 4};
+
+String[][] containment_label = {
+  {"REDUZIR ROTAÇÃO", "MANTER IMPULSO"},
+  {"SELAR ANTEPARAS", "ISOLAR O SETOR"},
+  {"ABRIR A RESERVA", "REDUZIR PORÇÕES"},
+  {"SEPARAR O GRUPO", "DEIXAR ESFRIAR"},
+  {"USAR REDUNDÂNCIA", "RECIRCULAR O AR"},
+  {"DESLIGAR CIRCUITOS", "DISTRIBUIR SOBRECARGA"},
+  {"MANTER ESCUTA", "DESLIGAR TRANSMISSOR"}
+};
+int[][] containment_resource = {
+  {RESOURCE_ENERGY, RESOURCE_MORALE},
+  {RESOURCE_ENERGY, RESOURCE_OXYGEN},
+  {RESOURCE_FOOD, RESOURCE_MORALE},
+  {RESOURCE_WATER, RESOURCE_MORALE},
+  {RESOURCE_ENERGY, RESOURCE_OXYGEN},
+  {RESOURCE_ENERGY, RESOURCE_MORALE},
+  {RESOURCE_ENERGY, RESOURCE_MORALE}
+};
+int[][] containment_cost = {
+  {5, 2}, {5, 4}, {4, 4}, {4, 3}, {4, 3}, {4, 4}, {3, 3}
+};
+int[][] containment_deadline = {
+  {3, 2}, {3, 2}, {4, 2}, {4, 2}, {4, 2}, {4, 2}, {4, 2}
 };
 
-int[] task_gate = {
-  GATE_ENGINE_DAMAGED,
-  GATE_BOOST_AVAILABLE,
-  GATE_HULL_LEAK,
-  GATE_ALWAYS,
-  GATE_RESOURCE_RED,
-  GATE_LIFE_SUPPORT_EMERGENCY,
-  GATE_POWER_FAULT,
-  GATE_COMMS_SILENT
-};
+boolean[] problem_active = new boolean[PROBLEM_COUNT];
+int[] problem_deadline = new int[PROBLEM_COUNT];
+int[] problem_activated_order = new int[PROBLEM_COUNT];
+int[] incident_sequence = new int[5];
+int problem_order_counter = 0;
+boolean intervention_used = false;
+boolean skip_next_day = false;
 
-int[] task_completion_room = {
-  SCREEN_ENERGY,
-  SCREEN_ENERGY,
-  SCREEN_DEPOT,
-  SCREEN_DORMITORY,
-  SCREEN_DORMITORY,
-  SCREEN_ENERGY,
-  SCREEN_ENERGY,
-  SCREEN_COMMAND
-};
-
-int[] task_completion_point = {
-  POINT_ENGINE_BENCH,
-  POINT_REACTOR,
-  POINT_HULL,
-  POINT_COMMON_TABLE,
-  POINT_BUNK,
-  POINT_LIFE_SUPPORT,
-  POINT_DISTRIBUTION,
-  POINT_ANTENNA
-};
-
-int[] task_cost_type = {
-  COST_PARTS,
-  COST_ENERGY,
-  COST_PARTS,
-  COST_ENERGY,
-  COST_WATER,
-  COST_PARTS,
-  COST_PARTS,
-  COST_PARTS
-};
-
-int[] task_cost_value = {
-  2,
-  20,
-  1,
-  8,
-  5,
-  2,
-  1,
-  1
-};
-
-String[] task_effect = {
-  "MOTOR VOLTA A OPERANTE",
-  "VIAGEM ENCURTA 1 DIA",
-  "VAZAMENTO ESTANCADO",
-  "MORAL +15",
-  "MORAL +10",
-  "SUPORTE DE VOLTA AO NORMAL",
-  "FALHA DE ENERGIA ENCERRADA",
-  "TRANSMISSÕES RESTAURADAS"
-};
-
-int[] task_step_count = {2, 1, 2, 1, 1, 2, 2, 2};
-
-int[][] task_step_room = {
-  {SCREEN_ENERGY, SCREEN_DEPOT},
-  {SCREEN_COMMAND},
-  {SCREEN_DORMITORY, SCREEN_DEPOT},
-  {SCREEN_DORMITORY},
-  {SCREEN_DEPOT},
-  {SCREEN_ENERGY, SCREEN_DEPOT},
-  {SCREEN_ENERGY, SCREEN_DEPOT},
-  {SCREEN_COMMAND, SCREEN_DEPOT}
-};
-
-int[][] task_step_point = {
-  {POINT_SILVIA, POINT_BENTO},
-  {POINT_VERA},
-  {POINT_NEUSA, POINT_SEAL_KIT},
-  {POINT_NEUSA},
-  {POINT_BENTO},
-  {POINT_SILVIA, POINT_BENTO},
-  {POINT_SILVIA, POINT_BENTO},
-  {POINT_VERA, POINT_BENTO}
-};
-
-
-/* power repair variants */
-int[] variant_item = {ITEM_FUSE, ITEM_CABLE, ITEM_COOLANT};
-int[] variant_room = {SCREEN_DEPOT, SCREEN_COMMAND, SCREEN_DORMITORY};
-int[] variant_point = {POINT_BENTO, POINT_VERA, POINT_NEUSA};
-int[] variant_cost_type = {COST_PARTS, COST_ENERGY, COST_WATER};
-int[] variant_cost_value = {1, 10, 5};
-int[] variant_completion_point = {POINT_DISTRIBUTION, POINT_REACTOR, POINT_ENGINE_BENCH};
-
-
-int active_task = TASK_NONE;
-int task_step_index = 0;
-
-boolean task_choice_open = false;
-int task_choice_cursor = 0;
-int task_choice_count = 0;
-int task_choice_last_frame = -30;
-int[] task_choice_indices = new int[TASK_COUNT];
-
-
-void resetTaskState(){
-  active_task = TASK_NONE;
-  task_step_index = 0;
-  task_choice_open = false;
-  task_choice_cursor = 0;
-  task_choice_count = 0;
-  task_choice_last_frame = -30;
+void resetProblemState(){
+  for (int i = 0; i < PROBLEM_COUNT; i++){
+    problem_active[i] = false;
+    problem_deadline[i] = 0;
+    problem_activated_order[i] = 0;
+  }
+  problem_room[PROBLEM_HULL] = SCREEN_NONE;
+  clearHullDamage();
+  problem_order_counter = 0;
+  intervention_used = false;
+  skip_next_day = false;
+  shuffleIncidentSequence();
 }
 
+void resetCrewState(){
+  survivors = CREW_COUNT;
+  risk_order_counter = 0;
+  for (int i = 0; i < CREW_COUNT; i++){
+    crew_alive[i] = true;
+    crew_risk_deadline[i] = 0;
+    crew_risk_order[i] = 0;
+  }
+}
 
-boolean taskIsAvailable(int task){
-  if (task < 0 || task >= TASK_COUNT){
+void shuffleIncidentSequence(){
+  int[] pool = new int[PROBLEM_COUNT];
+  for (int i = 0; i < PROBLEM_COUNT; i++) pool[i] = i;
+  for (int i = PROBLEM_COUNT - 1; i > 0; i--){
+    int swap = int(random(i + 1));
+    int value = pool[i];
+    pool[i] = pool[swap];
+    pool[swap] = value;
+  }
+  for (int i = 0; i < incident_sequence.length; i++) incident_sequence[i] = pool[i];
+}
+
+boolean specialistAlive(int crew){
+  return crew >= 0 && crew < CREW_COUNT && crew_alive[crew];
+}
+
+int urgentProblem(){
+  int urgent = PROBLEM_NONE;
+  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
+    if (!problem_active[problem]) continue;
+    if (urgent == PROBLEM_NONE || problem_deadline[problem] < problem_deadline[urgent]
+      || problem_deadline[problem] == problem_deadline[urgent]
+      && problem_activated_order[problem] < problem_activated_order[urgent]){
+      urgent = problem;
+    }
+  }
+  return urgent;
+}
+
+int urgentRisk(){
+  int urgent = -1;
+  for (int crew = 0; crew < CREW_COUNT; crew++){
+    if (!crew_alive[crew] || crew_risk_deadline[crew] <= 0) continue;
+    if (urgent < 0 || crew_risk_deadline[crew] < crew_risk_deadline[urgent]
+      || crew_risk_deadline[crew] == crew_risk_deadline[urgent]
+      && crew_risk_order[crew] < crew_risk_order[urgent]){
+      urgent = crew;
+    }
+  }
+  return urgent;
+}
+
+int activeProblemCount(){
+  int count = 0;
+  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
+    if (problem_active[problem]) count++;
+  }
+  return count;
+}
+
+int roomProblemCount(int room){
+  int count = 0;
+  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
+    if (problem_active[problem] && problem_room[problem] == room) count++;
+  }
+  return count;
+}
+
+void activateProblem(int problem, int deadline){
+  if (!problem_active[problem]){
+    problem_order_counter++;
+    problem_activated_order[problem] = problem_order_counter;
+  }
+  problem_active[problem] = true;
+  problem_deadline[problem] = deadline;
+  if (problem == PROBLEM_HULL && problem_room[problem] == SCREEN_NONE){
+    placeHullDamage();
+    problem_room[problem] = point_room[POINT_HULL];
+  }
+}
+
+void clearProblem(int problem){
+  problem_active[problem] = false;
+  problem_deadline[problem] = 0;
+  if (problem == PROBLEM_HULL){
+    clearHullDamage();
+    problem_room[problem] = SCREEN_NONE;
+  }
+}
+
+void putSurvivorAtRisk(int sourceProblem){
+  int[] candidates = new int[CREW_COUNT];
+  int count = 0;
+  for (int crew = 0; crew < CREW_COUNT; crew++){
+    if (crew_alive[crew] && crew_risk_deadline[crew] <= 0) candidates[count++] = crew;
+  }
+  if (count == 0) return;
+  int selected = candidates[(day + problem_risk_offset[sourceProblem]) % count];
+  risk_order_counter++;
+  crew_risk_deadline[selected] = 2;
+  crew_risk_order[selected] = risk_order_counter;
+}
+
+void applyProblemCrisis(int problem){
+  if (problem == PROBLEM_ENGINE){
+    engine_state = ENGINE_DESTROYED;
+  } else if (problem == PROBLEM_HULL){
+    oxygen -= 15;
+  } else if (problem == PROBLEM_FOOD){
+    food -= 8;
+    putSurvivorAtRisk(problem);
+  } else if (problem == PROBLEM_CONFLICT){
+    morale -= 8;
+    putSurvivorAtRisk(problem);
+  } else if (problem == PROBLEM_LIFE_SUPPORT){
+    oxygen -= 12;
+    putSurvivorAtRisk(problem);
+  } else if (problem == PROBLEM_POWER){
+    energy -= 12;
+    saving_on = false;
+  } else if (problem == PROBLEM_COMMS){
+    morale -= 10;
+  }
+  if (problem_crisis_reset[problem] > 0){
+    problem_deadline[problem] = problem_crisis_reset[problem];
+  }
+  system_message = "CRISE: " + problem_crisis[problem] + ".";
+}
+
+boolean canUseMainIntervention(){
+  return !intervention_used;
+}
+
+boolean canPayResource(int resource, int amount){
+  return resourceValue(resource) >= amount;
+}
+
+float resourceValue(int resource){
+  if (resource == RESOURCE_ENERGY) return energy;
+  if (resource == RESOURCE_OXYGEN) return oxygen;
+  if (resource == RESOURCE_WATER) return water;
+  if (resource == RESOURCE_FOOD) return food;
+  if (resource == RESOURCE_MORALE) return morale;
+  if (resource == RESOURCE_PARTS) return parts;
+  return 0;
+}
+
+void payResource(int resource, int amount){
+  if (resource == RESOURCE_ENERGY) energy -= amount;
+  else if (resource == RESOURCE_OXYGEN) oxygen -= amount;
+  else if (resource == RESOURCE_WATER) water -= amount;
+  else if (resource == RESOURCE_FOOD) food -= amount;
+  else if (resource == RESOURCE_MORALE) morale -= amount;
+  else if (resource == RESOURCE_PARTS) parts -= amount;
+}
+
+boolean tryRepairProblem(int problem){
+  if (!problem_active[problem]){
+    system_message = "NÃO HÁ " + problem_short[problem] + " PARA CORRIGIR.";
     return false;
   }
-
-  if (task_gate[task] == GATE_ENGINE_DAMAGED){
-    return engine_state == ENGINE_DAMAGED;
+  if (!canUseMainIntervention()){
+    system_message = "A INTERVENÇÃO PRINCIPAL DO DIA JÁ FOI USADA.";
+    return false;
   }
-
-  if (task_gate[task] == GATE_BOOST_AVAILABLE){
-    return boost_count < BOOST_LIMIT;
+  int component = problem_component[problem];
+  if (component != ITEM_NONE && held_item != component){
+    system_message = component == ITEM_SEAL_KIT ? "FALTA O KIT DE VEDAÇÃO." : "FALTA O FUSÍVEL DE POTÊNCIA.";
+    return false;
   }
-
-  if (task_gate[task] == GATE_HULL_LEAK){
-    return leak_on;
+  int cost = specialistAlive(problem_specialist[problem])
+    ? problem_cost_with[problem] : problem_cost_without[problem];
+  int resource = problem_cost_resource[problem];
+  if (!canPayResource(resource, cost)){
+    system_message = "RECURSO INSUFICIENTE PARA A CORREÇÃO.";
+    return false;
   }
-
-  if (task_gate[task] == GATE_RESOURCE_RED){
-    return isRed(oxygen) || isRed(morale);
-  }
-
-  if (task_gate[task] == GATE_LIFE_SUPPORT_EMERGENCY){
-    return life_support_emergency;
-  }
-
-  if (task_gate[task] == GATE_POWER_FAULT){
-    return powerTaskAvailable();
-  }
-
-  if (task_gate[task] == GATE_COMMS_SILENT){
-    return comms_silent;
-  }
-
+  payResource(resource, cost);
+  if (component != ITEM_NONE) held_item = ITEM_NONE;
+  clearProblem(problem);
+  intervention_used = true;
+  system_message = problem_short[problem] + " CORRIGIDO.";
+  clampResources();
+  checkEndConditions();
   return true;
 }
 
-
-boolean taskCostAvailable(int task){
-  if (task == TASK_POWER && power_variant == POWER_VARIANT_NONE){
-    return powerVariantPayable();
+boolean tryBoost(){
+  if (!canUseMainIntervention()){
+    system_message = "A INTERVENÇÃO PRINCIPAL DO DIA JÁ FOI USADA.";
+    return false;
   }
-
-  return costAvailable(task_cost_type[task], task_cost_value[task]);
-}
-
-boolean costAvailable(int type, int value){
-  if (type == COST_PARTS){
-    return parts >= value;
+  int cost = specialistAlive(CREW_VERA) ? 10 : 15;
+  if (energy < cost){
+    system_message = "ENERGIA INSUFICIENTE PARA AUMENTAR POTÊNCIA.";
+    return false;
   }
-
-  if (type == COST_ENERGY){
-    return energy >= value;
-  }
-
-  if (type == COST_WATER){
-    return water >= value;
-  }
-
+  energy -= cost;
+  intervention_used = true;
+  skip_next_day = true;
+  boost_count++;
+  system_message = "POTÊNCIA AUMENTADA: O PRÓXIMO DIA SERÁ ELIMINADO.";
+  checkEndConditions();
   return true;
 }
 
-
-/* Only unused, affordable power variants can be selected. */
-int powerVariantsUsed(){
-  int total = 0;
-
-  for (int i = 0; i < POWER_VARIANT_COUNT; i++){
-    if (power_variant_used[i]){
-      total++;
-    }
-  }
-
-  return total;
-}
-
-
-boolean powerVariantPayable(){
-  for (int i = 0; i < POWER_VARIANT_COUNT; i++){
-    if (!power_variant_used[i] && costAvailable(variant_cost_type[i], variant_cost_value[i])){
-      return true;
-    }
-  }
-
-  return false;
-}
-
-
-boolean powerTaskAvailable(){
-  if (!power_fault_on){
+boolean careForGroup(){
+  if (!canUseMainIntervention()){
+    system_message = "A INTERVENÇÃO PRINCIPAL DO DIA JÁ FOI USADA.";
     return false;
   }
-
-  if (power_variant != POWER_VARIANT_NONE){
-    return true;
+  if (water < 3 || food < 2){
+    system_message = "ÁGUA OU COMIDA INSUFICIENTE PARA CUIDAR DO GRUPO.";
+    return false;
   }
-
-  return powerVariantPayable();
+  water -= 3;
+  food -= 2;
+  morale += specialistAlive(CREW_NEUSA) ? 20 : 12;
+  intervention_used = true;
+  system_message = "GRUPO CUIDADO.";
+  clampResources();
+  return true;
 }
 
-
-int drawPowerVariant(){
-  int[] options = new int[POWER_VARIANT_COUNT];
-  int total = 0;
-
-  for (int i = 0; i < POWER_VARIANT_COUNT; i++){
-    if (!power_variant_used[i] && costAvailable(variant_cost_type[i], variant_cost_value[i])){
-      options[total] = i;
-      total++;
-    }
+boolean rescueUrgentSurvivor(){
+  int crew = urgentRisk();
+  if (crew < 0){
+    system_message = "NINGUÉM ESTÁ EM RISCO.";
+    return false;
   }
-
-  if (total == 0){
-    return POWER_VARIANT_NONE;
+  if (!canUseMainIntervention()){
+    system_message = "A INTERVENÇÃO PRINCIPAL DO DIA JÁ FOI USADA.";
+    return false;
   }
-
-  int variant = options[int(random(total))];
-  power_variant = variant;
-  power_variant_used[variant] = true;
-  task_cost_type[TASK_POWER] = variant_cost_type[variant];
-  task_cost_value[TASK_POWER] = variant_cost_value[variant];
-  task_completion_point[TASK_POWER] = variant_completion_point[variant];
-  task_step_room[TASK_POWER][1] = variant_room[variant];
-  task_step_point[TASK_POWER][1] = variant_point[variant];
-  return variant;
+  int waterCost = specialistAlive(CREW_NEUSA) ? 6 : 9;
+  int foodCost = specialistAlive(CREW_NEUSA) ? 2 : 3;
+  if (water < waterCost || food < foodCost){
+    system_message = "RECURSOS INSUFICIENTES PARA O SOCORRO.";
+    return false;
+  }
+  water -= waterCost;
+  food -= foodCost;
+  crew_risk_deadline[crew] = 0;
+  crew_risk_order[crew] = 0;
+  intervention_used = true;
+  system_message = crew_name[crew] + " FOI ESTABILIZADO(A).";
+  clampResources();
+  return true;
 }
 
-
-
-
-String taskStatusLabel(){
-  if (active_task == TASK_NONE){
-    return action_used ? "TAREFA DO DIA CONCLUÍDA" : "ESCOLHA UMA TAREFA NO COMANDO";
-  }
-
-  return task_label[active_task] + " | " + taskNextInstruction();
+void collectSpecialComponent(int item){
+  held_item = item;
+  system_message = item == ITEM_SEAL_KIT
+    ? "KIT DE VEDAÇÃO COLETADO." : "FUSÍVEL DE POTÊNCIA COLETADO.";
 }
 
-
-String heldItemLabel(){
-  if (held_item == ITEM_ENGINE_PARTS){
-    return "2 PEÇAS";
+void toggleSaving(){
+  boolean enabling = !saving_on;
+  int cost = specialistAlive(CREW_BENTO) ? 2 : 4;
+  if (enabling && morale < cost){
+    system_message = "MORAL INSUFICIENTE PARA ATIVAR ECONOMIA.";
+    return;
   }
-
-  if (held_item == ITEM_WATER){
-    return "ÁGUA";
-  }
-
-  if (held_item == ITEM_SEAL_KIT){
-    return "KIT DE VEDAÇÃO";
-  }
-
-  if (held_item == ITEM_SPARE_PART){
-    return "1 PEÇA";
-  }
-
-  if (held_item == ITEM_FUSE){
-    return "FUSÍVEL";
-  }
-
-  if (held_item == ITEM_CABLE){
-    return "CABO";
-  }
-
-  if (held_item == ITEM_COOLANT){
-    return "CARTUCHO";
-  }
-
-  return "NADA";
-}
-String taskNextInstruction(){
-  if (active_task == TASK_NONE){
-    return action_used
-      ? "VÁ AO SEU BELICHE - DORMITÓRIO"
-      : "USE O CONSOLE DE BRIEFING - SALA DE COMANDO";
-  }
-
-  if (task_step_index < task_step_count[active_task]){
-    int point = task_step_point[active_task][task_step_index];
-    int room = task_step_room[active_task][task_step_index];
-    return pointActionLabel(point) + " - " + roomTitle(room);
-  }
-
-  int point = task_completion_point[active_task];
-  return pointActionLabel(point) + " - " + roomTitle(task_completion_room[active_task]);
+  if (enabling) morale -= cost;
+  saving_on = enabling;
+  system_message = saving_on ? "MODO ECONOMIA LIGADO." : "MODO ECONOMIA DESLIGADO.";
+  clampResources();
+  checkEndConditions();
 }
 
-
-String pointActionLabel(int point){
-  if (point_kind[point] == POINT_NPC){
-    return "FALE COM " + point_label[point];
+void toggleRationing(){
+  boolean enabling = !rationing_on;
+  int cost = specialistAlive(CREW_BENTO) ? 2 : 4;
+  if (enabling && morale < cost){
+    system_message = "MORAL INSUFICIENTE PARA ATIVAR RACIONAMENTO.";
+    return;
   }
-
-  if (point_kind[point] == POINT_COLLECT){
-    return "PEGUE " + point_label[point];
-  }
-
-  return "USE " + point_label[point];
+  if (enabling) morale -= cost;
+  rationing_on = enabling;
+  system_message = rationing_on ? "RACIONAMENTO LIGADO." : "RACIONAMENTO DESLIGADO.";
+  clampResources();
+  checkEndConditions();
 }
 
-
-
-
-String taskCostLabel(int task){
-  String resource = task_cost_type[task] == COST_PARTS ? "PEÇAS"
-    : task_cost_type[task] == COST_ENERGY ? "ENERGIA"
-    : task_cost_type[task] == COST_WATER ? "ÁGUA" : "SEM CUSTO";
-  return task_cost_type[task] == COST_NONE
-    ? resource : task_cost_value[task] + " " + resource;
-}
-
-
-String taskRouteLabel(int task){
-  String route = "";
-  int previous_room = SCREEN_NONE;
-
-  for (int i = 0; i < task_step_count[task]; i++){
-    int room = task_step_room[task][i];
-
-    if (room != previous_room){
-      route += (route.length() == 0 ? "" : " > ") + roomTitle(room);
-      previous_room = room;
-    }
+String pointDisplayLabel(int point){
+  if (point == POINT_RISK_BUNK){
+    int crew = urgentRisk();
+    return crew < 0 ? "SOCORRO"
+      : "SOCORRER " + crew_name[crew] + " (" + crew_risk_deadline[crew] + "D)";
   }
-
-  int final_room = task_completion_room[task];
-  if (final_room != previous_room){
-    route += " > " + roomTitle(final_room);
-  }
-
-  return route;
+  return point_label[point];
 }
-
 
 boolean pointIsAvailable(int point){
-  if (point_kind[point] == POINT_COMPLETE || point_kind[point] == POINT_COLLECT){
-    return taskPointIsExpected(point);
-  }
-
+  if (point == POINT_ENGINE_BENCH) return problem_active[PROBLEM_ENGINE];
+  if (point == POINT_HULL) return problem_active[PROBLEM_HULL];
+  if (point == POINT_LIFE_SUPPORT) return problem_active[PROBLEM_LIFE_SUPPORT];
+  if (point == POINT_ANTENNA) return problem_active[PROBLEM_COMMS];
+  if (point == POINT_STOCK) return problem_active[PROBLEM_FOOD];
+  if (point == POINT_CONFLICT) return problem_active[PROBLEM_CONFLICT];
+  if (point == POINT_RISK_BUNK) return urgentRisk() >= 0;
   return true;
 }
-
 
 boolean pointIsInteractable(int point){
-  if (point_kind[point] == POINT_COMPLETE || point_kind[point] == POINT_COLLECT){
-    return taskPointIsExpected(point);
-  }
-
-  return true;
+  return pointIsAvailable(point);
 }
-
-
-boolean taskPointIsExpected(int point){
-  if (active_task == TASK_NONE || task_step_index >= task_step_count[active_task]){
-    return active_task != TASK_NONE
-      && point == task_completion_point[active_task]
-      && screen == task_completion_room[active_task];
-  }
-
-  return task_step_room[active_task][task_step_index] == screen
-    && task_step_point[active_task][task_step_index] == point;
-}
-
 
 void interactPoint(int point){
-  if (point_kind[point] == POINT_END_DAY){
+  if (point == POINT_TECH_BUNK){
     end_day_open = true;
-    return;
-  }
-
-  if (point_kind[point] == POINT_READ){
-    readPoint(point);
-    return;
-  }
-
-  if (point_kind[point] == POINT_SWITCH && !pointCompletesActiveTask(point)){
-    switchPoint(point);
-    return;
-  }
-
-  if (point_kind[point] == POINT_NPC){
-    interactNpc(point);
-    return;
-  }
-
-  if (point_kind[point] == POINT_COLLECT){
-    advanceTaskStep(point);
-    return;
-  }
-
-  completeTask(point);
-}
-
-
-/* The distribution panel repairs only when the matching item is held. */
-boolean pointCompletesActiveTask(int point){
-  return active_task != TASK_NONE && taskPointIsExpected(point)
-    && taskItemAvailable(active_task);
-}
-
-
-void readPoint(int point){
-  if (point == POINT_COMMAND_BRIEFING){
-    openTaskConsole();
   } else if (point == POINT_ROUTE){
-    openTechnical("ROTA", "DIA " + day + " DE " + trip_days
-      + ". RESTAM " + max(0, trip_days - day) + " DIAS.");
+    openTechnical("CONSOLE DA ROTA", "DIA " + day + " DE " + TRIP_DAYS
+      + ". RESTAM " + max(0, TRIP_DAYS - day) + " DIA(S). CONSUMO PREVISTO: ENERGIA -"
+      + dailyEnergyCost() + ", OXIGÊNIO -" + dailyOxygenCost()
+      + ". AUMENTAR POTÊNCIA CUSTA " + (specialistAlive(CREW_VERA) ? 10 : 15)
+      + " DE ENERGIA E ELIMINA O PRÓXIMO DIA COMPLETO.");
+    pending_intervention_point = point;
   } else if (point == POINT_STATUS){
-    openTechnical("STATUS DA NAVE", "MOTOR " + engineStateLabel()
-      + ". ESTADOS: " + activeStateSummary() + ".");
+    openTechnical("STATUS DA NAVE", activeProblemSummary());
+  } else if (point == POINT_REACTOR){
+    openTechnical("REATOR", "POTÊNCIA DISPONÍVEL. A ACELERAÇÃO É FEITA NO CONSOLE DA ROTA.");
   } else if (point == POINT_RESERVE){
-    openTechnical("RESERVA", parts + " PEÇAS DISPONÍVEIS.");
+    openTechnical("RESERVA", parts + " PEÇAS; COMPONENTE NA MÃO: " + heldItemLabel() + ".");
+  } else if (point == POINT_DISTRIBUTION){
+    openDistributionPanel();
+  } else if (point == POINT_RATIONING){
+    switchPoint(point);
+  } else if (point == POINT_SEAL_KIT){
+    collectSpecialComponent(ITEM_SEAL_KIT);
+  } else if (point == POINT_FUSE){
+    collectSpecialComponent(ITEM_FUSE);
+  } else if (point == POINT_ENGINE_BENCH){
+    tryRepairProblem(PROBLEM_ENGINE);
+  } else if (point == POINT_HULL){
+    tryRepairProblem(PROBLEM_HULL);
+  } else if (point == POINT_LIFE_SUPPORT){
+    tryRepairProblem(PROBLEM_LIFE_SUPPORT);
+  } else if (point == POINT_ANTENNA){
+    tryRepairProblem(PROBLEM_COMMS);
+  } else if (point == POINT_STOCK){
+    tryRepairProblem(PROBLEM_FOOD);
+  } else if (point == POINT_CONFLICT){
+    tryRepairProblem(PROBLEM_CONFLICT);
+  } else if (point == POINT_COMMON_TABLE){
+    careForGroup();
+  } else if (point == POINT_RISK_BUNK){
+    rescueUrgentSurvivor();
+  } else if (point_kind[point] == POINT_NPC){
+    interactNpc(point);
   }
 }
 
+void applyPendingIntervention(){
+  int point = pending_intervention_point;
+  pending_intervention_point = -1;
+  technical_open = false;
+  if (point == POINT_ROUTE) tryBoost();
+}
+
+boolean canRepairPower(){
+  if (!problem_active[PROBLEM_POWER] || !canUseMainIntervention()) return false;
+  if (problem_component[PROBLEM_POWER] != ITEM_NONE
+    && held_item != problem_component[PROBLEM_POWER]) return false;
+  int cost = specialistAlive(problem_specialist[PROBLEM_POWER])
+    ? problem_cost_with[PROBLEM_POWER] : problem_cost_without[PROBLEM_POWER];
+  return canPayResource(problem_cost_resource[PROBLEM_POWER], cost);
+}
+
+void openDistributionPanel(){
+  if (!problem_active[PROBLEM_POWER]){
+    switchPoint(POINT_DISTRIBUTION);
+    return;
+  }
+
+  int cost = specialistAlive(problem_specialist[PROBLEM_POWER])
+    ? problem_cost_with[PROBLEM_POWER] : problem_cost_without[PROBLEM_POWER];
+  String requirement = "FUSÍVEL DE POTÊNCIA + " + cost
+    + (cost == 1 ? " PEÇA" : " PEÇAS");
+  String missing = held_item == ITEM_FUSE ? "" : " FALTA O FUSÍVEL NA MÃO.";
+  String blocked = canUseMainIntervention() ? "" : " INTERVENÇÃO DO DIA JÁ USADA.";
+
+  openTechnical("PAINEL DE DISTRIBUIÇÃO", problemMapLine(PROBLEM_POWER)
+    + " REPARO: " + requirement + "." + missing + blocked
+    + " ECONOMIA: " + (saving_on ? "LIGADA" : "DESLIGADA")
+    + " (ENERGIA " + ENERGY_PER_DAY_SAVING + "/DIA, MORAL -"
+    + (specialistAlive(CREW_BENTO) ? 1 : 2) + "/DIA).");
+  pending_panel_choice = POINT_DISTRIBUTION;
+}
+
+void applyPanelRepair(){
+  pending_panel_choice = -1;
+  technical_open = false;
+  tryRepairProblem(PROBLEM_POWER);
+}
+
+void applyPanelEconomy(){
+  pending_panel_choice = -1;
+  technical_open = false;
+  toggleSaving();
+}
+
+void interactNpc(int point){
+  if (point == POINT_VERA){
+    openDialogue("VERA", "ROTA SOB CONTROLE. AUMENTAR POTÊNCIA NO CONSOLE ELIMINA O PRÓXIMO DIA.");
+  } else if (point == POINT_SILVIA){
+    openDialogue("SÍLVIA", "MOTOR, ENERGIA E SUPORTE RESPONDEM NAS ESTAÇÕES DA SALA.");
+  } else if (point == POINT_BENTO){
+    openDialogue("BENTO", "PEÇAS: " + parts + ". KIT E FUSÍVEL FICAM NO DEPÓSITO.");
+  } else {
+    openDialogue("NEUSA", "MORAL " + int(morale) + ". PESSOAS EM RISCO: " + riskCount() + ".");
+  }
+}
+
+int riskCount(){
+  int count = 0;
+  for (int crew = 0; crew < CREW_COUNT; crew++) if (crew_risk_deadline[crew] > 0) count++;
+  return count;
+}
+
+String heldItemLabel(){
+  if (held_item == ITEM_SEAL_KIT) return "KIT DE VEDAÇÃO";
+  if (held_item == ITEM_FUSE) return "FUSÍVEL DE POTÊNCIA";
+  return "NENHUM";
+}
 
 void switchPoint(int point){
   pending_switch_point = point;
   technical_open = true;
-
   if (point == POINT_DISTRIBUTION){
     technical_title = saving_on ? "DESATIVAR ECONOMIA" : "ATIVAR ECONOMIA";
     technical_text = saving_on
       ? "O CONSUMO VOLTA A 6 DE ENERGIA POR DIA."
-      : "ENERGIA -3/DIA. CUSTO INICIAL: MORAL -5; DEPOIS -1/DIA.";
+      : "ENERGIA CAI PARA 3/DIA. CUSTO MORAL AO ATIVAR E A CADA NOITE.";
   } else {
     technical_title = rationing_on ? "DESATIVAR RACIONAMENTO" : "ATIVAR RACIONAMENTO";
     technical_text = rationing_on
       ? "ÁGUA E COMIDA VOLTAM AO CONSUMO NORMAL."
-      : "ÁGUA -4 E COMIDA -3/DIA. CUSTO INICIAL: MORAL -8; DEPOIS -1/DIA.";
+      : "ÁGUA CAI PARA 4/DIA E COMIDA PARA 3/DIA. HÁ CUSTO DE MORAL.";
   }
 }
-
 
 void applySwitchPoint(){
   int point = pending_switch_point;
   pending_switch_point = -1;
   technical_open = false;
-
-  if (point == POINT_DISTRIBUTION){
-    toggleSaving();
-  } else if (point == POINT_RATIONING){
-    toggleRationing();
-  }
+  if (point == POINT_DISTRIBUTION) toggleSaving();
+  else if (point == POINT_RATIONING) toggleRationing();
 }
 
-
-void openTaskConsole(){
-  if (action_used){
-    openTechnical("BRIEFING", "A TAREFA DE HOJE JÁ FOI CONCLUÍDA.");
-    return;
-  }
-
-  if (active_task != TASK_NONE){
-    openTechnical("TAREFA ATIVA", taskStatusLabel());
-    return;
-  }
-
-  task_choice_count = 0;
-
-  for (int task = 0; task < TASK_COUNT; task++){
-    if (taskIsAvailable(task) && taskCostAvailable(task)){
-      task_choice_indices[task_choice_count++] = task;
-    }
-  }
-
-  if (task_choice_count == 0){
-    openTechnical("BRIEFING", "NENHUMA TAREFA PODE SER PAGA HOJE.");
-    return;
-  }
-
-  task_choice_cursor = 0;
-  task_choice_open = true;
-  task_choice_last_frame = frameCount;
+String activeProblemSummary(){
+  int count = activeProblemCount();
+  if (count == 0) return "NENHUM PROBLEMA ATIVO.";
+  int urgent = urgentProblem();
+  return count + " ATIVO(S). MAIS URGENTE: " + problem_short[urgent]
+    + " — " + problem_deadline[urgent] + " DIA(S).";
 }
 
-
-void interactNpc(int point){
-  String name = point_label[point];
-
-  if (active_task != TASK_NONE && taskPointIsExpected(point)){
-    advanceTaskStep(point);
-    openDialogue(name, "ENTENDIDO. " + taskNextInstruction());
-    return;
-  }
-
-  if (active_task != TASK_NONE){
-    openDialogue(name, "SUA PRIORIDADE É: " + taskNextInstruction());
-    return;
-  }
-
-  openDialogue(name, npcIdleText(point));
+String problemLossLabel(int problem){
+  String resource = problem_loss_resource[problem] == RESOURCE_ENERGY ? "ENERGIA"
+    : problem_loss_resource[problem] == RESOURCE_OXYGEN ? "OXIGÊNIO"
+    : problem_loss_resource[problem] == RESOURCE_FOOD ? "COMIDA" : "MORAL";
+  return resource + " -" + problem_loss_value[problem] + "/DIA";
 }
 
-
-String npcIdleText(int point){
-  if (point == POINT_VERA){
-    return "CONSULTE O CONSOLE DE BRIEFING PARA ESCOLHER A TAREFA DE HOJE.";
-  }
-
-  if (point == POINT_SILVIA){
-    return "MOTOR E SISTEMAS DE ENERGIA SOB OBSERVAÇÃO.";
-  }
-
-  if (point == POINT_BENTO){
-    return "ESTOQUE CONFERIDO. PEÇAS DISPONÍVEIS: " + parts + ".";
-  }
-
-  return "O GRUPO ESTÁ COM MORAL " + int(morale) + ".";
-}
-
-
-void beginTask(int task){
-  if (action_used || active_task != TASK_NONE || !taskIsAvailable(task)
-    || !taskCostAvailable(task)){
-    return;
-  }
-
-  if (task == TASK_POWER && power_variant == POWER_VARIANT_NONE){
-    drawPowerVariant();
-  }
-
-  active_task = task;
-  task_step_index = 0;
-  system_message = "TAREFA ACEITA: " + task_label[task] + ".";
-}
-
-
-void advanceTaskStep(int point){
-  if (active_task == TASK_NONE || !taskPointIsExpected(point)){
-    system_message = "ESSA INTERAÇÃO NÃO FAZ PARTE DA TAREFA ATUAL.";
-    return;
-  }
-
-  int item = itemForStep(active_task, task_step_index);
-
-  if (item != ITEM_NONE){
-    held_item = item;
-  }
-
-  task_step_index++;
-  system_message = item != ITEM_NONE
-    ? "ITEM OBTIDO: " + heldItemLabel() + "."
-    : "ETAPA CONCLUÍDA. " + taskNextInstruction();
-}
-
-
-int itemForStep(int task, int step){
-  if (task == TASK_REPAIR_ENGINE && step == 1){
-    return ITEM_ENGINE_PARTS;
-  }
-
-  if (task == TASK_REPAIR_HULL && step == 1){
-    return ITEM_SEAL_KIT;
-  }
-
-  if (task == TASK_RESCUE_SURVIVOR && step == 0){
-    return ITEM_WATER;
-  }
-
-  if (task == TASK_LIFE_SUPPORT && step == 1){
-    return ITEM_ENGINE_PARTS;
-  }
-
-  if (task == TASK_COMMS && step == 1){
-    return ITEM_SPARE_PART;
-  }
-
-  if (task == TASK_POWER && step == 1 && power_variant != POWER_VARIANT_NONE){
-    return variant_item[power_variant];
-  }
-
-  return ITEM_NONE;
-}
-
-
-void completeTask(int point){
-  if (action_used){
-    system_message = "A TAREFA DO DIA JÁ FOI CONCLUÍDA.";
-    return;
-  }
-
-  if (active_task == TASK_NONE || !taskPointIsExpected(point)){
-    system_message = "ESSA NÃO É A AÇÃO ATUAL.";
-    return;
-  }
-
-  if (!taskCostAvailable(active_task)){
-    system_message = "RECURSO INSUFICIENTE.";
-    return;
-  }
-
-  if (!taskItemAvailable(active_task)){
-    system_message = "FALTA O ITEM NECESSÁRIO.";
-    return;
-  }
-
-  int completed_task = active_task;
-  consumeTaskCost(completed_task);
-  applyTaskEffect(completed_task);
-  action_used = true;
-  held_item = ITEM_NONE;
-  active_task = TASK_NONE;
-  task_step_index = 0;
-  system_message = task_label[completed_task] + ": " + task_effect[completed_task] + ".";
-  clampResources();
-  checkEndConditions();
-}
-
-
-boolean taskItemAvailable(int task){
-  if (task == TASK_REPAIR_ENGINE || task == TASK_LIFE_SUPPORT){
-    return held_item == ITEM_ENGINE_PARTS;
-  }
-
-  if (task == TASK_REPAIR_HULL){
-    return held_item == ITEM_SEAL_KIT;
-  }
-
-  if (task == TASK_RESCUE_SURVIVOR){
-    return held_item == ITEM_WATER;
-  }
-
-  if (task == TASK_COMMS){
-    return held_item == ITEM_SPARE_PART;
-  }
-
-  if (task == TASK_POWER){
-    return power_variant != POWER_VARIANT_NONE && held_item == variant_item[power_variant];
-  }
-
-  return true;
-}
-
-
-void consumeTaskCost(int task){
-  if (task_cost_type[task] == COST_PARTS){
-    parts -= task_cost_value[task];
-  } else if (task_cost_type[task] == COST_ENERGY){
-    energy -= task_cost_value[task];
-  } else if (task_cost_type[task] == COST_WATER){
-    water -= task_cost_value[task];
-  }
-}
-
-
-void applyTaskEffect(int task){
-  if (task == TASK_REPAIR_ENGINE){
-    repairEngine();
-  } else if (task == TASK_BOOST_ENGINE){
-    boost_count++;
-    trip_days = max(trip_days - 1, 1);
-  } else if (task == TASK_REPAIR_HULL){
-    leak_on = false;
-    clearHullDamage();
-  } else if (task == TASK_REST_CREW){
-    morale += REST_MORALE_GAIN;
-  } else if (task == TASK_RESCUE_SURVIVOR){
-    morale += 10;
-  } else if (task == TASK_LIFE_SUPPORT){
-    life_support_emergency = false;
-  } else if (task == TASK_POWER){
-    power_fault_on = false;
-    power_variant = POWER_VARIANT_NONE;
-  } else if (task == TASK_COMMS){
-    comms_silent = false;
-  }
-}
-
-
-void updateTaskChoice(){
-  if (frameCount - task_choice_last_frame >= 10){
-    if (move_up_held || move_left_held){
-      task_choice_cursor = (task_choice_cursor + task_choice_count - 1) % task_choice_count;
-      task_choice_last_frame = frameCount;
-    } else if (move_down_held || move_right_held){
-      task_choice_cursor = (task_choice_cursor + 1) % task_choice_count;
-      task_choice_last_frame = frameCount;
-    }
-  }
-
-  if (interact_queued){
-    interact_queued = false;
-    int selected = task_choice_indices[task_choice_cursor];
-    task_choice_open = false;
-    beginTask(selected);
-  }
-}
-
-
-void drawTaskChoice(PGraphics g){
-  drawModalShade(g);
-  drawPanel(g, 20, 52, 600, 260, COL_CYAN);
-  text(g, "CONSOLE DE BRIEFING", 36, 64, 16, COL_CYAN);
-
-  for (int i = 0; i < task_choice_count; i++){
-    int task = task_choice_indices[i];
-    text(g, (i == task_choice_cursor ? "> " : "  ") + task_label[task],
-      36, 94 + i * 20, 16, i == task_choice_cursor ? COL_CYAN : COL_TEXT);
-  }
-
-  int selected = task_choice_indices[task_choice_cursor];
-  drawPanel(g, 318, 88, 286, 170, COL_BORDER);
-  text(g, task_label[selected], 334, 102, 16, COL_ORANGE);
-  text(g, "CUSTO: " + taskCostLabel(selected), 334, 132, 16, COL_TEXT);
-  drawTextWrapped(g, "EFEITO: " + task_effect[selected], 334, 158, 254, 16, 18, COL_TEXT);
-  drawTextWrapped(g, "ROTA: " + taskRouteLabel(selected), 334, 204, 254, 16, 18, COL_MUTED);
-  text(g, "SETAS: ESCOLHER   ENTER: ACEITAR   ESC: VOLTAR", 36, 278, 16, COL_MUTED);
+String problemMapLine(int problem){
+  return problem_short[problem] + " | " + problemLossLabel(problem)
+    + " | PRAZO " + problem_deadline[problem] + " | " + problem_crisis[problem];
 }

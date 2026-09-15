@@ -167,6 +167,8 @@ void drawPortrait(PGraphics g, String name, float x, float y){
 
 void openTechnical(String title, String value){
   pending_switch_point = -1;
+  pending_intervention_point = -1;
+  pending_panel_choice = -1;
   technical_title = title;
   technical_text = value;
   technical_open = true;
@@ -175,33 +177,58 @@ void openTechnical(String title, String value){
 
 void drawTechnicalPanel(PGraphics g){
   drawModalShade(g);
-  drawPanel(g, 70, 94, 500, 172, COL_CYAN);
-  text(g, technical_title, 88, 108, 16, COL_CYAN);
-  drawTextWrapped(g, technical_text, 88, 138, 464, 16, 18, COL_TEXT);
+  drawPanel(g, 54, 88, 532, 184, COL_CYAN);
+  text(g, technical_title, 72, 102, 16, COL_CYAN);
+  drawTextWrapped(g, technical_text, 72, 132, 496, 16, 18, COL_TEXT);
 
-  if (pending_switch_point >= 0){
-    drawButton(g, 286, 226, 128, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
-    drawButton(g, 424, 226, 128, 22, "CONFIRMAR (ENTER)", ACTION_CONFIRM_SWITCH, true);
+  if (pending_panel_choice == POINT_DISTRIBUTION){
+    drawButton(g, 72, 238, 150, 22, "REPARAR (ENTER)", ACTION_PANEL_REPAIR, canRepairPower());
+    drawButton(g, 232, 238, 150, 22, saving_on ? "ECONOMIA: LIGADA" : "ECONOMIA: DESLIGADA",
+      ACTION_PANEL_ECONOMY, true);
+    drawButton(g, 448, 238, 120, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
+  } else if (pending_switch_point >= 0 || pending_intervention_point >= 0){
+    int action = pending_switch_point >= 0
+      ? ACTION_CONFIRM_SWITCH : ACTION_CONFIRM_INTERVENTION;
+    drawButton(g, 286, 238, 128, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
+    drawButton(g, 424, 238, 128, 22, "CONFIRMAR (ENTER)", action, true);
   } else {
-    drawButton(g, 424, 226, 128, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+    drawButton(g, 424, 238, 128, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
   }
 }
 
 
 void drawEndDayPanel(PGraphics g){
   drawModalShade(g);
-  drawPanel(g, 54, 68, 532, 232, COL_ORANGE);
-  text(g, "ENCERRAR O DIA", 72, 82, 16, COL_ORANGE);
-  text(g, "CONSUMO PREVISTO", 72, 112, 16, COL_CYAN);
-  text(g, "ENERGIA -" + dailyEnergyCost() + "   OXIGÊNIO -" + dailyOxygenCost(),
-    72, 136, 16, COL_TEXT);
-  text(g, "ÁGUA -" + dailyWaterCost() + "   COMIDA -" + dailyFoodCost()
-    + "   MORAL -" + dailyMoraleCost(), 72, 158, 16, COL_TEXT);
-  text(g, "ESTADOS: " + activeStateSummary(), 72, 188, 16, COL_MUTED);
-  text(g, "TAREFA: " + dayTaskSummary(), 72, 210, 16,
-    action_used ? COL_GREEN : COL_YELLOW);
-  drawButton(g, 72, 254, 208, 26, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
-  drawButton(g, 306, 254, 262, 26, "ENCERRAR DIA (ENTER)", ACTION_END_DAY, true);
+  drawPanel(g, 40, 48, 560, 268, COL_ORANGE);
+  text(g, "ENCERRAR O DIA", 58, 60, 16, COL_ORANGE);
+  text(g, "CONSUMO E PERDAS PREVISTOS", 58, 86, 16, COL_CYAN);
+  text(g, "ENERGIA -" + (dailyEnergyCost() + dailyProblemLoss(RESOURCE_ENERGY))
+    + "   OXIGÊNIO -" + (dailyOxygenCost() + dailyProblemLoss(RESOURCE_OXYGEN)),
+    58, 108, 16, COL_TEXT);
+  text(g, "ÁGUA -" + dailyWaterCost() + "   COMIDA -"
+    + (dailyFoodCost() + dailyProblemLoss(RESOURCE_FOOD)), 58, 128, 16, COL_TEXT);
+  int policy_morale = dailyPolicyMoraleCost();
+  text(g, "POLÍTICAS: MORAL " + (policy_morale == 0 ? "0" : "-" + policy_morale)
+    + " | " + dayTaskSummary(), 58, 148, 16,
+    intervention_used ? COL_GREEN : COL_YELLOW);
+  text(g, "PROBLEMAS ATIVOS, PRAZOS E CRISES", 58, 174, 16, COL_CYAN);
+
+  float y = 196;
+  int shown = 0;
+  int total = activeProblemCount();
+  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
+    if (!problem_active[problem]) continue;
+    if (y + 36 > 276){
+      text(g, "E MAIS " + (total - shown) + " PROBLEMA(S).", 58, y, 16, COL_MUTED);
+      break;
+    }
+    y = drawTextWrapped(g, problemMapLine(problem), 58, y, 470, 16, 18, COL_TEXT);
+    shown++;
+  }
+  if (total == 0) text(g, "NENHUM. NOITE SEM PERDAS.", 58, y, 16, COL_MUTED);
+
+  drawButton(g, 58, 284, 208, 24, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 292, 284, 290, 24, "ENCERRAR DIA (ENTER)", ACTION_END_DAY, true);
 }
 
 

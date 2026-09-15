@@ -114,6 +114,10 @@ O prazo exibido inclui a noite atual: um problema que nasce com prazo 2 pode ser
 corrigido no dia do incidente ou no dia seguinte antes da crise. Crises não
 fatais mantêm o problema ativo e reiniciam seu prazo.
 
+Em empate de prazo, o problema ativado primeiro mantém a prioridade. Se nenhuma
+das duas contenções puder ser paga, a crise específica acontece imediatamente;
+quando não for fatal, o problema permanece ativo com o prazo reiniciado.
+
 ### Sete problemas
 
 | Problema | Perda diária | Contenção segura | Contenção arriscada | Crise |
@@ -145,6 +149,15 @@ Kit de vedação e fusível de potência são componentes especiais: precisam se
 coletados, mas a coleta é livre. Os custos comuns são pagos no ponto final.
 Uma pessoa em risco recebe prazo 2. Socorrer remove o risco; prazo zero causa
 morte e remove o benefício da especialidade.
+
+Quando uma crise precisa escolher uma pessoa, aplica-se a seleção determinística
+do modelo aprovado: entre sobreviventes vivos que ainda não estejam em risco, a
+ordem Vera, Bento, Neusa e Sílvia recebe um deslocamento pelo dia e pelo tipo do
+problema. Se ninguém for elegível, não nasce um segundo risco.
+
+Se houver mais de uma pessoa em risco, `Socorrer [nome]` aponta para o menor
+prazo; em empate, para o risco criado primeiro. Depois do socorro, o ponto passa
+à próxima pessoa elegível.
 
 ### Políticas
 

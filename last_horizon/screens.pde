@@ -13,13 +13,12 @@ boolean isMenuScreen(){
 
 
 boolean isRoomScreen(){
-  return screen == SCREEN_COMMAND || screen == SCREEN_ENERGY || screen == SCREEN_DEPOT || screen == SCREEN_DORMITORY;
+  return screen == SCREEN_COMMAND || screen == SCREEN_MACHINES || screen == SCREEN_DEPOT || screen == SCREEN_DORMITORY;
 }
 
 
 boolean modalOpen(){
-  return event_open || map_open || task_choice_open || dialog_open
-    || technical_open || end_day_open;
+  return event_open || map_open || dialog_open || technical_open || end_day_open;
 }
 
 
@@ -72,8 +71,6 @@ void drawModalLayer(PGraphics g){
     drawEventCard(g);
   } else if (map_open){
     drawMapOverlay(g);
-  } else if (task_choice_open){
-    drawTaskChoice(g);
   } else if (dialog_open){
     drawDialogue(g);
   } else if (technical_open){
@@ -94,10 +91,6 @@ boolean closeTopModal(){
     return false;
   }
 
-  if (task_choice_open){
-    task_choice_open = false;
-    return true;
-  }
 
   if (map_open || dialog_open || technical_open || end_day_open){
     map_open = false;
@@ -105,6 +98,8 @@ boolean closeTopModal(){
     technical_open = false;
     end_day_open = false;
     pending_switch_point = -1;
+    pending_intervention_point = -1;
+    pending_panel_choice = -1;
     return true;
   }
 
@@ -151,6 +146,20 @@ void doAction(int action){
   }
   if (action == ACTION_CONFIRM_SWITCH){
     applySwitchPoint();
+    return;
+  }
+  if (action == ACTION_CONFIRM_INTERVENTION){
+    applyPendingIntervention();
+    return;
+  }
+
+  if (action == ACTION_PANEL_REPAIR){
+    applyPanelRepair();
+    return;
+  }
+
+  if (action == ACTION_PANEL_ECONOMY){
+    applyPanelEconomy();
     return;
   }
 

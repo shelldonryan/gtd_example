@@ -70,7 +70,7 @@ O cômodo concentra motor, energia e suporte de vida.
 | inferior | bancada do motor — correção do motor | intervenção principal |
 | médio | Sílvia — diagnóstico e benefício de mecânica | conversa |
 | médio | painel de distribuição — falha elétrica e modo economia | intervenção principal e política |
-| superior | reator — potência e sistema de energia | intervenção principal |
+| superior | reator — potência do sistema | leitura técnica |
 | superior | painel de suporte de vida | intervenção principal |
 | acesso | porta única para o convés inferior do Comando | porta |
 
@@ -80,9 +80,10 @@ O cômodo concentra logística, estoques, componentes especiais e racionamento.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
-| inferior | componentes especiais, incluindo kit de vedação | coleta |
+| inferior | componentes especiais, incluindo kit de vedação e fusível | coleta |
 | médio | Bento — leitura dos estoques e benefício de intendente | conversa |
 | médio | alavanca de racionamento | política |
+| médio | estoque de comida — correção da falta de comida | intervenção principal |
 | superior | prateleira de reserva — componentes disponíveis | leitura técnica |
 | acesso | porta única para o convés médio do Comando | porta |
 
@@ -92,8 +93,9 @@ O cômodo concentra descanso, saúde, moral e encerramento do turno.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
-| inferior | beliche de sobrevivente em risco | intervenção principal de socorro |
+| inferior | beliche temporário `SOCORRER [NOME]` de sobrevivente em risco | intervenção principal de socorro |
 | médio | Neusa — estado do grupo e benefício de enfermeira | conversa |
+| médio | mesa do grupo — mediação do conflito | intervenção principal |
 | superior | mesa comum — `Cuidar do grupo` | intervenção principal de recuperação |
 | superior | beliche do técnico — resumo e dormir | leitura técnica e encerramento |
 | acesso | porta única para o convés superior do Comando | porta |
@@ -115,8 +117,14 @@ falar com NPC ou trocar de cômodo.
 | Cuidar do grupo | recuperação | mesa comum, Dormitório |
 | Socorrer sobrevivente | recuperação | beliche da pessoa em risco, Dormitório |
 | Reparar suporte de vida | correção | painel de suporte, Máquinas |
-| Reparar sistema de energia | correção | estação correspondente, Máquinas |
+| Reparar sistema de energia | correção | painel de distribuição, Máquinas |
 | Reparar comunicações | correção | antena, Comando |
+| Reorganizar comida | correção | estoque de comida, Depósito |
+| Mediar conflito | correção | mesa do grupo, Dormitório |
+
+O painel de distribuição atende as duas funções: quando a falha elétrica está
+ativa, a interação abre as opções de reparo e de economia no mesmo painel; sem a
+falha, alterna apenas a economia.
 
 Economia e racionamento são políticas persistentes locais. Não usam a
 intervenção principal, mas cobram moral ao ativar e em cada dia mantidas.
@@ -124,6 +132,12 @@ intervenção principal, mas cobram moral ao ativar e em cada dia mantidas.
 Uma crise pode colocar Vera, Bento, Neusa ou Sílvia em risco. Socorrer estabiliza
 a pessoa; a morte remove o benefício da especialidade, mas não bloqueia nenhuma
 ação necessária.
+
+O beliche de socorro só aparece enquanto existe uma pessoa em risco e usa o nome
+dela no rótulo. A pessoa segue a seleção determinística do modelo aprovado. Com
+mais de um risco, mostra o menor prazo e, em empate, o mais antigo; depois do
+socorro, passa ao próximo. O ponto não cria um quinto personagem nem fixa novos
+beliches no layout.
 
 ## Leitura do jogador
 
@@ -134,15 +148,7 @@ aquela ocorrência, não ao Depósito por definição.
 O jogador escolhe sua prioridade pelo deslocamento e pela intervenção, não por
 um aceite abstrato.
 
-## Implementação
-
-O sketch atual já implementa D-097: o dano no casco sorteia um ponto livre e
-alcançável nos três conveses de qualquer um dos quatro cômodos, e o destino da
-correção acompanha esse ponto. O restante ainda usa topologia linear, briefing
-obrigatório, tarefa singular em `tasks.pde`, rotas universais por NPC e recursos
-carregados; esse código continua sendo o protótipo anterior e diverge de D-073 a
-D-096.
-
-A implementação do restante do novo contrato está liberada com o balanceamento
-confirmado na issue #20. A migração integral, incluindo os nomes curtos das
-estações, pertence à issue #21.
+O sketch implementa a topologia em hub, os pontos de intervenção e o dano no
+casco aleatório e alcançável nos três conveses de qualquer um dos quatro
+cômodos. `tasks.pde` mantém problemas persistentes, componentes especiais,
+políticas, riscos individuais e intervenções sem briefing ou tarefa singular.

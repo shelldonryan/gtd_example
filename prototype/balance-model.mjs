@@ -212,6 +212,17 @@ function containIncident(state, choice) {
     return next;
   }
   const definition = PROBLEMS[next.pendingIncident];
+  const canContain = canPay(next, definition.safe.cost) || canPay(next, definition.risky.cost);
+  if (!canContain) {
+    const problem = { id: next.pendingIncident, deadline: definition.risky.deadline };
+    next.activeProblems.push(problem);
+    next.pendingIncident = null;
+    applyCrisis(next, problem);
+    clampResources(next);
+    checkOutcome(next);
+    next.lastMessage = `Sem recursos para conter ${definition.name}: ${definition.crisis}.`;
+    return next;
+  }
   const containment = definition[choice];
   if (!containment || !canPay(next, containment.cost)) {
     next.lastMessage = "Contenção inválida ou sem recursos para pagar.";
