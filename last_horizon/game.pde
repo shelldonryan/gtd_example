@@ -62,8 +62,8 @@ void openDay(){
 }
 
 int incidentForDay(int value){
-  if (value < 1 || value > 9 || value % 2 == 0) return PROBLEM_NONE;
-  int index = (value - 1) / 2;
+  if (value < 2 || value > TRIP_DAYS || value % 2 == 1) return PROBLEM_NONE;
+  int index = value / 2 - 1;
   return index < incident_sequence.length ? incident_sequence[index] : PROBLEM_NONE;
 }
 

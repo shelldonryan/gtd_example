@@ -168,6 +168,7 @@ void drawPortrait(PGraphics g, String name, float x, float y){
 void openTechnical(String title, String value){
   pending_switch_point = -1;
   pending_intervention_point = -1;
+  pending_collect_point = -1;
   pending_panel_choice = -1;
   technical_title = title;
   technical_text = value;
@@ -186,9 +187,11 @@ void drawTechnicalPanel(PGraphics g){
     drawButton(g, 232, 238, 150, 22, saving_on ? "ECONOMIA: LIGADA" : "ECONOMIA: DESLIGADA",
       ACTION_PANEL_ECONOMY, true);
     drawButton(g, 448, 238, 120, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
-  } else if (pending_switch_point >= 0 || pending_intervention_point >= 0){
-    int action = pending_switch_point >= 0
-      ? ACTION_CONFIRM_SWITCH : ACTION_CONFIRM_INTERVENTION;
+  } else if (pending_switch_point >= 0 || pending_intervention_point >= 0
+    || pending_collect_point >= 0){
+    int action = pending_switch_point >= 0 ? ACTION_CONFIRM_SWITCH
+      : pending_intervention_point >= 0 ? ACTION_CONFIRM_INTERVENTION
+      : ACTION_CONFIRM_COLLECT;
     drawButton(g, 286, 238, 128, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
     drawButton(g, 424, 238, 128, 22, "CONFIRMAR (ENTER)", action, true);
   } else {

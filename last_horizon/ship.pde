@@ -605,6 +605,7 @@ void resetRoomState(){
   technical_open = false;
   pending_switch_point = -1;
   pending_intervention_point = -1;
+  pending_collect_point = -1;
   end_day_open = false;
 }
 

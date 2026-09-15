@@ -16,10 +16,10 @@ final int HIT_TEST_FRAME = 5;
 
 String[] capture_label = {
   "menu_init", "vignette_1", "vignette_2", "vignette_3",
-  "incident_day_1", "problem_persistent", "map_position", "map_problems",
-  "command_hub", "machines_entry", "problem_repaired", "dormitory",
-  "end_day_summary", "end_day_cancelled", "day_2", "survivor_at_risk",
-  "survivor_rescued", "pause", "game_over", "victory",
+  "day_1_start", "incident_day_2", "problem_persistent", "map_position", "map_problems",
+  "command_hub", "machines_entry", "repair_confirm", "problem_repaired", "collect_confirm",
+  "dormitory", "end_day_summary", "end_day_cancelled", "day_3", "survivor_at_risk",
+  "rescue_confirm", "survivor_rescued", "pause", "game_over", "victory",
   "distribution_panel", "risk_visible", "dense_end_day"
 };
 
@@ -162,68 +162,90 @@ void runCaptureStep(int step){
     clickAction(ACTION_VIGNETTE_NEXT);
   } else if (step == 4){
     verify("vinheta inicia na Sala de comando", screen == SCREEN_COMMAND);
-    verify("incidente surge no dia 1", day == 1 && event_open);
+    verify("dia 1 começa sem incidente", day == 1 && !event_open);
     verify("comida inicial 70", food == FOOD_START && FOOD_START == 70);
-    clickAction(eventChoiceOn(0) ? ACTION_EVENT_A : ACTION_EVENT_B);
+    endDay();
   } else if (step == 5){
+    verify("incidente surge no dia 2",
+      day == 2 && screen == SCREEN_DORMITORY && event_open);
+    clickAction(eventChoiceOn(0) ? ACTION_EVENT_A : ACTION_EVENT_B);
+  } else if (step == 6){
     verify("contenção mantém problema persistente",
       problem_active[event_index] && !intervention_used);
     clickAction(ACTION_OPEN_MAP);
-  } else if (step == 6){
+  } else if (step == 7){
     float before_x = player_x;
     int before_screen = screen;
     clickAction(ACTION_INSPECT_COMMAND + roomIndex(problem_room[event_index]));
     verify("mapa não transporta o técnico", screen == before_screen && player_x == before_x);
-  } else if (step == 7){
+  } else if (step == 8){
     verify("mapa seleciona sala com problema",
       map_open && room_screen[map_selected_room] == problem_room[event_index]);
     clickAction(ACTION_CLOSE_MODAL);
     enterRoomAtDeck(SCREEN_COMMAND, 2, -1);
-  } else if (step == 8){
+  } else if (step == 9){
     player_x = ROOM_RIGHT - 28 - PLAYER_W;
     verify("hub abre Máquinas pelo convés inferior",
       useNearbyDoor() && screen == SCREEN_MACHINES);
-  } else if (step == 9){
+  } else if (step == 10){
     activateProblem(PROBLEM_ENGINE, 3);
     setCapturePlayerAtPoint(POINT_ENGINE_BENCH);
     interactPoint(POINT_ENGINE_BENCH);
-  } else if (step == 10){
+  } else if (step == 11){
+    verify("reparo pede confirmação antes de aplicar", technical_open
+      && pending_intervention_point == POINT_ENGINE_BENCH
+      && problem_active[PROBLEM_ENGINE] && !intervention_used);
+    pressEnter();
+  } else if (step == 12){
     verify("correção remove problema e usa intervenção",
       !problem_active[PROBLEM_ENGINE] && intervention_used);
+    enterRoom(SCREEN_DEPOT);
+    setCapturePlayerAtPoint(POINT_FUSE);
+    interactPoint(POINT_FUSE);
+  } else if (step == 13){
+    verify("coleta pede confirmação e explica o uso", technical_open
+      && pending_collect_point == POINT_FUSE && held_item == ITEM_NONE);
+    pressEnter();
+    verify("confirmar o painel guarda o fusível", held_item == ITEM_FUSE);
     enterRoom(SCREEN_DORMITORY);
-  } else if (step == 11){
+  } else if (step == 14){
     setCapturePlayerAtPoint(POINT_TECH_BUNK);
     interactPoint(POINT_TECH_BUNK);
-  } else if (step == 12){
+  } else if (step == 15){
     verify("beliche mostra resumo", end_day_open);
     clickAction(ACTION_CLOSE_MODAL);
-  } else if (step == 13){
-    verify("cancelar resumo preserva o dia", day == 1 && !end_day_open);
+  } else if (step == 16){
+    verify("cancelar resumo preserva o dia", day == 2 && !end_day_open);
     interactPoint(POINT_TECH_BUNK);
     clickAction(ACTION_END_DAY);
-  } else if (step == 14){
+  } else if (step == 17){
     verify("dia sem incidente começa no Dormitório",
-      day == 2 && screen == SCREEN_DORMITORY && !event_open);
+      day == 3 && screen == SCREEN_DORMITORY && !event_open);
     putSurvivorAtRisk(PROBLEM_CONFLICT);
-  } else if (step == 15){
+  } else if (step == 18){
     setCapturePlayerAtPoint(POINT_RISK_BUNK);
     interactPoint(POINT_RISK_BUNK);
-  } else if (step == 16){
+  } else if (step == 19){
+    verify("socorro pede confirmação antes de estabilizar",
+      technical_open && pending_intervention_point == POINT_RISK_BUNK
+      && riskCount() > 0 && !intervention_used);
+    pressEnter();
+  } else if (step == 20){
     verify("socorro estabiliza pessoa e usa intervenção",
       riskCount() == 0 && intervention_used);
     handleEscape();
-  } else if (step == 17){
+  } else if (step == 21){
     clickAction(ACTION_RESUME);
     oxygen = 0;
     checkEndConditions();
-  } else if (step == 18){
+  } else if (step == 22){
     resetRun();
     event_open = false;
     resetProblemState();
     day = TRIP_DAYS;
     enterRoom(SCREEN_DORMITORY);
     endDay();
-  } else if (step == 19){
+  } else if (step == 23){
     resetRun();
     event_open = false;
     resetProblemState();
@@ -233,13 +255,13 @@ void runCaptureStep(int step){
     enterRoom(SCREEN_MACHINES);
     setCapturePlayerAtPoint(POINT_DISTRIBUTION);
     interactPoint(POINT_DISTRIBUTION);
-  } else if (step == 20){
+  } else if (step == 24){
     verify("painel de distribuição reúne reparo e economia",
       technical_open && pending_panel_choice == POINT_DISTRIBUTION);
     applyPanelRepair();
     putSurvivorAtRisk(PROBLEM_CONFLICT);
     enterRoom(SCREEN_DORMITORY);
-  } else if (step == 21){
+  } else if (step == 25){
     verify("risco aparece na faixa do HUD", urgentRisk() >= 0
       && pointDisplayLabel(POINT_RISK_BUNK).indexOf("2D") > 0);
     activateProblem(PROBLEM_CONFLICT, 3);
@@ -248,7 +270,7 @@ void runCaptureStep(int step){
     activateProblem(PROBLEM_HULL, 2);
     setCapturePlayerAtPoint(POINT_TECH_BUNK);
     interactPoint(POINT_TECH_BUNK);
-  } else if (step == 22){
+  } else if (step == 26){
     verify("resumo lista os problemas ativos", end_day_open
       && activeProblemCount() == 4);
     clickAction(ACTION_CLOSE_MODAL);
@@ -260,6 +282,7 @@ void runRuleChecks(){
   checkConnectedDoors();
   checkMapState();
   checkTaskRules();
+  checkInterventionPanels();
   checkPlayerFacing();
   checkPlayerAnimationLoop();
   checkKeyboardModalButtons();
@@ -362,6 +385,7 @@ void checkEndDayForecast(){
   resetRun();
   event_open = false;
   resetProblemState();
+  day = 4;
   saving_on = true;
   rationing_on = true;
   activateProblem(PROBLEM_HULL, 3);
@@ -384,8 +408,9 @@ void checkEndDayForecast(){
 
 void checkTaskRules(){
   resetRun();
+  day = 2;
   openDay();
-  verify("dia 1 abre incidente", event_open && day == 1);
+  verify("dia 2 abre incidente", event_open && day == 2);
   int problem = event_index;
   applyEventChoice(0);
   verify("contenção cria problema persistente",
@@ -396,6 +421,61 @@ void checkTaskRules(){
   verify("segunda intervenção é bloqueada", !canUseMainIntervention());
 }
 
+
+void checkInterventionPanels(){
+  resetRun();
+  event_open = false;
+  resetProblemState();
+  activateProblem(PROBLEM_ENGINE, 3);
+  enterRoom(SCREEN_MACHINES);
+  setCapturePlayerAtPoint(POINT_ENGINE_BENCH);
+  interactPoint(POINT_ENGINE_BENCH);
+  verify("reparo abre painel antes de aplicar", technical_open
+    && pending_intervention_point == POINT_ENGINE_BENCH
+    && problem_active[PROBLEM_ENGINE] && !intervention_used);
+  pressEnter();
+  verify("confirmar o painel aplica o reparo",
+    !technical_open && !problem_active[PROBLEM_ENGINE] && intervention_used);
+
+  resetRun();
+  event_open = false;
+  resetProblemState();
+  enterRoom(SCREEN_DORMITORY);
+  setCapturePlayerAtPoint(POINT_COMMON_TABLE);
+  morale = 40;
+  interactPoint(POINT_COMMON_TABLE);
+  verify("cuidado abre painel antes de aplicar", technical_open
+    && pending_intervention_point == POINT_COMMON_TABLE
+    && morale == 40 && !intervention_used);
+  pressEnter();
+  verify("confirmar o painel aplica o cuidado",
+    !technical_open && water == 97 && food == 68 && morale == 60 && intervention_used);
+
+  resetRun();
+  event_open = false;
+  resetProblemState();
+  activateProblem(PROBLEM_COMMS, 3);
+  enterRoom(SCREEN_COMMAND);
+  setCapturePlayerAtPoint(POINT_ANTENNA);
+  interactPoint(POINT_ANTENNA);
+  verify("antena abre painel antes de aplicar", technical_open
+    && pending_intervention_point == POINT_ANTENNA && problem_active[PROBLEM_COMMS]);
+  handleEscape();
+  verify("voltar fecha o painel sem aplicar",
+    !technical_open && problem_active[PROBLEM_COMMS] && !intervention_used);
+
+  resetRun();
+  event_open = false;
+  resetProblemState();
+  enterRoom(SCREEN_DEPOT);
+  setCapturePlayerAtPoint(POINT_FUSE);
+  interactPoint(POINT_FUSE);
+  verify("coleta abre painel antes de guardar", technical_open
+    && pending_collect_point == POINT_FUSE && held_item == ITEM_NONE);
+  pressEnter();
+  verify("confirmar o painel guarda o componente",
+    !technical_open && held_item == ITEM_FUSE);
+}
 
 void checkKeyboardModalButtons(){
   resetRun();
@@ -437,12 +517,12 @@ void checkFailureRules(){
     }
   }
   verify("cinco incidentes não repetem", distinct);
-  verify("incidentes usam dias alternados", incidentForDay(1) != PROBLEM_NONE
-    && incidentForDay(2) == PROBLEM_NONE && incidentForDay(9) != PROBLEM_NONE);
+  verify("incidentes usam dias pares", incidentForDay(1) == PROBLEM_NONE
+    && incidentForDay(2) != PROBLEM_NONE && incidentForDay(10) != PROBLEM_NONE);
 
   resetProblemState();
   incident_sequence[0] = PROBLEM_ENGINE;
-  day = 1;
+  day = 2;
   energy = 4;
   morale = 1;
   openDay();
@@ -497,7 +577,7 @@ void checkInterventionRules(){
   resetRun();
   event_open = false;
   resetProblemState();
-  day = 2;
+  day = 1;
   enterRoom(SCREEN_COMMAND);
   interactPoint(POINT_ROUTE);
   verify("rota pede confirmação antes da aceleração",
@@ -507,7 +587,7 @@ void checkInterventionRules(){
     intervention_used && skip_next_day && energy == 90);
   endDay();
   verify("aceleração elimina consumo e incidente do próximo dia",
-    day == 4 && !event_open);
+    day == 3 && !event_open);
 }
 
 void checkCrewRules(){

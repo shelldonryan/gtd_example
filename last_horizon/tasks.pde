@@ -285,8 +285,7 @@ boolean tryRepairProblem(int problem){
     system_message = component == ITEM_SEAL_KIT ? "FALTA O KIT DE VEDAÇÃO." : "FALTA O FUSÍVEL DE POTÊNCIA.";
     return false;
   }
-  int cost = specialistAlive(problem_specialist[problem])
-    ? problem_cost_with[problem] : problem_cost_without[problem];
+  int cost = repairCost(problem);
   int resource = problem_cost_resource[problem];
   if (!canPayResource(resource, cost)){
     system_message = "RECURSO INSUFICIENTE PARA A CORREÇÃO.";
@@ -326,13 +325,13 @@ boolean careForGroup(){
     system_message = "A INTERVENÇÃO PRINCIPAL DO DIA JÁ FOI USADA.";
     return false;
   }
-  if (water < 3 || food < 2){
+  if (water < careWaterCost() || food < careFoodCost()){
     system_message = "ÁGUA OU COMIDA INSUFICIENTE PARA CUIDAR DO GRUPO.";
     return false;
   }
-  water -= 3;
-  food -= 2;
-  morale += specialistAlive(CREW_NEUSA) ? 20 : 12;
+  water -= careWaterCost();
+  food -= careFoodCost();
+  morale += careMoraleGain();
   intervention_used = true;
   system_message = "GRUPO CUIDADO.";
   clampResources();
@@ -349,8 +348,8 @@ boolean rescueUrgentSurvivor(){
     system_message = "A INTERVENÇÃO PRINCIPAL DO DIA JÁ FOI USADA.";
     return false;
   }
-  int waterCost = specialistAlive(CREW_NEUSA) ? 6 : 9;
-  int foodCost = specialistAlive(CREW_NEUSA) ? 2 : 3;
+  int waterCost = rescueWaterCost();
+  int foodCost = rescueFoodCost();
   if (water < waterCost || food < foodCost){
     system_message = "RECURSOS INSUFICIENTES PARA O SOCORRO.";
     return false;
@@ -363,6 +362,92 @@ boolean rescueUrgentSurvivor(){
   system_message = crew_name[crew] + " FOI ESTABILIZADO(A).";
   clampResources();
   return true;
+}
+
+int repairCost(int problem){
+  return specialistAlive(problem_specialist[problem])
+    ? problem_cost_with[problem] : problem_cost_without[problem];
+}
+
+String repairRequirement(int problem){
+  int cost = repairCost(problem);
+  String component = problem_component[problem] == ITEM_SEAL_KIT ? "KIT DE VEDAÇÃO + "
+    : problem_component[problem] == ITEM_FUSE ? "FUSÍVEL DE POTÊNCIA + " : "";
+  if (cost == 0) return component + "SEM CUSTO COM O BENEFÍCIO DE "
+    + crew_name[problem_specialist[problem]];
+  if (problem_cost_resource[problem] == RESOURCE_PARTS){
+    return component + cost + (cost == 1 ? " PEÇA" : " PEÇAS");
+  }
+  return component + resourceName(problem_cost_resource[problem]) + " -" + cost;
+}
+
+int careWaterCost(){ return 3; }
+int careFoodCost(){ return 2; }
+int careMoraleGain(){ return specialistAlive(CREW_NEUSA) ? 20 : 12; }
+int rescueWaterCost(){ return specialistAlive(CREW_NEUSA) ? 6 : 9; }
+int rescueFoodCost(){ return specialistAlive(CREW_NEUSA) ? 2 : 3; }
+
+String interventionBlockedSuffix(){
+  return canUseMainIntervention() ? "" : " INTERVENÇÃO DO DIA JÁ USADA.";
+}
+
+String paymentSuffix(int resource, int cost){
+  return canPayResource(resource, cost) ? "" : " RECURSO INSUFICIENTE.";
+}
+
+String missingComponentSuffix(int problem){
+  int component = problem_component[problem];
+  if (component == ITEM_NONE || held_item == component) return "";
+  return component == ITEM_SEAL_KIT
+    ? " FALTA O KIT DE VEDAÇÃO NA MÃO." : " FALTA O FUSÍVEL DE POTÊNCIA NA MÃO.";
+}
+
+void openRepairPanel(int point, int problem){
+  openTechnical(pointDisplayLabel(point), problemMapLine(problem)
+    + ". REPARO: " + repairRequirement(problem) + "."
+    + missingComponentSuffix(problem) + interventionBlockedSuffix()
+    + paymentSuffix(problem_cost_resource[problem], repairCost(problem)));
+  pending_intervention_point = point;
+}
+
+void openCarePanel(){
+  String blocked = water < careWaterCost() || food < careFoodCost()
+    ? " ÁGUA OU COMIDA INSUFICIENTE." : "";
+  openTechnical(pointDisplayLabel(POINT_COMMON_TABLE), "CUIDAR DO GRUPO: ÁGUA -"
+    + careWaterCost() + ", COMIDA -" + careFoodCost() + ". MORAL +" + careMoraleGain()
+    + "." + interventionBlockedSuffix() + blocked);
+  pending_intervention_point = POINT_COMMON_TABLE;
+}
+
+void openRescuePanel(){
+  String blocked = water < rescueWaterCost() || food < rescueFoodCost()
+    ? " RECURSOS INSUFICIENTES PARA O SOCORRO." : "";
+  openTechnical(pointDisplayLabel(POINT_RISK_BUNK), "SOCORRO: ÁGUA -"
+    + rescueWaterCost() + ", COMIDA -" + rescueFoodCost()
+    + "." + interventionBlockedSuffix() + blocked);
+  pending_intervention_point = POINT_RISK_BUNK;
+}
+
+void openCollectPanel(int point, int item){
+  int problem = item == ITEM_SEAL_KIT ? PROBLEM_HULL : PROBLEM_POWER;
+  String carrying = held_item == ITEM_NONE || held_item == item
+    ? " VOCÊ CARREGA UM COMPONENTE POR VEZ."
+    : " NA MÃO: " + componentName(held_item) + " — SERÁ TROCADO.";
+  openTechnical(componentName(item), collectPurpose(item)
+    + " O REPARO EXIGE " + repairRequirement(problem) + "."
+    + collectTargetSuffix(item) + carrying);
+  pending_collect_point = point;
+}
+
+void applyPendingCollect(){
+  int point = pending_collect_point;
+  pending_collect_point = -1;
+  technical_open = false;
+  if (point == POINT_SEAL_KIT){
+    collectSpecialComponent(ITEM_SEAL_KIT);
+  } else if (point == POINT_FUSE){
+    collectSpecialComponent(ITEM_FUSE);
+  }
 }
 
 void collectSpecialComponent(int item){
@@ -444,9 +529,36 @@ void interactPoint(int point){
   } else if (point == POINT_RATIONING){
     switchPoint(point);
   } else if (point == POINT_SEAL_KIT){
-    collectSpecialComponent(ITEM_SEAL_KIT);
+    openCollectPanel(point, ITEM_SEAL_KIT);
   } else if (point == POINT_FUSE){
-    collectSpecialComponent(ITEM_FUSE);
+    openCollectPanel(point, ITEM_FUSE);
+  } else if (point == POINT_ENGINE_BENCH){
+    openRepairPanel(point, PROBLEM_ENGINE);
+  } else if (point == POINT_HULL){
+    openRepairPanel(point, PROBLEM_HULL);
+  } else if (point == POINT_LIFE_SUPPORT){
+    openRepairPanel(point, PROBLEM_LIFE_SUPPORT);
+  } else if (point == POINT_ANTENNA){
+    openRepairPanel(point, PROBLEM_COMMS);
+  } else if (point == POINT_STOCK){
+    openRepairPanel(point, PROBLEM_FOOD);
+  } else if (point == POINT_CONFLICT){
+    openRepairPanel(point, PROBLEM_CONFLICT);
+  } else if (point == POINT_COMMON_TABLE){
+    openCarePanel();
+  } else if (point == POINT_RISK_BUNK){
+    openRescuePanel();
+  } else if (point_kind[point] == POINT_NPC){
+    interactNpc(point);
+  }
+}
+
+void applyPendingIntervention(){
+  int point = pending_intervention_point;
+  pending_intervention_point = -1;
+  technical_open = false;
+  if (point == POINT_ROUTE){
+    tryBoost();
   } else if (point == POINT_ENGINE_BENCH){
     tryRepairProblem(PROBLEM_ENGINE);
   } else if (point == POINT_HULL){
@@ -463,25 +575,14 @@ void interactPoint(int point){
     careForGroup();
   } else if (point == POINT_RISK_BUNK){
     rescueUrgentSurvivor();
-  } else if (point_kind[point] == POINT_NPC){
-    interactNpc(point);
   }
-}
-
-void applyPendingIntervention(){
-  int point = pending_intervention_point;
-  pending_intervention_point = -1;
-  technical_open = false;
-  if (point == POINT_ROUTE) tryBoost();
 }
 
 boolean canRepairPower(){
   if (!problem_active[PROBLEM_POWER] || !canUseMainIntervention()) return false;
   if (problem_component[PROBLEM_POWER] != ITEM_NONE
     && held_item != problem_component[PROBLEM_POWER]) return false;
-  int cost = specialistAlive(problem_specialist[PROBLEM_POWER])
-    ? problem_cost_with[PROBLEM_POWER] : problem_cost_without[PROBLEM_POWER];
-  return canPayResource(problem_cost_resource[PROBLEM_POWER], cost);
+  return canPayResource(problem_cost_resource[PROBLEM_POWER], repairCost(PROBLEM_POWER));
 }
 
 void openDistributionPanel(){
@@ -490,15 +591,12 @@ void openDistributionPanel(){
     return;
   }
 
-  int cost = specialistAlive(problem_specialist[PROBLEM_POWER])
-    ? problem_cost_with[PROBLEM_POWER] : problem_cost_without[PROBLEM_POWER];
-  String requirement = "FUSÍVEL DE POTÊNCIA + " + cost
-    + (cost == 1 ? " PEÇA" : " PEÇAS");
-  String missing = held_item == ITEM_FUSE ? "" : " FALTA O FUSÍVEL NA MÃO.";
-  String blocked = canUseMainIntervention() ? "" : " INTERVENÇÃO DO DIA JÁ USADA.";
+  String blocked = interventionBlockedSuffix();
 
   openTechnical("PAINEL DE DISTRIBUIÇÃO", problemMapLine(PROBLEM_POWER)
-    + " REPARO: " + requirement + "." + missing + blocked
+    + ". REPARO: " + repairRequirement(PROBLEM_POWER) + "."
+    + missingComponentSuffix(PROBLEM_POWER) + blocked
+    + paymentSuffix(RESOURCE_PARTS, repairCost(PROBLEM_POWER))
     + " ECONOMIA: " + (saving_on ? "LIGADA" : "DESLIGADA")
     + " (ENERGIA " + ENERGY_PER_DAY_SAVING + "/DIA, MORAL -"
     + (specialistAlive(CREW_BENTO) ? 1 : 2) + "/DIA).");
@@ -535,10 +633,27 @@ int riskCount(){
   return count;
 }
 
-String heldItemLabel(){
-  if (held_item == ITEM_SEAL_KIT) return "KIT DE VEDAÇÃO";
-  if (held_item == ITEM_FUSE) return "FUSÍVEL DE POTÊNCIA";
+String componentName(int item){
+  if (item == ITEM_SEAL_KIT) return "KIT DE VEDAÇÃO";
+  if (item == ITEM_FUSE) return "FUSÍVEL DE POTÊNCIA";
   return "NENHUM";
+}
+
+String collectPurpose(int item){
+  return item == ITEM_SEAL_KIT
+    ? "SERVE PARA REPARAR O DANO NO CASCO."
+    : "SERVE PARA REPARAR O SISTEMA DE ENERGIA.";
+}
+
+String collectTargetSuffix(int item){
+  int problem = item == ITEM_SEAL_KIT ? PROBLEM_HULL : PROBLEM_POWER;
+  return problem_active[problem]
+    ? " PROBLEMA ATIVO AGORA: " + problem_title[problem] + "."
+    : " SEM " + problem_title[problem] + " AGORA.";
+}
+
+String heldItemLabel(){
+  return componentName(held_item);
 }
 
 void switchPoint(int point){

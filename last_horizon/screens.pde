@@ -99,6 +99,7 @@ boolean closeTopModal(){
     end_day_open = false;
     pending_switch_point = -1;
     pending_intervention_point = -1;
+    pending_collect_point = -1;
     pending_panel_choice = -1;
     return true;
   }
@@ -150,6 +151,11 @@ void doAction(int action){
   }
   if (action == ACTION_CONFIRM_INTERVENTION){
     applyPendingIntervention();
+    return;
+  }
+
+  if (action == ACTION_CONFIRM_COLLECT){
+    applyPendingCollect();
     return;
   }
 

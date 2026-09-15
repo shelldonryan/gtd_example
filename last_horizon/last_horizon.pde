@@ -32,6 +32,7 @@ final int ACTION_CONFIRM_SWITCH = 17;
 final int ACTION_CONFIRM_INTERVENTION = 18;
 final int ACTION_PANEL_REPAIR = 19;
 final int ACTION_PANEL_ECONOMY = 20;
+final int ACTION_CONFIRM_COLLECT = 21;
 final int ACTION_EVENT_A = 30;
 final int ACTION_EVENT_B = 31;
 final int ACTION_RESUME = 40;
@@ -169,6 +170,7 @@ String technical_title = "";
 String technical_text = "";
 int pending_switch_point = -1;
 int pending_intervention_point = -1;
+int pending_collect_point = -1;
 int pending_panel_choice = -1;
 boolean end_day_open = false;
 
@@ -376,6 +378,11 @@ void handleEnter(){
 
   if (technical_open && pending_intervention_point >= 0){
     doAction(ACTION_CONFIRM_INTERVENTION);
+    return;
+  }
+
+  if (technical_open && pending_collect_point >= 0){
+    doAction(ACTION_CONFIRM_COLLECT);
     return;
   }
 

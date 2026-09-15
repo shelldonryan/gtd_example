@@ -15,7 +15,8 @@ import { stdin as input, stdout as output } from "node:process";
 import { pathToFileURL } from "node:url";
 
 const MAX_RESOURCE = 100;
-const INCIDENT_DAYS = new Set([1, 3, 5, 7, 9]);
+// Calendário vigente (D-108): incidentes nos dias 2, 4, 6, 8 e 10.
+const INCIDENT_DAYS = new Set([2, 4, 6, 8, 10]);
 const INCIDENT_SEQUENCE = ["hull", "conflict", "engine", "food", "power"];
 const SURVIVORS = ["Vera", "Bento", "Neusa", "Sílvia"];
 
@@ -186,7 +187,7 @@ function checkOutcome(state) {
 
 function incidentForDay(day, sequence) {
   if (!INCIDENT_DAYS.has(day)) return null;
-  return sequence[(day - 1) / 2];
+  return sequence[day / 2 - 1];
 }
 
 function beginDay(state) {
@@ -489,18 +490,18 @@ const STRATEGIES = {
       return state.day === 1 && !state.policies.rationing ? [{ type: "policy", policy: "rationing" }] : [];
     },
     action(state) {
+      if (state.risks.length > 0) return { type: "rescue", name: state.risks[0].name };
       const planned = {
         1: { type: "care" },
         2: { type: "repair", problem: "hull" },
         3: { type: "care" },
         4: { type: "care" },
-        6: { type: "repair", problem: "engine" },
-        7: { type: "repair", problem: "conflict" },
-        8: { type: "repair", problem: "food" },
-        9: { type: "care" },
+        5: { type: "care" },
+        7: { type: "repair", problem: "engine" },
+        8: { type: "repair", problem: "conflict" },
+        9: { type: "repair", problem: "food" },
         10: { type: "repair", problem: "power" },
       };
-      if (state.day === 5 && state.risks.length > 0) return { type: "rescue", name: state.risks[0].name };
       return planned[state.day] ?? null;
     },
   },
@@ -509,8 +510,7 @@ const STRATEGIES = {
     containment: "safe",
     policies() { return []; },
     action(state) {
-      if (state.day === 1) return { type: "repair", problem: "hull" };
-      if ([2, 4, 6, 8].includes(state.day)) return { type: "boost" };
+      if ([1, 3, 5, 7, 9].includes(state.day)) return { type: "boost" };
       return null;
     },
   },
