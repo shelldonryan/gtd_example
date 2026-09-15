@@ -17,5 +17,5 @@ crise perde mais 15 e reinicia o prazo em 2. Reparar exige o kit de vedação e
 
 ## Estado
 
-Valores confirmados e comprovados em `prototype/balance-model.mjs`; a migração
-para o sketch pertence à issue #21.
+Valores confirmados e comprovados em `prototype/balance-model.mjs`; migrados
+para o sketch na issue #21.

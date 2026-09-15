@@ -6,7 +6,7 @@ abre salas 2D jogáveis, e o técnico é controlável dentro delas.
 
 
 A especificação vigente das salas e intervenções está em `interface/ROOMS.md`.
-O sketch permanece plano e implementa D-073 a D-103.
+O sketch permanece plano e implementa D-073 a D-103 e D-108 a D-110.
 
 ## Onde o código mora
 
@@ -63,7 +63,7 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
 
 ## Contrato de gameplay implementado
 
-Incidentes nos dias 1, 3, 5, 7 e 9 usam cinco dos sete problemas embaralhados
+Incidentes nos dias 2, 4, 6, 8 e 10 usam cinco dos sete problemas embaralhados
 sem reposição. Toda contenção cria um problema persistente com perda, prazo e
 crise; falta de recursos para ambas as contenções dispara a crise imediatamente.
 
@@ -92,9 +92,15 @@ de implementação confirmadas na #21.
   periférica possui somente o retorno ao mesmo convés do Comando.
 - **Interação:** os pontos respondem ao estado dos problemas. Não há briefing,
   aceite ou cadeia universal por NPC.
-- **Intervenções:** reparos pagam o custo na estação; kit e fusível são
-  conferidos e consumidos quando necessários. Cuidado, socorro e potência
-  compartilham o limite de uma intervenção diária.
+- **Intervenções:** toda intervenção principal abre o painel de confirmação
+  (`pending_intervention_point`) com problema, perda, prazo, crise e custo;
+  `CONFIRMAR (ENTER)` aplica e `VOLTAR (ESC)` fecha sem gastar a intervenção.
+  Reparos pagam o custo na estação; kit e fusível são conferidos e consumidos
+  quando necessários. A coleta de kit ou fusível tem painel próprio
+  (`pending_collect_point`) que explica o uso do componente, o requisito do
+  reparo correspondente e a troca do item na mão; `CONFIRMAR (ENTER)` guarda o
+  componente. Cuidado, socorro e potência compartilham o limite de uma
+  intervenção diária.
 - **Políticas:** economia e racionamento podem ser alternados livremente e usam
   os custos de Bento vivo ou morto.
 - **Ciclo:** dormir aplica políticas, consumo, perdas, moral, riscos, crises e
@@ -177,7 +183,7 @@ As capturas atualizadas ficam em `last_horizon/output/` na branch do protótipo.
 | Moral −1 por recurso em vermelho | energia, oxigênio, água e comida entre 1 e 29 |
 | Oxigênio caro (10/dia) | verifica a energia após o consumo base de energia, como no modelo aprovado |
 | Chegada | ocorre depois de processar o dia 10; potência pode eliminar um dia futuro completo |
-| Sorteio de incidentes | embaralha os 7 uma vez e usa 5 sem reposição nos dias 1, 3, 5, 7 e 9 |
+| Sorteio de incidentes | embaralha os 7 uma vez e usa 5 sem reposição nos dias 2, 4, 6, 8 e 10 |
 | Painel de distribuição | ponto único que abre as opções de reparo e economia quando a falha elétrica está ativa; sem a falha, alterna apenas a economia |
 | Seleção de quem entra em risco | mesma ordem de declaração dos problemas no modelo aprovado, combinada com o dia |
 | Ordem de derrota | energia, oxigênio, moral, motor e, por último, nenhum sobrevivente vivo |
@@ -201,11 +207,12 @@ raiz do repositório:
 "C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --ladder-test
 ```
 
-`--capture` percorre 23 estados, salva `output/NN_estado.png` em 1280×720
-(720p) e `output/NN_estado_window.png`, e roda 57 verificações: incidente no dia
-1, problema persistente, mapa, hub, intervenção, beliche, socorro, crise
-imediata, empate de urgência, especialista morto, dano no casco, painel de
-distribuição com reparo e economia, risco visível e resumo com vários problemas.
+`--capture` percorre 27 estados, salva `output/NN_estado.png` em 1280×720
+(720p) e `output/NN_estado_window.png`, e roda 70 verificações: dia 1 sem
+incidente, incidente no dia 2, confirmação de reparo, de coleta e de socorro,
+problema persistente, mapa, hub, intervenção, beliche, crise imediata, empate de
+urgência, especialista morto, dano no casco, painel de distribuição com reparo e
+economia, risco visível e resumo com vários problemas.
 `--hit-test` abre 1400×900 e prova as quatro fichas do mapa e o letterbox.
 `--ladder-test` mantém os cinco casos de saída e reentrada. As regras também
 geram `output/map_dense.png`, a sala mais carregada possível no mapa.
@@ -225,12 +232,13 @@ Limitações observadas:
 
 ## Estado da revisão
 
-- **Código atual:** D-048 a D-103 estão implementadas no protótipo.
-- **Ciclo:** cinco incidentes sem reposição, problemas persistentes, perdas,
-  prazos, crises, riscos individuais e uma intervenção principal por dia.
+- **Código atual:** D-048 a D-103 e D-108 a D-110 estão implementadas no protótipo.
+- **Ciclo:** cinco incidentes sem reposição nos dias 2, 4, 6, 8 e 10, problemas
+  persistentes, perdas, prazos, crises, riscos individuais e uma intervenção
+  principal por dia.
 - **Espaço:** Comando em hub, mapa consultável com todos os problemas e estações
   físicas para correção, recuperação, aceleração e políticas.
-- **Evidência:** `--capture` com 57 verificações e nenhuma falha, `--hit-test` e
+- **Evidência:** `--capture` com 70 verificações e nenhuma falha, `--hit-test` e
   `--ladder-test` com 5 verificações cada, `git diff --check` limpo e
   `node prototype/balance-model.mjs --simulate` com `BALANCE CHECK: PASS`.
 - **Textos:** transmissões e textos finais ainda possuem pendências de

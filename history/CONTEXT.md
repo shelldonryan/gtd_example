@@ -43,9 +43,9 @@ falhas que podem surgir durante o percurso.
 ## Desenvolvimento da viagem
 
 A viagem é representada por dez dias de jogo. O primeiro começa na Sala de
-comando e os seguintes, no Dormitório. Incidentes surgem em dias alternados. A
-resposta escolhe uma contenção imediata, mas o problema permanece no sistema ou
-cômodo afetado até ser corrigido fisicamente.
+comando e os seguintes, no Dormitório. Incidentes surgem nos dias 2, 4, 6, 8 e
+10. A resposta escolhe uma contenção imediata, mas o problema permanece no
+sistema ou cômodo afetado até ser corrigido fisicamente.
 Quando meteoros danificam o casco, o ponto atingido é sorteado entre locais
 alcançáveis dos quatro cômodos e permanece ali até a correção.
 

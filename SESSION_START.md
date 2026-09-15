@@ -3,7 +3,7 @@
 > Resumo operacional obrigatório. Leia antes de analisar, editar ou implementar
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
-Atualizado em: 2026-09-15 (D-099 a D-107 registradas; #21 implementada, revisada e fechada)
+Atualizado em: 2026-09-15 (D-108 a D-110 registradas; calendário em dias pares e painel de confirmação em intervenção, coleta e socorro)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Regras inegociáveis
@@ -60,15 +60,17 @@ reporte e não escolha silenciosamente.
 
 ## Estado operacional atual
 
-- #19, #20 e #21 estão CLOSED; D-073 a D-107 estão confirmadas e implementadas
-  no protótipo.
+- #19, #20, #21, #22, #23 e #24 estão CLOSED; D-073 a D-110 estão confirmadas e
+  implementadas no protótipo.
 - #8 está disponível para o inventário de assets.
 - #7 está disponível e independente.
-- O sketch implementa o ciclo novo: incidentes nos dias 1, 3, 5, 7 e 9, cinco
-  problemas sem reposição, contenções que não corrigem a causa, uma intervenção
-  principal por dia, hub por convés, riscos individuais e crises.
-- Nenhum trabalho de código ou documentação está pendente nesta etapa; a
-  implementação está no commit do ticket.
+- O sketch implementa o ciclo novo: incidentes nos dias 2, 4, 6, 8 e 10 (o dia
+  1 fica sem incidente), cinco problemas sem reposição, contenções que não
+  corrigem a causa, uma intervenção principal por dia e coleta de componente,
+  ambas com painel de confirmação, hub por convés, riscos individuais e crises.
+- As alterações das decisões D-108 a D-110 estão no **working tree** da branch
+  `prototype/sketch-architecture`, sem commit; a branch está 6 commits à frente
+  do origin por sessões anteriores.
 
 ### Fronteira Wayfinder
 
@@ -81,22 +83,28 @@ Sincronizada com o grafo nativo em 2026-09-15:
 | #19 Redesenhar o ciclo | CLOSED | — | D-073 a D-096 |
 | #20 Balancear o novo ciclo | CLOSED | — | D-097 e D-098 |
 | #21 Implementar novo ciclo e hub | CLOSED | — | D-099 a D-103, aplicadas |
+| #22 Calendário em dias pares | CLOSED | — | D-108, aplicada |
+| #23 Confirmação nas intervenções | CLOSED | — | D-109, aplicada |
+| #24 Painel na coleta de componentes | CLOSED | — | D-110, aplicada |
 
 ## Contrato vigente do produto
 
 - Jogo de gerenciamento de recursos e exploração 2D em plataforma, em uma nave
   **sem nome**.
 - Viagem de dez dias; primeiro dia no Comando, seguintes no Dormitório.
-- Incidentes nos dias 1, 3, 5, 7 e 9; cinco dos sete problemas, embaralhados sem
+- Incidentes nos dias 2, 4, 6, 8 e 10; cinco dos sete problemas, embaralhados sem
   reposição.
 - Toda contenção deixa um problema persistente com perda diária, prazo e crise.
 - Não há briefing nem aceite de tarefa. HUD destaca o menor prazo entre
   problemas e pessoas em risco; mapa mostra todos os problemas por sala e nunca
   transporta o técnico.
-- Uma intervenção principal por dia: correção, recuperação ou aceleração.
-  Diagnósticos, conversas, componentes especiais e políticas são livres.
+- Uma intervenção principal por dia: correção, recuperação ou aceleração. Toda
+  intervenção principal abre o painel de confirmação do ponto — `CONFIRMAR
+  (ENTER)` aplica e `VOLTAR (ESC)` fecha sem gastar o dia. Diagnósticos,
+  conversas, componentes especiais e políticas são livres.
 - Recursos comuns são pagos na intervenção. Só kit de vedação e fusível de
-  potência exigem coleta e transporte.
+  potência exigem coleta e transporte, e cada coleta abre painel com o uso do
+  componente e o requisito do reparo.
 - O Comando é o único hub: porta superior para Dormitório, média para Depósito e
   inferior para Sala de máquinas. Salas periféricas não se conectam.
 - Dano no casco surge em ponto aleatório, livre e alcançável de qualquer cômodo.
@@ -136,7 +144,10 @@ Topologia e intervenções: `interface/ROOMS.md`.
 Concept arts definem linguagem visual e composição, nunca nomes ou números:
 
 - `assets/concept_arts/HUD_CONCEPT_ART.png`;
-- `assets/concept_arts/COMMAND_ROOM_CONCEPT_ART.png`.
+- `assets/concept_arts/COMMAND_ROOM_CONCEPT_ART.png`;
+- `assets/concept_arts/COMMAND_ROOM_EDITED.png`, `MACHINE_ROOM.png`,
+  `WAREHOUSE.png` e `BEDROOM.png` (interiores, ainda sem referência em
+  documento ou issue).
 
 ## Índice de decisões
 
@@ -161,6 +172,18 @@ Não replique aqui o histórico completo:
   economia juntos, prazo da pessoa em risco visível no HUD e no beliche, e
   derrota com precedência energia, oxigênio e moral; registradas em
   `code/SKETCH_ARCHITECTURE.md`.
+- D-108: os incidentes passam a ocorrer nos dias 2, 4, 6, 8 e 10 e o dia 1 fica
+  sem incidente; cinco incidentes, sorteio sem reposição e todas as regras da
+  #20 continuam iguais. Confirmada pelo usuário e implementada na #22.
+- D-109: toda intervenção principal (`!`) abre o painel de confirmação com
+  problema, perda, prazo, crise e custo; `CONFIRMAR (ENTER)` aplica e `VOLTAR
+  (ESC)` fecha sem gastar a intervenção do dia. O painel antecipa ainda as
+  pré-condições: componente faltando, recurso insuficiente e intervenção já
+  usada. Confirmada pelo usuário e implementada na #23.
+- D-110: a coleta de kit de vedação ou fusível de potência abre painel com o uso
+  do componente, o requisito do reparo correspondente, o estado do problema e o
+  aviso de troca do item na mão; `CONFIRMAR (ENTER)` guarda o componente.
+  Confirmada pelo usuário e implementada na #24.
 
 ## Fontes por tarefa
 
@@ -198,10 +221,17 @@ Código:
 - se a vitória permite continuar jogando;
 - se a derrota mostra nomes ou apenas a contagem dos sobreviventes;
 - comportamento do nome vazio no menu: botão bloqueado versus fallback
-  `Técnico`;
-- transmissões da Terra e textos finais de vinheta, vitória e derrota ainda não
-  implementados;
-- qualquer nome, retrato ou história além de Vera, Bento, Neusa e Sílvia.
+  `Técnico` (o código desabilita `INICIAR` e `ENTER` com o campo em branco, o que
+  torna o fallback inalcançável pela interface);
+- vinheta implementada com texto provisório diferente do roteiro confirmado no
+  #11 (telas 1 e 3);
+- as nove linhas de alerta do painel `SISTEMA` do #11 não têm casa no HUD atual
+  e ainda não foram classificadas como superseded;
+- transmissões da Terra e a mensagem de Marte na vitória ainda não
+  implementadas;
+- qualquer nome, retrato ou história além de Vera, Bento, Neusa e Sílvia;
+- os quatro concept arts de interior em `assets/concept_arts/` não estão
+  rastreados nem citados por documento ou issue.
 
 ## Checklist de abertura
 
@@ -225,26 +255,44 @@ Código:
 
 ## Última sessão registrada
 
-- #21 implementada: o sketch abandonou `active_task`, briefing, itens comuns
-  carregados, eventos diários e salas lineares.
-- D-099 a D-103 confirmadas com o usuário e registradas em `SESSION_START.md`,
-  `mechanics/ACTIONS.md` e `interface/ROOMS.md`.
-- Código alterado: `last_horizon.pde`, `game.pde`, `tasks.pde`, `ship.pde`,
-  `hud.pde`, `screens.pde`, `ui.pde`, `capture.pde`.
-- Documentos sincronizados: `SESSION_START.md`, `code/SKETCH_ARCHITECTURE.md`,
-  `mechanics/ACTIONS.md`, `interface/ROOMS.md`, `interface/HUD.md`,
-  `interface/FLOW.md`.
-- Verificação: `--capture` com 57 verificações e nenhuma falha, `--hit-test` e
-  `--ladder-test` com 5 cada, `BALANCE CHECK: PASS` no modelo numérico e
-  `git diff --check` limpo.
-- Revisão: eixos Standards e Spec executados sobre o diff; os achados de risco
-  determinístico, ponto do reparo de energia, prazo da pessoa em risco, resumo
-  do sono, ficha do mapa, console da rota, precedência de derrota e código morto
-  foram corrigidos.
-- Encerramento no Wayfinder: decisões, arquivos e evidência registrados na #21,
-  issue fechada como concluída e corpo da #1 atualizado com a nova fronteira.
-- Resultado: protótipo executável com o novo ciclo; textos finais e transmissões
-  seguem pendentes do #11.
+- Sessão aberta com leitura de `SESSION_START.md`, `issue://1`, inventário e
+  fontes do #8; fronteira conferida contra o grafo nativo (#8 bloqueado por #5,
+  #6, #19 e #20, todas CLOSED) sem divergência.
+- O usuário pediu a troca do calendário: incidentes deixam de ocorrer no dia 1 e
+  passam aos dias 2, 4, 6, 8 e 10 — registrada como D-108 na #22.
+- Em seguida, o usuário pediu padronizar as intervenções principais: antes só
+  `ROTA` e `DISTRIBUIÇÃO` abriam painel, e bancada, antena, suporte, estoque,
+  conflito, mesa comum, socorro e casco aplicavam direto. Agora todo `!` abre o
+  painel de confirmação — registrada como D-109 na #23.
+- Por último, o usuário pediu o mesmo tratamento para o resto ("posso pegar
+  fusível e nem sei pra quê"): a coleta de kit ou fusível agora abre painel com
+  uso, requisito do reparo, estado do problema e aviso de troca do item na mão —
+  registrada como D-110 na #24.
+- Código alterado: `game.pde` (`incidentForDay`), `tasks.pde` (acessores de custo
+  únicos, `openRepairPanel`, `openCarePanel`, `openRescuePanel`,
+  `openCollectPanel`, `applyPendingIntervention`, `applyPendingCollect` e o
+  roteamento dos pontos), `ui.pde`, `screens.pde`, `ship.pde` e `last_horizon.pde`
+  (`pending_collect_point` e `ACTION_CONFIRM_COLLECT`), `capture.pde` (27
+  estados, verificações de confirmação e `checkInterventionPanels`) e
+  `prototype/balance-model.mjs` (`INCIDENT_DAYS`, índice e planos das
+  estratégias de recuperação e aceleração).
+- Documentos sincronizados: `README.md`, `history/CONTEXT.md`,
+  `mechanics/ACTIONS.md`, `interface/FLOW.md`, `interface/ROOMS.md`,
+  `interface/HUD.md`, `code/SKETCH_ARCHITECTURE.md`, `events/CREW_ISSUES.md`,
+  `events/HAZARDS.md`, `events/SYSTEM_FAULTS.md`, `SESSION_START.md` e o corpo
+  da #1.
+- Verificação: `--capture` com 27 estados e 70 verificações sem falha,
+  `--hit-test` e `--ladder-test` com 5 cada, `BALANCE CHECK: PASS` com a correção
+  prioritária vencendo 2520/2520 ordens e `git diff --check` limpo.
+- Consequência de balanceamento observada no modelo: a aceleração agora elimina
+  os cinco dias de incidente (2, 4, 6, 8 e 10) e vence com 20 de energia; a
+  omissão continua perdendo por oxigênio.
+- Encerramento no Wayfinder: #22, #23 e #24 criadas como sub-issues da #1,
+  atribuídas e fechadas com decisão, arquivos e evidência; comentário de
+  supersessão do calendário na #20; corpo da #1 atualizado.
+- Resultado: protótipo executável com o calendário par e painel de confirmação em
+  toda intervenção principal e na coleta; as alterações estão no working tree,
+  sem commit.
 
 A fronteira vigente é **#7 e #8 abertos, ambos disponíveis e sem bloqueadores**.
 O próximo caminho crítico é **#8 (inventário de assets)**, com **#7 (documento de

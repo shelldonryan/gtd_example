@@ -50,7 +50,7 @@ A partida representa uma viagem de dez dias por quatro cômodos. A Sala de
 comando é o hub central e possui uma porta por convés para Dormitório, Depósito
 e Sala de máquinas; as salas periféricas não se conectam entre si.
 
-Incidentes surgem em dias alternados. A resposta escolhe uma contenção, mas cria
+Incidentes surgem nos dias 2, 4, 6, 8 e 10. A resposta escolhe uma contenção, mas cria
 um problema local persistente com perda diária, prazo e crise conhecida. Não há
 aceite de tarefa no Comando: o jogador consulta as urgências no HUD e no mapa e
 escolhe onde intervir.
@@ -103,7 +103,8 @@ O pool mantém sete incidentes: falha no motor, chuva de meteoros, falta de
 comida, conflito no dormitório, falha no suporte de vida, falha no sistema de
 energia e falha nas comunicações.
 
-Eles surgem em dias alternados e um problema ainda ativo não é sorteado de novo.
+Eles surgem nos dias 2, 4, 6, 8 e 10, e um problema ainda ativo não é sorteado
+de novo.
 Cada cartão oferece duas contenções: gastar mais agora para ganhar segurança ou
 economizar e aceitar maior risco. A escolha não encerra a causa; a correção
 acontece fisicamente no cômodo responsável.

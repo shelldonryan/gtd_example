@@ -64,6 +64,8 @@ técnico.
 
 - Diálogos de NPC avançam com `ENTER` ou clique em `CONTINUAR (ENTER)`.
 - Problemas já nascem ativos; não existe briefing nem confirmação de tarefa.
+- Toda intervenção principal (`!`) abre o painel com o custo e o efeito;
+  `CONFIRMAR (ENTER)` aplica, `VOLTAR (ESC)` fecha sem gastar a intervenção.
 - Recursos comuns são pagos no ponto da intervenção. Coleta física fica
   reservada a componentes especiais.
 
@@ -91,9 +93,10 @@ abre o novo dia no Dormitório.
   ligam-se somente a ele.
 - **Diálogo de NPC:** retrato sobre a cena e caixa inferior; bloqueia movimento e
   interação até avançar ou fechar.
-- **Painel técnico:** usa a caixa inferior sem retrato para sistemas e resumo do
-  fim do dia.
-- **Coleta e conclusão:** exibem aviso breve sem interromper a exploração.
+- **Painel técnico:** usa a caixa inferior sem retrato para sistemas, para a
+  confirmação de intervenção e para o resumo do fim do dia.
+- **Coleta:** abre painel com o uso do componente e, ao confirmar, exibe aviso
+  breve sem interromper a exploração.
 - **Mapa:** preserva sala e posição e reúne os problemas por cômodo.
 - **Incidente:** modal técnico com duas contenções; bloqueia a exploração até a
   escolha, mas deixa o problema ativo para correção física. Sem recursos para

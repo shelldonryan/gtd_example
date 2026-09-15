@@ -14,7 +14,7 @@ simulações.
 | Duração | 10 dias |
 | Estoques iniciais | 100 em energia, oxigênio, água e moral; 70 de comida; 6 peças |
 | Intervenções principais por dia | 1 correção, recuperação ou aceleração |
-| Incidentes | em dias alternados; problema ativo não é sorteado novamente |
+| Incidentes | nos dias 2, 4, 6, 8 e 10; problema ativo não é sorteado novamente |
 
 Decisões fixadas neste arquivo:
 
@@ -38,7 +38,7 @@ Decisões fixadas neste arquivo:
 | Moral | 2 | mais 1 por recurso em vermelho (de 1 a 29) |
 
 O primeiro dia começa no Comando e os seguintes, no Dormitório. Incidentes
-surgem em dias alternados. A resposta escolhe quanto risco aceitar naquele
+surgem nos dias 2, 4, 6, 8 e 10. A resposta escolhe quanto risco aceitar naquele
 momento, mas não resolve a causa: o problema nasce ativo no cômodo afetado.
 
 O técnico pode explorar, diagnosticar, coletar componentes especiais — itens
@@ -95,10 +95,10 @@ Problemas e responsabilidades permanecem distribuídos assim:
 
 ### Calendário e ordem do turno
 
-Os incidentes ocorrem no início dos dias **1, 3, 5, 7 e 9**. No começo da
-partida, os sete problemas são embaralhados uniformemente e os cinco primeiros
-formam a viagem. Assim, nenhum problema se repete na mesma partida e um problema
-ativo nunca volta ao sorteio.
+Os incidentes ocorrem no início dos dias **2, 4, 6, 8 e 10**; o dia 1 não tem
+incidente. No começo da partida, os sete problemas são embaralhados
+uniformemente e os cinco primeiros formam a viagem. Assim, nenhum problema se
+repete na mesma partida e um problema ativo nunca volta ao sorteio.
 
 Ao dormir, o estado é processado nesta ordem:
 
@@ -146,7 +146,10 @@ quando não for fatal, o problema permanece ativo com o prazo reiniciado.
 | Socorrer pessoa — Neusa | água −6, comida −2 | água −9, comida −3 |
 
 Kit de vedação e fusível de potência são componentes especiais: precisam ser
-coletados, mas a coleta é livre. Os custos comuns são pagos no ponto final.
+coletados, mas a coleta é livre. Cada coleta abre um painel que explica para que
+o componente serve, o requisito do reparo correspondente e se já existe um
+problema ativo; o técnico carrega um componente por vez e o painel avisa quando
+a coleta substitui o item atual. Os custos comuns são pagos no ponto final.
 Uma pessoa em risco recebe prazo 2. Socorrer remove o risco; prazo zero causa
 morte e remove o benefício da especialidade.
 
@@ -173,7 +176,8 @@ separadamente.
 
 `node prototype/balance-model.mjs --simulate` executa quatro estratégias sobre
 dez dias e as **2.520 ordens possíveis** de cinco problemas distintos para a
-correção prioritária. Esse modelo confirmado é a entrada numérica da issue #21.
+correção prioritária. Esse modelo confirmado é a entrada numérica migrada na
+issue #21; o calendário de incidentes segue a decisão D-108.
 
 ## Agravamento
 
@@ -204,4 +208,5 @@ a mesma ação continua possível com custo ou risco maior.
 
 - Calendário, processamento, sete problemas, contenções, correções, recuperação,
   aceleração, políticas e benefícios foram confirmados pelo usuário.
-- A issue #21 pode migrar esse contrato integralmente para o sketch.
+- O contrato foi migrado integralmente para o sketch na issue #21; o calendário
+  vigente é o dos dias 2, 4, 6, 8 e 10 (D-108).

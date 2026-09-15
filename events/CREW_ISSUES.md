@@ -27,5 +27,5 @@ em risco; `Socorrer [nome]` é uma intervenção separada.
 
 ## Estado
 
-Valores confirmados e comprovados em `prototype/balance-model.mjs`; a migração
-para o sketch pertence à issue #21.
+Valores confirmados e comprovados em `prototype/balance-model.mjs`; migrados
+para o sketch na issue #21.

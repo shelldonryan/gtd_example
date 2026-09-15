@@ -40,7 +40,7 @@ graph LR
 ## O ciclo do dia
 
 1. O primeiro dia começa na Sala de comando; os seguintes, no Dormitório.
-   Incidentes surgem em dias alternados.
+   Incidentes surgem nos dias 2, 4, 6, 8 e 10.
 2. Quando há incidente, o cartão apresenta duas contenções: gastar mais agora
    para ganhar segurança ou economizar e aceitar mais risco. A escolha não
    corrige a causa; cria um problema ativo no cômodo responsável.
@@ -53,7 +53,8 @@ graph LR
 5. Diagnóstico, conversa, coleta de componente especial e ajuste de política são
    livres. Recursos comuns são pagos no ponto da intervenção.
 6. Uma intervenção principal por dia conclui uma correção, recuperação ou
-   aceleração. Os demais problemas permanecem ativos.
+   aceleração, sempre confirmada no painel do ponto. Os demais problemas
+   permanecem ativos.
 7. Para encerrar o turno, o técnico retorna ao próprio beliche no Dormitório.
    O resumo mostra consumo, perdas, prazos e a intervenção concluída ou ausente.
 8. Dormir processa recursos, agravamentos, crises e condições de término. O novo
@@ -90,9 +91,10 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
   imediatamente; não existe tarefa a aceitar no Comando.
 - Dano no casco não possui estação fixa: cada ocorrência ativa um local
   alcançável sorteado em qualquer um dos quatro cômodos.
-- NPCs usam retrato e caixa inferior modal. Sistemas usam painel técnico sem
-  retrato. Coletas e conclusões usam avisos breves; portas e escadas, indicações
-  contextuais.
+- NPCs usam retrato e caixa inferior modal. Sistemas e intervenções usam painel
+  técnico sem retrato; toda intervenção principal exige confirmação antes de
+  aplicar. Coletas abrem painel de confirmação e depois aviso breve; portas e
+  escadas, indicações contextuais.
 - Uma correção, recuperação ou aceleração consome a intervenção principal do
   dia. Movimento, diagnóstico, conversa, componente especial e políticas não.
 - A sequência contém somente passos necessários ao problema; NPC e troca de
@@ -100,7 +102,7 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
 - Recursos comuns são pagos no ponto final. Apenas componentes especiais
   precisam ser buscados fisicamente no Depósito.
 - Cinco dos sete problemas são sorteados sem reposição e surgem no início dos
-  dias 1, 3, 5, 7 e 9. O cartão bloqueia a exploração até a contenção ser
+  dias 2, 4, 6, 8 e 10. O cartão bloqueia a exploração até a contenção ser
   escolhida. Se nenhuma das duas contenções puder ser paga, a crise daquele
   problema acontece imediatamente e nenhum cartão aparece.
 - A pausa não consome tempo nem recursos.

@@ -21,10 +21,10 @@ cada estação fique alcançável andando ou subindo escada. O pulo de 48 px
 | Tipo | Interrompe movimento | O que faz |
 | --- | --- | --- |
 | Leitura técnica | sim | abre painel inferior sem retrato |
-| Coleta | não | põe um componente especial na mão e mostra aviso breve |
+| Coleta | sim | abre painel com o uso do componente e o requisito do reparo; ao confirmar, põe o componente na mão e mostra aviso breve |
 | Conversa | sim | abre retrato e caixa inferior do sobrevivente |
 | Interruptor | sim | explica a consequência e pede confirmação |
-| Intervenção principal | não | cobra o custo, remove ou altera o estado e usa a intervenção do dia |
+| Intervenção principal | sim | abre painel de confirmação com custo e efeito; ao confirmar, cobra o custo, remove ou altera o estado e usa a intervenção do dia |
 | Porta | não | troca entre o Comando e uma sala periférica |
 
 Regras que valem em todos os cômodos:
@@ -33,9 +33,12 @@ Regras que valem em todos os cômodos:
   técnico entra no alcance.
 - O técnico carrega **um componente especial por vez**. Recursos comuns do HUD
   são pagos diretamente no ponto da intervenção e não viram itens carregados.
+  Coletar outro componente substitui o que está na mão, e o painel da coleta
+  avisa a troca.
 - Diagnóstico, conversa, coleta de componente especial e mudança de política não
   gastam a intervenção principal.
-- Uma correção, recuperação ou aceleração concluída usa a intervenção do dia.
+- Uma correção, recuperação ou aceleração concluída usa a intervenção do dia e
+  exige confirmação no painel do ponto; `VOLTAR` não consome nada.
 - Problemas não corrigidos atravessam o dia, aplicam perdas e reduzem seus prazos.
 - Cada dano no casco cria um ponto de correção temporário em um local aleatório
   alcançável pelo jogador, em qualquer um dos quatro cômodos.

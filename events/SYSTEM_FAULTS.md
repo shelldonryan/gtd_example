@@ -33,5 +33,5 @@ moral e abre prazo 2. A crise perde 10 de moral e reinicia em 3. Reparar custa
 
 ## Estado
 
-Valores confirmados e comprovados em `prototype/balance-model.mjs`; a migração
-para o sketch e a adaptação dos textos D-047 pertencem à issue #21.
+Valores confirmados e comprovados em `prototype/balance-model.mjs`; migrados
+para o sketch e para os textos D-047 na issue #21.
