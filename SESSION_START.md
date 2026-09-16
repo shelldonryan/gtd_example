@@ -318,5 +318,11 @@ Código:
 - Os valores exatos, matrizes de conteúdo, textos finais, pool detalhado e rotas
   continuam delegados aos tickets 25 e 26. O código ainda não foi migrado e
   nenhuma verificação executável do novo ciclo foi alegada.
+- O commit documental `4138f25` (`docs: define quest-based gameplay contract`)
+  contém as duas ADRs e as fontes locais sincronizadas; permanece sem push.
+- Permanecem fora deste commit, por serem alterações locais não relacionadas:
+  `.gitignore`, as exclusões em `last_horizon/output/`, os quatro PNGs em
+  `assets/concept_arts/` e `skills-lock.json`.
 - Resultado: planejamento Wayfinder e documentação de domínio atualizados;
-  protótipo executável ainda não atualizado. Não houve commit nem push.
+  protótipo executável ainda não atualizado. Não houve alteração de código nem
+  verificação executável do novo ciclo.
