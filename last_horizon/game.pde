@@ -1,15 +1,6 @@
 int event_index = -1;
 boolean event_open = false;
-
-String[] event_body = {
-  "O MOTOR PERDEU RENDIMENTO. ESCOLHA COMO CONTER A FALHA.",
-  "O CASCO FOI ATINGIDO. ESCOLHA COMO CONTER A PERDA.",
-  "O ESTOQUE NÃO SUSTENTA O RITMO ATUAL.",
-  "UMA DISCUSSÃO DIVIDE OS SOBREVIVENTES.",
-  "O SUPORTE DE VIDA PERDEU ESTABILIDADE.",
-  "A REDE ELÉTRICA OPERA EM SOBRECARGA.",
-  "O TRANSMISSOR PERDEU O CONTATO COM A TERRA."
-};
+int opened_day = 0;
 
 void startGame(){
   resetRun();
@@ -20,23 +11,19 @@ void startGame(){
 void resetRun(){
   player_name = player_name.trim();
   if (player_name.length() == 0) player_name = "Técnico";
-
   day = 1;
+  opened_day = 0;
   trip_days = TRIP_DAYS;
-  energy = STOCK_START;
-  oxygen = STOCK_START;
-  water = STOCK_START;
-  food = FOOD_START;
-  morale = STOCK_START;
-  parts = PARTS_START;
+  energy = 80;
+  oxygen = 85;
+  water = 80;
+  food = 70;
+  morale = 80;
+  parts = 4;
   engine_state = ENGINE_WORKING;
-  saving_on = false;
-  rationing_on = false;
-  boost_count = 0;
   game_over_reason = REASON_NONE;
   paused = false;
-  system_message = "";
-  last_system_message = "";
+  system_message = last_system_message = "";
   event_index = PROBLEM_NONE;
   event_open = false;
   resetCrewState();
@@ -45,143 +32,100 @@ void resetRun(){
 }
 
 void openDay(){
-  intervention_used = false;
-  skip_next_day = false;
-  event_open = false;
+  if (opened_day == day) return;
+  opened_day = day;
+  resetDailyQuest();
   event_index = incidentForDay(day);
-  if (event_index == PROBLEM_NONE) return;
-
-  event_open = true;
-  if (!eventChoiceOn(0) && !eventChoiceOn(1)){
-    activateProblem(event_index, containment_deadline[event_index][1]);
-    applyProblemCrisis(event_index);
-    event_open = false;
-    clampResources();
-    checkEndConditions();
+  event_open = event_index != PROBLEM_NONE;
+  if (event_open){
+    if (event_index == PROBLEM_HULL){
+      placeHullDamage();
+      problem_room[PROBLEM_HULL] = point_room[POINT_HULL];
+    }
+  } else {
+    selectPreventiveOffers();
   }
 }
 
 int incidentForDay(int value){
   if (value < 2 || value > TRIP_DAYS || value % 2 == 1) return PROBLEM_NONE;
-  int index = value / 2 - 1;
-  return index < incident_sequence.length ? incident_sequence[index] : PROBLEM_NONE;
-}
-
-boolean eventChoiceOn(int choice){
-  if (event_index < 0 || event_index >= PROBLEM_COUNT || choice < 0 || choice > 1) return false;
-  return canPayResource(containment_resource[event_index][choice], containment_cost[event_index][choice]);
+  return incident_sequence[value / 2 - 1];
 }
 
 void applyEventChoice(int choice){
-  if (!event_open || !eventChoiceOn(choice)) return;
-  int problem = event_index;
-  payResource(containment_resource[problem][choice], containment_cost[problem][choice]);
-  activateProblem(problem, containment_deadline[problem][choice]);
-  event_open = false;
-  system_message = problem_short[problem] + " CONTIDO; A CAUSA SEGUE ATIVA.";
-  clampResources();
-  checkEndConditions();
+  if (!event_open || choice < 0 || choice > 1 || !dailyQuestFree()) return;
+  quest_review = PREVENTIVE_COUNT + event_index * 2 + choice;
 }
 
-void endDay(){
-  if (event_open) return;
-
-  int policy_cost = specialistAlive(CREW_BENTO) ? 1 : 2;
-  if (saving_on) morale -= policy_cost;
-  if (rationing_on) morale -= policy_cost;
-
-  energy -= dailyEnergyCost();
-  oxygen -= energy < RESOURCE_LOW_ENERGY ? OXYGEN_PER_DAY_LOW_ENERGY : OXYGEN_PER_DAY;
-  water -= dailyWaterCost();
-  food -= dailyFoodCost();
-
-  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
-    if (problem_active[problem]) payResource(problem_loss_resource[problem], problem_loss_value[problem]);
+void applyQuestConsequences(){
+  system_message = questNightSummary();
+  for (int resource = RESOURCE_ENERGY; resource <= RESOURCE_PARTS; resource++){
+    payResource(resource, preventiveNightLoss(resource));
   }
+  active_quest = selected_order = -1;
+  held_item = ITEM_NONE;
+  quest_stage = 0;
+}
 
-  int red = 0;
-  if (isRed(energy)) red++;
-  if (isRed(oxygen)) red++;
-  if (isRed(water)) red++;
-  if (isRed(food)) red++;
-  morale -= MORALE_PER_DAY + red * MORALE_PER_RED_RESOURCE;
-
+void processNight(){
+  energy -= ENERGY_PER_DAY;
+  oxygen -= OXYGEN_PER_DAY;
+  water -= WATER_PER_DAY;
+  food -= FOOD_PER_DAY;
+  morale -= MORALE_PER_DAY;
+  for (int p = 0; p < PROBLEM_COUNT; p++){
+    if (problem_active[p]) payResource(problem_loss_resource[p], problem_loss_value[p]);
+  }
   processSurvivorRisks();
   processProblemDeadlines();
   clampResources();
+}
 
+void endDay(){
+  if (event_open || paused || !isRoomScreen() || !atQuestPoint(POINT_TECH_BUNK)) return;
+  applyQuestConsequences();
+  processNight();
+  end_day_open = orders_open = dialog_open = technical_open = map_open = false;
   if (checkEndConditions()) return;
-
-  int next_day = day + (skip_next_day ? 2 : 1);
-  if (next_day > TRIP_DAYS){
+  if (day == TRIP_DAYS){
     screen = SCREEN_VICTORY;
-    event_open = false;
     return;
   }
-
-  day = next_day;
+  day++;
   enterRoom(SCREEN_DORMITORY);
   openDay();
 }
 
 void processSurvivorRisks(){
-  for (int crew = 0; crew < CREW_COUNT; crew++){
-    if (!crew_alive[crew] || crew_risk_deadline[crew] <= 0) continue;
-    crew_risk_deadline[crew]--;
-    if (crew_risk_deadline[crew] <= 0){
-      crew_alive[crew] = false;
-      survivors--;
-      system_message = crew_name[crew] + " NÃO RESISTIU.";
-    }
+  int crew = urgentRisk();
+  if (crew < 0) return;
+  if (--crew_risk_deadline[crew] == 0){
+    crew_alive[crew] = false;
+    survivors--;
+    system_message = crew_name[crew] + " NÃO RESISTIU.";
   }
 }
 
 void processProblemDeadlines(){
-  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
-    if (!problem_active[problem]) continue;
-    problem_deadline[problem]--;
-    if (problem_deadline[problem] <= 0) applyProblemCrisis(problem);
+  /* Activation order also decides who receives the first simultaneous crisis risk. */
+  for (int order = 1; order <= problem_order_counter; order++){
+    for (int p = 0; p < PROBLEM_COUNT; p++){
+      if (!problem_active[p] || problem_activated_order[p] != order) continue;
+      if (--problem_deadline[p] <= 0) applyProblemCrisis(p);
+    }
   }
-}
-
-int dailyEnergyCost(){
-  return saving_on ? ENERGY_PER_DAY_SAVING : ENERGY_PER_DAY;
-}
-
-int dailyOxygenCost(){
-  float after_energy = energy - dailyEnergyCost();
-  return after_energy < RESOURCE_LOW_ENERGY ? OXYGEN_PER_DAY_LOW_ENERGY : OXYGEN_PER_DAY;
-}
-
-int dailyWaterCost(){
-  return rationing_on ? WATER_PER_DAY_RATIONING : WATER_PER_DAY;
-}
-
-int dailyFoodCost(){
-  return rationing_on ? FOOD_PER_DAY_RATIONING : FOOD_PER_DAY;
-}
-
-int dailyPolicyMoraleCost(){
-  int each = specialistAlive(CREW_BENTO) ? 1 : 2;
-  return (saving_on ? each : 0) + (rationing_on ? each : 0);
 }
 
 int dailyProblemLoss(int resource){
   int total = 0;
-  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
-    if (problem_active[problem] && problem_loss_resource[problem] == resource){
-      total += problem_loss_value[problem];
-    }
+  for (int p = 0; p < PROBLEM_COUNT; p++){
+    if (problem_active[p] && problem_loss_resource[p] == resource) total += problem_loss_value[p];
   }
   return total;
 }
 
-boolean isRed(float value){
-  return value > 0 && value < RESOURCE_RED;
-}
-
 int resourceColour(float value){
-  if (value <= 0 || value < RESOURCE_RED) return COL_RED;
+  if (value < RESOURCE_RED) return COL_RED;
   if (value < RESOURCE_GREEN) return COL_YELLOW;
   return COL_GREEN;
 }
@@ -202,17 +146,14 @@ boolean checkEndConditions(){
   else if (morale <= 0) game_over_reason = REASON_MORALE;
   else if (engine_state == ENGINE_DESTROYED) game_over_reason = REASON_ENGINE;
   else if (survivors <= 0) game_over_reason = REASON_CREW;
-
   if (game_over_reason == REASON_NONE) return false;
-  event_open = false;
+  event_open = orders_open = dialog_open = technical_open = end_day_open = map_open = false;
   paused = false;
   screen = SCREEN_GAME_OVER;
   return true;
 }
 
-String engineStateLabel(){
-  return engine_state == ENGINE_DESTROYED ? "DESTRUÍDO" : "OPERANTE";
-}
+String engineStateLabel(){ return engine_state == ENGINE_DESTROYED ? "DESTRUÍDO" : "OPERANTE"; }
 
 String gameOverTitle(){
   if (game_over_reason == REASON_OXYGEN) return "OXIGÊNIO ZERO";
@@ -232,20 +173,20 @@ String gameOverMessage(){
 
 void drawEventCard(PGraphics g){
   drawModalShade(g);
-  drawPanel(g, 42, 60, 556, 240, COL_ORANGE);
-  text(g, "INCIDENTE — DIA " + day, 60, 74, 16, COL_ORANGE);
-  text(g, problem_title[event_index], 60, 102, 16, COL_TEXT);
-  drawTextWrapped(g, event_body[event_index], 60, 128, 520, 16, 18, COL_MUTED);
-  drawEventOption(g, 60, 190, 250, containment_label[event_index][0],
-    containmentEffect(event_index, 0), ACTION_EVENT_A, eventChoiceOn(0));
-  drawEventOption(g, 330, 190, 250, containment_label[event_index][1],
-    containmentEffect(event_index, 1), ACTION_EVENT_B, eventChoiceOn(1));
-}
-
-String containmentEffect(int problem, int choice){
-  return resourceName(containment_resource[problem][choice]) + " -"
-    + containment_cost[problem][choice] + "; PRAZO "
-    + containment_deadline[problem][choice] + ". CAUSA SEGUE ATIVA.";
+  drawPanel(g, 22, 55, 596, 267, COL_ORANGE);
+  text(g, "INCIDENTE — DIA " + day + " | " + problem_title[event_index], 34, 64, 16, COL_ORANGE);
+  if (quest_review >= 0){
+    drawQuestCard(g, quest_review, 34, 83, 572, ACTION_NONE, false);
+    text(g, "CONFIRME A SOLUÇÃO. ELA NÃO PODE SER CANCELADA.", 46, 261, 16, COL_ORANGE);
+    drawButton(g, 34, 297, 176, 20, "VOLTAR (ESC)", ACTION_BACK_SOLUTION, true);
+    drawButton(g, 416, 297, 190, 20, "CONFIRMAR (ENTER)", ACTION_ACCEPT_SOLUTION, true);
+  } else {
+    for (int i = 0; i < 2; i++){
+      drawQuestCard(g, PREVENTIVE_COUNT + event_index * 2 + i, 34 + i * 290, 83, 282,
+        i == 0 ? ACTION_EVENT_A : ACTION_EVENT_B, true);
+    }
+    text(g, "CUSTO PAGO NA ENTREGA. SEM RECURSOS, O PROBLEMA PODE PERMANECER ATIVO.", 34, 300, 16, COL_MUTED);
+  }
 }
 
 String resourceName(int resource){
@@ -255,18 +196,4 @@ String resourceName(int resource){
   if (resource == RESOURCE_FOOD) return "COMIDA";
   if (resource == RESOURCE_MORALE) return "MORAL";
   return "PEÇAS";
-}
-
-void drawEventOption(PGraphics g, float x, float y, float w, String label,
-  String effect, int action, boolean on){
-  boolean hover = on && uiLayer() == LAYER_MODAL && isHovering(x, y, w, 82);
-  int border = on ? (hover ? COL_CYAN : COL_BORDER) : COL_DIM;
-  drawPanel(g, x, y, w, 82, border);
-  text(g, label, x + 10, y + 8, 16, on ? COL_TEXT : COL_DIM);
-  drawTextWrapped(g, effect, x + 10, y + 34, w - 20, 16, 18, on ? COL_CYAN : COL_DIM);
-  addButton(x, y, w, 82, action, on);
-}
-
-String dayTaskSummary(){
-  return intervention_used ? "INTERVENÇÃO CONCLUÍDA" : "SEM INTERVENÇÃO";
 }

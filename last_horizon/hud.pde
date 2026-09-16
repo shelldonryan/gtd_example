@@ -132,31 +132,23 @@ void drawObjectiveStrip(PGraphics g){
     system_message_until = frameCount + 180;
   }
 
-  boolean show_notice = system_message.length() > 0 && frameCount < system_message_until;
+  String line = quest_completed ? "QUEST CONCLUÍDA — RETORNE AO SEU BELICHE" : "COMPARE AS DUAS OFERTAS EM ORDENS";
+  if (selected_order >= 0) line = "CONFIRMAR COM " + crew_name[quest_owner[selected_order]] + " — " + pointLocation(nextQuestPoint());
+  if (active_quest >= 0){
+    int q = active_quest;
+    line = (quest_stage == QUEST_COLLECT ? "COLETAR " : "ENTREGAR ") + quest_object[q] + " — " + pointLocation(nextQuestPoint());
+    text(g, crew_name[quest_owner[q]] + " | " + questEffect(q) + " | " + questFailure(q), 16, OBJECTIVE_Y + 14, 16, COL_MUTED);
+  } else {
+    text(g, quest_completed ? questNightSummary() : "UMA QUEST POR DIA. ACEITA: NÃO PODE SER CANCELADA.", 16, OBJECTIVE_Y + 14, 16, COL_MUTED);
+  }
+  text(g, line, 16, OBJECTIVE_Y + 3, 16, COL_CYAN);
   int urgent = urgentProblem();
   int risk = urgentRisk();
-  boolean risk_first = risk >= 0 && (urgent == PROBLEM_NONE
-    || crew_risk_deadline[risk] < problem_deadline[urgent]);
-  String title = risk_first ? crew_name[risk] + " EM RISCO"
-    : urgent == PROBLEM_NONE ? "SEM PROBLEMAS" : problem_short[urgent];
-  String value;
-
-  if (risk_first){
-    value = crew_risk_deadline[risk] + " DIA(S) — " + roomTitle(SCREEN_DORMITORY)
-      + (activeProblemCount() > 0 ? " | +" + activeProblemCount() + " PROBLEMA(S)" : "");
-  } else if (urgent == PROBLEM_NONE){
-    value = intervention_used
-      ? "INTERVENÇÃO CONCLUÍDA — VÁ AO SEU BELICHE"
-      : "EXPLORE A NAVE OU ENCERRE O DIA";
-  } else {
-    value = problem_deadline[urgent] + " DIA(S) — " + roomTitle(problem_room[urgent])
-      + (activeProblemCount() > 1 ? " | +" + (activeProblemCount() - 1) + " PROBLEMA(S)" : "")
-      + (risk >= 0 ? " | " + riskCount() + " EM RISCO" : "");
-  }
-
-  if (show_notice) value = system_message;
-  text(g, title, 16, OBJECTIVE_Y + 4, 16, COL_CYAN);
-  text(g, value, 210, OBJECTIVE_Y + 4, 16, show_notice ? COL_ORANGE : COL_TEXT);
+  String warning = urgent < 0 ? "SEM PROBLEMAS ATIVOS" : problem_short[urgent] + ": " + problem_deadline[urgent] + "D"
+    + " | " + roomTitle(problem_room[urgent]) + " | +" + (activeProblemCount() - 1) + " PROBLEMA(S)";
+  if (risk >= 0) warning += " | " + crew_name[risk] + " EM RISCO: " + crew_risk_deadline[risk] + "D";
+  if (system_message.length() > 0 && frameCount < system_message_until) warning = system_message;
+  text(g, warning, 16, OBJECTIVE_Y + 24, 16, COL_ORANGE);
 }
 
 
@@ -168,8 +160,30 @@ void drawFooter(PGraphics g){
   g.rect(0, FOOTER_Y, BASE_W, FOOTER_H);
 
   boolean controls_on = !modalOpen() && !paused;
-  drawButton(g, 6, FOOTER_Y + 4, 112, 22, "MAPA", ACTION_OPEN_MAP, controls_on);
-  textCentered(g, "A/D ANDAR  W/S ESCADA  ESPAÇO PULAR  E INTERAGIR",
-    360, FOOTER_Y + 7, 16, controls_on ? COL_MUTED : COL_DIM);
-  text(g, "ESC PAUSA", 536, FOOTER_Y + 7, 16, COL_DIM);
+  drawButton(g, 6, FOOTER_Y + 4, 80, 22, "MAPA", ACTION_OPEN_MAP, controls_on);
+  drawButton(g, 92, FOOTER_Y + 4, 80, 22, "ORDENS", ACTION_OPEN_ORDERS, controls_on);
+  if (controls_on && ordersAvailable()){
+    drawOrdersBadge(g, 159, FOOTER_Y + 15, ordersPulse());
+  }
+  text(g, "A/D ANDAR  W/S ESCADA  ESPAÇO PULAR  E INTERAGIR  ESC PAUSA",
+    186, FOOTER_Y + 7, 16, controls_on ? COL_MUTED : COL_DIM);
+}
+
+
+float ordersPulse(){
+  return (1 - cos(TWO_PI * (millis() % 1400) / 1400.0)) * 0.5;
+}
+
+
+void drawOrdersBadge(PGraphics g, float cx, float cy, float pulse){
+  g.pushMatrix();
+  g.translate(cx, cy);
+  g.scale(1 + pulse * 0.375);
+  g.noStroke();
+  g.fill(lerpColor(COL_ORANGE, COL_YELLOW, pulse));
+  g.ellipse(0, 0, 8, 8);
+  g.fill(COL_BG);
+  g.rect(-0.7, -2.7, 1.4, 3.3, 0.4);
+  g.rect(-0.7, 1.4, 1.4, 1.4, 0.4);
+  g.popMatrix();
 }

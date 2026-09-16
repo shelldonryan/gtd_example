@@ -19,7 +19,6 @@ float[] ladder_x = {190, 445};
 final int POINT_READ = 0;
 final int POINT_COLLECT = 1;
 final int POINT_NPC = 2;
-final int POINT_SWITCH = 3;
 final int POINT_COMPLETE = 4;
 final int POINT_END_DAY = 5;
 
@@ -32,55 +31,43 @@ final int POINT_SILVIA = 5;
 final int POINT_DISTRIBUTION = 6;
 final int POINT_REACTOR = 7;
 final int POINT_LIFE_SUPPORT = 8;
-final int POINT_SEAL_KIT = 9;
-final int POINT_FUSE = 10;
-final int POINT_BENTO = 11;
-final int POINT_RATIONING = 12;
-final int POINT_RESERVE = 13;
-final int POINT_STOCK = 14;
-final int POINT_RISK_BUNK = 15;
-final int POINT_NEUSA = 16;
-final int POINT_CONFLICT = 17;
-final int POINT_COMMON_TABLE = 18;
-final int POINT_TECH_BUNK = 19;
-final int POINT_HULL = 20;
-final int POINT_COUNT = 21;
+final int POINT_BENTO = 9;
+final int POINT_RESERVE = 10;
+final int POINT_STOCK = 11;
+final int POINT_RISK_BUNK = 12;
+final int POINT_NEUSA = 13;
+final int POINT_CONFLICT = 14;
+final int POINT_COMMON_TABLE = 15;
+final int POINT_TECH_BUNK = 16;
+final int POINT_HULL = 17;
+final int POINT_COUNT = 18;
 
 int[] point_room = {
   SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND,
   SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_MACHINES,
-  SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT,
+  SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT,
   SCREEN_DORMITORY, SCREEN_DORMITORY, SCREEN_DORMITORY, SCREEN_DORMITORY,
   SCREEN_DORMITORY, SCREEN_NONE
 };
-
 float[] point_x = {
-  540, 260, 100, 400,
-  90, 540, 90, 520, 80,
-  80, 150, 310, 220, 510, 420,
+  540, 260, 100, 400, 90, 540, 90, 520, 80, 310, 510, 420,
   100, 330, 470, 500, 120, 530
 };
-
 float[] point_y = {
-  128, 202, 278, 128,
-  278, 202, 202, 128, 128,
-  278, 278, 202, 202, 128, 128,
+  128, 202, 278, 128, 278, 202, 202, 128, 128, 202, 128, 202,
   278, 202, 202, 128, 128, 278
 };
-
 String[] point_label = {
-  "VERA", "ROTA", "SITUAÇÃO", "ANTENA",
-  "BANCADA", "SÍLVIA", "DISTRIBUIÇÃO", "REATOR", "SUPORTE",
-  "KIT", "FUSÍVEL", "BENTO", "RACIONAMENTO", "RESERVA", "ESTOQUE",
-  "SOCORRO", "NEUSA", "CONFLITO", "MESA COMUM", "SEU BELICHE", "CASCO"
+  "VERA", "CONSOLE DA ROTA", "SITUAÇÃO", "ANTENA",
+  "BANCADA DO MOTOR", "SÍLVIA", "DISTRIBUIÇÃO", "REATOR", "SUPORTE",
+  "BENTO", "RESERVA", "ESTOQUE DE COMIDA",
+  "SOCORRO", "NEUSA", "MESA DO GRUPO", "MESA COMUM", "SEU BELICHE", "CASCO"
 };
-
 int[] point_kind = {
-  POINT_NPC, POINT_COMPLETE, POINT_READ, POINT_COMPLETE,
-  POINT_COMPLETE, POINT_NPC, POINT_SWITCH, POINT_READ, POINT_COMPLETE,
-  POINT_COLLECT, POINT_COLLECT, POINT_NPC, POINT_SWITCH, POINT_READ, POINT_COMPLETE,
-  POINT_COMPLETE, POINT_NPC, POINT_COMPLETE, POINT_COMPLETE, POINT_END_DAY,
-  POINT_COMPLETE
+  POINT_NPC, POINT_READ, POINT_READ, POINT_COMPLETE,
+  POINT_COMPLETE, POINT_NPC, POINT_COMPLETE, POINT_READ, POINT_COMPLETE,
+  POINT_NPC, POINT_READ, POINT_COMPLETE,
+  POINT_COMPLETE, POINT_NPC, POINT_COMPLETE, POINT_COMPLETE, POINT_END_DAY, POINT_COMPLETE
 };
 
 
@@ -198,30 +185,30 @@ int roomIndex(int room_id){
 void drawMapRoomDetails(PGraphics g){
   int index = constrain(map_selected_room, 0, ROOM_COUNT - 1);
   int selected_room = room_screen[index];
-  String detail = roomOccupant(index) + " | " + roomSystems(index);
-  if (selected_room == screen) detail += " | VOCÊ ESTÁ AQUI";
-  text(g, detail, 50, 172, 16, COL_TEXT);
-  text(g, "PROBLEMAS: PERDA POR DIA, PRAZO E CRISE", 50, 194, 16, COL_MUTED);
-
-  float y = 212;
-  int shown = 0;
-  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
-    if (!problem_active[problem] || problem_room[problem] != selected_room) continue;
-    if (y + 36 > 296){
-      text(g, "E MAIS " + (roomProblemCount(selected_room) - shown) + " PROBLEMA(S).",
-        50, y, 16, COL_MUTED);
-      break;
-    }
-    y = drawTextWrapped(g, problemMapLine(problem), 50, y, 420, 16, 18, COL_TEXT);
-    shown++;
+  text(g, roomOccupant(index) + " | " + roomSystems(index), 50, 168, 16, COL_TEXT);
+  float y = 183;
+  if (active_quest >= 0){
+    int q = active_quest;
+    if (point_room[quest_origin[q]] == selected_room)
+      y = drawTextWrapped(g, "COLETA: " + quest_object[q] + " — " + point_label[quest_origin[q]], 50, y, 540, 16, 18, COL_CYAN);
+    if (point_room[quest_destination[q]] == selected_room)
+      y = drawTextWrapped(g, "ENTREGA: " + point_label[quest_destination[q]] + " | " + questEffect(q), 50, y, 540, 16, 18, COL_GREEN);
+  } else if (selected_order >= 0 && point_room[crew_point[quest_owner[selected_order]]] == selected_room){
+    y = drawTextWrapped(g, "CONFIRMAR ORDEM COM " + crew_name[quest_owner[selected_order]], 50, y, 540, 16, 18, COL_CYAN);
   }
-  if (shown == 0) text(g, "SEM PROBLEMAS ATIVOS.", 50, y, 16, COL_MUTED);
+  for (int p = 0; p < PROBLEM_COUNT; p++){
+    if (!problem_active[p] || problem_room[p] != selected_room) continue;
+    y = drawTextWrapped(g, problemMapLine(p), 50, y + 6, 540, 16, 18, COL_ORANGE);
+  }
+  int risk = urgentRisk();
+  if (selected_room == SCREEN_DORMITORY && risk >= 0)
+    drawTextWrapped(g, crew_name[risk] + " EM RISCO: " + crew_risk_deadline[risk] + " NOITE(S). SOCORRO: -8 ÁGUA, -2 COMIDA.", 50, y + 6, 540, 16, 18, COL_ORANGE);
 }
 
 
 String roomOccupant(int index){
-  String[] occupants = {"VERA", "SÍLVIA", "BENTO", "NEUSA"};
-  return occupants[index];
+  int crew = index == 0 ? CREW_VERA : index == 1 ? CREW_SILVIA : index == 2 ? CREW_BENTO : CREW_NEUSA;
+  return crew_name[crew] + (crew_alive[crew] ? "" : " — FALECEU");
 }
 
 
@@ -327,17 +314,26 @@ void drawPeripheralDoor(PGraphics g, int deck){
 
 
 void drawRoomPoint(PGraphics g, int point){
+  if (point_kind[point] == POINT_NPC){
+    for (int crew = 0; crew < CREW_COUNT; crew++)
+      if (crew_point[crew] == point && !crew_alive[crew]) return;
+  }
   boolean available = pointIsAvailable(point);
   boolean nearby = available && isPointInRange(point);
-  int colour = nearby ? COL_CYAN : (available ? COL_TEXT : COL_DIM);
+  int colour = nearby || nextQuestPoint() == point ? COL_CYAN : (available ? COL_TEXT : COL_DIM);
   float x = point_x[point];
   float y = point_y[point];
 
   g.stroke(nearby ? COL_CYAN : COL_BORDER);
   g.fill(nearby ? COL_CYAN_DARK : COL_PANEL);
   g.rect(x - 12, y - 22, 24, 18, 2);
-  text(g, str(pointMarker(point_kind[point])), x - 3, y - 22, 16, colour);
+  if (available) text(g, str(pointMarker(point_kind[point])), x - 3, y - 22, 16, colour);
   textCentered(g, pointDisplayLabel(point), x, y - 44, 16, colour);
+  if (point == nextQuestPoint()){
+    String step = active_quest < 0 ? "CONFIRMAR" : quest_stage == QUEST_COLLECT ? "COLETAR" : "ENTREGAR";
+    textCentered(g, step, x, y - 55, 16, COL_CYAN);
+    if (active_quest >= 0 && quest_stage == QUEST_COLLECT) drawQuestObject(g, x + 18, y - 12);
+  }
 
   if (nearby){
     g.noFill();
@@ -363,10 +359,6 @@ char pointMarker(int kind){
 
   if (kind == POINT_NPC){
     return 'N';
-  }
-
-  if (kind == POINT_SWITCH){
-    return 'S';
   }
 
   if (kind == POINT_END_DAY){
@@ -566,6 +558,7 @@ void drawHeldItem(PGraphics g){
   }
 
   text(g, "NA MÃO: " + heldItemLabel(), ROOM_LEFT + 170, ROOM_TOP + 6, 16, COL_ORANGE);
+  drawQuestObject(g, player_x + PLAYER_W + 5, player_y + 15);
 }
 
 
@@ -603,9 +596,8 @@ void resetRoomState(){
   map_open = false;
   dialog_open = false;
   technical_open = false;
-  pending_switch_point = -1;
-  pending_intervention_point = -1;
-  pending_collect_point = -1;
+  pending_quest_action = ACTION_NONE;
+  pending_retry = -1;
   end_day_open = false;
 }
 
@@ -646,21 +638,13 @@ boolean useNearbyDoor(){
 
 
 void updateRoom(){
-  if (paused || event_open || map_open || technical_open || end_day_open){
+  if (paused || modalOpen()){
     jump_queued = false;
     interact_queued = false;
     return;
   }
 
 
-  if (dialog_open){
-    if (interact_queued){
-      interact_queued = false;
-      dialog_open = false;
-    }
-    jump_queued = false;
-    return;
-  }
 
   if (interact_queued){
     interact_queued = false;
@@ -668,6 +652,10 @@ void updateRoom(){
     if (!useNearbyDoor()){
       interactNearby();
     }
+  }
+  if (modalOpen()){
+    jump_queued = false;
+    return;
   }
 
   updatePlayerFacing();
@@ -898,4 +886,11 @@ boolean isPointInRange(int point){
   float player_bottom = player_y + PLAYER_H;
   return abs(player_center_x - point_x[point]) <= INTERACTION_RANGE
     && abs(player_bottom - point_y[point]) <= 3;
+}
+
+void drawQuestObject(PGraphics g, float x, float y){
+  g.stroke(COL_ORANGE);
+  g.fill(COL_PANEL_2);
+  g.rect(x - 4, y - 4, 8, 8);
+  g.line(x - 2, y, x + 2, y);
 }

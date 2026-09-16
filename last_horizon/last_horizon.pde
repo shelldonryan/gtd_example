@@ -28,11 +28,18 @@ final int ACTION_INSPECT_DORMITORY = 13;
 final int ACTION_OPEN_MAP = 14;
 final int ACTION_CLOSE_MODAL = 15;
 final int ACTION_END_DAY = 16;
-final int ACTION_CONFIRM_SWITCH = 17;
-final int ACTION_CONFIRM_INTERVENTION = 18;
-final int ACTION_PANEL_REPAIR = 19;
-final int ACTION_PANEL_ECONOMY = 20;
-final int ACTION_CONFIRM_COLLECT = 21;
+final int ACTION_OPEN_ORDERS = 17;
+final int ACTION_ORDER_A = 18;
+final int ACTION_ORDER_B = 19;
+final int ACTION_ACCEPT_ORDER = 20;
+final int ACTION_COLLECT_QUEST = 21;
+final int ACTION_DELIVER_QUEST = 22;
+final int ACTION_RESCUE = 23;
+final int ACTION_NEXT_RETRY = 24;
+final int ACTION_RETRY_QUEST = 25;
+final int ACTION_ACCEPT_SOLUTION = 26;
+final int ACTION_BACK_SOLUTION = 27;
+final int ACTION_CONFIRM_QUEST = 28;
 final int ACTION_EVENT_A = 30;
 final int ACTION_EVENT_B = 31;
 final int ACTION_RESUME = 40;
@@ -57,30 +64,18 @@ final float ROOM_RIGHT = 632;
 final float ROOM_TOP = 56;
 final float ROOM_BOTTOM = 294;
 final int ITEM_NONE = 0;
-final int ITEM_SEAL_KIT = 1;
-final int ITEM_FUSE = 2;
 
 /* rules - mechanics/ACTIONS.md */
 final int RESOURCE_MAX = 100;
 final int RESOURCE_GREEN = 60;
 final int RESOURCE_RED = 30;
-final int RESOURCE_LOW_ENERGY = 30;
 final int TRIP_DAYS = 10;
 final int CREW_START = 4;
-final int PARTS_START = 6;
-final int STOCK_START = 100;
-final int FOOD_START = 70;
-
-final int ENERGY_PER_DAY = 6;
-final int ENERGY_PER_DAY_SAVING = 3;
-final int OXYGEN_PER_DAY = 5;
-final int OXYGEN_PER_DAY_LOW_ENERGY = 10;
-final int WATER_PER_DAY = 8;
-final int WATER_PER_DAY_RATIONING = 4;
-final int FOOD_PER_DAY = 7;
-final int FOOD_PER_DAY_RATIONING = 3;
+final int ENERGY_PER_DAY = 7;
+final int OXYGEN_PER_DAY = 4;
+final int WATER_PER_DAY = 6;
+final int FOOD_PER_DAY = 6;
 final int MORALE_PER_DAY = 2;
-final int MORALE_PER_RED_RESOURCE = 1;
 
 /* engine */
 final int ENGINE_WORKING = 0;
@@ -132,16 +127,13 @@ int vignette_page = 0;
 int day = 1;
 int trip_days = TRIP_DAYS;
 int survivors = CREW_START;
-float energy = STOCK_START;
-float oxygen = STOCK_START;
-float water = STOCK_START;
-float food = STOCK_START;
-float morale = STOCK_START;
-int parts = PARTS_START;
+float energy = 80;
+float oxygen = 85;
+float water = 80;
+float food = 70;
+float morale = 80;
+int parts = 4;
 int engine_state = ENGINE_WORKING;
-int boost_count = 0;
-boolean saving_on = false;
-boolean rationing_on = false;
 int game_over_reason = REASON_NONE;
 String system_message = "";
 String last_system_message = "";
@@ -168,10 +160,6 @@ String dialog_text = "";
 boolean technical_open = false;
 String technical_title = "";
 String technical_text = "";
-int pending_switch_point = -1;
-int pending_intervention_point = -1;
-int pending_collect_point = -1;
-int pending_panel_choice = -1;
 boolean end_day_open = false;
 
 /* input */
@@ -361,42 +349,25 @@ void handleEscape(){
 
 
 void handleEnter(){
-  if (dialog_open){
+  if (paused) return;
+  if (event_open){
+    if (quest_review >= 0) doAction(ACTION_ACCEPT_SOLUTION);
+    return;
+  }
+  if ((dialog_open || technical_open) && pending_quest_action != ACTION_NONE){
+    doAction(ACTION_CONFIRM_QUEST);
+    return;
+  }
+  if (dialog_open || technical_open){
     doAction(ACTION_CLOSE_MODAL);
     return;
   }
-
-  if (technical_open && pending_switch_point >= 0){
-    doAction(ACTION_CONFIRM_SWITCH);
-    return;
-  }
-
-  if (technical_open && pending_panel_choice >= 0){
-    doAction(canRepairPower() ? ACTION_PANEL_REPAIR : ACTION_CLOSE_MODAL);
-    return;
-  }
-
-  if (technical_open && pending_intervention_point >= 0){
-    doAction(ACTION_CONFIRM_INTERVENTION);
-    return;
-  }
-
-  if (technical_open && pending_collect_point >= 0){
-    doAction(ACTION_CONFIRM_COLLECT);
-    return;
-  }
-
   if (end_day_open){
     doAction(ACTION_END_DAY);
     return;
   }
-
-  if (screen == SCREEN_INIT && player_name.trim().length() > 0){
-    doAction(ACTION_START_GAME);
-    return;
-  }
-
-  if (screen == SCREEN_VIGNETTE) doAction(ACTION_VIGNETTE_NEXT);
+  if (screen == SCREEN_INIT && player_name.trim().length() > 0) doAction(ACTION_START_GAME);
+  else if (screen == SCREEN_VIGNETTE) doAction(ACTION_VIGNETTE_NEXT);
 }
 
 

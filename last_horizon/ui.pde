@@ -131,6 +131,7 @@ void drawModalShade(PGraphics g){
 
 
 void openDialogue(String name, String value){
+  pending_quest_action = ACTION_NONE;
   dialog_name = name;
   dialog_text = value;
   dialog_open = true;
@@ -140,10 +141,15 @@ void openDialogue(String name, String value){
 void drawDialogue(PGraphics g){
   drawModalShade(g);
   drawPortrait(g, dialog_name, 470, 72);
-  drawPanel(g, 24, 210, 592, 126, COL_CYAN);
-  text(g, dialog_name, 40, 220, 16, COL_CYAN);
-  drawTextWrapped(g, dialog_text, 40, 244, 410, 16, 18, COL_TEXT);
-  drawButton(g, 470, 298, 128, 22, "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true);
+  drawPanel(g, 24, 192, 592, 144, COL_CYAN);
+  text(g, dialog_name, 40, 202, 16, COL_CYAN);
+  drawTextWrapped(g, dialog_text, 40, 222, 552, 16, 18, COL_TEXT);
+  if (pending_quest_action == ACTION_ACCEPT_ORDER){
+    drawButton(g, 40, 304, 128, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
+    drawButton(g, 410, 304, 188, 22, "ACEITAR ORDEM (ENTER)", ACTION_CONFIRM_QUEST, true);
+  } else {
+    drawButton(g, 450, 304, 148, 22, "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true);
+  }
 }
 
 
@@ -166,10 +172,8 @@ void drawPortrait(PGraphics g, String name, float x, float y){
 
 
 void openTechnical(String title, String value){
-  pending_switch_point = -1;
-  pending_intervention_point = -1;
-  pending_collect_point = -1;
-  pending_panel_choice = -1;
+  pending_quest_action = ACTION_NONE;
+  pending_retry = -1;
   technical_title = title;
   technical_text = value;
   technical_open = true;
@@ -178,60 +182,42 @@ void openTechnical(String title, String value){
 
 void drawTechnicalPanel(PGraphics g){
   drawModalShade(g);
-  drawPanel(g, 54, 88, 532, 184, COL_CYAN);
-  text(g, technical_title, 72, 102, 16, COL_CYAN);
-  drawTextWrapped(g, technical_text, 72, 132, 496, 16, 18, COL_TEXT);
-
-  if (pending_panel_choice == POINT_DISTRIBUTION){
-    drawButton(g, 72, 238, 150, 22, "REPARAR (ENTER)", ACTION_PANEL_REPAIR, canRepairPower());
-    drawButton(g, 232, 238, 150, 22, saving_on ? "ECONOMIA: LIGADA" : "ECONOMIA: DESLIGADA",
-      ACTION_PANEL_ECONOMY, true);
-    drawButton(g, 448, 238, 120, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
-  } else if (pending_switch_point >= 0 || pending_intervention_point >= 0
-    || pending_collect_point >= 0){
-    int action = pending_switch_point >= 0 ? ACTION_CONFIRM_SWITCH
-      : pending_intervention_point >= 0 ? ACTION_CONFIRM_INTERVENTION
-      : ACTION_CONFIRM_COLLECT;
-    drawButton(g, 286, 238, 128, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
-    drawButton(g, 424, 238, 128, 22, "CONFIRMAR (ENTER)", action, true);
+  drawPanel(g, 34, 108, 572, 210, COL_CYAN);
+  text(g, technical_title, 50, 120, 16, COL_CYAN);
+  drawTextWrapped(g, technical_text, 50, 148, 540, 16, 18, COL_TEXT);
+  if (pending_quest_action != ACTION_NONE){
+    drawButton(g, 50, 284, 128, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
+    String label = pending_quest_action == ACTION_DELIVER_QUEST ? "ENTREGAR (ENTER)" : "CONFIRMAR (ENTER)";
+    drawButton(g, 422, 284, 168, 22, label, ACTION_CONFIRM_QUEST, pendingQuestEnabled());
+    if (!pendingQuestEnabled()) text(g, "RECURSOS INSUFICIENTES OU QUEST DO DIA JÁ ESCOLHIDA.", 50, 257, 16, COL_ORANGE);
   } else {
-    drawButton(g, 424, 238, 128, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+    drawButton(g, 450, 284, 140, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
   }
 }
 
 
 void drawEndDayPanel(PGraphics g){
   drawModalShade(g);
-  drawPanel(g, 40, 48, 560, 268, COL_ORANGE);
-  text(g, "ENCERRAR O DIA", 58, 60, 16, COL_ORANGE);
-  text(g, "CONSUMO E PERDAS PREVISTOS", 58, 86, 16, COL_CYAN);
-  text(g, "ENERGIA -" + (dailyEnergyCost() + dailyProblemLoss(RESOURCE_ENERGY))
-    + "   OXIGÊNIO -" + (dailyOxygenCost() + dailyProblemLoss(RESOURCE_OXYGEN)),
-    58, 108, 16, COL_TEXT);
-  text(g, "ÁGUA -" + dailyWaterCost() + "   COMIDA -"
-    + (dailyFoodCost() + dailyProblemLoss(RESOURCE_FOOD)), 58, 128, 16, COL_TEXT);
-  int policy_morale = dailyPolicyMoraleCost();
-  text(g, "POLÍTICAS: MORAL " + (policy_morale == 0 ? "0" : "-" + policy_morale)
-    + " | " + dayTaskSummary(), 58, 148, 16,
-    intervention_used ? COL_GREEN : COL_YELLOW);
-  text(g, "PROBLEMAS ATIVOS, PRAZOS E CRISES", 58, 174, 16, COL_CYAN);
-
-  float y = 196;
-  int shown = 0;
-  int total = activeProblemCount();
-  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
-    if (!problem_active[problem]) continue;
-    if (y + 36 > 276){
-      text(g, "E MAIS " + (total - shown) + " PROBLEMA(S).", 58, y, 16, COL_MUTED);
-      break;
-    }
-    y = drawTextWrapped(g, problemMapLine(problem), 58, y, 470, 16, 18, COL_TEXT);
-    shown++;
+  drawPanel(g, 28, 55, 584, 268, COL_ORANGE);
+  text(g, "ENCERRAR O DIA — CONSUMO E PERDAS PREVISTOS", 42, 67, 16, COL_ORANGE);
+  text(g, "ENERGIA -" + (ENERGY_PER_DAY + dailyProblemLoss(RESOURCE_ENERGY) + preventiveNightLoss(RESOURCE_ENERGY))
+    + " | OXIGÊNIO -" + (OXYGEN_PER_DAY + dailyProblemLoss(RESOURCE_OXYGEN) + preventiveNightLoss(RESOURCE_OXYGEN))
+    + " | ÁGUA -" + (WATER_PER_DAY + preventiveNightLoss(RESOURCE_WATER)), 42, 88, 16, COL_TEXT);
+  text(g, "COMIDA -" + (FOOD_PER_DAY + dailyProblemLoss(RESOURCE_FOOD) + preventiveNightLoss(RESOURCE_FOOD))
+    + " | MORAL -" + (MORALE_PER_DAY + dailyProblemLoss(RESOURCE_MORALE) + preventiveNightLoss(RESOURCE_MORALE))
+    + " | PEÇAS -" + preventiveNightLoss(RESOURCE_PARTS), 42, 102, 16, COL_TEXT);
+  float y = drawTextWrapped(g, questNightSummary(), 42, 122, 556, 16, 18, COL_CYAN);
+  int risk = urgentRisk();
+  if (risk >= 0) y = drawTextWrapped(g, crew_name[risk] + " EM RISCO — " + crew_risk_deadline[risk]
+    + " NOITE(S)" + (crew_risk_deadline[risk] == 1 ? ": MORRE NESTA NOITE." : "."), 42, y + 5, 556, 16, 18, COL_ORANGE);
+  y += 8;
+  for (int p = 0; p < PROBLEM_COUNT; p++){
+    if (!problem_active[p]) continue;
+    y = drawTextWrapped(g, problemMapLine(p) + (problem_deadline[p] == 1 ? " — CRISE NESTA NOITE!" : ""),
+      42, y + 3, 556, 16, 18, problem_deadline[p] == 1 ? COL_RED : COL_TEXT);
   }
-  if (total == 0) text(g, "NENHUM. NOITE SEM PERDAS.", 58, y, 16, COL_MUTED);
-
-  drawButton(g, 58, 284, 208, 24, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
-  drawButton(g, 292, 284, 290, 24, "ENCERRAR DIA (ENTER)", ACTION_END_DAY, true);
+  drawButton(g, 42, 291, 208, 24, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 296, 291, 302, 24, "ENCERRAR DIA (ENTER)", ACTION_END_DAY, true);
 }
 
 

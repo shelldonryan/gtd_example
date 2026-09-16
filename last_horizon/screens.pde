@@ -18,7 +18,7 @@ boolean isRoomScreen(){
 
 
 boolean modalOpen(){
-  return event_open || map_open || dialog_open || technical_open || end_day_open;
+  return event_open || orders_open || map_open || dialog_open || technical_open || end_day_open;
 }
 
 
@@ -69,6 +69,8 @@ void drawModalLayer(PGraphics g){
 
   if (event_open){
     drawEventCard(g);
+  } else if (orders_open){
+    drawOrdersPanel(g);
   } else if (map_open){
     drawMapOverlay(g);
   } else if (dialog_open){
@@ -88,19 +90,17 @@ boolean closeTopModal(){
   }
 
   if (event_open){
+    if (quest_review >= 0){
+      quest_review = -1;
+      return true;
+    }
     return false;
   }
 
-
-  if (map_open || dialog_open || technical_open || end_day_open){
-    map_open = false;
-    dialog_open = false;
-    technical_open = false;
-    end_day_open = false;
-    pending_switch_point = -1;
-    pending_intervention_point = -1;
-    pending_collect_point = -1;
-    pending_panel_choice = -1;
+  if (orders_open || map_open || dialog_open || technical_open || end_day_open){
+    orders_open = map_open = dialog_open = technical_open = end_day_open = false;
+    pending_quest_action = ACTION_NONE;
+    pending_retry = -1;
     return true;
   }
 
@@ -145,27 +145,33 @@ void doAction(int action){
     endDay();
     return;
   }
-  if (action == ACTION_CONFIRM_SWITCH){
-    applySwitchPoint();
+  if (action == ACTION_OPEN_ORDERS){
+    orders_page = -1;
+    orders_open = true;
     return;
   }
-  if (action == ACTION_CONFIRM_INTERVENTION){
-    applyPendingIntervention();
+  if (action == ACTION_ORDER_A || action == ACTION_ORDER_B){
+    choosePreventive(action == ACTION_ORDER_A ? 0 : 1);
     return;
   }
-
-  if (action == ACTION_CONFIRM_COLLECT){
-    applyPendingCollect();
+  if (action == ACTION_CONFIRM_QUEST){
+    applyQuestAction();
     return;
   }
-
-  if (action == ACTION_PANEL_REPAIR){
-    applyPanelRepair();
+  if (action == ACTION_NEXT_RETRY){
+    cycleRetry();
     return;
   }
-
-  if (action == ACTION_PANEL_ECONOMY){
-    applyPanelEconomy();
+  if (action == ACTION_RETRY_QUEST){
+    reviewRetry();
+    return;
+  }
+  if (action == ACTION_ACCEPT_SOLUTION){
+    if (quest_review >= 0) acceptSolution(quest_review);
+    return;
+  }
+  if (action == ACTION_BACK_SOLUTION){
+    quest_review = -1;
     return;
   }
 
