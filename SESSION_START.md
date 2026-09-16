@@ -320,9 +320,11 @@ Código:
   nenhuma verificação executável do novo ciclo foi alegada.
 - O commit documental `4138f25` (`docs: define quest-based gameplay contract`)
   contém as duas ADRs e as fontes locais sincronizadas; permanece sem push.
-- Permanecem fora deste commit, por serem alterações locais não relacionadas:
-  `.gitignore`, as exclusões em `last_horizon/output/`, os quatro PNGs em
-  `assets/concept_arts/` e `skills-lock.json`.
+- O commit de limpeza `ab1f9f3` (`chore: clean generated captures and skill
+  metadata`) contém `.gitignore`, `skills-lock.json` e as 286 exclusões de
+  capturas geradas em `last_horizon/output/`; permanece sem push.
+- Permanecem fora dos commits, por serem assets locais ainda não inventariados,
+  os quatro PNGs em `assets/concept_arts/`.
 - Resultado: planejamento Wayfinder e documentação de domínio atualizados;
   protótipo executável ainda não atualizado. Não houve alteração de código nem
   verificação executável do novo ciclo.
