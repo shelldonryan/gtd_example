@@ -6,16 +6,19 @@
 | Papel | Enfermeira |
 | Onde fica | Dormitório, em ponto fixo junto às camas |
 | Temperamento | Cansada, mas é quem segura o grupo |
-| Função nas ordens | Oferece e confirma ordens de moral, convivência e socorro |
+| Função nas ordens | Oferece e confirma N-01, N-02, CON-A e CON-B |
 
 ## Papel no jogo
 
-Neusa oferece ordens ligadas à saúde, convivência e moral. Ela contextualiza o
-estado do grupo e pode ser a origem ou o destino de uma ordem preventiva ou de
-socorro.
+Neusa oferece e confirma as ordens de água, convivência e mediação:
 
-Suas ordens não recebem bônus numérico. Uma crise pode colocar uma pessoa em
-risco; há no máximo uma pessoa em risco por vez e o socorro é uma quest simples.
+- `N-01`: preparar água do grupo com filtro de água;
+- `N-02`: abrir espaço para a conversa com cartões de mediação;
+- `CON-A` e `CON-B`: soluções físicas do conflito no dormitório.
+
+Ela pode ser a origem ou o destino de uma ordem. Uma crise pode colocar uma
+pessoa em risco; há no máximo uma pessoa em risco por vez e o socorro é uma
+quest simples. Se morrer, deixa de oferecer ordens.
 
 ## Vínculos
 

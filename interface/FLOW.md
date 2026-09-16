@@ -30,7 +30,7 @@ graph LR
   ORDENS -->|escolher uma| CONFIRMA["confirmar com sobrevivente"]
   CONFIRMA --> QUEST["coletar → entregar"]
   COMANDO -.->|dia com incidente| INCIDENTE["duas soluções físicas"]
-  INCIDENTE -->|escolher uma| QUEST
+  INCIDENTE -->|escolher e confirmar| QUEST
   QUEST -->|recompensa ou correção| DORMITORIO
   DORMITORIO -->|beliche: dormir| DORMITORIO
   COMANDO -.->|MAPA| MAPA["mapa consultável"]
@@ -46,22 +46,22 @@ graph LR
 ## O ciclo do dia
 
 1. O primeiro dia começa na Sala de comando; os seguintes, no Dormitório.
-2. Nos dias sem incidente, duas ordens preventivas aparecem remotamente. O
-   jogador compara as ofertas, escolhe uma e confirma a escolha ao encontrar o
-   sobrevivente responsável.
-3. A ordem aceita informa objeto, origem, destino, recompensa e perda em caso de
-   falha. Não pode ser cancelada e deve ser concluída antes de dormir.
+2. Nos dias sem incidente, o jogo apresenta duas ordens preventivas. O jogador
+   compara responsável, objeto, origem, destino, recompensa e falha; a seleção
+   fica pendente até a confirmação presencial com o sobrevivente.
+3. A confirmação presencial transforma a seleção em ordem aceita. A ordem aceita
+   não pode ser cancelada; a outra oferta expira.
 4. Nos dias 2, 4, 6, 8 e 10, um incidente apresenta duas soluções físicas. O
-   jogador escolhe uma e executa a quest correspondente.
-5. A coleta e a entrega são as duas etapas leves da ordem. O mapa marca origem e
-   destino, mas não transporta o técnico.
+   jogador escolhe e confirma uma no cartão; não existe contenção separada.
+5. A ordem ativa passa por `COLETAR` e `ENTREGAR`. A coleta confirma o objeto e
+   sua finalidade; a entrega confirma o resultado antes de aplicar.
 6. Uma única quest pode ser concluída por dia. Diagnóstico e conversa fora da
    ordem são opcionais e não criam uma cadeia obrigatória.
 7. Se nenhuma ordem preventiva for aceita, os dois recursos oferecidos sofrem
-   pequenas perdas. Se a ordem aceita falhar, perde-se uma pequena quantidade do
-   recurso que ela protegeria.
+   pequenas perdas. Se a ordem aceita falhar, perde-se o recurso que ela
+   protegeria; o objeto retorna à origem.
 8. Se a solução de incidente falhar, o problema permanece ativo e segue sua
-   perda, prazo e crise normais.
+   perda, prazo e crise normais, sem multa adicional.
 9. O técnico retorna ao próprio beliche no Dormitório. Dormir processa consumo,
    perdas, riscos, crises e condições de término.
 
@@ -95,24 +95,30 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
 - O mapa é uma sobreposição consultável. Marca `VOCÊ ESTÁ AQUI`, mostra a ordem
   ativa e os problemas por cômodo; clicar numa sala não move o técnico.
 - Fechar o mapa retorna à mesma sala e à mesma posição.
-- O HUD mostra a ordem ativa, seu objeto, origem, destino e recompensa. Problemas
-  ativos continuam mostrando perda, prazo e crise.
-- Nos dias sem incidente, duas ordens preventivas são apresentadas remotamente.
-  A escolhida é confirmada ao encontrar o sobrevivente; a outra expira.
+- O HUD mostra na ordem ativa o estágio `COLETAR` ou `ENTREGAR`, além de
+  responsável, objeto, origem, destino, recompensa e falha. Problemas ativos
+  continuam mostrando perda, prazo e crise.
+- Nos dias sem incidente, as oito ofertas do pool são filtradas para um par
+  válido. As duas ordens são apresentadas remotamente; a escolhida só se torna
+  aceita ao encontrar o sobrevivente responsável.
 - Nos dias com incidente, o cartão apresenta duas soluções físicas. A solução
-  escolhida substitui a contenção separada e deve ser executada no espaço jogável.
-- O sobrevivente responsável pode ser origem ou destino da ordem. Uma rota não
-  exige três cômodos distintos.
-- Coleta e entrega são as duas etapas da quest. Componentes são carregados um por
-  vez e só existem como parte de uma ordem aceita.
+  escolhida substitui a contenção separada e deve ser executada no espaço
+  jogável.
+- O sobrevivente responsável pode ser origem ou destino da ordem. As rotas da
+  matriz usam no máximo dois cômodos distintos; o casco parte do console da rota
+  e termina no ponto sorteado.
+- A coleta confirma o objeto e sua finalidade. A entrega confirma recompensa,
+  custo, resultado ou problema resolvido antes de aplicar.
+- Componentes e objetos só existem como parte de uma ordem aceita. O técnico
+  carrega um por vez; não há coleta livre nem acúmulo de quests.
 - Diagnóstico e conversa fora da ordem são opcionais. Não há cadeia universal de
   NPCs nem objetivo paralelo.
 - Uma quest pode ser concluída por dia. A ordem aceita não pode ser cancelada.
-- Uma ordem preventiva aceita e não concluída perde uma pequena quantidade do
-  recurso que protegeria. A ordem não escolhida não gera perda.
+- Uma ordem preventiva aceita e não concluída perde o recurso que protegeria e
+  devolve o objeto à origem. A ordem não escolhida não gera perda.
 - Se nenhuma ordem preventiva for aceita, os dois recursos das ofertas sofrem
   pequenas perdas. Se uma solução de incidente falhar, o problema permanece com
-  suas perdas, prazo e crise normais.
+  suas perdas, prazo e crise normais, sem multa adicional.
 - NPCs usam retrato e caixa inferior modal. Ordens e soluções mostram confirmação
   antes do compromisso; coleta, entrega e dormir exibem o custo ou resultado
   relevante antes de aplicar.

@@ -6,16 +6,19 @@
 | Papel | Piloto |
 | Onde fica | Sala de comando, em ponto fixo junto ao painel de rota |
 | Temperamento | Pragmática; fala por números e horas |
-| Função nas ordens | Oferece e confirma ordens de navegação, rota e comunicações |
+| Função nas ordens | Oferece e confirma V-01, V-02, COM-A e COM-B |
 
 ## Papel no jogo
 
-Vera oferece ordens ligadas à rota e às comunicações. O técnico pode consultá-la
-para interpretar a situação geral, mas não precisa falar com ela diariamente.
+Vera oferece e confirma as ordens de rota e comunicações:
+
+- `V-01`: calibrar a antena com bobina de transmissão;
+- `V-02`: atualizar a rota com cartão de rota;
+- `COM-A` e `COM-B`: soluções físicas da falha nas comunicações.
 
 Ela pode ser a origem ou o destino de uma ordem. Suas ordens não recebem bônus
-numérico e continuam disponíveis com a mesma regra enquanto ela estiver viva.
-Se morrer, deixa de oferecer ordens; o pool validado usa os sobreviventes vivos.
+numérico. Se morrer, deixa de oferecer ordens; o pool validado usa os
+sobreviventes vivos.
 
 ## Vínculos
 

@@ -15,13 +15,15 @@ pelos quatro cômodos. A Sala de comando é o hub; suas portas por convés levam
 ao Dormitório, ao Depósito e à Sala de máquinas. O mapa apenas consulta posição
 e problemas.
 
-Incidentes criam problemas locais persistentes. O técnico escolhe a prioridade
-deslocando-se até os pontos relacionados, sem aceitar uma tarefa. Diagnósticos,
-conversas, componentes especiais e políticas são livres; uma correção,
-recuperação ou aceleração principal pode ser concluída por dia.
+Incidentes criam problemas locais persistentes. Nos dias com incidente, o técnico
+escolhe uma entre duas soluções físicas e executa a rota correspondente. Nos
+dias sem incidente, compara duas ordens preventivas e confirma uma
+presencialmente com o sobrevivente responsável.
 
-Recursos comuns são pagos no ponto final. O técnico carrega apenas um componente
-especial por vez, que persiste entre dias até ser usado ou trocado.
+Uma quest tem as etapas `COLETAR` e `ENTREGAR`. O técnico carrega somente o
+objeto da ordem aceita, que aparece no ponto de origem e é entregue no destino.
+Diagnósticos e conversas fora da ordem são opcionais; não existem políticas,
+coleta livre de componentes ou cadeia universal de visitas.
 
 ## Representação visual
 

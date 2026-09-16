@@ -1,8 +1,8 @@
 # Ações e custos
 
-Este arquivo registra o contrato mecânico vigente. Os estoques, consumos e o
-modelo numérico da issue #20 foram confirmados pelo usuário após a execução das
-simulações.
+Este arquivo registra o contrato mecânico vigente. A forma das quests está
+definida; o modelo numérico anterior da issue #20 foi **SUPERSEDED**. Estoques,
+consumos, custos, recompensas, perdas, prazos e crises serão fechados no #26.
 
 ## Regras base
 
@@ -78,6 +78,102 @@ multa extra pela quest não concluída.
 Uma ordem pode usar um fusível, kit, caixa, ferramenta ou outro objeto produzido
 para a atividade. O objeto deve ter função mecânica e pode ser reutilizado em
 ordens diferentes.
+## Catálogo de ordens preventivas
+
+O pool de dias sem incidente possui oito ofertas. Cada oferta protege um único
+recurso; o valor numérico da recompensa e da perda pertence ao ticket de
+balanceamento. Os pares abaixo são combinações válidas para comparação:
+
+| ID | Responsável | Ordem | Objeto | Origem | Destino | Recompensa | Falha |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| V-01 | Vera | Calibrar a antena | bobina de transmissão | reserva (Depósito) | antena (Comando) | moral + | moral - |
+| V-02 | Vera | Atualizar a rota | cartão de rota | Vera (Comando) | console da rota (Comando) | energia + | energia - |
+| B-01 | Bento | Reforçar a reserva | caixa de provisões | prateleira de reserva (Depósito) | estoque de comida (Depósito) | comida + | comida - |
+| B-02 | Bento | Separar peças de emergência | chave de torque | prateleira de reserva (Depósito) | Bento (Depósito) | peças + | peças - |
+| N-01 | Neusa | Preparar água do grupo | filtro de água | console da rota (Comando) | mesa comum (Dormitório) | água + | água - |
+| N-02 | Neusa | Abrir espaço para a conversa | cartões de mediação | Neusa (Dormitório) | mesa do grupo (Dormitório) | moral + | moral - |
+| S-01 | Sílvia | Regular a distribuição | módulo de relé | console da rota (Comando) | painel de distribuição (Máquinas) | energia + | energia - |
+| S-02 | Sílvia | Testar o suporte de vida | cartucho de oxigênio | console da rota (Comando) | painel de suporte de vida (Máquinas) | oxigênio + | oxigênio - |
+
+Os pares de referência são `V-01 + B-01`, `V-02 + N-01`, `B-02 + S-02` e
+`N-02 + S-01`. Eles protegem recursos diferentes, usam rotas distintas e não
+criam uma opção universal. O ticket de balanceamento escolhe um par válido,
+remove as ordens de sobreviventes mortos e preserva esses invariantes. Se um par
+de referência deixar de existir, escolhe duas ofertas de sobreviventes vivos com
+recursos protegidos diferentes; se restar apenas uma pessoa, usa as duas ofertas
+dela. Sem sobreviventes, a partida já terminou.
+
+## Matriz das soluções de incidente
+
+Cada incidente tem duas soluções físicas. O custo abaixo identifica o recurso
+que será calibrado no ticket de balanceamento; o resultado é a consequência
+positiva da entrega. A perda, o prazo e a crise de deixar o problema ativo
+continuam pertencendo à definição numérica do problema.
+
+O catálogo contém quatorze soluções: duas para cada um dos sete incidentes.
+Em cada solução de incidente, o campo `SE FALHAR` aparece como `PROBLEMA
+ATIVO: [perda/dia] | PRAZO [n] | CRISE [texto]`. Os valores de perda, prazo e
+crise são os da família do incidente e serão preenchidos no #26 antes da
+implementação.
+
+| Incidente | ID | Responsável | Objeto | Custo | Origem | Destino | Resultado | Se falhar |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Motor | ENG-A | Sílvia | chave de torque | peças | console da rota (Comando) | bancada do motor (Máquinas) | alinhar o eixo do motor | problema ativo; perda, prazo e crise do motor |
+| Motor | ENG-B | Sílvia | atuador do motor | energia | console da rota (Comando) | bancada do motor (Máquinas) | estabilizar a rotação | problema ativo; perda, prazo e crise do motor |
+| Casco | HUL-A | Sílvia | kit de vedação | peças | console da rota (Comando) | ponto de casco sorteado | fechar a ruptura | problema ativo; perda, prazo e crise do casco |
+| Casco | HUL-B | Sílvia | placa de blindagem | energia | console da rota (Comando) | ponto de casco sorteado | sustentar a placa | problema ativo; perda, prazo e crise do casco |
+| Suporte de vida | LIFE-A | Sílvia | cartucho de oxigênio | peças | console da rota (Comando) | painel de suporte de vida (Máquinas) | repor o cartucho | problema ativo; perda, prazo e crise do suporte |
+| Suporte de vida | LIFE-B | Sílvia | filtro de CO2 | energia | console da rota (Comando) | painel de suporte de vida (Máquinas) | recircular o ar | problema ativo; perda, prazo e crise do suporte |
+| Energia | PWR-A | Sílvia | fusível de potência | peças | console da rota (Comando) | painel de distribuição (Máquinas) | isolar o circuito | problema ativo; perda, prazo e crise da energia |
+| Energia | PWR-B | Sílvia | módulo de relé | moral | console da rota (Comando) | painel de distribuição (Máquinas) | redistribuir a carga | problema ativo; perda, prazo e crise da energia |
+| Comunicações | COM-A | Vera | bobina de transmissão | peças | console da rota (Comando) | antena (Comando) | restabelecer o contato | problema ativo; perda, prazo e crise das comunicações |
+| Comunicações | COM-B | Vera | célula de sinal | energia | console da rota (Comando) | antena (Comando) | manter a escuta | problema ativo; perda, prazo e crise das comunicações |
+| Comida | FOOD-A | Bento | caixa de provisões | peças | console da rota (Comando) | estoque de comida (Depósito) | recompor o estoque | problema ativo; perda, prazo e crise da comida |
+| Comida | FOOD-B | Bento | selante de estoque | moral | console da rota (Comando) | estoque de comida (Depósito) | proteger a reserva | problema ativo; perda, prazo e crise da comida |
+| Conflito | CON-A | Neusa | cartões de mediação | moral | console da rota (Comando) | mesa do grupo (Dormitório) | mediar a conversa | problema ativo; perda, prazo e crise do conflito |
+| Conflito | CON-B | Neusa | refeição quente | comida | console da rota (Comando) | mesa do grupo (Dormitório) | reunir o grupo | problema ativo; perda, prazo e crise do conflito |
+
+O ponto de casco é sorteado uma vez quando o problema nasce. Como as soluções
+partem do console da rota, a rota até qualquer cômodo tem no máximo dois
+cômodos distintos: Comando e o cômodo do dano. Os objetos compartilhados, como
+bobina, caixa, chave, filtro, cartões e relé, podem reaparecer em ordens
+diferentes, mas nunca ficam disponíveis para coleta livre.
+
+## Estados da quest
+
+Antes do compromisso, o cartão mostra responsável, objeto, origem, destino,
+recompensa ou resultado e consequência da falha. Uma ordem preventiva escolhida
+fica pendente até a confirmação presencial com seu responsável. Depois da
+confirmação, a etapa é `COLETAR`; após guardar o objeto, a etapa é `ENTREGAR`; a
+entrega confirmada conclui a única quest do dia.
+
+Dormir com uma ordem preventiva aceita e incompleta aplica a falha daquela
+ordem, devolve o objeto ao ponto de origem e limpa o item carregado. Dormir com
+uma solução de incidente incompleta não aplica multa extra: o problema segue
+ativo com sua perda, prazo e crise normais. A ordem não escolhida expira, e uma
+ordem aceita nunca pode ser cancelada.
+## Vocabulário da interface da quest
+
+Os cartões e painéis usam frases curtas e os mesmos nomes da matriz:
+
+| Momento | Texto obrigatório |
+| --- | --- |
+| Oferta preventiva | `ORDEM PREVENTIVA — [ordem]` |
+| Campos da oferta | responsável; objeto; coleta; entrega |
+| Recompensa | `RECOMPENSA: +[n] [recurso]` |
+| Falha prevista | `SE FALHAR: -[n] [recurso]` |
+| Confirmação presencial | `[nome]: CONFIRME A ORDEM. ELA NÃO PODE SER CANCELADA.` |
+| Coleta | `COLETAR [objeto]? SERVE PARA [resultado]. DESTINO: [destino].` |
+| Entrega | `ENTREGAR [objeto]? RESULTADO: [resultado]. CUSTO: [custo].` |
+| Preventiva concluída | `ORDEM CONCLUÍDA: +[n] [recurso].` |
+| Preventiva incompleta | `ORDEM NÃO CONCLUÍDA: -[n] [recurso]. O OBJETO VOLTA À ORIGEM.` |
+| Nenhuma preventiva | `NENHUMA ORDEM ACEITA: -[n] [recurso 1] E -[n] [recurso 2].` |
+| Solução urgente incompleta | `SOLUÇÃO NÃO CONCLUÍDA. [PROBLEMA] PERMANECE ATIVO.` |
+
+
+Formato linear dos campos: `RESPONSÁVEL: [nome] | OBJETO: [objeto] | COLETA: [origem] | ENTREGA: [destino]`.
+`[n]` e `[custo]` são preenchidos pelo balanceamento. O texto não pode esconder
+o recurso afetado, a origem, o destino ou o estado da ordem.
 
 ## Calendário e processamento
 
@@ -186,4 +282,4 @@ socorro. Se o prazo chegar a zero, a pessoa morre e `A BORDO` diminui.
   nova e não devem ser reutilizados sem a recalibração de
   [Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
 - O código atual ainda implementa o ciclo anterior; a migração e a verificação
-  pertencem aos tickets de quests e balanceamento.
+  pertencem ao trabalho posterior à validação numérica da #26.

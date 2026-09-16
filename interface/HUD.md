@@ -22,7 +22,7 @@ caso ela não seja concluída.
 | Comida | ícone, número e barra | quantidade de comida armazenada |
 | Peças | ícone e número | quantas peças podem ser usadas em ordens técnicas |
 | Moral | ícone, número e barra | estado emocional dos sobreviventes |
-| Ordem ativa | faixa textual e marcador | objeto, origem, destino, recompensa e perda |
+| Ordem ativa | faixa textual e marcador | estágio, responsável, objeto, origem, destino, recompensa ou resultado e perda |
 | Problema urgente | faixa textual compacta | menor prazo, sala responsável e quantidade de outros problemas |
 
 ## Barras de recursos
@@ -49,7 +49,7 @@ no inventário de assets.
 | --- | --- |
 | Topo | dia, quantos estão a bordo e os seis indicadores de recurso |
 | Centro | sala 2D jogável usando toda a largura |
-| Faixa de ordem | objeto, origem, destino, recompensa e perda da ordem ativa |
+| Faixa de ordem | estágio, responsável, objeto, origem, destino, recompensa ou resultado e perda da ordem ativa |
 | Faixa de urgência | problema com menor prazo e quantidade dos demais |
 | Rodapé | botão `MAPA` e orientação de controles |
 | Sobreposição | ordens, mapa, diálogos, incidentes e resumo ao dormir |
@@ -69,49 +69,55 @@ técnico.
 ### Diálogos e ordens
 
 - Diálogos de NPC avançam com `ENTER` ou clique em `CONTINUAR (ENTER)`.
-- Nos dias sem incidente, duas ordens preventivas aparecem remotamente com
-  nome, retrato, objeto, origem, destino, recompensa e perda.
-- A ordem escolhida é confirmada presencialmente com o sobrevivente. Depois da
-  confirmação, ela não pode ser cancelada.
-- Nos dias com incidente, o cartão mostra duas soluções físicas com custo,
-  objeto, rota e resultado. A solução escolhida deve ser executada.
-- A coleta e a entrega são as duas etapas leves. O objeto só existe como parte
-  de uma ordem aceita e pode ser carregado um por vez.
-- Recursos comuns são pagos ou recebidos no destino da ordem.
+- Nos dias sem incidente, o cartão compara duas ofertas do pool com
+  responsável, objeto, origem, destino, recompensa e perda.
+- A ordem escolhida é confirmada presencialmente com o sobrevivente responsável.
+  Depois da confirmação, ela não pode ser cancelada.
+- Nos dias com incidente, o cartão mostra duas soluções físicas com responsável,
+  custo, objeto, origem, destino, resultado e `SE FALHAR`: problema ativo, perda,
+  prazo e crise. A solução escolhida deve ser executada.
+- A faixa da ordem ativa mostra `COLETAR` ou `ENTREGAR`; a entrega só aplica o
+  resultado depois da confirmação.
+- O objeto só existe como parte de uma ordem aceita e pode ser carregado um por
+  vez. Recursos comuns são pagos ou recebidos no destino.
 
 Os botões dos modais repetem o atalho no rótulo: `FECHAR (ESC)`, `VOLTAR (ESC)`,
 `CONFIRMAR (ENTER)`, `ACEITAR ORDEM (ENTER)`, `ENTREGAR (ENTER)` e o botão de
 dormir. O botão de pausa é `CONTINUAR (ESC)`.
 
 ### Encerrar o dia
-
 Não existe botão persistente `Passar dia`. O técnico precisa chegar ao próprio
 beliche no Dormitório e interagir. Antes de dormir, o resumo modal mostra:
 
 1. consumo previsto dos recursos;
-2. recompensa ou perda da ordem preventiva;
-3. ordem ativa concluída ou ausente;
+2. recompensa ou perda da ordem preventiva, se houver;
+3. etapa e resultado da ordem ativa, ou ausência de ordem;
 4. problemas ativos, prazos e crises iminentes;
 5. confirmação para dormir e opção de voltar.
 
-Dormir processa recursos, perdas, risco individual, prazos, crises, vitória ou
-derrota e abre o novo dia no Dormitório.
+Dormir com uma preventiva aceita e incompleta mostra a perda, devolve o objeto à
+origem e encerra a ordem. Dormir com uma solução urgente incompleta mantém o
+problema sem penalidade adicional. O processamento numérico segue o ticket #26.
 
 ## Estados da interface
 
 - **Salas de interior:** o Comando é o hub; Dormitório, Depósito e Máquinas
   ligam-se somente a ele.
 - **Ofertas de ordem:** duas ordens preventivas comparáveis nos dias sem
-  incidente; apenas uma pode ser aceita.
+  incidente; apenas uma pode ser aceita presencialmente.
 - **Diálogo de confirmação:** retrato e caixa inferior; confirma a ordem ao
   encontrar o sobrevivente responsável.
-- **Painel técnico:** caixa inferior sem retrato para custos, resultados,
+- **Painel técnico:** caixa inferior sem retrato para custos, resultados, coleta,
   entrega, risco e resumo do fim do dia.
-- **Coleta:** mostra o objeto da ordem; confirmar guarda o item.
-- **Entrega:** mostra recompensa, custo ou problema resolvido antes de aplicar.
+- **Coleta:** mostra o objeto, sua finalidade e o destino; confirmar guarda o
+  item.
+- **Entrega:** mostra recompensa, custo, resultado ou problema resolvido antes
+  de aplicar.
 - **Mapa:** preserva sala e posição e marca origem, destino e problemas.
-- **Incidente:** modal técnico com duas soluções físicas; bloqueia exploração até
-  a escolha.
+- **Incidente:** modal técnico com duas soluções físicas; bloqueia exploração
+  até a escolha e confirmação.
+- **Falha de preventiva:** exibe a perda do recurso protegido e devolve o objeto
+  à origem ao dormir.
 - **Transmissão e desfecho:** permanecem modais.
 
 ## Avisos
@@ -137,4 +143,5 @@ ativado primeiro. A ordem não muda quando o jogador troca de sala.
 O mapa contém a comparação completa. A ficha da sala mostra, para cada problema,
 a perda diária, o prazo e a consequência quando ele chegar a zero. Para dano no
 casco, a ficha pertence ao cômodo que contém o local alcançável sorteado naquela
-ocorrência. Os valores confirmados estão em `mechanics/ACTIONS.md`.
+ocorrência. A estrutura está em `mechanics/ACTIONS.md`; os valores numéricos
+serão confirmados no ticket #26.

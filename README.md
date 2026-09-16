@@ -80,8 +80,8 @@ vivo. O jogador administra:
 
 É o hub físico e o centro de navegação e comunicações. A porta superior leva ao
 Dormitório, a média ao Depósito e a inferior à Sala de máquinas. Vera oferece
-ordens ligadas à rota e às comunicações; o console e a antena recebem entregas
-de ordens. Não existe uma lista extensa de tarefas.
+ordens ligadas à rota e às comunicações; o console pode ser origem ou destino de
+objetos, e a antena recebe entregas. Não existe uma lista extensa de tarefas.
 
 ### Sala de máquinas
 
@@ -92,8 +92,8 @@ leituras curtas. Não há modo economia nem bônus de especialista.
 ### Depósito
 
 Concentra estoques e objetos de quest. Bento oferece e confirma ordens
-logísticas; o técnico coleta objetos no Depósito e os leva ao destino indicado.
-Não há racionamento nem coleta livre fora de uma ordem.
+logísticas; o técnico coleta cada objeto na origem indicada pela ordem e o leva
+ao destino. Não há racionamento nem coleta livre fora de uma ordem.
 
 ### Dormitório
 

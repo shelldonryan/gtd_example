@@ -6,17 +6,19 @@
 | Papel | Intendente |
 | Onde fica | Depósito, em ponto fixo junto aos estoques |
 | Temperamento | Ranzinza; guarda o estoque a sete chaves |
-| Função nas ordens | Oferece e confirma ordens de comida, água, peças e logística |
+| Função nas ordens | Oferece e confirma B-01, B-02, FOOD-A e FOOD-B |
 
 ## Papel no jogo
 
-Bento oferece ordens ligadas a estoques, componentes e logística. Ele explica a
-necessidade do objeto e a consequência de deixar a manutenção para depois, mas
-não entrega recursos comuns sem uma ordem concluída.
+Bento oferece e confirma as ordens de estoque e logística:
 
-Ele pode ser a origem ou o destino de uma ordem. Suas ordens não recebem bônus
-numérico. Componentes são coletados e carregados somente quando fazem parte da
-ordem aceita.
+- `B-01`: reforçar a reserva com caixa de provisões;
+- `B-02`: separar peças de emergência com chave de torque;
+- `FOOD-A` e `FOOD-B`: soluções físicas da falta de comida.
+
+Ele pode ser a origem ou o destino de uma ordem. O objeto só aparece quando
+pertence à ordem aceita; não entrega recursos comuns fora da etapa de entrega.
+Se morrer, deixa de oferecer ordens; o pool validado usa os sobreviventes vivos.
 
 ## Vínculos
 

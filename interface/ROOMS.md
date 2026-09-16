@@ -46,6 +46,12 @@ Regras que valem em todos os cômodos:
 - Diagnóstico e conversa fora da ordem não gastam a conclusão diária.
 - O mapa mostra a origem e o destino, mas não transporta o técnico.
 - Indicações usam ações concretas, nunca termos internos.
+- A ordem ativa usa somente pontos que aparecem na oferta. O objeto não fica
+  disponível no mapa antes da confirmação da ordem.
+- A matriz completa das oito ordens preventivas e das quatorze soluções de
+  incidente está em `mechanics/ACTIONS.md`; estes pontos preservam as rotas
+  físicas e a leitura local.
+
 
 ## Sala de comando
 
@@ -56,10 +62,10 @@ ao Comando para aceitar uma ordem.
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
 | superior | porta do Dormitório | porta |
-| superior | Vera — ordens de navegação e comunicações | conversa e confirmação |
+| superior | Vera — ordens de navegação e comunicações | conversa, confirmação e coleta/entrega condicionadas à ordem |
 | superior | antena — destino de ordens de comunicação | entrega |
 | médio | porta do Depósito | porta |
-| médio | console da rota — jornada, previsão e ordens de potência | leitura e entrega |
+| médio | console da rota — origem de objetos, jornada, previsão e ordens de potência | leitura, coleta e entrega |
 | inferior | porta da Sala de máquinas | porta |
 | inferior | painel de situação — visão geral dos problemas e ordens | leitura técnica |
 
@@ -73,21 +79,23 @@ O cômodo concentra motor, energia e suporte de vida.
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
 | inferior | bancada do motor — destino de ordens do motor | entrega |
-| médio | Sílvia — ordens e confirmação técnica | conversa e confirmação |
+| médio | Sílvia — ordens e confirmação técnica | conversa, confirmação e coleta/entrega condicionadas à ordem |
 | médio | painel de distribuição — destino de ordens de energia | entrega |
 | superior | reator — leitura da potência do sistema | leitura técnica |
 | superior | painel de suporte de vida — destino de ordens de oxigênio | entrega |
 | acesso | porta única para o convés inferior do Comando | porta |
 ## Depósito
 
-O cômodo concentra logística, estoques e objetos de quest.
+O cômodo concentra logística e estoques. Objetos de quest ficam na origem
+indicada pela ordem; alguns partem do console da rota no Comando para manter a
+rota curta.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
-| inferior | componentes e objetos especiais | coleta |
-| médio | Bento — ordens logísticas e confirmação | conversa e confirmação |
+| inferior | componentes e objetos especiais da ordem ativa | coleta condicionada à ordem |
+| médio | Bento — ordens logísticas e confirmação | conversa, confirmação e coleta/entrega condicionadas à ordem |
 | médio | estoque de comida — destino de ordens de suprimentos | entrega |
-| superior | prateleira de reserva — objetos disponíveis | leitura e coleta |
+| superior | prateleira de reserva — objetos da ordem ativa | leitura e coleta condicionadas à ordem |
 | acesso | porta única para o convés médio do Comando | porta |
 
 O cômodo concentra descanso, saúde, moral e encerramento do turno.
@@ -95,7 +103,7 @@ O cômodo concentra descanso, saúde, moral e encerramento do turno.
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
 | inferior | beliche temporário `SOCORRER [NOME]` de sobrevivente em risco | entrega de socorro |
-| médio | Neusa — ordens da tripulação e confirmação | conversa e confirmação |
+| médio | Neusa — ordens da tripulação e confirmação | conversa, confirmação e coleta/entrega condicionadas à ordem |
 | médio | mesa do grupo — destino de ordens de convivência | entrega |
 | superior | mesa comum — destino de ordens de moral | entrega |
 | superior | beliche do técnico — resumo e dormir | leitura técnica e encerramento |
@@ -103,42 +111,51 @@ O cômodo concentra descanso, saúde, moral e encerramento do turno.
 
 ## Ordens
 
-Os incidentes e os dias tranquilos usam a mesma estrutura de ordem: objeto,
-origem, destino e consequência. Nos dias sem incidente, duas ordens preventivas
-chegam remotamente e uma é confirmada ao encontrar o sobrevivente responsável.
+Os incidentes e os dias tranquilos usam a mesma estrutura de ordem: responsável,
+objeto, origem, destino e consequência. Nos dias sem incidente, duas ordens
+preventivas chegam remotamente e uma é confirmada ao encontrar o sobrevivente
+responsável. Os pares válidos protegem recursos diferentes e ficam no catálogo
+de `mechanics/ACTIONS.md`.
 
-Nos dias com incidente, o cartão apresenta duas soluções físicas. A solução
-escolhida substitui a contenção separada e precisa ser executada na estação
-correspondente.
+Nos dias com incidente, o cartão apresenta duas soluções físicas. A escolhida
+substitui a contenção separada e precisa ser executada na estação correspondente.
+O cartão informa também o custo e o resultado; os valores numéricos pertencem ao
+ticket #26.
 
-| Ordem | Tipo | Onde conclui |
-| --- | --- | --- |
-| Manutenção preventiva | preparação | estação indicada pela oferta |
-| Solução técnica | correção | estação do motor, energia, suporte, comunicações ou casco |
-| Solução de suprimentos | recuperação | estoque ou estação logística |
-| Solução da tripulação | convivência | mesa do grupo ou mesa comum |
-| Socorro | recuperação humana | beliche da pessoa em risco |
+| Ordem | Tipo | Origem | Onde conclui |
+| --- | --- | --- | --- |
+| Manutenção preventiva | preparação | ponto indicado pela oferta | estação indicada pela oferta |
+| Solução técnica | correção | console da rota (Comando) | estação do motor, energia, suporte, comunicações ou casco |
+| Solução de suprimentos | recuperação | console da rota (Comando) | estoque de comida |
+| Solução da tripulação | convivência | Neusa ou console da rota | mesa do grupo |
+| Socorro | recuperação humana | origem da crise | beliche da pessoa em risco |
 
-Uma quest possui somente duas etapas leves: coletar e entregar. A rota usa no
-máximo dois cômodos distintos, e o sobrevivente que oferece a ordem pode ser a
-origem ou o destino. O objeto é carregado por vez e pode ser reutilizado em
-ordens diferentes.
+Uma quest possui somente duas etapas leves: `COLETAR` e `ENTREGAR`. A rota usa
+no máximo dois cômodos distintos, o sobrevivente responsável pode ser origem ou
+destino, e o objeto é carregado por vez. A solução do casco parte do console da
+rota no Comando para alcançar o ponto sorteado em qualquer cômodo.
+
+Após a confirmação da ordem, a coleta mostra o objeto e sua finalidade. A ordem
+preventiva exige confirmação presencial com o responsável; a solução de incidente
+é confirmada no cartão. A entrega mostra o resultado antes de aplicar. Se uma
+ordem preventiva aceita falhar ao dormir, o objeto retorna à origem; se uma
+solução urgente falhar, o problema permanece ativo sem multa adicional.
 
 
 ## Leitura do jogador
 
-O HUD mostra a ordem ativa com objeto, origem, destino, recompensa e consequência
-da falha. Também destaca o problema ativo com menor prazo e quantos outros
-existem.
+O HUD mostra a ordem ativa com estágio, responsável, objeto, origem, destino,
+recompensa ou resultado e consequência da falha. Também destaca o problema
+ativo com menor prazo e quantos outros existem.
 
 O mapa agrupa problemas e ordens por sala. Cada problema mostra perda diária,
-prazo e consequência da crise; cada ordem mostra o ponto de coleta e o destino.
-O mapa nunca transporta o técnico.
+prazo e consequência da crise; cada ordem mostra o ponto de coleta, o destino e
+o estágio atual. O mapa nunca transporta o técnico.
 
 Quando o dano no casco estiver ativo, ele pertence ao cômodo sorteado para aquela
-ocorrência e a quest aponta para o local alcançável correspondente.
+ocorrência e a quest aponta para o local alcançável correspondente. A origem das
+duas soluções é o console da rota no Comando.
 
-O sketch atual ainda implementa o ciclo anterior. A migração para ordens,
-soluções físicas, componentes de quest, riscos simplificados e uma conclusão
-diária pertence aos tickets [Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
-e [Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
+O catálogo de quests está fechado em `mechanics/ACTIONS.md` e `events/`. O
+balanceamento numérico ainda pertence ao ticket #26; o sketch atual continua
+implementando o ciclo anterior até a migração posterior.

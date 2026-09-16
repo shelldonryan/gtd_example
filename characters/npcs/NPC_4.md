@@ -6,16 +6,20 @@
 | Papel | Mecânica |
 | Onde fica | Sala de máquinas, em ponto fixo junto aos sistemas |
 | Temperamento | Direta, sem paciência para desculpa |
-| Função nas ordens | Oferece e confirma ordens de motor, energia, suporte e casco |
+| Função nas ordens | Oferece e confirma S-01, S-02, ENG-A, ENG-B, HUL-A, HUL-B, LIFE-A, LIFE-B e PWR-A, PWR-B |
 
 ## Papel no jogo
 
-Sílvia oferece ordens ligadas ao motor, energia, suporte de vida e casco. Ela
-interpreta falhas técnicas, mas não é uma etapa obrigatória de toda ordem.
+Sílvia oferece e confirma as ordens técnicas:
+
+- `S-01` e `S-02`: preparar energia e suporte de vida;
+- `ENG-A` e `ENG-B`: soluções físicas da falha no motor;
+- `HUL-A` e `HUL-B`: soluções físicas do dano no casco;
+- `LIFE-A`, `LIFE-B`, `PWR-A` e `PWR-B`: soluções físicas dos sistemas.
 
 Ela pode ser a origem ou o destino de uma ordem. Suas ordens não recebem bônus
-numérico e continuam possíveis com a mesma regra enquanto ela estiver viva.
-Se morrer, deixa de oferecer ordens; o pool validado usa os sobreviventes vivos.
+numérico. Se morrer, deixa de oferecer ordens; o pool validado usa os
+sobreviventes vivos.
 
 ## Vínculos
 

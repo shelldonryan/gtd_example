@@ -83,17 +83,16 @@ por vez, com uma quest simples de socorro; sua morte reduz `A BORDO` sem
 recalcular custos.
 
 O hub, as quatro salas, o mapa consultável, o dano no casco alcançável e o
-objetivo de chegar a Marte permanecem. A migração e a verificação estão nos
-tickets [Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
-e [Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
+objetivo de chegar a Marte permanecem. O catálogo de quests está fechado em
+`mechanics/ACTIONS.md` e `events/`; a migração e a verificação do sketch
+dependem do balanceamento da #26.
 
 ## Implementação atual e migração
 
 O sketch atual ainda implementa o contrato anterior de problemas, contenções,
 intervenções e componentes. A arquitetura visual, o hub, o mapa, o pipeline de
-assets e a física continuam reaproveitáveis; a migração do ciclo pertence aos
-tickets [Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
-e [Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
+assets e a física continuam reaproveitáveis; a migração do ciclo pertence à #26,
+após a validação numérica e a simulação.
 
 O alvo da migração é:
 
@@ -108,8 +107,9 @@ O alvo da migração é:
 - **Ciclo:** consumo diário, resultado da ordem e condições de término processados
   ao dormir.
 
-Os detalhes de estado, textos, rotas, pool e valores serão definidos nos tickets
-de quests e balanceamento antes da alteração do sketch.
+O catálogo, os textos e as rotas das quests estão definidos em
+`mechanics/ACTIONS.md` e `events/`. O ticket #26 ainda define os valores
+numéricos e a simulação antes da alteração do sketch.
 
 Números do movimento (grade lógica 640×360; render 1280×720 / 720p): personagem
 16×24, andar 1,5 px/quadro, pulo de 48 px, gravidade 0,5, escada 1,0 e
@@ -245,7 +245,7 @@ Limitações observadas:
 ## Estado da revisão
 
 - **Código atual:** o protótipo comprovado ainda implementa o ciclo anterior;
-  a migração do novo contrato pertence aos tickets 25 e 26.
+  a migração do novo contrato pertence à #26.
 - **Contrato alvo:** cinco incidentes nos dias 2, 4, 6, 8 e 10, ordens
   preventivas nos demais dias, duas soluções físicas por incidente e uma
   conclusão de quest por dia.
@@ -256,5 +256,5 @@ Limitações observadas:
 - **Evidência existente:** `--capture`, `--hit-test`, `--ladder-test`,
   `node prototype/balance-model.mjs --simulate` e `git diff --check` comprovam
   o contrato anterior, não o novo ciclo.
-- **Próxima evidência:** os tickets 25 e 26 devem registrar a verificação do
-  novo fluxo antes de atualizar este estado para implementado.
+- **Próxima evidência:** a #26 deve registrar a verificação numérica e do novo
+  fluxo antes de atualizar este estado para implementado.
