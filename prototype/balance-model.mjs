@@ -782,11 +782,17 @@ function runStrategy(strategy, incidentSequence = DEFAULT_INCIDENT_SEQUENCE) {
     } else if (state.risk && strategy.rescue(state)) {
       state = reduce(state, { type: "rescue" });
     } else {
-      const selected = strategy.choosePreventive(state, state.dailyOffers);
-      if (selected) {
-        state = reduce(state, { type: "choose_preventive", id: selected.id });
-        state = reduce(state, { type: "accept_preventive" });
-        if (strategy.completePreventive(state)) state = completeQuest(state);
+      const retry = strategy.chooseRetry(state, state.retrySolutions);
+      if (retry) {
+        state = reduce(state, { type: "choose_solution", id: retry.id });
+        if (strategy.completeIncident(state)) state = completeQuest(state);
+      } else {
+        const selected = strategy.choosePreventive(state, state.dailyOffers);
+        if (selected) {
+          state = reduce(state, { type: "choose_preventive", id: selected.id });
+          state = reduce(state, { type: "accept_preventive" });
+          if (strategy.completePreventive(state)) state = completeQuest(state);
+        }
       }
     }
 
@@ -797,6 +803,7 @@ function runStrategy(strategy, incidentSequence = DEFAULT_INCIDENT_SEQUENCE) {
 }
 
 const COMPLETE_QUESTS = Object.freeze({
+  chooseRetry: (state, retries) => retries[0] ?? null,
   completeIncident: () => true,
   completePreventive: () => true,
   rescue: () => true,
@@ -837,6 +844,7 @@ const STRATEGIES = Object.freeze({
   omission: {
     title: "Omissão",
     chooseSolution: (state, problemId) => PROBLEMS[problemId].solutions[0],
+    chooseRetry: () => null,
     choosePreventive: () => null,
     completeIncident: () => false,
     completePreventive: () => false,
