@@ -223,9 +223,9 @@ continuar ativas após o reinício do prazo.
 - A forma das ordens, incidentes e mecânicas simplificadas está confirmada.
 - O calendário vigente é 2, 4, 6, 8 e 10, com cinco incidentes de sete tipos.
 - O estoque, o consumo, os custos, as recompensas, as perdas, os prazos, as
-  crises, o socorro e a seleção do pool estão implementados no
-  `prototype/balance-model.mjs`.
-- O código do sketch ainda implementa o ciclo anterior; a migração visual e a
-  verificação do fluxo físico pertencem ao trabalho posterior ao balanceamento.
-- A simulação da issue #26 é a evidência numérica do contrato; não substitui a
-  futura captura do sketch migrado.
+  crises, o socorro e a seleção do pool estão implementados em
+  `prototype/balance-model.mjs` e no sketch `last_horizon/`.
+- O sketch executa as oito preventivas e quatorze soluções com confirmação,
+  coleta e entrega físicas, retomadas e socorro no beliche de risco.
+- `--capture` verifica o fluxo no Processing e salva a evidência visual;
+  o modelo Node continua sendo a referência numérica independente.

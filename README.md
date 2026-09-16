@@ -44,6 +44,16 @@ O padrão de animação vale para todo asset animado do projeto: uma spritesheet
 única em PNG com JSON de metadados. Não há exportação de PNG separado por
 quadro; o `.aseprite` de origem acompanha a spritesheet quando disponível.
 
+## Executar o jogo
+
+As quests das issues #25 e #26 estão implementadas em `last_horizon/*.pde`;
+`prototype/balance-model.mjs` é a referência numérica separada, não o jogo.
+Abra `last_horizon/last_horizon.pde` no Processing 4.5.6 e execute.
+O botão `ORDENS` compara as ofertas e reabre os detalhes da quest. Confirme a
+preventiva com seu responsável, colete e entregue usando `E` e `ENTER`, e
+durma no seu beliche. A migração não depende da conclusão do inventário #8.
+Comandos CLI e captura: `code/SKETCH_ARCHITECTURE.md`.
+
 ## Mecanica principal
 
 A partida representa uma viagem de dez dias por quatro cômodos. A Sala de

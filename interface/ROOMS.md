@@ -26,7 +26,6 @@ cada estação fique alcançável andando ou subindo escada. O pulo de 48 px
 | Coleta | sim | entrega ou libera o objeto da ordem |
 | Entrega | sim | aplica a recompensa ou resolve a solução escolhida |
 | Conversa | sim | abre retrato e caixa inferior do sobrevivente |
-| Interruptor | sim | explica a consequência e pede confirmação |
 | Porta | não | troca entre o Comando e uma sala periférica |
 
 Regras que valem em todos os cômodos:
@@ -43,7 +42,10 @@ Regras que valem em todos os cômodos:
   confirmada presencialmente com o sobrevivente responsável.
 - Nos dias com incidente, o cartão apresenta duas soluções físicas e a escolhida
   deve ser executada no espaço jogável.
-- Diagnóstico e conversa fora da ordem não gastam a conclusão diária.
+- Pontos fora da etapa atual ficam apagados, sem marcador de ação, destaque ou
+  resposta a `E`. NPCs vivos continuam visíveis, mas só interagem quando são
+  necessários à confirmação, coleta ou entrega. Portas e beliche do técnico
+  permanecem acessíveis; socorro habilita com pessoa em risco e quest diária livre.
 - O mapa mostra a origem e o destino, mas não transporta o técnico.
 - Indicações usam ações concretas, nunca termos internos.
 - A ordem ativa usa somente pontos que aparecem na oferta. O objeto não fica
@@ -129,9 +131,9 @@ O cartão informa também o custo e o resultado; os valores numéricos estão em
 | Solução técnica | correção | console da rota (Comando) | estação do motor, energia, suporte, comunicações ou casco |
 | Solução de suprimentos | recuperação | console da rota (Comando) | estoque de comida |
 | Solução da tripulação | convivência | Neusa ou console da rota | mesa do grupo |
-| Socorro | recuperação humana | origem da crise | beliche da pessoa em risco |
+| Socorro | recuperação humana | recursos do estoque, pagos na confirmação | beliche da pessoa em risco |
 
-Uma quest possui somente duas etapas leves: `COLETAR` e `ENTREGAR`. A rota usa
+Ordens preventivas e soluções possuem duas etapas leves: `COLETAR` e `ENTREGAR`. A rota usa
 no máximo dois cômodos distintos, o sobrevivente responsável pode ser origem ou
 destino, e o objeto é carregado por vez. A solução do casco parte do console da
 rota no Comando para alcançar o ponto sorteado em qualquer cômodo.
@@ -144,6 +146,10 @@ solução urgente falhar, o problema permanece ativo sem multa adicional e a mes
 solução reaparece como retomada.
 Em dia com incidente novo, o cartão do incidente tem prioridade; a retomada do
 problema anterior fica disponível no próximo dia sem incidente.
+
+O socorro simplificado é confirmado presencialmente no beliche da pessoa em
+risco: paga `-8 água` e `-2 comida` e conclui a quest do dia, conforme o modelo
+numérico. Não há objeto adicional nem cadeia de visitas para socorrer.
 
 
 ## Leitura do jogador
@@ -161,5 +167,7 @@ ocorrência e a quest aponta para o local alcançável correspondente. A origem 
 duas soluções é o console da rota no Comando.
 
 O catálogo de quests e o balanceamento numérico estão em `mechanics/ACTIONS.md`
-e `events/`. O sketch atual continua implementando o ciclo anterior até a
-migração posterior.
+e `events/`. O sketch `last_horizon/` executa esse contrato. O botão `ORDENS`
+reabre as ofertas ou os detalhes da quest; `OFERTAS / PRÓXIMA RETOMADA` permite
+consultar as soluções pendentes em dias sem incidente. A arte das estações e
+dos objetos ainda usa a representação geométrica do protótipo.

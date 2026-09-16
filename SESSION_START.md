@@ -3,7 +3,7 @@
 > Resumo operacional obrigatório. Leia antes de analisar, editar ou implementar
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
-Atualizado em: 2026-09-16 (issue #26 concluída; fronteira atualizada)
+Atualizado em: 2026-09-16 (issues #25 e #26 migradas e verificadas no sketch)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Regras inegociáveis
@@ -62,16 +62,17 @@ reporte e não escolha silenciosamente.
 
 - #19, #20, #21, #22, #23 e #24 estão CLOSED; D-073 a D-110 continuam
   confirmadas e implementadas no protótipo anterior.
-- #25 foi concluída: o catálogo das oito ordens preventivas e das quatorze
-  soluções físicas está definido em `mechanics/ACTIONS.md` e `events/`.
-- #26 foi concluída: estoque, consumo, custos, recompensas, perdas, prazos,
-  crises, risco e seleção do pool estão definidos e simulados.
-- O sketch ainda não foi migrado para o novo ciclo de quests.
+- #25 foi concluída: catálogo das oito preventivas e quatorze soluções,
+  agora com confirmação, coleta e entrega físicas em `last_horizon/`.
+- #26 foi concluída: números, pool, falhas, negligência, crises, risco e socorro
+  estão implementados tanto no modelo Node quanto no sketch Processing.
+- A migração foi solicitada explicitamente antes do inventário #8. O jogo já
+  executa o novo ciclo; estações e objetos ainda usam a arte geométrica.
 - #8 está OPEN e disponível após o fechamento da #26:
   [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8).
 - #7 está OPEN, disponível e independente:
   [Documento de entrega e como o jogo roda na apresentação](https://github.com/shelldonryan/gtd_example/issues/7).
-- O próximo caminho crítico é #8; a migração do sketch vem depois do inventário.
+- O próximo caminho crítico é #8 para arte final; a migração funcional já terminou.
 
 ### Fronteira Wayfinder
 
@@ -81,8 +82,8 @@ Sincronizada com o grafo nativo após o fechamento do balanceamento:
 |---|---|---|---|
 | #7 Documento de entrega | OPEN | — | independente e disponível |
 | #8 Inventário de assets | OPEN | — | disponível após #26 |
-| #25 Redesenhar incidentes e ordens como quests físicas | CLOSED | — | catálogo e fluxo definidos |
-| #26 Simplificar mecânicas legadas e balancear o ciclo de quests | CLOSED | — | números, pool e simulação definidos |
+| #25 Redesenhar incidentes e ordens como quests físicas | CLOSED | — | catálogo e fluxo físico implementados no sketch |
+| #26 Simplificar mecânicas legadas e balancear o ciclo de quests | CLOSED | — | números, pool e consequências implementados no sketch |
 | #19 Redesenhar o ciclo | CLOSED | — | contrato anterior superseded |
 | #20 Balancear o novo ciclo | CLOSED | — | números anteriores superseded |
 | #21 Implementar novo ciclo e hub | CLOSED | — | implementação anterior superseded em parte |
@@ -93,9 +94,9 @@ Sincronizada com o grafo nativo após o fechamento do balanceamento:
 
 ## Contrato vigente do produto
 
-O contrato abaixo é a direção confirmada para a próxima migração. O sketch ainda
-implementa parte do contrato anterior; não tratar a implementação atual como
-prova da intenção nova.
+O contrato abaixo está implementado no sketch `last_horizon/` e no modelo
+numérico `prototype/balance-model.mjs`. A migração não aguardou o inventário #8,
+por solicitação explícita do usuário; arte final continua fora desta mudança.
 
 - Jogo de gerenciamento de recursos e exploração 2D em plataforma, em uma nave
   **sem nome**.
@@ -106,6 +107,11 @@ prova da intenção nova.
 - Nos dias sem incidente, os sobreviventes oferecem duas ordens preventivas. O
   jogador escolhe e confirma uma presencialmente; deve concluí-la para evitar o
   prejuízo maior de negligência.
+- Ajuste de playtest: dias tranquilos começam sem modal; `ORDENS` mostra `!`
+  pulsante enquanto houver escolha disponível, até selecionar uma ordem.
+- Só o ponto da etapa atual permite interação. Demais estações e NPCs ficam
+  sem marcador de ação e sem resposta a `E`; NPCs vivos permanecem visíveis.
+  Portas, beliche do técnico e socorro com risco/quest livre são preservados.
 - Nos dias com incidente, o cartão apresenta duas soluções físicas. O jogador
   escolhe uma, coleta o objeto e entrega no destino.
 - Toda ordem informa objeto, origem, destino, recompensa e consequência de falha.
@@ -190,8 +196,8 @@ Não replique aqui o histórico completo:
 - D-099 a D-103: decisões de implementação do ciclo anterior, incluindo
   distribuição, beliche temporário, empate de urgência e crise imediata;
   **SUPERSEDED** onde conflitarem com ordens e riscos simplificados.
-- D-104 a D-107: leituras de implementação do ciclo anterior; não são requisitos
-  do novo sketch até a conclusão da #26.
+- D-104 a D-107: leituras do ciclo anterior; superseded onde conflitam com as
+  quests das issues #25 e #26, agora implementadas no sketch.
 - D-108: os incidentes ocorrem nos dias 2, 4, 6, 8 e 10 e o dia 1 fica sem
   incidente; decisão preservada no novo contrato.
 - D-109: confirmação de ações importantes; o princípio permanece, mas os painéis
@@ -206,8 +212,8 @@ Não replique aqui o histórico completo:
   políticas, bônus numéricos, coleta livre e contador separado de intervenção
   saem. Problemas persistentes permanecem; há no máximo uma pessoa em risco.
 - **Tickets concluídos:** a #25 define matriz, textos e rotas; a #26 define
-  números, seleção do pool e simulação. O inventário de assets (#8) está
-  liberado; a migração do sketch permanece posterior.
+  números, seleção do pool e simulação. Ambos foram migrados para o sketch.
+  O inventário de assets (#8) continua disponível como próximo caminho.
 
 ## Fontes por tarefa
 
@@ -242,8 +248,7 @@ Código:
 
 ## Lacunas que exigem consulta ou ticket
 
-- a migração do novo ciclo de quests para o sketch e a captura desse fluxo,
-  após o inventário;
+- a arte final dos objetos e estações, que ainda usam representação geométrica;
 - o inventário final de assets, dimensões, reutilização e ordem de produção,
   no ticket [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8),
   agora disponível;
@@ -283,31 +288,48 @@ Código:
 
 ## Última sessão registrada
 
-- A issue #26 foi implementada e fechada após a pesquisa do código e a
-  simulação do novo ciclo.
-- `prototype/balance-model.mjs` agora define estoque inicial `E80 O85 A80
-  C70 M80 P4`, consumo diário `E-7 O-4 A-6 C-6 M-2`, recompensas preventivas,
-  falhas, negligência, custos urgentes, prazos, crises, risco e socorro.
-- O pool usa quatro pares de referência em ciclo, filtra sobreviventes vivos e
-  preenche vagas sem repetir recurso. A partida interativa embaralha cinco dos
-  sete incidentes sem reposição.
-- O modelo cobre as etapas `COLETAR` → `ENTREGAR`, uma quest por dia, problemas
-  persistentes, falha urgente sem multa extra e retomada da mesma solução nos
-  dias seguintes. A negligência continua sendo aplicada quando o socorro ocupa
-  um dia sem incidente; socorro antes de incidente pendente é rejeitado.
-- `mechanics/ACTIONS.md`, `events/`, `interface/FLOW.md`, `interface/HUD.md`,
-  `interface/ROOMS.md`, `interface/MENU_VICTORY.md`,
-  `code/SKETCH_ARCHITECTURE.md` e ADR-0002 foram sincronizados com os valores.
-- `node --check prototype/balance-model.mjs` passou.
-- `node prototype/balance-model.mjs --simulate` passou com `BALANCE CHECK: PASS`.
-- Três estratégias vencedoras, omissão derrotada e reserva de peças vencedora em
-  `2520/2520` sequências.
-- A TUI foi exercitada e mostra objeto, origem, destino, recompensa, falha e
-  as duas soluções com custos antes da escolha.
-- O sketch Processing ainda implementa o ciclo anterior; nenhuma alteração foi
-  feita nos `.pde`. A migração visual fica posterior ao inventário da #8.
-- A #26 está CLOSED, a #8 está OPEN e disponível e a #7 continua OPEN,
-  independente. O próximo caminho crítico é #8.
-- Os quatro PNGs não rastreados em `assets/concept_arts/` foram preservados.
-- Resultado: contrato numérico e documentação prontos; não é ainda
-  funcionalidade pronta do novo ciclo no sketch.
+- Correção do selo de ordens: círculo e exclamação agora compartilham a mesma
+  transformação e pulsam juntos (tamanho e cor, ciclo de 1,4 s). Antes o glifo
+  tinha tamanho fixo e só o círculo variava.
+- A exclamação passou a ser geométrica (barra e ponto) e centrada no círculo:
+  a medição da caixa de tinta acusava deslocamento `+1,50, -1,50` px lógicos com
+  o glifo de fonte e agora registra `0,00, 0,00`.
+- `checkOrdersBadge` mede altura da tinta (`5,50 -> 7,50` px) e o centro do
+  glifo em duas fases fixas do pulso, e salva `output/orders_badge_pulse.png`
+  como prova visual.
+- `verify` falho agora imprime `FALHOU` e encerra o harness com `exit()`; antes
+  lançava exceção a cada quadro e o Processing ficava preso sem terminar.
+- Ajuste anterior de playtest: removida a abertura automática de ordens;
+  adicionado `!` pulsante no botão e disponibilidade contextual dos pontos.
+  Captura no Processing passou com `QUEST CHECK: PASS`, incluindo início livre,
+  antena/reserva inativas e ativação de origem/destino conforme a etapa.
+- Por solicitação explícita, as issues #25 e #26 foram migradas para as oito
+  abas de `last_horizon/`, sem aguardar o inventário #8.
+- O jogo contém oito preventivas, quatorze soluções, comparação remota, aceite
+  presencial, coleta, um objeto carregado e entrega confirmada.
+- `ORDENS` reabre ofertas/detalhes e percorre retomadas. Problemas conservam
+  a solução escolhida e o prazo; incidente novo tem prioridade.
+- Estoque, consumo, recompensas, falha, negligência, custos, crises, risco único
+  e socorro seguem o modelo Node. Retomada e socorro não apagam negligência.
+- Removidos contenção separada, políticas, bônus, aceleração e coleta livre.
+  Preservados hub, portas, escadas, animação, física e viewport.
+- `--capture` no Processing passou com `QUEST CHECK: PASS`: 22 quests,
+  exclusividade, confirmações físicas, custo inviável, noites, retomada via
+  interface, risco, morte, pool e casco alcançável.
+- Três estratégias vencem; omissão perde; reserva de peças vence
+  `2520/2520` sequências no próprio sketch.
+- `--hit-test` e `--ladder-test` passaram. O modelo Node continua retornando
+  `BALANCE CHECK: PASS`.
+- Capturas de ofertas, confirmação, coleta/entrega, mapa, objeto carregado,
+  incidentes, retomada, socorro, resumo denso, vitória e derrota estão em
+  `last_horizon/output/`; a inspeção visual incluiu textos longos de casco e suporte.
+- GitNexus retornou `UNKNOWN` para funções `.pde`; não há cobertura do grafo
+  dessas funções. A verificação funcional foi feita no Processing.
+- Fontes de mecânicas, eventos, interface, arquitetura, README, contexto e
+  ADR-0002 foram sincronizadas com a migração.
+- #25 e #26 permanecem CLOSED; #8 OPEN e disponível; #7 OPEN independente.
+  O corpo da #1 e os comentários das duas issues registram a mesma fronteira.
+- Os quatro concept arts não rastreados foram preservados. Sem commit ou push
+  nesta sessão.
+- Resultado: novo ciclo funcional no jogo Processing, com arte geométrica;
+  não apenas documentação ou simulador Node.

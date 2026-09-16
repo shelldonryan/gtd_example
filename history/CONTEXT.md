@@ -33,8 +33,8 @@ Quatro sobreviventes viajam a bordo, além do técnico: **Vera**, a piloto, no
 comando; **Bento**, o intendente, no depósito; **Neusa**, a enfermeira, no
 dormitório; e **Sílvia**, a mecânica, na Sala de máquinas. Eles ficam parados em
 pontos dos cômodos e respondem quando o técnico interage com eles. Não possuem
-rotinas autônomas. Se uma pessoa morrer, sua especialidade deixa de facilitar as
-ações relacionadas, mas nenhuma intervenção necessária fica bloqueada.
+rotinas autônomas. Se uma pessoa morrer, ela deixa de oferecer ordens e reduz
+a contagem a bordo; os custos das soluções não mudam.
 
 Os sistemas estão funcionando, mas não foram preparados para uma viagem sem
 problemas. A nave precisa economizar energia, controlar os estoques e lidar com

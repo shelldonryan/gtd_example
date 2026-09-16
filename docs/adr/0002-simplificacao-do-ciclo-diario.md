@@ -14,6 +14,6 @@ O ciclo anterior acumulava seis recursos, políticas persistentes, bônus numér
 
 A ordem preventiva, a solução urgente e o socorro compartilham a mesma unidade
 diária. Os valores de recompensas, perdas, custos, prazos e crises estão
-consolidados em `mechanics/ACTIONS.md` e simulados em
-`prototype/balance-model.mjs`; esta ADR registra a forma do sistema e as
-remoções que a simplificação exigiu.
+consolidados em `mechanics/ACTIONS.md`, simulados em
+`prototype/balance-model.mjs` e executados no sketch `last_horizon/`.
+Esta ADR registra a forma do sistema e as remoções que a simplificação exigiu.

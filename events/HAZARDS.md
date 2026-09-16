@@ -31,4 +31,5 @@ nunca fica disponível para coleta livre.
 
 O dano no casco e as duas rotas de solução estão definidos na matriz de quests
 da issue #25. Os valores numéricos acima são o contrato recalibrado da issue
-#26. O sketch ainda precisa migrar esse contrato para o fluxo visual.
+#26. O sketch `last_horizon/` executa a coleta no console e a entrega no ponto
+do casco sorteado, que permanece fixo durante as retomadas.

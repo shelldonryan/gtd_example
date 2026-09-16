@@ -10,7 +10,7 @@
 | Sala de máquinas | pela porta inferior do Comando | cena 2D jogável, motor, energia, suporte e ordens técnicas |
 | Depósito | pela porta média do Comando | cena 2D jogável, estoques, componentes e ordens logísticas |
 | Dormitório | pela porta superior do Comando e no início de cada novo dia | cena 2D jogável, descanso, saúde, moral, Neusa e ordens da tripulação |
-| Ordens | no início de dias sem incidente | duas ordens preventivas comparáveis, com objeto, rota, recompensa e perda |
+| Ordens | botão `ORDENS`, sem abertura automática | duas ordens preventivas comparáveis, com objeto, rota, recompensa e perda |
 | Mapa | botão `MAPA` | sobreposição com posição, ordens ativas e problemas por sala; nunca transporta |
 | Diálogo | interação com sobrevivente | retrato e caixa inferior; oferece ou confirma uma ordem |
 | Incidente | no início dos dias 2, 4, 6, 8 e 10 | cartão modal com duas soluções físicas |
@@ -46,17 +46,18 @@ graph LR
 ## O ciclo do dia
 
 1. O primeiro dia começa na Sala de comando; os seguintes, no Dormitório.
-2. Nos dias sem incidente, o jogo apresenta duas ordens preventivas. O jogador
-   compara responsável, objeto, origem, destino, recompensa e falha; a seleção
-   fica pendente até a confirmação presencial com o sobrevivente.
+2. Nos dias sem incidente, o jogador começa livre na sala. O botão `ORDENS`
+   mostra uma exclamação pulsante enquanto houver uma ordem disponível e nenhuma
+   seleção ou quest em andamento. O jogador abre o cartão quando quiser; a
+   seleção fica pendente até a confirmação presencial com o sobrevivente.
 3. A confirmação presencial transforma a seleção em ordem aceita. A ordem aceita
    não pode ser cancelada; a outra oferta expira.
 4. Nos dias 2, 4, 6, 8 e 10, um incidente apresenta duas soluções físicas. O
    jogador escolhe e confirma uma no cartão; não existe contenção separada.
 5. A ordem ativa passa por `COLETAR` e `ENTREGAR`. A coleta confirma o objeto e
    sua finalidade; a entrega confirma o resultado antes de aplicar.
-6. Uma única quest pode ser concluída por dia. Diagnóstico e conversa fora da
-   ordem são opcionais e não criam uma cadeia obrigatória.
+6. Uma única quest pode ser concluída por dia. Somente o ponto da etapa atual
+   permite interação: responsável da confirmação, origem da coleta ou destino.
 7. Se nenhuma ordem preventiva for aceita, os dois recursos oferecidos sofrem
    pequenas perdas. Se a ordem aceita falhar, perde-se o recurso que ela
    protegeria; o objeto retorna à origem.
@@ -83,6 +84,7 @@ manutenção.
 | Interagir e abrir portas | E |
 | Continuar diálogos, confirmar modal e dormir | ENTER |
 | Abrir o mapa | botão `MAPA`, com o mouse |
+| Rever ofertas, ordem ativa e retomadas | botão `ORDENS`, com o mouse |
 | Pausa, fechar/voltar modal e continuar na pausa | ESC |
 
 O dia não avança por tecla ou botão persistente. Encerrá-lo exige chegar ao
@@ -117,6 +119,10 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
 - Diagnóstico e conversa fora da ordem são opcionais. Não há cadeia universal de
   NPCs nem objetivo paralelo.
 - Uma quest pode ser concluída por dia. A ordem aceita não pode ser cancelada.
+- Antes do aceite, o botão `ORDENS` permite trocar a seleção preventiva. Depois
+  do aceite, mostra apenas os detalhes da quest. Em dias sem incidente,
+  `OFERTAS / PRÓXIMA RETOMADA` percorre as soluções dos problemas pendentes;
+  a retomada exige confirmação e mantém a perda de negligência das preventivas.
 - Uma ordem preventiva aceita e não concluída perde o recurso que protegeria e
   devolve o objeto à origem. A ordem não escolhida não gera perda.
 - Se nenhuma ordem preventiva for aceita, os dois recursos das ofertas sofrem

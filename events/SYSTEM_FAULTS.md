@@ -40,4 +40,5 @@ Assim, a rota usa no máximo o Comando e o cômodo afetado.
 
 A família, os destinos e as duas soluções físicas estão definidos na matriz de
 quests da issue #25. Os valores numéricos acima são o contrato recalibrado da
-issue #26. O sketch ainda precisa migrar esse contrato para o fluxo visual.
+issue #26. O sketch `last_horizon/` executa esse contrato no fluxo físico,
+incluindo a retomada da mesma solução sem reiniciar seu prazo.

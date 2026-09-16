@@ -49,5 +49,6 @@ custos nem cria bônus ou penalidades ocultos.
 
 As soluções físicas e os objetos de comida e convivência estão definidos na
 matriz de quests da issue #25. Os valores numéricos acima são o contrato
-recalibrado da issue #26. O sketch ainda precisa migrar esse contrato para o
-fluxo visual.
+recalibrado da issue #26, agora executado em `last_horizon/`. O socorro exige
+presença no beliche da pessoa em risco e confirmação do custo, sem uma cadeia
+adicional de coleta; usa a mesma conclusão diária das demais quests.

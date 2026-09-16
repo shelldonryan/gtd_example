@@ -51,7 +51,7 @@ no inventário de assets.
 | Centro | sala 2D jogável usando toda a largura |
 | Faixa de ordem | estágio, responsável, objeto, origem, destino, recompensa ou resultado e perda da ordem ativa |
 | Faixa de urgência | problema com menor prazo e quantidade dos demais |
-| Rodapé | botão `MAPA` e orientação de controles |
+| Rodapé | botões `MAPA` e `ORDENS`, e orientação de controles |
 | Sobreposição | ordens, mapa, diálogos, incidentes e resumo ao dormir |
 
 O mapa abre pelo botão `MAPA`, mostra `VOCÊ ESTÁ AQUI`, a ordem ativa e todas as
@@ -67,6 +67,20 @@ diária, prazo restante e consequência da crise. O clique nunca transporta o
 técnico.
 
 ### Diálogos e ordens
+
+O botão `ORDENS` reabre as duas ofertas antes do aceite ou a ficha completa da
+quest ativa. Nos dias sem incidente, `OFERTAS / PRÓXIMA RETOMADA` percorre as
+soluções pendentes com seus prazos atuais. Nenhum desses botões move o técnico.
+
+O início do jogo e os dias sem incidente não abrem o modal automaticamente.
+O botão mostra `!` pulsando suavemente em tamanho e cor, com ciclo de 1,4 s,
+enquanto houver oferta/retomada disponível e nenhuma seleção ou quest em curso.
+Consultar e fechar sem escolher mantém o aviso; selecionar uma ordem o remove.
+Cartões obrigatórios de incidentes continuam abrindo normalmente.
+O círculo e a exclamação formam um selo único: os dois crescem e mudam de cor
+juntos, na mesma proporção; o glifo nunca fica parado enquanto o círculo pulsa.
+A exclamação é desenhada como geometria — barra e ponto — e fica centrada no
+círculo por construção, sem depender da métrica da fonte.
 
 - Diálogos de NPC avançam com `ENTER` ou clique em `CONTINUAR (ENTER)`.
 - Nos dias sem incidente, o cartão compara duas ofertas do pool com

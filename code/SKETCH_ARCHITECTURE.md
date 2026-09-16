@@ -5,8 +5,8 @@ Ele continua válido para o viewport, o HUD e o estado global. O mapa macro agor
 abre salas 2D jogáveis, e o técnico é controlável dentro delas.
 
 
-A especificação vigente das salas e intervenções está em `interface/ROOMS.md`.
-O sketch permanece plano e implementa D-073 a D-103 e D-108 a D-110.
+A especificação vigente das salas e quests está em `interface/ROOMS.md`.
+O sketch permanece plano e executa o contrato das issues #25 e #26.
 
 ## Onde o código mora
 
@@ -24,8 +24,8 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
 | `screens.pde` | máquina de estados, camadas modais, menus, vinheta, pausa e desfechos |
 | `ship.pde` | hub, quatro salas, portas por convés, mapa consultável, plataformas, escadas, NPCs e estações |
 | `game.pde` | calendário, turno, incidentes, consumo, crises e condições de término |
-| `tasks.pde` | target ordens e soluções, problemas persistentes, sobreviventes, riscos e objetos de quest |
-| `capture.pde` | captura visual e verificações de ciclo, hub, clique e escada |
+| `tasks.pde` | catálogo e estado de ordens, soluções, retomadas, problemas, sobreviventes, risco e objetos |
+| `capture.pde` | captura visual das quests e verificações de ciclo, campanhas, hub, clique e escada |
 
 ## Pipeline de assets
 
@@ -61,9 +61,9 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
   `pipeline_probe_window.png`.
 
 
-## Contrato de gameplay confirmado para migração
+## Contrato de gameplay implementado
 
-O ciclo alvo usa cinco incidentes nos dias 2, 4, 6, 8 e 10, escolhidos sem
+O ciclo usa cinco incidentes nos dias 2, 4, 6, 8 e 10, escolhidos sem
 reposição entre sete tipos organizados em falhas técnicas, suprimentos e
 tripulação. Cada incidente oferece duas soluções físicas em formato de quest.
 
@@ -84,17 +84,16 @@ recalcular custos.
 
 O hub, as quatro salas, o mapa consultável, o dano no casco alcançável e o
 objetivo de chegar a Marte permanecem. O catálogo e o balanceamento das quests
-estão em `mechanics/ACTIONS.md` e `events/`; a migração e a verificação do
-sketch são trabalho posterior.
+estão em `mechanics/ACTIONS.md` e `events/` e são executados no sketch.
 
-## Implementação atual e migração
+## Implementação do ciclo
 
-O sketch atual ainda implementa o contrato anterior de problemas, contenções,
-intervenções e componentes. A arquitetura visual, o hub, o mapa, o pipeline de
-assets e a física continuam reaproveitáveis; a migração do ciclo começa após a
-validação numérica e a simulação deste ticket.
+O sketch usa as mesmas regras do modelo `prototype/balance-model.mjs`.
+Hub, mapa consultável, física, spritesheet e viewport foram preservados.
+A migração foi solicitada explicitamente antes do inventário de assets #8;
+as estações e objetos usam a representação geométrica do protótipo.
 
-O alvo da migração é:
+O ciclo implementado contém:
 
 - **Ordens:** duas ofertas preventivas em dias sem incidente e duas soluções
   físicas nos dias com incidente; apenas uma quest concluída por dia.
@@ -108,8 +107,8 @@ O alvo da migração é:
   ao dormir.
 
 O catálogo, os textos, as rotas e os valores numéricos das quests estão
-definidos em `mechanics/ACTIONS.md` e `events/`. A alteração do sketch deve
-consumir esse contrato sem reintroduzir políticas, bônus ou limites paralelos.
+definidos em `mechanics/ACTIONS.md` e `events/`. Não há contenção separada,
+economia, racionamento, acelerador, bônus de NPC ou coleta livre.
 
 Números do movimento (grade lógica 640×360; render 1280×720 / 720p): personagem
 16×24, andar 1,5 px/quadro, pulo de 48 px, gravidade 0,5, escada 1,0 e
@@ -120,10 +119,20 @@ só; o estilo permanece em globais agrupadas, funções curtas e `update` separa
 de `draw`.
 ## Estado da partida
 
-Globais planas mantêm recursos, dia, sala e movimento. O estado alvo também
-precisará registrar a oferta diária, a ordem escolhida, a etapa de coleta ou
-entrega, o objeto carregado, a recompensa, a perda de falha e os problemas
-persistentes.
+Globais planas mantêm recursos, dia, sala e movimento. `daily_offers` contém as
+duas ofertas; `selected_order` é a seleção ainda não confirmada; `active_quest`
+e `quest_stage` controlam coleta e entrega. `held_item` identifica o único
+objeto carregado. `quest_completed` é o limite diário; `preventive_committed`
+distingue falha de preventiva de negligência, inclusive após socorro ou retomada.
+
+`problem_solution` guarda a escolha urgente durante as noites; retomadas não
+reiniciam `problem_deadline`. `opened_day` impede reinicializar o mesmo turno.
+O custo urgente é validado e pago apenas na entrega; a falta de recursos nunca
+trava a escolha inicial nem força uma crise imediata.
+
+`ORDENS` abre comparação ou detalhes. O aceite preventivo valida presença junto
+ao responsável; coleta, entrega e sono validam o ponto físico. `E` apenas abre
+o painel; `ENTER` confirma. Fechar o painel não cancela a ordem aceita.
 
 O estado de risco individual mantém no máximo uma pessoa em risco. Sobreviventes
 mortos deixam de oferecer ordens, mas não alteram custos.
@@ -135,7 +144,7 @@ Nenhuma tela recebe parâmetro: as abas compartilham o mesmo estado do sketch.
 `mechanics/ACTIONS.md` é a fonte de regras. Os valores antigos do modelo da
 issue #20 estão **SUPERSEDED** pela estrutura de quests. Os valores vigentes do
 novo ciclo estão consolidados em `mechanics/ACTIONS.md` e no modelo executável;
-a migração do sketch deve consumi-los sem recalibração local.
+o sketch os utiliza sem recalibração local.
 
 ## Viewport e input
 
@@ -221,11 +230,13 @@ raiz do repositório:
 "C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --ladder-test
 ```
 
-`--capture`, `--hit-test` e `--ladder-test` continuam sendo a fronteira pública
-de verificação. As capturas existentes comprovam o ciclo anterior. Depois da
-migração, `--capture` deverá cobrir as duas ofertas preventivas, a escolha
-presencial, coleta e entrega, recompensas, falha de ordem, negligência, as duas
-soluções de incidente, problemas persistentes e o risco individual simplificado.
+`--capture`, `--hit-test` e `--ladder-test` são a fronteira pública de
+verificação. `--capture` salva 30 estados do novo ciclo, além dos cartões e HUDs
+do catálogo, e exerce aceite presencial, coleta, entrega, custo inviável,
+falha, negligência, retomada pela interface, exclusividade diária, crises,
+socorro, morte e filtragem do pool. Asserções falhas interrompem a execução.
+O mesmo modo executa três estratégias vencedoras, omissão derrotada e
+2.520/2.520 sequências vencidas pela reserva de peças no próprio Processing.
 Os modos de hit-test e escada continuam cobrindo as quatro salas, o letterbox e
 as rotas físicas.
 
@@ -244,18 +255,18 @@ Limitações observadas:
 
 ## Estado da revisão
 
-- **Código atual:** o protótipo comprovado ainda implementa o ciclo anterior;
-  a migração do novo contrato é trabalho posterior ao balanceamento da #26.
-- **Contrato alvo:** cinco incidentes nos dias 2, 4, 6, 8 e 10, ordens
-  preventivas nos demais dias, duas soluções físicas por incidente e uma
-  conclusão de quest por dia.
-- **Mecânicas removidas:** políticas, bônus numéricos, coleta livre e contador
-  separado de intervenção.
-- **Espaço preservado:** Comando em hub, mapa consultável, quatro salas e
-  estações físicas com rotas curtas.
-- **Evidência existente:** `node prototype/balance-model.mjs --simulate` comprova
-  o contrato numérico novo; `--capture`, `--hit-test` e `--ladder-test` ainda
-  comprovam somente o ciclo anterior do sketch.
-- **Próxima evidência:** a migração deverá capturar as duas ofertas preventivas,
-  escolha presencial, coleta, entrega, falha, negligência, soluções urgentes,
-  problemas persistentes e risco individual.
+- **Código atual:** `last_horizon/*.pde` executa as issues #25 e #26, não apenas
+  o modelo Node.
+- **Contrato:** cinco incidentes nos dias 2, 4, 6, 8 e 10; oito ordens
+  preventivas e quatorze soluções físicas; uma conclusão por dia.
+- **Mecânicas removidas:** contenção separada, políticas, bônus numéricos,
+  acelerador, coleta livre e contador paralelo de intervenção.
+- **Espaço preservado:** Comando em hub, mapa consultável, quatro salas,
+  portas, escadas, física e animação.
+- **Evidência:** `--capture` retorna `QUEST CHECK: PASS`; `--hit-test` e
+  `--ladder-test` passam; o modelo Node retorna `BALANCE CHECK: PASS`.
+- **Capturas conferidas:** ofertas, confirmação presencial, coleta/entrega,
+  objeto carregado, mapa, incidentes de motor/casco/suporte, retomada, socorro,
+  resumo noturno denso, vitória e derrota em `last_horizon/output/`.
+- **Limite visual:** a arte final dos objetos e estações permanece no inventário
+  #8; a lógica física já funciona com a representação geométrica existente.
