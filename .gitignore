@@ -5,6 +5,7 @@ last_horizon/application.macosx/
 last_horizon/application.linux32/
 last_horizon/application.linux64/
 last_horizon/*.class
+last_horizon/output/*
 
 # Java build artifacts
 *.class
@@ -24,4 +25,5 @@ desktop.ini
 *~
 
 AGENTS.md
+.agents
 CLAUDE.md
