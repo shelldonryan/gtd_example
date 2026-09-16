@@ -299,8 +299,8 @@ Código:
   `interface/ROOMS.md`, `interface/MENU_VICTORY.md`,
   `code/SKETCH_ARCHITECTURE.md` e ADR-0002 foram sincronizados com os valores.
 - `node --check prototype/balance-model.mjs` passou.
-- `node prototype/balance-model.mjs --simulate` passou com `BALANCE CHECK: PASS`,
-  três estratégias vencedoras, omissão derrotada e triagem vencedora em
+- `node prototype/balance-model.mjs --simulate` passou com `BALANCE CHECK: PASS`.
+- Três estratégias vencedoras, omissão derrotada e reserva de peças vencedora em
   `2520/2520` sequências.
 - A TUI foi exercitada e mostra objeto, origem, destino, recompensa, falha e
   as duas soluções com custos antes da escolha.
