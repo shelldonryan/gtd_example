@@ -119,7 +119,8 @@ prova da intenção nova.
   pequenas perdas. Os valores exatos pertencem ao balanceamento.
 - Solução de incidente não concluída deixa o problema ativo, com perda diária,
   prazo e crise normais, sem multa extra; a mesma solução pode ser retomada nos
-  dias seguintes.
+  dias seguintes. Em dia com incidente novo, o cartão novo tem prioridade; a
+  retomada volta a aparecer no próximo dia sem incidente.
 - O sobrevivente responsável pode ser origem ou destino. A rota é curta e não
   exige três cômodos distintos.
 - Componentes especiais, como fusível e kit de vedação, existem como objetos de

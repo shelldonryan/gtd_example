@@ -142,6 +142,8 @@ preventiva exige confirmação presencial com o responsável; a solução de inc
 ordem preventiva aceita falhar ao dormir, o objeto retorna à origem; se uma
 solução urgente falhar, o problema permanece ativo sem multa adicional e a mesma
 solução reaparece como retomada.
+Em dia com incidente novo, o cartão do incidente tem prioridade; a retomada do
+problema anterior fica disponível no próximo dia sem incidente.
 
 
 ## Leitura do jogador

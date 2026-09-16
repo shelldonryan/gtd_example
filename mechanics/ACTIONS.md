@@ -158,6 +158,8 @@ prazo e crise normais.
 A mesma solução escolhida reaparece como retomada nos dias seguintes enquanto o
 problema permanecer ativo. Retomá-la continua consumindo a única conclusão diária
 e não altera o custo ou a consequência já exibidos.
+Em dia com incidente novo, o cartão do incidente tem prioridade; a retomada fica
+disponível no próximo dia sem incidente, enquanto o problema permanece ativo.
 
 ## Vocabulário da interface da quest
 

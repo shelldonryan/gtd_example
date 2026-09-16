@@ -98,7 +98,8 @@ beliche no Dormitório e interagir. Antes de dormir, o resumo modal mostra:
 Dormir com uma preventiva aceita e incompleta mostra a perda, devolve o objeto à
 origem e encerra a ordem. Dormir com uma solução urgente incompleta mantém o
 problema sem penalidade adicional; a mesma solução reaparece como retomada nos
-dias seguintes. Os valores e a ordem do processamento estão em `mechanics/ACTIONS.md`.
+dias seguintes. Em dia com incidente novo, o cartão novo tem prioridade e a
+retomada volta a aparecer no próximo dia sem incidente. Os valores e a ordem do processamento estão em `mechanics/ACTIONS.md`.
 
 ## Estados da interface
 

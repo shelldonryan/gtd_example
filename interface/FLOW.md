@@ -63,6 +63,8 @@ graph LR
 8. Se a solução de incidente falhar, o problema permanece ativo e segue sua
    perda, prazo e crise normais, sem multa adicional. A mesma solução reaparece
    como retomada enquanto o problema permanecer ativo.
+Em um dia com incidente novo, o cartão desse incidente tem prioridade. A
+retomada do problema anterior fica disponível no próximo dia sem incidente.
 9. O técnico retorna ao próprio beliche no Dormitório. Dormir processa consumo,
    perdas, riscos, crises e condições de término.
 
