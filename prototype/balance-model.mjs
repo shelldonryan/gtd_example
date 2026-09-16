@@ -505,7 +505,7 @@ function choosePreventive(state, id) {
     return next;
   }
   next.selectedOffer = order.id;
-  next.lastMessage = `${order.id}: confirme com ${order.responsible}.`;
+  next.lastMessage = `${order.responsible}: CONFIRME A ORDEM. ELA NÃO PODE SER CANCELADA.`;
   return next;
 }
 
@@ -873,8 +873,8 @@ function formatCost(cost) {
 }
 
 function formatPreventiveOffer(order) {
-  return `${order.id} ${order.title} | RESPONSÁVEL: ${order.responsible} | OBJETO: ${order.object}`
-    + ` | COLETA: ${order.origin} | ENTREGA: ${order.destination}`
+  return `ORDEM PREVENTIVA — ${order.title} [${order.id}] | RESPONSÁVEL: ${order.responsible}`
+    + ` | OBJETO: ${order.object} | COLETA: ${order.origin} | ENTREGA: ${order.destination}`
     + ` | RECOMPENSA: +${order.reward} ${RESOURCE_LABELS[order.resource]}`
     + ` | SE FALHAR: -${order.failure} ${RESOURCE_LABELS[order.resource]}`;
 }
