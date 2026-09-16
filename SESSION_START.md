@@ -3,7 +3,7 @@
 > Resumo operacional obrigatório. Leia antes de analisar, editar ou implementar
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
-Atualizado em: 2026-09-15 (D-108 a D-110 registradas; calendário em dias pares e painel de confirmação em intervenção, coleta e socorro)
+Atualizado em: 2026-09-15 (novo ciclo de quests registrado; fronteira atualizada)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Regras inegociáveis
@@ -60,68 +60,87 @@ reporte e não escolha silenciosamente.
 
 ## Estado operacional atual
 
-- #19, #20, #21, #22, #23 e #24 estão CLOSED; D-073 a D-110 estão confirmadas e
-  implementadas no protótipo.
-- #8 está disponível para o inventário de assets.
-- #7 está disponível e independente.
-- O sketch implementa o ciclo novo: incidentes nos dias 2, 4, 6, 8 e 10 (o dia
-  1 fica sem incidente), cinco problemas sem reposição, contenções que não
-  corrigem a causa, uma intervenção principal por dia e coleta de componente,
-  ambas com painel de confirmação, hub por convés, riscos individuais e crises.
-- As decisões D-108 a D-110 estão commitadas na branch
-  `prototype/sketch-architecture` (`83f152e` código, `677697f` documentos e
-  `4ac9a12` capturas), sem push; a branch está 9 commits à frente do origin.
+- #19, #20, #21, #22, #23 e #24 estão CLOSED; D-073 a D-110 continuam
+  confirmadas e implementadas no protótipo anterior.
+- O novo contrato de ordens, soluções físicas e simplificação do ciclo foi
+  confirmado nesta sessão, mas ainda não foi migrado para o sketch.
+- #25 está OPEN e disponível: [Redesenhar incidentes e ordens como quests
+  físicas](https://github.com/shelldonryan/gtd_example/issues/25).
+- #26 está OPEN e bloqueada nativamente por #25:
+  [Simplificar mecânicas legadas e balancear o ciclo de
+  quests](https://github.com/shelldonryan/gtd_example/issues/26).
+- #8 está OPEN e bloqueada nativamente por #25 e #26:
+  [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8).
+- #7 está OPEN, disponível e independente:
+  [Documento de entrega e como o jogo roda na apresentação](https://github.com/shelldonryan/gtd_example/issues/7).
+- O próximo caminho crítico é #25, seguido por #26; #8 será liberada quando os
+  contratos de quests e balanceamento estiverem fechados.
 
 ### Fronteira Wayfinder
 
-Sincronizada com o grafo nativo em 2026-09-15:
+Sincronizada com o grafo nativo após a criação do novo ciclo:
 
 | Issue | Estado | Bloqueadores abertos | Relação |
 |---|---|---|---|
-| #7 Documento de entrega | OPEN | — | independente |
-| #8 Inventário de assets | OPEN | — | disponível |
-| #19 Redesenhar o ciclo | CLOSED | — | D-073 a D-096 |
-| #20 Balancear o novo ciclo | CLOSED | — | D-097 e D-098 |
-| #21 Implementar novo ciclo e hub | CLOSED | — | D-099 a D-103, aplicadas |
-| #22 Calendário em dias pares | CLOSED | — | D-108, aplicada |
-| #23 Confirmação nas intervenções | CLOSED | — | D-109, aplicada |
-| #24 Painel na coleta de componentes | CLOSED | — | D-110, aplicada |
+| #7 Documento de entrega | OPEN | — | independente e disponível |
+| #8 Inventário de assets | OPEN | #25, #26 | depende do contrato de quests e do balanceamento |
+| #25 Redesenhar incidentes e ordens como quests físicas | OPEN | — | próximo caminho crítico |
+| #26 Simplificar mecânicas legadas e balancear o ciclo de quests | OPEN | #25 | segue o contrato de quests |
+| #19 Redesenhar o ciclo | CLOSED | — | contrato anterior superseded |
+| #20 Balancear o novo ciclo | CLOSED | — | números anteriores superseded |
+| #21 Implementar novo ciclo e hub | CLOSED | — | implementação anterior superseded em parte |
+| #22 Calendário em dias pares | CLOSED | — | calendário preservado |
+| #23 Confirmação nas intervenções | CLOSED | — | confirmação preservada para ações importantes |
+| #24 Painel na coleta de componentes | CLOSED | — | componentes reaproveitados como quests |
 
 ## Contrato vigente do produto
+
+O contrato abaixo é a direção confirmada para a próxima migração. O sketch ainda
+implementa parte do contrato anterior; não tratar a implementação atual como
+prova da intenção nova.
 
 - Jogo de gerenciamento de recursos e exploração 2D em plataforma, em uma nave
   **sem nome**.
 - Viagem de dez dias; primeiro dia no Comando, seguintes no Dormitório.
-- Incidentes nos dias 2, 4, 6, 8 e 10; cinco dos sete problemas, embaralhados sem
-  reposição.
-- Toda contenção deixa um problema persistente com perda diária, prazo e crise.
-- Não há briefing nem aceite de tarefa. HUD destaca o menor prazo entre
-  problemas e pessoas em risco; mapa mostra todos os problemas por sala e nunca
+- Incidentes nos dias 2, 4, 6, 8 e 10; cinco dos sete tipos, embaralhados sem
+  reposição. Os tipos pertencem às famílias de falhas técnicas, suprimentos e
+  tripulação.
+- Nos dias sem incidente, os sobreviventes oferecem duas ordens preventivas. O
+  jogador escolhe e confirma uma presencialmente; deve concluí-la para evitar o
+  prejuízo maior de negligência.
+- Nos dias com incidente, o cartão apresenta duas soluções físicas. O jogador
+  escolhe uma, coleta o objeto e entrega no destino.
+- Toda ordem informa objeto, origem, destino, recompensa e consequência de falha.
+  Uma ordem aceita não pode ser cancelada.
+- Uma única quest pode ser concluída por dia. Coleta e entrega são as duas etapas
+  leves; o técnico carrega um objeto por vez.
+- Ordem preventiva concluída aumenta um recurso específico. Ordem aceita e não
+  concluída perde uma pequena quantidade desse mesmo recurso. Nenhuma ordem
+  preventiva aceita perde os dois recursos oferecidos.
+- Se nenhuma ordem preventiva for aceita, os dois recursos das ofertas sofrem
+  pequenas perdas. Os valores exatos pertencem ao balanceamento.
+- Solução de incidente não concluída deixa o problema ativo, com perda diária,
+  prazo e crise normais, sem multa extra.
+- O sobrevivente responsável pode ser origem ou destino. A rota é curta e não
+  exige três cômodos distintos.
+- Componentes especiais, como fusível e kit de vedação, existem como objetos de
+  quest; não há coleta livre fora de uma ordem.
+- Economia, racionamento e bônus numéricos dos sobreviventes não fazem parte do
+  novo ciclo.
+- Há no máximo uma pessoa em risco por vez. Socorro é uma quest simples; a morte
+  reduz `A BORDO` sem recalcular custos.
+- O Comando é o único hub. O mapa mostra origem, destino e problemas, mas nunca
   transporta o técnico.
-- Uma intervenção principal por dia: correção, recuperação ou aceleração. Toda
-  intervenção principal abre o painel de confirmação do ponto — `CONFIRMAR
-  (ENTER)` aplica e `VOLTAR (ESC)` fecha sem gastar o dia. Diagnósticos,
-  conversas, componentes especiais e políticas são livres.
-- Recursos comuns são pagos na intervenção. Só kit de vedação e fusível de
-  potência exigem coleta e transporte, e cada coleta abre painel com o uso do
-  componente e o requisito do reparo.
-- O Comando é o único hub: porta superior para Dormitório, média para Depósito e
-  inferior para Sala de máquinas. Salas periféricas não se conectam.
-- Dano no casco surge em ponto aleatório, livre e alcançável de qualquer cômodo.
-- Dormir no beliche do técnico processa políticas, consumo, perdas, moral,
-  riscos individuais, prazos, crises e término.
-- `Aumentar potência` elimina um dia futuro completo, inclusive consumo e
-  eventual incidente.
-- `Cuidar do grupo` recupera moral; `Socorrer [nome]` estabiliza uma pessoa em
-  risco. Morte remove o benefício da especialidade, nunca uma ação necessária.
-- Economia e racionamento são políticas persistentes com custo inicial e diário
-  de moral.
+- Dormir no beliche do técnico processa consumo, perdas, riscos, prazos, crises
+  e término.
 - Vitória: chegar após o décimo dia com motor operante e ao menos um
   sobrevivente. Derrota: energia, oxigênio ou moral em zero, motor destruído ou
   nenhum sobrevivente vivo.
 
-Números, custos, ordem do turno e crises: `mechanics/ACTIONS.md`.
-Topologia e intervenções: `interface/ROOMS.md`.
+Números, custos, recompensas, perdas, prazos e ordem final do processamento:
+`mechanics/ACTIONS.md` e [Simplificar mecânicas legadas e balancear o ciclo de
+quests](https://github.com/shelldonryan/gtd_example/issues/26). Topologia e
+ordens: `interface/ROOMS.md`.
 
 ## Contrato técnico
 
@@ -141,13 +160,14 @@ Topologia e intervenções: `interface/ROOMS.md`.
 - HUD: seis ícones 16×16; cartões de recurso sem rótulo.
 - Áudio offline: `javax.sound.sampled`, WAV PCM 16 bits em `data/`.
 
-Concept arts definem linguagem visual e composição, nunca nomes ou números:
+Concept arts definem linguagem visual e composição, nunca nomes, números,
+dimensões ou layout final:
 
 - `assets/concept_arts/HUD_CONCEPT_ART.png`;
 - `assets/concept_arts/COMMAND_ROOM_CONCEPT_ART.png`;
 - `assets/concept_arts/COMMAND_ROOM_EDITED.png`, `MACHINE_ROOM.png`,
-  `WAREHOUSE.png` e `BEDROOM.png` (interiores, ainda sem referência em
-  documento ou issue).
+  `WAREHOUSE.png` e `BEDROOM.png`, agora incluídos no escopo do inventário
+  ampliado da issue [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8).
 
 ## Índice de decisões
 
@@ -156,34 +176,37 @@ Não replique aqui o histórico completo:
 - D-001 a D-047: protótipo anterior; fontes em #14, #11, #12 e #17.
 - D-048 a D-072: navegação, interação, viewport, tipografia e animação já
   implementadas; fonte principal em #18.
-- D-073 a D-096: novo ciclo e hub, confirmados em #19; superam regras antigas de
-  briefing, tarefa singular, evento diário, rota universal por NPC, itens comuns
-  carregados e mapa com um único destino.
-- D-097: dano no casco aleatório e alcançável, implementado; fonte em #20.
-- D-098: calendário, problemas, contenções, intervenções, políticas, benefícios e
-  ordem do turno, confirmados em #20 e `mechanics/ACTIONS.md`.
-- D-099 a D-102: distribuição como reparo de energia, beliche temporário com
-  seleção determinística, urgência pelo problema mais antigo em empate e crise
-  imediata sem contenção pagável; confirmadas e implementadas na #21.
-- D-103: o beliche temporário prioriza a pessoa em risco com menor prazo e usa
-  ordem de criação no empate; confirmada e implementada na #21.
-- D-104 a D-107 (leituras de implementação, não decisões de gameplay): risco
-  selecionado pela ordem do modelo aprovado, painel de distribuição com reparo e
-  economia juntos, prazo da pessoa em risco visível no HUD e no beliche, e
-  derrota com precedência energia, oxigênio e moral; registradas em
-  `code/SKETCH_ARCHITECTURE.md`.
-- D-108: os incidentes passam a ocorrer nos dias 2, 4, 6, 8 e 10 e o dia 1 fica
-  sem incidente; cinco incidentes, sorteio sem reposição e todas as regras da
-  #20 continuam iguais. Confirmada pelo usuário e implementada na #22.
-- D-109: toda intervenção principal (`!`) abre o painel de confirmação com
-  problema, perda, prazo, crise e custo; `CONFIRMAR (ENTER)` aplica e `VOLTAR
-  (ESC)` fecha sem gastar a intervenção do dia. O painel antecipa ainda as
-  pré-condições: componente faltando, recurso insuficiente e intervenção já
-  usada. Confirmada pelo usuário e implementada na #23.
-- D-110: a coleta de kit de vedação ou fusível de potência abre painel com o uso
-  do componente, o requisito do reparo correspondente, o estado do problema e o
-  aviso de troca do item na mão; `CONFIRMAR (ENTER)` guarda o componente.
-  Confirmada pelo usuário e implementada na #24.
+- D-073 a D-096: contrato histórico do ciclo anterior, com briefing, tarefa,
+  contenção e correção separadas; **SUPERSEDED** pelo novo contrato de ordens e
+  soluções físicas registrado na ADR-0001.
+- D-097: dano no casco aleatório e alcançável; permanece confirmado e deverá ser
+  usado como destino de uma solução física.
+- D-098: números do ciclo anterior; a forma de problemas, políticas e benefícios
+  foi **SUPERSEDED** pela ADR-0002 e aguarda recalibração no ticket #26. O
+  calendário e os sete tipos continuam como base do novo contrato.
+- D-099 a D-103: decisões de implementação do ciclo anterior, incluindo
+  distribuição, beliche temporário, empate de urgência e crise imediata;
+  **SUPERSEDED** onde conflitarem com ordens e riscos simplificados.
+- D-104 a D-107: leituras de implementação do ciclo anterior; não são requisitos
+  do novo sketch até a conclusão dos tickets #25 e #26.
+- D-108: os incidentes ocorrem nos dias 2, 4, 6, 8 e 10 e o dia 1 fica sem
+  incidente; decisão preservada no novo contrato.
+- D-109: confirmação de ações importantes; o princípio permanece, mas os painéis
+  e ações concretas serão adaptados ao fluxo de ordens do novo ciclo.
+- D-110: coleta com confirmação; o princípio de objeto explicado permanece, mas
+  coleta livre e uso exclusivo de fusível ou kit ficam **SUPERSEDED** pelo
+  modelo de objetos de quest.
+- **Novo ciclo de quests (ADR-0001):** dias sem incidente oferecem duas ordens
+  preventivas e permitem concluir uma; dias com incidente oferecem duas
+  soluções físicas. Objetos têm origem, destino e consequência legíveis.
+- **Simplificação do ciclo (ADR-0002):** seis recursos e consumo permanecem;
+  políticas, bônus numéricos, coleta livre e contador separado de intervenção
+  saem. Problemas persistentes permanecem; há no máximo uma pessoa em risco.
+- **Tickets novos:** [Redesenhar incidentes e ordens como quests
+  físicas](https://github.com/shelldonryan/gtd_example/issues/25) define a
+  matriz, textos e rotas; [Simplificar mecânicas legadas e balancear o ciclo de
+  quests](https://github.com/shelldonryan/gtd_example/issues/26) pesquisa o
+  código e define os números. O inventário de assets (#8) depende dos dois.
 
 ## Fontes por tarefa
 
@@ -216,22 +239,29 @@ Código:
 `interface/MENU_CONFIGURATION.md` está fora do escopo. Arquivos
 `research/*.md` podem existir apenas nas branches `research/*`.
 
-## Lacunas que exigem consulta
+## Lacunas que exigem consulta ou ticket
 
-- se a vitória permite continuar jogando;
-- se a derrota mostra nomes ou apenas a contagem dos sobreviventes;
+- a matriz final de ordens preventivas, soluções de incidente, objetos, textos e
+  rotas, no ticket [Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25);
+- os cálculos de consumo, custos, recompensas, perdas, prazos, crises e pool
+  validado, no ticket [Simplificar mecânicas legadas e balancear o ciclo de
+  quests](https://github.com/shelldonryan/gtd_example/issues/26);
+- o inventário final de assets, dimensões, reutilização e ordem de produção,
+  no ticket [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8),
+  bloqueado pelos dois tickets acima;
+- se a vitória permite continuar jogando depois da chegada;
+- se a derrota mostra os nomes dos sobreviventes ou apenas a contagem;
 - comportamento do nome vazio no menu: botão bloqueado versus fallback
-  `Técnico` (o código desabilita `INICIAR` e `ENTER` com o campo em branco, o que
-  torna o fallback inalcançável pela interface);
+  `Técnico`;
 - vinheta implementada com texto provisório diferente do roteiro confirmado no
-  #11 (telas 1 e 3);
-- as nove linhas de alerta do painel `SISTEMA` do #11 não têm casa no HUD atual
-  e ainda não foram classificadas como superseded;
+  #11;
+- as nove linhas de alerta do painel `SISTEMA` ainda não foram classificadas
+  como superseded;
 - transmissões da Terra e a mensagem de Marte na vitória ainda não
   implementadas;
 - qualquer nome, retrato ou história além de Vera, Bento, Neusa e Sílvia;
-- os quatro concept arts de interior em `assets/concept_arts/` não estão
-  rastreados nem citados por documento ou issue.
+- os quatro concept arts de interior em `assets/concept_arts/` ainda precisam ser
+  rastreados no inventário final.
 
 ## Checklist de abertura
 
@@ -255,48 +285,38 @@ Código:
 
 ## Última sessão registrada
 
-- Sessão aberta com leitura de `SESSION_START.md`, `issue://1`, inventário e
-  fontes do #8; fronteira conferida contra o grafo nativo (#8 bloqueado por #5,
-  #6, #19 e #20, todas CLOSED) sem divergência.
-- O usuário pediu a troca do calendário: incidentes deixam de ocorrer no dia 1 e
-  passam aos dias 2, 4, 6, 8 e 10 — registrada como D-108 na #22.
-- Em seguida, o usuário pediu padronizar as intervenções principais: antes só
-  `ROTA` e `DISTRIBUIÇÃO` abriam painel, e bancada, antena, suporte, estoque,
-  conflito, mesa comum, socorro e casco aplicavam direto. Agora todo `!` abre o
-  painel de confirmação — registrada como D-109 na #23.
-- Por último, o usuário pediu o mesmo tratamento para o resto ("posso pegar
-  fusível e nem sei pra quê"): a coleta de kit ou fusível agora abre painel com
-  uso, requisito do reparo, estado do problema e aviso de troca do item na mão —
-  registrada como D-110 na #24.
-- Código alterado: `game.pde` (`incidentForDay`), `tasks.pde` (acessores de custo
-  únicos, `openRepairPanel`, `openCarePanel`, `openRescuePanel`,
-  `openCollectPanel`, `applyPendingIntervention`, `applyPendingCollect` e o
-  roteamento dos pontos), `ui.pde`, `screens.pde`, `ship.pde` e `last_horizon.pde`
-  (`pending_collect_point` e `ACTION_CONFIRM_COLLECT`), `capture.pde` (27
-  estados, verificações de confirmação e `checkInterventionPanels`) e
-  `prototype/balance-model.mjs` (`INCIDENT_DAYS`, índice e planos das
-  estratégias de recuperação e aceleração).
-- Documentos sincronizados: `README.md`, `history/CONTEXT.md`,
+- Sessão aberta com leitura de `SESSION_START.md`, `issue://1`, inventário
+  completo, ticket de assets, comentários relevantes e fontes locais do ciclo.
+- O usuário confirmou o redesign: cinco incidentes em sete tipos, agrupados em
+  falhas técnicas, suprimentos e tripulação; duas soluções físicas por
+  incidente; duas ordens preventivas nos dias sem incidente, uma concluível;
+  recompensa em recurso específico; pool validado; objetos como quests;
+  sobreviventes como responsáveis; risco individual simples; políticas, bônus
+  numéricos, coleta livre e contador duplicado removidos.
+- Ordens preventivas não aceitas geram perda nos dois recursos oferecidos.
+  Ordens aceitas não podem ser canceladas; falha perde o mesmo recurso da
+  recompensa. Soluções urgentes não concluídas deixam o problema ativo com
+  perda, prazo e crise normais.
+- Criadas como sub-issues do mapa:
+  [Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+  e [Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
+  O segundo está bloqueado pelo primeiro; [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8)
+  está bloqueado pelos dois. [Documento de entrega e como o jogo roda na
+  apresentação](https://github.com/shelldonryan/gtd_example/issues/7) permanece
+  disponível e independente.
+- O corpo do mapa [Last Horizon — gameplay fechado e plano de construção](https://github.com/shelldonryan/gtd_example/issues/1)
+  foi atualizado com o destino, ADRs, decisões, fronteira, bloqueios nativos e
+  lacunas. O corpo de [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8)
+  foi ampliado com o novo escopo e suas dependências.
+- Criadas as ADRs `docs/adr/0001-ordens-e-incidentes-como-quests.md` e
+  `docs/adr/0002-simplificacao-do-ciclo-diario.md`.
+- Fontes locais sincronizadas: `README.md`, `history/CONTEXT.md`,
   `mechanics/ACTIONS.md`, `interface/FLOW.md`, `interface/ROOMS.md`,
-  `interface/HUD.md`, `code/SKETCH_ARCHITECTURE.md`, `events/CREW_ISSUES.md`,
-  `events/HAZARDS.md`, `events/SYSTEM_FAULTS.md`, `SESSION_START.md` e o corpo
-  da #1.
-- Verificação: `--capture` com 27 estados e 70 verificações sem falha,
-  `--hit-test` e `--ladder-test` com 5 cada, `BALANCE CHECK: PASS` com a correção
-  prioritária vencendo 2520/2520 ordens e `git diff --check` limpo.
-- Consequência de balanceamento observada no modelo: a aceleração agora elimina
-  os cinco dias de incidente (2, 4, 6, 8 e 10) e vence com 20 de energia; a
-  omissão continua perdendo por oxigênio.
-- Encerramento no Wayfinder: #22, #23 e #24 criadas como sub-issues da #1,
-  atribuídas e fechadas com decisão, arquivos e evidência; comentário de
-  supersessão do calendário na #20; corpo da #1 atualizado.
-- Resultado: protótipo executável com o calendário par e painel de confirmação em
-  toda intervenção principal e na coleta; as alterações estão nos commits
-  `83f152e` (código), `677697f` (documentos) e `4ac9a12` (capturas), sem push.
-- Higiene pendente: `assets/concept_arts/` mantém quatro interiores sem rastreio
-  e `last_horizon/output/` guarda 44 capturas de numeração antiga, sem
-  correspondência com a execução vigente — limpeza depende de autorização.
-
-A fronteira vigente é **#7 e #8 abertos, ambos disponíveis e sem bloqueadores**.
-O próximo caminho crítico é **#8 (inventário de assets)**, com **#7 (documento de
-entrega)** em paralelo.
+  `interface/HUD.md`, `events/CREW_ISSUES.md`, `events/HAZARDS.md`,
+  `events/SYSTEM_FAULTS.md`, `characters/npcs/NPC_1..4.md`,
+  `code/SKETCH_ARCHITECTURE.md` e este arquivo.
+- Os valores exatos, matrizes de conteúdo, textos finais, pool detalhado e rotas
+  continuam delegados aos tickets 25 e 26. O código ainda não foi migrado e
+  nenhuma verificação executável do novo ciclo foi alegada.
+- Resultado: planejamento Wayfinder e documentação de domínio atualizados;
+  protótipo executável ainda não atualizado. Não houve commit nem push.

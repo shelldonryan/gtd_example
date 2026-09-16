@@ -6,18 +6,17 @@
 | Papel | Intendente |
 | Onde fica | Depósito, em ponto fixo junto aos estoques |
 | Temperamento | Ranzinza; guarda o estoque a sete chaves |
-| Função nas intervenções | Logística: reduz pela metade o custo moral das políticas e evita 3 de comida na correção do estoque |
+| Função nas ordens | Oferece e confirma ordens de comida, água, peças e logística |
 
 ## Papel no jogo
 
-Bento acompanha estoques, componentes especiais e racionamento no Depósito. Ele
-explica o custo logístico das decisões, mas não entrega recursos comuns já
-contabilizados no HUD.
+Bento oferece ordens ligadas a estoques, componentes e logística. Ele explica a
+necessidade do objeto e a consequência de deixar a manutenção para depois, mas
+não entrega recursos comuns sem uma ordem concluída.
 
-Componentes especiais podem ser coletados fisicamente nos pontos do Depósito.
-Racionamento é uma política persistente local. Com Bento, cada política custa 2
-de moral ao ativar e 1 por dia; sem ele, custa 4 e 2. Reorganizar comida passa
-de custo zero para 3 de comida. Valores confirmados na issue #20.
+Ele pode ser a origem ou o destino de uma ordem. Suas ordens não recebem bônus
+numérico. Componentes são coletados e carregados somente quando fazem parte da
+ordem aceita.
 
 ## Vínculos
 

@@ -1,21 +1,29 @@
 # Ameaças do percurso
 
-Eventos externos criam problemas persistentes na nave. O cartão escolhe uma
-contenção imediata com custo e risco diferentes; a correção física acontece
-depois. Os valores abaixo foram confirmados na issue #20.
+Eventos externos criam problemas persistentes na nave. O incidente apresenta
+duas soluções físicas em formato de quest; o jogador escolhe uma, coleta o objeto
+indicado e o entrega no destino.
 
 ## Chuva de meteoros
 
-A nave atravessa uma região carregada e sofre dano no casco. `Selar anteparas`
-custa 5 de energia e abre prazo 3; `Isolar apenas o setor` perde 4 de oxigênio
-e abre prazo 2. Nenhuma alternativa corrige a causa.
+A nave atravessa uma região carregada e sofre dano no casco. Cada solução deve
+informar, antes da escolha:
 
-Cada ocorrência escolhe um local aleatório alcançável pelo jogador em qualquer
-um dos quatro cômodos. Enquanto ativo, o dano perde 5 de oxigênio por dia. A
-crise perde mais 15 e reinicia o prazo em 2. Reparar exige o kit de vedação e
-1 peça com Sílvia viva, ou 2 peças sem o benefício dela.
+- objeto necessário;
+- origem e destino da rota;
+- custo em recursos;
+- benefício da conclusão;
+- perda, prazo e crise se o problema permanecer.
+
+O ponto de entrega do casco é sorteado entre locais livres e alcançáveis dos
+quatro cômodos. O problema permanece associado ao local até que a solução seja
+concluída. Uma ordem preventiva também pode usar objetos de vedação, desde que o
+pool e o balanceamento mantenham a recompensa útil sem anular a pressão.
 
 ## Estado
 
-Valores confirmados e comprovados em `prototype/balance-model.mjs`; migrados
-para o sketch na issue #21.
+A estrutura da ameaça está confirmada. A matriz de soluções, os objetos, os
+textos e os valores serão definidos em [Redesenhar incidentes e ordens como
+quests físicas](https://github.com/shelldonryan/gtd_example/issues/25) e
+[Simplificar mecânicas legadas e balancear o ciclo de
+quests](https://github.com/shelldonryan/gtd_example/issues/26).

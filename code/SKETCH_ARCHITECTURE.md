@@ -24,7 +24,7 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
 | `screens.pde` | máquina de estados, camadas modais, menus, vinheta, pausa e desfechos |
 | `ship.pde` | hub, quatro salas, portas por convés, mapa consultável, plataformas, escadas, NPCs e estações |
 | `game.pde` | calendário, turno, incidentes, consumo, crises e condições de término |
-| `tasks.pde` | problemas persistentes, contenções, sobreviventes, políticas, componentes e intervenções |
+| `tasks.pde` | target ordens e soluções, problemas persistentes, sobreviventes, riscos e objetos de quest |
 | `capture.pde` | captura visual e verificações de ciclo, hub, clique e escada |
 
 ## Pipeline de assets
@@ -61,50 +61,55 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
   `pipeline_probe_window.png`.
 
 
-## Contrato de gameplay implementado
+## Contrato de gameplay confirmado para migração
 
-Incidentes nos dias 2, 4, 6, 8 e 10 usam cinco dos sete problemas embaralhados
-sem reposição. Toda contenção cria um problema persistente com perda, prazo e
-crise; falta de recursos para ambas as contenções dispara a crise imediatamente.
+O ciclo alvo usa cinco incidentes nos dias 2, 4, 6, 8 e 10, escolhidos sem
+reposição entre sete tipos organizados em falhas técnicas, suprimentos e
+tripulação. Cada incidente oferece duas soluções físicas em formato de quest.
 
-Uma intervenção principal por dia corrige, recupera ou acelera. Políticas,
-conversas e coleta de kit ou fusível são livres. Custos comuns são pagos na
-estação; somente os dois componentes especiais ficam em `held_item`.
+Nos dias sem incidente, os sobreviventes oferecem duas ordens preventivas. O
+jogador escolhe uma, confirma a ordem presencialmente e deve concluí-la antes de
+dormir para evitar o prejuízo maior de negligência. Uma ordem aceita não pode ser
+cancelada.
 
-O Comando é o hub com Dormitório no convés superior, Depósito no médio e
-Máquinas no inferior. HUD e mapa leem o mesmo conjunto de problemas ativos. O
-empate de urgência preserva o problema ativado primeiro.
+Toda ordem informa objeto, origem, destino, recompensa e consequência de falha.
+Coleta e entrega são as duas etapas leves; componentes são objetos de quest
+carregados um por vez. Uma solução urgente não concluída deixa o problema ativo
+com perda, prazo e crise normais.
 
-Vera, Bento, Neusa e Sílvia possuem vida e risco individuais. Crises escolhem a
-pessoa pela regra determinística do modelo; o beliche temporário prioriza menor
-prazo e depois ordem de criação. A morte reduz `A BORDO` e remove o benefício,
-sem bloquear a intervenção.
+Os seis recursos e o consumo diário permanecem. Economia, racionamento e bônus
+numéricos dos sobreviventes foram removidos. Há no máximo uma pessoa em risco
+por vez, com uma quest simples de socorro; sua morte reduz `A BORDO` sem
+recalcular custos.
 
-D-097 continua integrado: dano no casco recebe ponto livre e alcançável em
-qualquer sala. D-098 fornece todos os números; D-099 a D-103 fecham as decisões
-de implementação confirmadas na #21.
+O hub, as quatro salas, o mapa consultável, o dano no casco alcançável e o
+objetivo de chegar a Marte permanecem. A migração e a verificação estão nos
+tickets [Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+e [Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
 
-## Implementação atual
+## Implementação atual e migração
 
-- **Mapa:** preserva sala, posição e componente carregado; agrupa todos os
-  problemas por cômodo e mostra perda, prazo e crise.
-- **Hub:** três portas do lado direito do Comando, uma por convés; cada sala
-  periférica possui somente o retorno ao mesmo convés do Comando.
-- **Interação:** os pontos respondem ao estado dos problemas. Não há briefing,
-  aceite ou cadeia universal por NPC.
-- **Intervenções:** toda intervenção principal abre o painel de confirmação
-  (`pending_intervention_point`) com problema, perda, prazo, crise e custo;
-  `CONFIRMAR (ENTER)` aplica e `VOLTAR (ESC)` fecha sem gastar a intervenção.
-  Reparos pagam o custo na estação; kit e fusível são conferidos e consumidos
-  quando necessários. A coleta de kit ou fusível tem painel próprio
-  (`pending_collect_point`) que explica o uso do componente, o requisito do
-  reparo correspondente e a troca do item na mão; `CONFIRMAR (ENTER)` guarda o
-  componente. Cuidado, socorro e potência compartilham o limite de uma
-  intervenção diária.
-- **Políticas:** economia e racionamento podem ser alternados livremente e usam
-  os custos de Bento vivo ou morto.
-- **Ciclo:** dormir aplica políticas, consumo, perdas, moral, riscos, crises e
-  término nessa ordem. `Aumentar potência` elimina o próximo dia completo.
+O sketch atual ainda implementa o contrato anterior de problemas, contenções,
+intervenções e componentes. A arquitetura visual, o hub, o mapa, o pipeline de
+assets e a física continuam reaproveitáveis; a migração do ciclo pertence aos
+tickets [Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+e [Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
+
+O alvo da migração é:
+
+- **Ordens:** duas ofertas preventivas em dias sem incidente e duas soluções
+  físicas nos dias com incidente; apenas uma quest concluída por dia.
+- **Objetos:** coleta e entrega como duas etapas leves, com um item carregado por
+  vez e sem coleta livre.
+- **NPCs:** ofertas e confirmação presencial, sem bônus numérico.
+- **Problemas:** solução urgente não concluída mantém perda, prazo e crise.
+- **Riscos:** no máximo uma pessoa em risco, com quest simples de socorro.
+- **Políticas:** economia e racionamento removidos.
+- **Ciclo:** consumo diário, resultado da ordem e condições de término processados
+  ao dormir.
+
+Os detalhes de estado, textos, rotas, pool e valores serão definidos nos tickets
+de quests e balanceamento antes da alteração do sketch.
 
 Números do movimento (grade lógica 640×360; render 1280×720 / 720p): personagem
 16×24, andar 1,5 px/quadro, pulo de 48 px, gravidade 0,5, escada 1,0 e
@@ -113,21 +118,24 @@ plataformas atravessáveis por baixo.
 **Sem classes e sem hierarquia.** O Processing junta todas as abas numa classe
 só; o estilo permanece em globais agrupadas, funções curtas e `update` separado
 de `draw`.
-
 ## Estado da partida
 
-Globais planas mantêm recursos, dia, sala e movimento. `tasks.pde` agrupa
-`problem_active`, `problem_deadline`, ordem de ativação, sequência de incidentes,
-estado individual da tripulação, riscos, `intervention_used`, `skip_next_day` e
-os dois componentes possíveis em `held_item`.
+Globais planas mantêm recursos, dia, sala e movimento. O estado alvo também
+precisará registrar a oferta diária, a ordem escolhida, a etapa de coleta ou
+entrega, o objeto carregado, a recompensa, a perda de falha e os problemas
+persistentes.
+
+O estado de risco individual mantém no máximo uma pessoa em risco. Sobreviventes
+mortos deixam de oferecer ordens, mas não alteram custos.
 
 Nenhuma tela recebe parâmetro: as abas compartilham o mesmo estado do sketch.
 
 ## Números
 
-`mechanics/ACTIONS.md` é a fonte de regras. As constantes e tabelas de
-`game.pde` e `tasks.pde` implementam os valores confirmados na issue #20 e as
-decisões D-099 a D-103 da #21.
+`mechanics/ACTIONS.md` é a fonte de regras. Os valores antigos do modelo da
+issue #20 estão **SUPERSEDED** pela estrutura de quests. O ticket de balanceamento
+deve pesquisar `game.pde`, `tasks.pde` e `prototype/balance-model.mjs` antes de
+definir consumo, custos, recompensas, perdas, prazos e crises.
 
 ## Viewport e input
 
@@ -139,17 +147,19 @@ decisões D-099 a D-103 da #21.
 - O mouse aciona apenas controles da interface, como `MAPA` e opções modais. O
   mapa preserva a sala e a posição; a movimentação entre cômodos usa portas e
   interação por `E`.
-- **Teclas modais:** `ENTER` avança diálogos e confirma políticas, potência e
-  sono; `E` interage com os pontos da sala.
+- **Teclas modais:** `ENTER` avança diálogos, confirma ordens e soluções,
+  entrega objetos e confirma o sono; `E` interage com os pontos da sala.
 - Os botões repetem no próprio rótulo os atalhos disponíveis: `INICIAR (ENTER)`,
   `CONTINUAR (ENTER)`, `CONTINUAR (ESC)`, `CONFIRMAR (ENTER)`,
-  `ENCERRAR DIA (ENTER)`, `VOLTAR (ESC)` e `FECHAR (ESC)`.
-- **Camadas de input**: menu, sala jogável, mapa, diálogo, painel técnico, evento
-  e pausa. Todas as camadas modais bloqueiam movimento e interação da sala.
+  `ACEITAR ORDEM (ENTER)`, `ENTREGAR (ENTER)`, `ENCERRAR DIA (ENTER)`,
+  `VOLTAR (ESC)` e `FECHAR (ESC)`.
+- **Camadas de input**: menu, ofertas de ordem, sala jogável, mapa, diálogo,
+  painel técnico, evento e pausa. Todas as camadas modais bloqueiam movimento
+  e interação da sala.
 - **ESC** é consumido pelo sketch (`key = 0`) antes de alternar a pausa; não
   encerra mais a janela.
-- Enquanto há evento pendente, o modal técnico mostra as duas consequências e
-  bloqueia exploração, mapa e objetivos.
+- Enquanto há incidente pendente, o modal técnico mostra as duas soluções e
+  bloqueia exploração até a escolha.
 - **Cursor**: `HAND` sobre controles ativos, `WAIT` sobre controles desabilitados
   e `ARROW` no restante.
 
@@ -176,22 +186,26 @@ crítico pisca a borda e ganha ícone de aviso. O mapa macro não imprime nome d
 
 As capturas atualizadas ficam em `last_horizon/output/` na branch do protótipo.
 
-## Leitura das regras (onde o vault deixou em aberto)
+## Leitura das regras do contrato novo
 
-| Ponto | Leitura adotada |
+| Ponto | Leitura vigente |
 | --- | --- |
-| Moral −1 por recurso em vermelho | energia, oxigênio, água e comida entre 1 e 29 |
-| Oxigênio caro (10/dia) | verifica a energia após o consumo base de energia, como no modelo aprovado |
-| Chegada | ocorre depois de processar o dia 10; potência pode eliminar um dia futuro completo |
-| Sorteio de incidentes | embaralha os 7 uma vez e usa 5 sem reposição nos dias 2, 4, 6, 8 e 10 |
-| Painel de distribuição | ponto único que abre as opções de reparo e economia quando a falha elétrica está ativa; sem a falha, alterna apenas a economia |
-| Seleção de quem entra em risco | mesma ordem de declaração dos problemas no modelo aprovado, combinada com o dia |
-| Ordem de derrota | energia, oxigênio, moral, motor e, por último, nenhum sobrevivente vivo |
-| Nome vazio no `MENU_INIT` | `INICIAR` desabilitado; "Técnico" só quando o campo tem espaços |
+| Calendário | cinco incidentes de sete tipos, nos dias 2, 4, 6, 8 e 10 |
+| Dias sem incidente | duas ordens preventivas; uma deve ser concluída para evitar negligência maior |
+| Dias com incidente | duas soluções físicas; uma deve ser escolhida e executada |
+| Limite diário | uma quest concluída por dia, sem contador paralelo |
+| Componentes | objetos de quest, carregados um por vez, sem coleta livre |
+| Políticas | economia e racionamento removidos |
+| Bônus | sobreviventes não alteram custos ou recompensas |
+| Risco | no máximo uma pessoa em risco, com socorro simples |
+| Falha urgente | problema permanece com perda, prazo e crise normais |
+| Vitória e derrota | continuam conforme `MENU_VICTORY.md` e `MENU_GAME_OVER.md` |
+
+Os valores exatos e o processamento numérico serão recalculados em [Simplificar
+mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
 
 Nenhum sobrevivente vivo encerra a partida com mensagem própria: é a quinta causa
-de derrota, documentada em `README.md`, `mechanics/ACTIONS.md` e
-`interface/MENU_GAME_OVER.md`. O técnico não entra na conta dos quatro.
+de derrota. O técnico não entra na conta dos quatro.
 
 ## Como rodar
 
@@ -207,15 +221,13 @@ raiz do repositório:
 "C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --ladder-test
 ```
 
-`--capture` percorre 27 estados, salva `output/NN_estado.png` em 1280×720
-(720p) e `output/NN_estado_window.png`, e roda 70 verificações: dia 1 sem
-incidente, incidente no dia 2, confirmação de reparo, de coleta e de socorro,
-problema persistente, mapa, hub, intervenção, beliche, crise imediata, empate de
-urgência, especialista morto, dano no casco, painel de distribuição com reparo e
-economia, risco visível e resumo com vários problemas.
-`--hit-test` abre 1400×900 e prova as quatro fichas do mapa e o letterbox.
-`--ladder-test` mantém os cinco casos de saída e reentrada. As regras também
-geram `output/map_dense.png`, a sala mais carregada possível no mapa.
+`--capture`, `--hit-test` e `--ladder-test` continuam sendo a fronteira pública
+de verificação. As capturas existentes comprovam o ciclo anterior. Depois da
+migração, `--capture` deverá cobrir as duas ofertas preventivas, a escolha
+presencial, coleta e entrega, recompensas, falha de ordem, negligência, as duas
+soluções de incidente, problemas persistentes e o risco individual simplificado.
+Os modos de hit-test e escada continuam cobrindo as quatro salas, o letterbox e
+as rotas físicas.
 
 Limitações observadas:
 
@@ -232,14 +244,17 @@ Limitações observadas:
 
 ## Estado da revisão
 
-- **Código atual:** D-048 a D-103 e D-108 a D-110 estão implementadas no protótipo.
-- **Ciclo:** cinco incidentes sem reposição nos dias 2, 4, 6, 8 e 10, problemas
-  persistentes, perdas, prazos, crises, riscos individuais e uma intervenção
-  principal por dia.
-- **Espaço:** Comando em hub, mapa consultável com todos os problemas e estações
-  físicas para correção, recuperação, aceleração e políticas.
-- **Evidência:** `--capture` com 70 verificações e nenhuma falha, `--hit-test` e
-  `--ladder-test` com 5 verificações cada, `git diff --check` limpo e
-  `node prototype/balance-model.mjs --simulate` com `BALANCE CHECK: PASS`.
-- **Textos:** transmissões e textos finais ainda possuem pendências de
-  implementação registradas no #11 e em `SESSION_START.md`.
+- **Código atual:** o protótipo comprovado ainda implementa o ciclo anterior;
+  a migração do novo contrato pertence aos tickets 25 e 26.
+- **Contrato alvo:** cinco incidentes nos dias 2, 4, 6, 8 e 10, ordens
+  preventivas nos demais dias, duas soluções físicas por incidente e uma
+  conclusão de quest por dia.
+- **Mecânicas removidas:** políticas, bônus numéricos, coleta livre e contador
+  separado de intervenção.
+- **Espaço preservado:** Comando em hub, mapa consultável, quatro salas e
+  estações físicas com rotas curtas.
+- **Evidência existente:** `--capture`, `--hit-test`, `--ladder-test`,
+  `node prototype/balance-model.mjs --simulate` e `git diff --check` comprovam
+  o contrato anterior, não o novo ciclo.
+- **Próxima evidência:** os tickets 25 e 26 devem registrar a verificação do
+  novo fluxo antes de atualizar este estado para implementado.

@@ -50,73 +50,77 @@ A partida representa uma viagem de dez dias por quatro cômodos. A Sala de
 comando é o hub central e possui uma porta por convés para Dormitório, Depósito
 e Sala de máquinas; as salas periféricas não se conectam entre si.
 
-Incidentes surgem nos dias 2, 4, 6, 8 e 10. A resposta escolhe uma contenção, mas cria
-um problema local persistente com perda diária, prazo e crise conhecida. Não há
-aceite de tarefa no Comando: o jogador consulta as urgências no HUD e no mapa e
-escolhe onde intervir.
+Incidentes surgem nos dias 2, 4, 6, 8 e 10. Existem sete tipos, cinco escolhidos
+por partida sem reposição, organizados em falhas técnicas, suprimentos e
+tripulação. Cada incidente oferece duas soluções em formato de quest: o jogador
+escolhe uma, coleta o objeto necessário e o entrega no destino físico.
 
-Uma correção, recuperação ou aceleração principal pode ser concluída por dia.
-Preparação e políticas são livres. Para encerrar o turno, o técnico retorna ao
-próprio beliche no Dormitório, confere as consequências previstas e dorme.
+Nos dias sem incidente, duas ordens preventivas são oferecidas pelos
+sobreviventes. O jogador escolhe uma e deve concluí-la para evitar a perda maior
+por negligência. A ordem concluída aumenta um recurso específico; aceitar e não
+concluir perde uma pequena quantidade desse mesmo recurso. Não aceitar nenhuma
+ordem perde pequenas quantidades dos dois recursos oferecidos.
 
-O jogador deve equilibrar os seguintes recursos:
+Uma ordem de incidente não concluída deixa o problema ativo, com perda diária,
+prazo e crise. A coleta e a entrega formam as duas etapas leves da quest, e uma
+única quest pode ser concluída por dia. Componentes especiais existem como
+objetos de quest e o técnico carrega um por vez.
+
+O objetivo é chegar a Marte com o motor operante e pelo menos um sobrevivente
+vivo. O jogador administra:
 
 - **Energia:** mantém o motor e os sistemas da nave funcionando.
 - **Oxigênio:** garante a sobrevivência das pessoas a bordo.
-- **Água:** Consumida pelos sobreviventes.
-- **Comida:** Consumida diariamente pelos sobreviventes.
-- **Peças:** Utilizadas para reparar o motor e outros sistemas.
-- **Moral:** Representa o estado emocional dos sobreviventes e pode afetar a
-  capacidade de lidar com problemas.
+- **Água:** consumida pelos sobreviventes.
+- **Comida:** consumida diariamente pelos sobreviventes.
+- **Peças:** utilizadas em reparos e ordens técnicas.
+- **Moral:** representa o estado emocional dos sobreviventes.
 
 ## Comodos da nave
 
-### Sala de comando
-
 É o hub físico e o centro de navegação e comunicações. A porta superior leva ao
-Dormitório, a média ao Depósito e a inferior à Sala de máquinas. Vera acompanha
-a rota; o console permite consultar a viagem e aumentar potência, enquanto a
-antena conclui correções de comunicação. Não existe briefing diário obrigatório.
+Dormitório, a média ao Depósito e a inferior à Sala de máquinas. Vera oferece
+ordens ligadas à rota e às comunicações; o console e a antena recebem entregas
+de ordens. Não existe uma lista extensa de tarefas.
 
 ### Sala de máquinas
 
-Concentra motor, energia e suporte de vida. Sílvia oferece diagnóstico e seu
-benefício de mecânica; bancada, reator, distribuição e suporte recebem as
-intervenções técnicas. O modo economia é uma política persistente local.
+Concentra motor, energia e suporte de vida. Sílvia oferece e confirma ordens
+técnicas; bancada, distribuição, reator e suporte recebem entregas ou fornecem
+leituras curtas. Não há modo economia nem bônus de especialista.
 
 ### Depósito
 
-Concentra estoques, componentes especiais e racionamento. Recursos comuns do HUD
-são pagos diretamente no ponto final; apenas componentes especiais, como um kit
-ou fusível específico, precisam ser buscados. Bento oferece leitura logística
-sem ser passagem obrigatória de toda correção.
+Concentra estoques e objetos de quest. Bento oferece e confirma ordens
+logísticas; o técnico coleta objetos no Depósito e os leva ao destino indicado.
+Não há racionamento nem coleta livre fora de uma ordem.
 
 ### Dormitório
 
-Concentra descanso, saúde e moral. Dormir encerra o turno; `Cuidar do grupo`
-recupera moral; `Socorrer [nome]` estabiliza um sobrevivente em risco. Neusa
-oferece a leitura humana do grupo.
+Concentra descanso, saúde e moral. Neusa oferece e confirma ordens da tripulação.
+Uma pessoa em risco pode gerar uma quest simples de socorro. Dormir encerra o
+turno e processa as consequências.
 
 ## Eventos
 
 O pool mantém sete incidentes: falha no motor, chuva de meteoros, falta de
 comida, conflito no dormitório, falha no suporte de vida, falha no sistema de
-energia e falha nas comunicações.
+energia e falha nas comunicações. Eles pertencem às famílias de falhas técnicas,
+suprimentos e tripulação.
 
-Eles surgem nos dias 2, 4, 6, 8 e 10, e um problema ainda ativo não é sorteado
-de novo.
-Cada cartão oferece duas contenções: gastar mais agora para ganhar segurança ou
-economizar e aceitar maior risco. A escolha não encerra a causa; a correção
-acontece fisicamente no cômodo responsável.
+Cinco incidentes aparecem, sem reposição, nos dias 2, 4, 6, 8 e 10. Cada cartão
+oferece duas soluções físicas em formato de quest. O jogador escolhe uma,
+coleta o objeto indicado e o entrega no destino.
 
-O dano no casco por meteoros não pertence a uma estação fixa: cada ocorrência
-escolhe um local aleatório alcançável pelo jogador em qualquer um dos quatro
-cômodos e permanece ali até a correção.
+Nos dias sem incidente, duas ordens preventivas são oferecidas pelos
+sobreviventes. Uma deve ser aceita e concluída para evitar o prejuízo maior por
+negligência. A ordem concluída aumenta um recurso específico; a ordem aceita e
+não concluída perde uma pequena quantidade desse mesmo recurso.
 
-Problemas ignorados aplicam uma perda diária e avançam para uma crise específica.
-Uma crise pode destruir um sistema, causar uma grande perda ou colocar um
-sobrevivente nomeado em risco. Os valores confirmados estão em
-`mechanics/ACTIONS.md`.
+O dano no casco por meteoros continua sendo associado a um local aleatório,
+alcançável pelo jogador em qualquer um dos quatro cômodos. Problemas não
+resolvidos permanecem ativos, aplicam perdas diárias, reduzem prazos e podem
+chegar a crises.
 
 ## Condições de término
 

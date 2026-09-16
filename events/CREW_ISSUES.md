@@ -1,31 +1,41 @@
-# Problemas dos sobreviventes
+# Problemas da tripulação e dos suprimentos
 
-Eventos humanos criam problemas persistentes ligados ao Dormitório ou ao
-Depósito. O cartão escolhe uma contenção imediata; `Cuidar do grupo`, `Socorrer
-[nome]` ou uma correção logística resolve a causa depois no espaço jogável. Os
-valores abaixo foram confirmados na issue #20.
+Os incidentes de suprimentos e tripulação pertencem a duas variações da mesma
+família de ordens: uma necessidade humana ou logística gera duas soluções físicas
+e uma delas deve ser executada antes de dormir.
 
 ## Falta de comida
 
-Perda de 3 de comida por dia. `Abrir a reserva` custa 4 de comida e abre prazo
-4; `Reduzir porções agora` custa 4 de moral e abre prazo 2. A crise perde mais
-8 de comida, põe uma pessoa em risco e reinicia em 3.
+O incidente cria uma necessidade no Depósito. As duas soluções apresentam um
+objeto, uma origem, um destino, um custo e um resultado. Uma ordem preventiva
+também pode usar um objeto logístico para aumentar comida em um dia sem
+incidente.
 
-Reorganizar o estoque remove o problema sem recurso comum com Bento vivo; sem o
-benefício dele, custa 3 de comida. Racionamento reduz o consumo diário de água
-e comida, mas cobra moral.
+Se a solução não for concluída, o problema de comida permanece ativo, cobra sua
+perda diária, reduz o prazo e pode chegar à crise. A crise usa uma consequência
+de suprimentos e pode colocar uma pessoa em risco.
 
 ## Conflito no dormitório
 
-Perda de 4 de moral por dia. `Separar o grupo` custa 4 de água e abre prazo 4;
-`Deixar a discussão esfriar` custa 3 de moral e abre prazo 2. A crise perde mais
-8 de moral, põe uma pessoa em risco e reinicia em 3.
+O incidente cria uma necessidade no Dormitório. As duas soluções apresentam um
+objeto ou recurso de mediação, uma origem, um destino, um custo e um resultado.
+Ordens preventivas de convivência podem aumentar moral em dias sem incidente.
 
-Mediar remove o problema sem recurso comum com Neusa viva; sem o benefício dela,
-custa 3 de água. `Cuidar do grupo` recupera moral, mas não estabiliza uma pessoa
-em risco; `Socorrer [nome]` é uma intervenção separada.
+Se a solução não for concluída, o problema de tripulação permanece ativo, cobra
+sua perda diária, reduz o prazo e pode chegar à crise. A crise usa uma
+consequência humana e pode colocar uma pessoa em risco.
+
+## Risco individual
+
+Há no máximo uma pessoa em risco por vez. Socorrer é uma ordem visível e simples.
+Se o prazo chegar a zero, a pessoa morre e `A BORDO` diminui; a morte não altera
+custos nem cria bônus ou penalidades ocultos.
 
 ## Estado
 
-Valores confirmados e comprovados em `prototype/balance-model.mjs`; migrados
-para o sketch na issue #21.
+As estruturas novas estão confirmadas. Recompensas, perdas, custos, prazos e
+crises serão definidos e verificados em [Simplificar mecânicas legadas e
+balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
+
+[Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+define a matriz de objetos, origens, destinos e textos.

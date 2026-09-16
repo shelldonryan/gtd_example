@@ -21,137 +21,124 @@ cada estação fique alcançável andando ou subindo escada. O pulo de 48 px
 | Tipo | Interrompe movimento | O que faz |
 | --- | --- | --- |
 | Leitura técnica | sim | abre painel inferior sem retrato |
-| Coleta | sim | abre painel com o uso do componente e o requisito do reparo; ao confirmar, põe o componente na mão e mostra aviso breve |
+| Oferta de ordem | sim | mostra uma ordem do sobrevivente e permite compará-la com outra |
+| Confirmação de ordem | sim | confirma a ordem escolhida antes da coleta |
+| Coleta | sim | entrega ou libera o objeto da ordem |
+| Entrega | sim | aplica a recompensa ou resolve a solução escolhida |
 | Conversa | sim | abre retrato e caixa inferior do sobrevivente |
 | Interruptor | sim | explica a consequência e pede confirmação |
-| Intervenção principal | sim | abre painel de confirmação com custo e efeito; ao confirmar, cobra o custo, remove ou altera o estado e usa a intervenção do dia |
 | Porta | não | troca entre o Comando e uma sala periférica |
 
 Regras que valem em todos os cômodos:
 
 - Alcance de interação de 12 px, na mesma altura, e o ponto se destaca quando o
   técnico entra no alcance.
-- O técnico carrega **um componente especial por vez**. Recursos comuns do HUD
-  são pagos diretamente no ponto da intervenção e não viram itens carregados.
-  Coletar outro componente substitui o que está na mão, e o painel da coleta
-  avisa a troca.
-- Diagnóstico, conversa, coleta de componente especial e mudança de política não
-  gastam a intervenção principal.
-- Uma correção, recuperação ou aceleração concluída usa a intervenção do dia e
-  exige confirmação no painel do ponto; `VOLTAR` não consome nada.
-- Problemas não corrigidos atravessam o dia, aplicam perdas e reduzem seus prazos.
-- Cada dano no casco cria um ponto de correção temporário em um local aleatório
-  alcançável pelo jogador, em qualquer um dos quatro cômodos.
-- O mapa não altera sala, posição, problemas ou componente carregado.
+- O técnico carrega **um objeto de quest por vez**. O item aparece como parte da
+  ordem aceita e é entregue no destino; não há coleta livre de componentes.
+- Coleta e entrega são as duas etapas leves de uma ordem. A entrega aplica custo,
+  recompensa, correção ou risco correspondente.
+- Uma quest pode ser concluída por dia. Ordens preventivas aceitas não podem ser
+  canceladas.
+- Nos dias sem incidente, duas ordens são comparadas remotamente e uma é
+  confirmada presencialmente com o sobrevivente responsável.
+- Nos dias com incidente, o cartão apresenta duas soluções físicas e a escolhida
+  deve ser executada no espaço jogável.
+- Diagnóstico e conversa fora da ordem não gastam a conclusão diária.
+- O mapa mostra a origem e o destino, mas não transporta o técnico.
 - Indicações usam ações concretas, nunca termos internos.
 
 ## Sala de comando
 
-O cômodo é o hub físico e concentra navegação e comunicações. Não existe console
-de aceite diário nem conversa obrigatória com Vera.
+O cômodo é o hub físico e concentra navegação, comunicações e comparação inicial
+das ordens. As ofertas podem ser lidas remotamente; não existe visita obrigatória
+ao Comando para aceitar uma ordem.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
 | superior | porta do Dormitório | porta |
-| superior | Vera — navegação, comunicações e benefício de piloto | conversa |
-| superior | antena — correção das comunicações | intervenção principal |
+| superior | Vera — ordens de navegação e comunicações | conversa e confirmação |
+| superior | antena — destino de ordens de comunicação | entrega |
 | médio | porta do Depósito | porta |
-| médio | console da rota — jornada, previsão e aumento de potência | leitura técnica e intervenção principal |
+| médio | console da rota — jornada, previsão e ordens de potência | leitura e entrega |
 | inferior | porta da Sala de máquinas | porta |
-| inferior | painel de situação — visão geral dos problemas | leitura técnica |
+| inferior | painel de situação — visão geral dos problemas e ordens | leitura técnica |
 
 No primeiro dia, o técnico começa no Comando. Nos demais, chega ao hub pela
-porta superior vinda do Dormitório. `Aumentar potência` elimina um dia futuro
-completo, incluindo consumo e eventual incidente daquele dia.
+porta superior vinda do Dormitório. Ordens de potência podem eliminar um dia
+futuro completo, conforme os valores definidos no balanceamento.
 
 ## Sala de máquinas
-
 O cômodo concentra motor, energia e suporte de vida.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
-| inferior | bancada do motor — correção do motor | intervenção principal |
-| médio | Sílvia — diagnóstico e benefício de mecânica | conversa |
-| médio | painel de distribuição — falha elétrica e modo economia | intervenção principal e política |
-| superior | reator — potência do sistema | leitura técnica |
-| superior | painel de suporte de vida | intervenção principal |
+| inferior | bancada do motor — destino de ordens do motor | entrega |
+| médio | Sílvia — ordens e confirmação técnica | conversa e confirmação |
+| médio | painel de distribuição — destino de ordens de energia | entrega |
+| superior | reator — leitura da potência do sistema | leitura técnica |
+| superior | painel de suporte de vida — destino de ordens de oxigênio | entrega |
 | acesso | porta única para o convés inferior do Comando | porta |
-
 ## Depósito
 
-O cômodo concentra logística, estoques, componentes especiais e racionamento.
+O cômodo concentra logística, estoques e objetos de quest.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
-| inferior | componentes especiais, incluindo kit de vedação e fusível | coleta |
-| médio | Bento — leitura dos estoques e benefício de intendente | conversa |
-| médio | alavanca de racionamento | política |
-| médio | estoque de comida — correção da falta de comida | intervenção principal |
-| superior | prateleira de reserva — componentes disponíveis | leitura técnica |
+| inferior | componentes e objetos especiais | coleta |
+| médio | Bento — ordens logísticas e confirmação | conversa e confirmação |
+| médio | estoque de comida — destino de ordens de suprimentos | entrega |
+| superior | prateleira de reserva — objetos disponíveis | leitura e coleta |
 | acesso | porta única para o convés médio do Comando | porta |
-
-## Dormitório
 
 O cômodo concentra descanso, saúde, moral e encerramento do turno.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
-| inferior | beliche temporário `SOCORRER [NOME]` de sobrevivente em risco | intervenção principal de socorro |
-| médio | Neusa — estado do grupo e benefício de enfermeira | conversa |
-| médio | mesa do grupo — mediação do conflito | intervenção principal |
-| superior | mesa comum — `Cuidar do grupo` | intervenção principal de recuperação |
+| inferior | beliche temporário `SOCORRER [NOME]` de sobrevivente em risco | entrega de socorro |
+| médio | Neusa — ordens da tripulação e confirmação | conversa e confirmação |
+| médio | mesa do grupo — destino de ordens de convivência | entrega |
+| superior | mesa comum — destino de ordens de moral | entrega |
 | superior | beliche do técnico — resumo e dormir | leitura técnica e encerramento |
 | acesso | porta única para o convés superior do Comando | porta |
 
-## Intervenções
+## Ordens
 
-Problemas já nascem ativos após os incidentes; não são aceitos numa lista. HUD e
-mapa indicam a sala afetada, e os pontos relacionados respondem imediatamente.
+Os incidentes e os dias tranquilos usam a mesma estrutura de ordem: objeto,
+origem, destino e consequência. Nos dias sem incidente, duas ordens preventivas
+chegam remotamente e uma é confirmada ao encontrar o sobrevivente responsável.
 
-As sequências variam. Um passo existe somente para descobrir informação, obter
-um componente especial ou aplicar a correção. Não há obrigação universal de
-falar com NPC ou trocar de cômodo.
+Nos dias com incidente, o cartão apresenta duas soluções físicas. A solução
+escolhida substitui a contenção separada e precisa ser executada na estação
+correspondente.
 
-| Intervenção | Tipo | Onde conclui |
+| Ordem | Tipo | Onde conclui |
 | --- | --- | --- |
-| Reparar motor | correção | bancada do motor, Máquinas |
-| Aumentar potência | aceleração | console da rota, Comando |
-| Reparar casco | correção | local aleatório alcançável indicado pelo problema |
-| Cuidar do grupo | recuperação | mesa comum, Dormitório |
-| Socorrer sobrevivente | recuperação | beliche da pessoa em risco, Dormitório |
-| Reparar suporte de vida | correção | painel de suporte, Máquinas |
-| Reparar sistema de energia | correção | painel de distribuição, Máquinas |
-| Reparar comunicações | correção | antena, Comando |
-| Reorganizar comida | correção | estoque de comida, Depósito |
-| Mediar conflito | correção | mesa do grupo, Dormitório |
+| Manutenção preventiva | preparação | estação indicada pela oferta |
+| Solução técnica | correção | estação do motor, energia, suporte, comunicações ou casco |
+| Solução de suprimentos | recuperação | estoque ou estação logística |
+| Solução da tripulação | convivência | mesa do grupo ou mesa comum |
+| Socorro | recuperação humana | beliche da pessoa em risco |
 
-O painel de distribuição atende as duas funções: quando a falha elétrica está
-ativa, a interação abre as opções de reparo e de economia no mesmo painel; sem a
-falha, alterna apenas a economia.
+Uma quest possui somente duas etapas leves: coletar e entregar. A rota usa no
+máximo dois cômodos distintos, e o sobrevivente que oferece a ordem pode ser a
+origem ou o destino. O objeto é carregado por vez e pode ser reutilizado em
+ordens diferentes.
 
-Economia e racionamento são políticas persistentes locais. Não usam a
-intervenção principal, mas cobram moral ao ativar e em cada dia mantidas.
-
-Uma crise pode colocar Vera, Bento, Neusa ou Sílvia em risco. Socorrer estabiliza
-a pessoa; a morte remove o benefício da especialidade, mas não bloqueia nenhuma
-ação necessária.
-
-O beliche de socorro só aparece enquanto existe uma pessoa em risco e usa o nome
-dela no rótulo. A pessoa segue a seleção determinística do modelo aprovado. Com
-mais de um risco, mostra o menor prazo e, em empate, o mais antigo; depois do
-socorro, passa ao próximo. O ponto não cria um quinto personagem nem fixa novos
-beliches no layout.
 
 ## Leitura do jogador
 
-O HUD mostra o problema com menor prazo e quantos outros existem. O mapa agrupa
-todos por sala; cada ficha mostra perda diária, prazo e consequência da crise.
-Quando o dano no casco estiver ativo, ele pertence ao cômodo sorteado para
-aquela ocorrência, não ao Depósito por definição.
-O jogador escolhe sua prioridade pelo deslocamento e pela intervenção, não por
-um aceite abstrato.
+O HUD mostra a ordem ativa com objeto, origem, destino, recompensa e consequência
+da falha. Também destaca o problema ativo com menor prazo e quantos outros
+existem.
 
-O sketch implementa a topologia em hub, os pontos de intervenção e o dano no
-casco aleatório e alcançável nos três conveses de qualquer um dos quatro
-cômodos. `tasks.pde` mantém problemas persistentes, componentes especiais,
-políticas, riscos individuais e intervenções sem briefing ou tarefa singular.
+O mapa agrupa problemas e ordens por sala. Cada problema mostra perda diária,
+prazo e consequência da crise; cada ordem mostra o ponto de coleta e o destino.
+O mapa nunca transporta o técnico.
+
+Quando o dano no casco estiver ativo, ele pertence ao cômodo sorteado para aquela
+ocorrência e a quest aponta para o local alcançável correspondente.
+
+O sketch atual ainda implementa o ciclo anterior. A migração para ordens,
+soluções físicas, componentes de quest, riscos simplificados e uma conclusão
+diária pertence aos tickets [Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+e [Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).

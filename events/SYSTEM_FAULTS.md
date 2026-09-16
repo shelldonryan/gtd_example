@@ -1,37 +1,37 @@
 # Falhas de sistema
 
-Eventos internos criam problemas persistentes na Sala de máquinas ou no
-Comando. O cartão escolhe uma contenção imediata; nenhuma alternativa corrige a
-causa. Os valores abaixo foram confirmados na issue #20.
+Falhas internas criam problemas persistentes na família de falhas técnicas. O
+incidente apresenta duas soluções físicas em formato de quest; o jogador escolhe
+uma, coleta o objeto indicado e o entrega no sistema correspondente.
 
-## Falha no motor
+## Tipos
 
-Perda de 4 de energia por dia. `Reduzir rotação` custa 5 de energia e abre prazo
-3; `Manter impulso` custa 2 de moral e abre prazo 2. A crise destrói o motor e
-causa derrota. Reparar custa 2 peças com Sílvia viva ou 3 sem ela.
+| Incidente | Destino típico |
+| --- | --- |
+| Falha no motor | bancada do motor |
+| Dano no casco | local alcançável sorteado |
+| Falha no suporte de vida | painel de suporte |
+| Falha no sistema de energia | painel de distribuição |
+| Falha nas comunicações | antena |
 
-## Falha no suporte de vida
+Cada solução deve informar, antes da escolha:
 
-Perda de 4 de oxigênio por dia. `Usar redundância` custa 4 de energia e abre
-prazo 4; `Recircular o ar` custa 3 de oxigênio e abre prazo 2. A crise perde 12
-de oxigênio, põe uma pessoa em risco e reinicia em 3. Reparar custa 1 peça com
-Sílvia viva ou 2 sem ela.
+- objeto necessário;
+- origem e destino;
+- custo em recursos;
+- resultado da entrega;
+- perda diária, prazo e crise se não for concluída.
 
-## Falha no sistema de energia
+## Agravamento
 
-Perda de 3 de energia por dia. `Desligar circuitos` custa 4 de energia e abre
-prazo 4; `Distribuir a sobrecarga` custa 4 de moral e abre prazo 2. A crise
-perde 12 de energia, desliga o modo economia e reinicia em 3. Reparar exige o
-fusível de potência e custa 1 peça com Sílvia viva ou 2 sem ela.
-
-## Falha nas comunicações
-
-Perda de 2 de moral por dia e suspensão das transmissões da Terra. `Manter
-escuta` custa 3 de energia e abre prazo 4; `Desligar o transmissor` custa 3 de
-moral e abre prazo 2. A crise perde 10 de moral e reinicia em 3. Reparar custa
-1 peça com Vera viva ou 2 sem ela.
+Se a solução não for concluída antes de dormir, o problema permanece ativo,
+cobra sua perda diária, reduz o prazo e pode chegar à crise. A crise pode
+colocar uma pessoa em risco; apenas uma pessoa pode permanecer em risco por vez.
 
 ## Estado
 
-Valores confirmados e comprovados em `prototype/balance-model.mjs`; migrados
-para o sketch e para os textos D-047 na issue #21.
+A família e os destinos estão confirmados. A matriz das duas soluções, os textos
+curtos, os objetos e os valores serão definidos em [Redesenhar incidentes e
+ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+e verificados em [Simplificar mecânicas legadas e balancear o ciclo de
+quests](https://github.com/shelldonryan/gtd_example/issues/26).

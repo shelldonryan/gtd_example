@@ -2,9 +2,13 @@
 
 ## Objetivo
 
-O HUD apresenta recursos e a urgência que o jogador precisa acompanhar enquanto
-atravessa a nave. Não há lista lateral de tarefas: a faixa compacta destaca o
-problema com menor prazo, e o mapa reúne todos os problemas ativos por sala.
+O HUD apresenta recursos, a ordem ativa e a urgência que o jogador precisa
+acompanhar enquanto atravessa a nave. A partida tem um objetivo global — chegar
+a Marte — e uma decisão concreta por dia.
+
+Nos dias sem incidente, o HUD apoia a comparação de duas ordens preventivas. Nos
+dias com incidente, mostra a solução física escolhida e o problema que permanece
+caso ela não seja concluída.
 
 ## Informações exibidas
 
@@ -12,12 +16,13 @@ problema com menor prazo, e o mapa reúne todos os problemas ativos por sala.
 | --- | --- | --- |
 | Dia da viagem | cartão de texto | mostra o dia atual e o total de dias da viagem |
 | A bordo | cartão de texto | quantos sobreviventes vivos; o técnico não entra na conta |
-| Energia | ícone, número e barra | estoque que mantém o motor e o suporte de vida |
-| Oxigênio | ícone, número e barra | tempo de sobrevivência possível no espaço |
+| Energia | ícone, número e barra | estoque que mantém o motor e os sistemas |
+| Oxigênio | ícone, número e barra | margem de sobrevivência da tripulação |
 | Água | ícone, número e barra | quantidade de água |
 | Comida | ícone, número e barra | quantidade de comida armazenada |
-| Peças | ícone e número | quantas peças podem ser usadas em reparos |
+| Peças | ícone e número | quantas peças podem ser usadas em ordens técnicas |
 | Moral | ícone, número e barra | estado emocional dos sobreviventes |
+| Ordem ativa | faixa textual e marcador | objeto, origem, destino, recompensa e perda |
 | Problema urgente | faixa textual compacta | menor prazo, sala responsável e quantidade de outros problemas |
 
 ## Barras de recursos
@@ -44,12 +49,13 @@ no inventário de assets.
 | --- | --- |
 | Topo | dia, quantos estão a bordo e os seis indicadores de recurso |
 | Centro | sala 2D jogável usando toda a largura |
+| Faixa de ordem | objeto, origem, destino, recompensa e perda da ordem ativa |
 | Faixa de urgência | problema com menor prazo e quantidade dos demais |
 | Rodapé | botão `MAPA` e orientação de controles |
-| Sobreposição | mapa, diálogos, painéis técnicos, incidentes e resumo ao dormir |
+| Sobreposição | ordens, mapa, diálogos, incidentes e resumo ao dormir |
 
-O mapa abre pelo botão `MAPA`, mostra `VOCÊ ESTÁ AQUI` e marca todas as salas
-afetadas. Fechá-lo retorna à mesma sala e posição.
+O mapa abre pelo botão `MAPA`, mostra `VOCÊ ESTÁ AQUI`, a ordem ativa e todas as
+salas afetadas. Fechá-lo retorna à mesma sala e posição.
 
 ## Controles de alto nível
 
@@ -60,18 +66,22 @@ ocupante, sistemas e todos os problemas locais. Cada problema informa perda
 diária, prazo restante e consequência da crise. O clique nunca transporta o
 técnico.
 
-### Diálogos e pontos
+### Diálogos e ordens
 
 - Diálogos de NPC avançam com `ENTER` ou clique em `CONTINUAR (ENTER)`.
-- Problemas já nascem ativos; não existe briefing nem confirmação de tarefa.
-- Toda intervenção principal (`!`) abre o painel com o custo e o efeito;
-  `CONFIRMAR (ENTER)` aplica, `VOLTAR (ESC)` fecha sem gastar a intervenção.
-- Recursos comuns são pagos no ponto da intervenção. Coleta física fica
-  reservada a componentes especiais.
+- Nos dias sem incidente, duas ordens preventivas aparecem remotamente com
+  nome, retrato, objeto, origem, destino, recompensa e perda.
+- A ordem escolhida é confirmada presencialmente com o sobrevivente. Depois da
+  confirmação, ela não pode ser cancelada.
+- Nos dias com incidente, o cartão mostra duas soluções físicas com custo,
+  objeto, rota e resultado. A solução escolhida deve ser executada.
+- A coleta e a entrega são as duas etapas leves. O objeto só existe como parte
+  de uma ordem aceita e pode ser carregado um por vez.
+- Recursos comuns são pagos ou recebidos no destino da ordem.
 
-Os botões de modais repetem o atalho no rótulo: `FECHAR (ESC)`, `VOLTAR (ESC)`,
-`CONFIRMAR (ENTER)` e o botão de dormir. O botão de pausa é
-`CONTINUAR (ESC)`.
+Os botões dos modais repetem o atalho no rótulo: `FECHAR (ESC)`, `VOLTAR (ESC)`,
+`CONFIRMAR (ENTER)`, `ACEITAR ORDEM (ENTER)`, `ENTREGAR (ENTER)` e o botão de
+dormir. O botão de pausa é `CONTINUAR (ESC)`.
 
 ### Encerrar o dia
 
@@ -79,28 +89,29 @@ Não existe botão persistente `Passar dia`. O técnico precisa chegar ao própr
 beliche no Dormitório e interagir. Antes de dormir, o resumo modal mostra:
 
 1. consumo previsto dos recursos;
-2. perdas e políticas persistentes;
-3. problemas ativos, prazos e crises iminentes;
-4. intervenção principal concluída ou ausente;
+2. recompensa ou perda da ordem preventiva;
+3. ordem ativa concluída ou ausente;
+4. problemas ativos, prazos e crises iminentes;
 5. confirmação para dormir e opção de voltar.
 
-Dormir processa recursos, moral, perdas, prazos, crises, vitória ou derrota e
-abre o novo dia no Dormitório.
+Dormir processa recursos, perdas, risco individual, prazos, crises, vitória ou
+derrota e abre o novo dia no Dormitório.
 
 ## Estados da interface
 
 - **Salas de interior:** o Comando é o hub; Dormitório, Depósito e Máquinas
   ligam-se somente a ele.
-- **Diálogo de NPC:** retrato sobre a cena e caixa inferior; bloqueia movimento e
-  interação até avançar ou fechar.
-- **Painel técnico:** usa a caixa inferior sem retrato para sistemas, para a
-  confirmação de intervenção e para o resumo do fim do dia.
-- **Coleta:** abre painel com o uso do componente e, ao confirmar, exibe aviso
-  breve sem interromper a exploração.
-- **Mapa:** preserva sala e posição e reúne os problemas por cômodo.
-- **Incidente:** modal técnico com duas contenções; bloqueia a exploração até a
-  escolha, mas deixa o problema ativo para correção física. Sem recursos para
-  nenhuma contenção, a crise acontece imediatamente e o modal não aparece.
+- **Ofertas de ordem:** duas ordens preventivas comparáveis nos dias sem
+  incidente; apenas uma pode ser aceita.
+- **Diálogo de confirmação:** retrato e caixa inferior; confirma a ordem ao
+  encontrar o sobrevivente responsável.
+- **Painel técnico:** caixa inferior sem retrato para custos, resultados,
+  entrega, risco e resumo do fim do dia.
+- **Coleta:** mostra o objeto da ordem; confirmar guarda o item.
+- **Entrega:** mostra recompensa, custo ou problema resolvido antes de aplicar.
+- **Mapa:** preserva sala e posição e marca origem, destino e problemas.
+- **Incidente:** modal técnico com duas soluções físicas; bloqueia exploração até
+  a escolha.
 - **Transmissão e desfecho:** permanecem modais.
 
 ## Avisos

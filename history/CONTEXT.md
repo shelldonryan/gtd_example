@@ -43,29 +43,31 @@ falhas que podem surgir durante o percurso.
 ## Desenvolvimento da viagem
 
 A viagem é representada por dez dias de jogo. O primeiro começa na Sala de
-comando e os seguintes, no Dormitório. Incidentes surgem nos dias 2, 4, 6, 8 e
-10. A resposta escolhe uma contenção imediata, mas o problema permanece no
-sistema ou cômodo afetado até ser corrigido fisicamente.
-Quando meteoros danificam o casco, o ponto atingido é sorteado entre locais
-alcançáveis dos quatro cômodos e permanece ali até a correção.
+comando; os seguintes, no Dormitório. Incidentes surgem nos dias 2, 4, 6, 8 e
+10. Existem sete tipos de incidente, cinco escolhidos por partida sem
+reposição, organizados em falhas técnicas, suprimentos e tripulação.
 
-Cada problema informa o que perde por dia, quanto tempo resta e qual crise
-ocorrerá se for ignorado. O técnico não aceita uma lista de tarefas: escolhe a
-prioridade andando até os pontos da nave. Conversas, diagnósticos, componentes
-especiais e políticas são preparação livre; somente uma correção, recuperação
-ou aceleração principal pode ser concluída por dia.
+Cada incidente apresenta duas soluções físicas. O técnico escolhe uma, aceita a
+ordem, coleta o objeto indicado e o entrega no destino. Se a solução não for
+concluída antes de dormir, o problema permanece ativo, cobra sua perda diária,
+reduz o prazo e pode chegar à crise.
 
-O jogador também pode cuidar do grupo, socorrer uma pessoa em risco ou aumentar
-a potência para eliminar um dia futuro de consumo e incidentes. Economia e
-racionamento persistem enquanto ativos: preservam recursos, mas cobram moral.
+Nos dias sem incidente, os sobreviventes oferecem duas ordens preventivas. O
+técnico escolhe uma, confirma a ordem presencialmente e executa uma rota curta de
+coleta e entrega. Uma ordem concluída aumenta um recurso específico. Se nenhuma
+ordem for aceita, os dois recursos associados às ofertas sofrem uma perda maior;
+se a ordem aceita não for concluída, perde-se uma quantidade menor do recurso
+protegido. A ordem aceita não pode ser cancelada.
 
-O turno termina quando o técnico volta ao próprio beliche no Dormitório e
-dorme. Consumos, perdas e prazos são então processados. Dormir sem intervir é
-permitido, mas aproxima os problemas de suas crises e pode levar à derrota.
+As ordens formam o trabalho do dia: não existe uma lista extensa nem cadeia
+universal de visitas. Componentes especiais continuam existindo como objetos de
+quest, carregados um por vez. O mapa mostra a origem e o destino, mas nunca
+transporta o técnico.
 
-As decisões não possuem solução perfeita. Corrigir uma falha deixa outra ativa;
-recuperar o grupo adia um reparo; acelerar a viagem reduz a exposição futura,
-mas consome recursos agora. O jogador escolhe qual risco aceita manter.
+O jogador administra os seis recursos durante o consumo diário e decide qual
+risco ou preparação merece a única conclusão de quest do dia. Diagnósticos são
+opcionais e curtos; políticas de economia e racionamento e bônus numéricos dos
+sobreviventes não fazem parte do novo ciclo.
 
 ## Objetivo
 

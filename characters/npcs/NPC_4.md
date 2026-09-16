@@ -6,17 +6,16 @@
 | Papel | Mecânica |
 | Onde fica | Sala de máquinas, em ponto fixo junto aos sistemas |
 | Temperamento | Direta, sem paciência para desculpa |
-| Função nas intervenções | Mecânica: reduz em 1 peça os reparos de motor, casco, energia e suporte de vida |
+| Função nas ordens | Oferece e confirma ordens de motor, energia, suporte e casco |
 
 ## Papel no jogo
 
-Sílvia acompanha motor, energia e suporte de vida na Sala de máquinas. Ela
-interpreta falhas técnicas, mas não é uma etapa obrigatória de toda correção.
-Recursos comuns são pagos diretamente na estação; somente componentes especiais
-justificam busca no Depósito.
+Sílvia oferece ordens ligadas ao motor, energia, suporte de vida e casco. Ela
+interpreta falhas técnicas, mas não é uma etapa obrigatória de toda ordem.
 
-Se Sílvia morrer, as correções técnicas continuam possíveis, mas cada uma custa
-1 peça adicional. Valores confirmados na issue #20.
+Ela pode ser a origem ou o destino de uma ordem. Suas ordens não recebem bônus
+numérico e continuam possíveis com a mesma regra enquanto ela estiver viva.
+Se morrer, deixa de oferecer ordens; o pool validado usa os sobreviventes vivos.
 
 ## Vínculos
 

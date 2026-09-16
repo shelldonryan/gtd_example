@@ -6,15 +6,16 @@
 | Papel | Enfermeira |
 | Onde fica | Dormitório, em ponto fixo junto às camas |
 | Temperamento | Cansada, mas é quem segura o grupo |
-| Função nas intervenções | Saúde: cuidado recupera 20 de moral e socorro custa 6 de água + 2 de comida; sem Neusa, recupera 12 e custa 9 + 3 |
+| Função nas ordens | Oferece e confirma ordens de moral, convivência e socorro |
 
 ## Papel no jogo
 
-Neusa acompanha saúde e moral no Dormitório. `Cuidar do grupo` custa 3 de água
-e 2 de comida e recupera 20 de moral com ela viva, ou 12 sem ela. `Socorrer
-[nome]` custa 6 de água e 2 de comida com Neusa, ou 9 e 3 sem seu benefício.
-Mediar conflito passa de custo zero para 3 de água. Valores confirmados na
-issue #20.
+Neusa oferece ordens ligadas à saúde, convivência e moral. Ela contextualiza o
+estado do grupo e pode ser a origem ou o destino de uma ordem preventiva ou de
+socorro.
+
+Suas ordens não recebem bônus numérico. Uma crise pode colocar uma pessoa em
+risco; há no máximo uma pessoa em risco por vez e o socorro é uma quest simples.
 
 ## Vínculos
 

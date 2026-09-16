@@ -6,17 +6,16 @@
 | Papel | Piloto |
 | Onde fica | Sala de comando, em ponto fixo junto ao painel de rota |
 | Temperamento | Pragmática; fala por números e horas |
-| Função nas intervenções | Navegação e comunicações: potência custa 10 de energia e comunicações, 1 peça; sem Vera, custam 15 e 2 |
+| Função nas ordens | Oferece e confirma ordens de navegação, rota e comunicações |
 
 ## Papel no jogo
 
-Vera acompanha a rota e as comunicações no hub central. O técnico pode consultá-la
-para interpretar a situação geral, mas não precisa falar com ela diariamente nem
-aceitar uma tarefa.
+Vera oferece ordens ligadas à rota e às comunicações. O técnico pode consultá-la
+para interpretar a situação geral, mas não precisa falar com ela diariamente.
 
-Ela participa de `Aumentar potência` e dos problemas de comunicação. Se morrer,
-essas ações continuam disponíveis: potência sobe de 10 para 15 de energia e o
-reparo de comunicações, de 1 para 2 peças. Valores confirmados na issue #20.
+Ela pode ser a origem ou o destino de uma ordem. Suas ordens não recebem bônus
+numérico e continuam disponíveis com a mesma regra enquanto ela estiver viva.
+Se morrer, deixa de oferecer ordens; o pool validado usa os sobreviventes vivos.
 
 ## Vínculos
 

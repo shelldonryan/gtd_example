@@ -6,16 +6,17 @@
 | --- | --- | --- |
 | MENU INIT | ao abrir o jogo | título, campo do nome do técnico e botão de início |
 | Vinheta | depois do INIT | 3 telas de texto, avançadas com clique |
-| Sala de comando | depois da vinheta ou pelas portas do hub | cena 2D jogável: rota, comunicações, antena, acessos por convés e Vera |
-| Sala de máquinas | pela porta inferior do Comando | cena 2D jogável: motor, energia, suporte de vida, economia e Sílvia |
-| Depósito | pela porta média do Comando | cena 2D jogável: estoques, componentes especiais, racionamento e Bento |
-| Dormitório | pela porta superior do Comando e no início de cada novo dia | cena 2D jogável: descanso, saúde, moral, Neusa e beliche do técnico |
-| Mapa | botão `MAPA` | sobreposição com posição, problemas por sala e fichas consultáveis; nunca transporta o jogador |
-| Diálogo | interação com sobrevivente | retrato sobre a cena e caixa inferior modal; avança com `ENTER` ou `CONTINUAR` |
-| Incidente | em dias alternados | cartão modal sobre a sala atual; escolhe a contenção e cria um problema local persistente |
+| Sala de comando | depois da vinheta ou pelas portas do hub | cena 2D jogável, rota, comunicações, ordens e acessos por convés |
+| Sala de máquinas | pela porta inferior do Comando | cena 2D jogável, motor, energia, suporte e ordens técnicas |
+| Depósito | pela porta média do Comando | cena 2D jogável, estoques, componentes e ordens logísticas |
+| Dormitório | pela porta superior do Comando e no início de cada novo dia | cena 2D jogável, descanso, saúde, moral, Neusa e ordens da tripulação |
+| Ordens | no início de dias sem incidente | duas ordens preventivas comparáveis, com objeto, rota, recompensa e perda |
+| Mapa | botão `MAPA` | sobreposição com posição, ordens ativas e problemas por sala; nunca transporta |
+| Diálogo | interação com sobrevivente | retrato e caixa inferior; oferece ou confirma uma ordem |
+| Incidente | no início dos dias 2, 4, 6, 8 e 10 | cartão modal com duas soluções físicas |
 | Pausa | ESC nas salas | continuar, reiniciar ou sair |
 | Vitória | fim da viagem, com motor operante e sobrevivente vivo | ver `MENU_VICTORY.md` |
-| Derrota | oxigênio, energia ou moral em zero, motor destruído ou nenhum sobrevivente vivo | ver `MENU_GAME_OVER.md` |
+| Derrota | recurso crítico, motor destruído ou nenhum sobrevivente vivo | ver `MENU_GAME_OVER.md` |
 
 ## Grafo
 
@@ -25,6 +26,12 @@ graph LR
   COMANDO <-->|porta superior| DORMITORIO["Dormitório"]
   COMANDO <-->|porta média| DEPOSITO["Depósito"]
   COMANDO <-->|porta inferior| MAQUINAS["Sala de máquinas"]
+  DORMITORIO -.->|dia sem incidente| ORDENS["duas ordens preventivas"]
+  ORDENS -->|escolher uma| CONFIRMA["confirmar com sobrevivente"]
+  CONFIRMA --> QUEST["coletar → entregar"]
+  COMANDO -.->|dia com incidente| INCIDENTE["duas soluções físicas"]
+  INCIDENTE -->|escolher uma| QUEST
+  QUEST -->|recompensa ou correção| DORMITORIO
   DORMITORIO -->|beliche: dormir| DORMITORIO
   COMANDO -.->|MAPA| MAPA["mapa consultável"]
   MAQUINAS -.->|MAPA| MAPA
@@ -36,29 +43,32 @@ graph LR
   DEPOSITO -.->|ESC| PAUSA
   DORMITORIO -.->|ESC| PAUSA
 ```
-
 ## O ciclo do dia
 
 1. O primeiro dia começa na Sala de comando; os seguintes, no Dormitório.
-   Incidentes surgem nos dias 2, 4, 6, 8 e 10.
-2. Quando há incidente, o cartão apresenta duas contenções: gastar mais agora
-   para ganhar segurança ou economizar e aceitar mais risco. A escolha não
-   corrige a causa; cria um problema ativo no cômodo responsável.
-3. O HUD destaca o problema com menor prazo. O mapa mostra todos os problemas,
-   agrupados por sala, com perda diária, prazo e consequência da crise.
-   Dano no casco fica associado ao cômodo que contém o local alcançável sorteado
-   para aquela ocorrência.
-4. O técnico escolhe a prioridade deslocando-se até os pontos relacionados.
-   Não existe aceite de tarefa nem visita diária obrigatória ao Comando.
-5. Diagnóstico, conversa, coleta de componente especial e ajuste de política são
-   livres. Recursos comuns são pagos no ponto da intervenção.
-6. Uma intervenção principal por dia conclui uma correção, recuperação ou
-   aceleração, sempre confirmada no painel do ponto. Os demais problemas
-   permanecem ativos.
-7. Para encerrar o turno, o técnico retorna ao próprio beliche no Dormitório.
-   O resumo mostra consumo, perdas, prazos e a intervenção concluída ou ausente.
-8. Dormir processa recursos, agravamentos, crises e condições de término. O novo
-   dia começa no Dormitório.
+2. Nos dias sem incidente, duas ordens preventivas aparecem remotamente. O
+   jogador compara as ofertas, escolhe uma e confirma a escolha ao encontrar o
+   sobrevivente responsável.
+3. A ordem aceita informa objeto, origem, destino, recompensa e perda em caso de
+   falha. Não pode ser cancelada e deve ser concluída antes de dormir.
+4. Nos dias 2, 4, 6, 8 e 10, um incidente apresenta duas soluções físicas. O
+   jogador escolhe uma e executa a quest correspondente.
+5. A coleta e a entrega são as duas etapas leves da ordem. O mapa marca origem e
+   destino, mas não transporta o técnico.
+6. Uma única quest pode ser concluída por dia. Diagnóstico e conversa fora da
+   ordem são opcionais e não criam uma cadeia obrigatória.
+7. Se nenhuma ordem preventiva for aceita, os dois recursos oferecidos sofrem
+   pequenas perdas. Se a ordem aceita falhar, perde-se uma pequena quantidade do
+   recurso que ela protegeria.
+8. Se a solução de incidente falhar, o problema permanece ativo e segue sua
+   perda, prazo e crise normais.
+9. O técnico retorna ao próprio beliche no Dormitório. Dormir processa consumo,
+   perdas, riscos, crises e condições de término.
+
+O objetivo global continua sendo chegar a Marte com o motor operante e pelo
+menos um sobrevivente vivo. A pressão diária vem da escolha entre duas ordens,
+do custo dos seis recursos e da consequência de deixar uma necessidade sem
+manutenção.
 
 ## Controles
 
@@ -82,40 +92,35 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
   possuem portas entre si.
 - A composição espacial toma `COMMAND_ROOM_CONCEPT_ART.png` como referência,
   sem adotar nomes ou números ilustrativos da imagem.
-- O mapa é uma sobreposição consultável. Marca `VOCÊ ESTÁ AQUI`; clicar num
-  cômodo abre sua ficha, mas não move o técnico.
-- O HUD mostra o problema com menor prazo e a quantidade dos demais. A ficha de
-  cada sala mostra todos os problemas locais, suas perdas, prazos e crises.
+- O mapa é uma sobreposição consultável. Marca `VOCÊ ESTÁ AQUI`, mostra a ordem
+  ativa e os problemas por cômodo; clicar numa sala não move o técnico.
 - Fechar o mapa retorna à mesma sala e à mesma posição.
-- Problemas já nascem ativos após o incidente. Os pontos relacionados respondem
-  imediatamente; não existe tarefa a aceitar no Comando.
-- Dano no casco não possui estação fixa: cada ocorrência ativa um local
-  alcançável sorteado em qualquer um dos quatro cômodos.
-- NPCs usam retrato e caixa inferior modal. Sistemas e intervenções usam painel
-  técnico sem retrato; toda intervenção principal exige confirmação antes de
-  aplicar. Coletas abrem painel de confirmação e depois aviso breve; portas e
-  escadas, indicações contextuais.
-- Uma correção, recuperação ou aceleração consome a intervenção principal do
-  dia. Movimento, diagnóstico, conversa, componente especial e políticas não.
-- A sequência contém somente passos necessários ao problema; NPC e troca de
-  cômodo não são requisitos universais.
-- Recursos comuns são pagos no ponto final. Apenas componentes especiais
-  precisam ser buscados fisicamente no Depósito.
-- Cinco dos sete problemas são sorteados sem reposição e surgem no início dos
-  dias 2, 4, 6, 8 e 10. O cartão bloqueia a exploração até a contenção ser
-  escolhida. Se nenhuma das duas contenções puder ser paga, a crise daquele
-  problema acontece imediatamente e nenhum cartão aparece.
-- A pausa não consome tempo nem recursos.
-- O beliche do técnico abre o resumo e a confirmação para dormir; não existe
-  botão `Passar dia`.
-- Transmissões da Terra aparecem na primeira ocorrência do incidente grave
-  correspondente, mesmo quando o jogador escolhe a contenção mais segura. Cada
-  tipo transmite uma vez por partida.
-- O cartão de transmissão externa não consome intervenção, recurso ou tempo.
-  Se coincidir com um incidente, a transmissão anterior aparece primeiro.
-- Marte só envia mensagem na vitória; ela fica incorporada à tela de vitória, sem um cartão adicional.
+- O HUD mostra a ordem ativa, seu objeto, origem, destino e recompensa. Problemas
+  ativos continuam mostrando perda, prazo e crise.
+- Nos dias sem incidente, duas ordens preventivas são apresentadas remotamente.
+  A escolhida é confirmada ao encontrar o sobrevivente; a outra expira.
+- Nos dias com incidente, o cartão apresenta duas soluções físicas. A solução
+  escolhida substitui a contenção separada e deve ser executada no espaço jogável.
+- O sobrevivente responsável pode ser origem ou destino da ordem. Uma rota não
+  exige três cômodos distintos.
+- Coleta e entrega são as duas etapas da quest. Componentes são carregados um por
+  vez e só existem como parte de uma ordem aceita.
+- Diagnóstico e conversa fora da ordem são opcionais. Não há cadeia universal de
+  NPCs nem objetivo paralelo.
+- Uma quest pode ser concluída por dia. A ordem aceita não pode ser cancelada.
+- Uma ordem preventiva aceita e não concluída perde uma pequena quantidade do
+  recurso que protegeria. A ordem não escolhida não gera perda.
+- Se nenhuma ordem preventiva for aceita, os dois recursos das ofertas sofrem
+  pequenas perdas. Se uma solução de incidente falhar, o problema permanece com
+  suas perdas, prazo e crise normais.
+- NPCs usam retrato e caixa inferior modal. Ordens e soluções mostram confirmação
+  antes do compromisso; coleta, entrega e dormir exibem o custo ou resultado
+  relevante antes de aplicar.
+- A pausa não consome tempo nem recursos. Portas e escadas continuam sendo
+  indicações contextuais.
 
-Os botões exibem no próprio rótulo o atalho de teclado que já controla a ação:
+Os botões exibem no próprio rótulo o atalho de teclado que controla a ação:
 `INICIAR (ENTER)`, `CONTINUAR (ENTER)`, `CONTINUAR (ESC)`, `CONFIRMAR (ENTER)`,
-`ENCERRAR DIA (ENTER)`, `VOLTAR (ESC)` e `FECHAR (ESC)`. Botões sem atalho de
-teclado permanecem acionados pelo mouse.
+`ACEITAR ORDEM (ENTER)`, `ENTREGAR (ENTER)`, `ENCERRAR DIA (ENTER)`,
+`VOLTAR (ESC)` e `FECHAR (ESC)`. Botões sem atalho de teclado permanecem
+acionados pelo mouse.
