@@ -61,7 +61,8 @@ graph LR
    pequenas perdas. Se a ordem aceita falhar, perde-se o recurso que ela
    protegeria; o objeto retorna à origem.
 8. Se a solução de incidente falhar, o problema permanece ativo e segue sua
-   perda, prazo e crise normais, sem multa adicional.
+   perda, prazo e crise normais, sem multa adicional. A mesma solução reaparece
+   como retomada enquanto o problema permanecer ativo.
 9. O técnico retorna ao próprio beliche no Dormitório. Dormir processa consumo,
    perdas, riscos, crises e condições de término.
 

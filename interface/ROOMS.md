@@ -65,13 +65,14 @@ ao Comando para aceitar uma ordem.
 | superior | Vera — ordens de navegação e comunicações | conversa, confirmação e coleta/entrega condicionadas à ordem |
 | superior | antena — destino de ordens de comunicação | entrega |
 | médio | porta do Depósito | porta |
-| médio | console da rota — origem de objetos, jornada, previsão e ordens de potência | leitura, coleta e entrega |
+| médio | console da rota — origem de objetos, jornada e previsão | leitura, coleta e entrega |
 | inferior | porta da Sala de máquinas | porta |
 | inferior | painel de situação — visão geral dos problemas e ordens | leitura técnica |
 
 No primeiro dia, o técnico começa no Comando. Nos demais, chega ao hub pela
-porta superior vinda do Dormitório. Ordens de potência podem eliminar um dia
-futuro completo, conforme os valores definidos no balanceamento.
+porta superior vinda do Dormitório.
+O console da rota informa jornada, dias restantes e previsão de consumo antes
+das decisões de quest. Não existe aceleração que elimine dias.
 
 ## Sala de máquinas
 O cômodo concentra motor, energia e suporte de vida.
@@ -119,8 +120,8 @@ de `mechanics/ACTIONS.md`.
 
 Nos dias com incidente, o cartão apresenta duas soluções físicas. A escolhida
 substitui a contenção separada e precisa ser executada na estação correspondente.
-O cartão informa também o custo e o resultado; os valores numéricos pertencem ao
-ticket #26.
+O cartão informa também o custo e o resultado; os valores numéricos estão em
+`mechanics/ACTIONS.md`.
 
 | Ordem | Tipo | Origem | Onde conclui |
 | --- | --- | --- | --- |
@@ -139,7 +140,8 @@ Após a confirmação da ordem, a coleta mostra o objeto e sua finalidade. A ord
 preventiva exige confirmação presencial com o responsável; a solução de incidente
 é confirmada no cartão. A entrega mostra o resultado antes de aplicar. Se uma
 ordem preventiva aceita falhar ao dormir, o objeto retorna à origem; se uma
-solução urgente falhar, o problema permanece ativo sem multa adicional.
+solução urgente falhar, o problema permanece ativo sem multa adicional e a mesma
+solução reaparece como retomada.
 
 
 ## Leitura do jogador
@@ -156,6 +158,6 @@ Quando o dano no casco estiver ativo, ele pertence ao cômodo sorteado para aque
 ocorrência e a quest aponta para o local alcançável correspondente. A origem das
 duas soluções é o console da rota no Comando.
 
-O catálogo de quests está fechado em `mechanics/ACTIONS.md` e `events/`. O
-balanceamento numérico ainda pertence ao ticket #26; o sketch atual continua
-implementando o ciclo anterior até a migração posterior.
+O catálogo de quests e o balanceamento numérico estão em `mechanics/ACTIONS.md`
+e `events/`. O sketch atual continua implementando o ciclo anterior até a
+migração posterior.

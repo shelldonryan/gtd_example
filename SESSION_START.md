@@ -64,27 +64,25 @@ reporte e não escolha silenciosamente.
   confirmadas e implementadas no protótipo anterior.
 - #25 foi concluída: o catálogo das oito ordens preventivas e das quatorze
   soluções físicas está definido em `mechanics/ACTIONS.md` e `events/`.
-- O contrato de quests foi fechado, mas os valores numéricos e a migração do
-  sketch ainda não foram concluídos.
-- #26 está OPEN e disponível: [Simplificar mecânicas legadas e balancear o
-  ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
-- #8 está OPEN e bloqueada nativamente por #26:
+- #26 foi concluída: estoque, consumo, custos, recompensas, perdas, prazos,
+  crises, risco e seleção do pool estão definidos e simulados.
+- O sketch ainda não foi migrado para o novo ciclo de quests.
+- #8 está OPEN e disponível após o fechamento da #26:
   [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8).
 - #7 está OPEN, disponível e independente:
   [Documento de entrega e como o jogo roda na apresentação](https://github.com/shelldonryan/gtd_example/issues/7).
-- O próximo caminho crítico é #26; #8 será liberada quando o balanceamento
-  estiver fechado.
+- O próximo caminho crítico é #8; a migração do sketch vem depois do inventário.
 
 ### Fronteira Wayfinder
 
-Sincronizada com o grafo nativo após o fechamento do catálogo de quests:
+Sincronizada com o grafo nativo após o fechamento do balanceamento:
 
 | Issue | Estado | Bloqueadores abertos | Relação |
 |---|---|---|---|
 | #7 Documento de entrega | OPEN | — | independente e disponível |
-| #8 Inventário de assets | OPEN | #26 | depende do balanceamento |
+| #8 Inventário de assets | OPEN | — | disponível após #26 |
 | #25 Redesenhar incidentes e ordens como quests físicas | CLOSED | — | catálogo e fluxo definidos |
-| #26 Simplificar mecânicas legadas e balancear o ciclo de quests | OPEN | — | próximo caminho crítico |
+| #26 Simplificar mecânicas legadas e balancear o ciclo de quests | CLOSED | — | números, pool e simulação definidos |
 | #19 Redesenhar o ciclo | CLOSED | — | contrato anterior superseded |
 | #20 Balancear o novo ciclo | CLOSED | — | números anteriores superseded |
 | #21 Implementar novo ciclo e hub | CLOSED | — | implementação anterior superseded em parte |
@@ -138,14 +136,12 @@ prova da intenção nova.
   nenhum sobrevivente vivo.
 
 O catálogo concreto, seus IDs, objetos, origens, destinos, resultados e textos
-estão em `mechanics/ACTIONS.md` e `events/`. As oito preventivas usam pares de
-recursos distintos; as quatorze soluções cobrem os sete incidentes. O ticket
-#26 ainda define os valores numéricos e a seleção final do pool.
+estão em `mechanics/ACTIONS.md` e `events/`. Os valores numéricos e a seleção
+final do pool foram definidos e simulados no ticket #26.
 
 Números, custos, recompensas, perdas, prazos e ordem final do processamento:
-`mechanics/ACTIONS.md` e [Simplificar mecânicas legadas e balancear o ciclo de
-quests](https://github.com/shelldonryan/gtd_example/issues/26). Topologia e
-ordens: `interface/ROOMS.md`.
+`mechanics/ACTIONS.md` e o modelo executável
+`prototype/balance-model.mjs`. Topologia e ordens: `interface/ROOMS.md`.
 
 ## Contrato técnico
 
@@ -187,8 +183,8 @@ Não replique aqui o histórico completo:
 - D-097: dano no casco aleatório e alcançável; permanece confirmado e deverá ser
   usado como destino de uma solução física.
 - D-098: números do ciclo anterior; a forma de problemas, políticas e benefícios
-  foi **SUPERSEDED** pela ADR-0002 e aguarda recalibração no ticket #26. O
-  calendário e os sete tipos continuam como base do novo contrato.
+  foi **SUPERSEDED** pela ADR-0002. A recalibração do novo ciclo está
+  implementada no ticket #26; o calendário e os sete tipos continuam como base.
 - D-099 a D-103: decisões de implementação do ciclo anterior, incluindo
   distribuição, beliche temporário, empate de urgência e crise imediata;
   **SUPERSEDED** onde conflitarem com ordens e riscos simplificados.
@@ -207,9 +203,9 @@ Não replique aqui o histórico completo:
 - **Simplificação do ciclo (ADR-0002):** seis recursos e consumo permanecem;
   políticas, bônus numéricos, coleta livre e contador separado de intervenção
   saem. Problemas persistentes permanecem; há no máximo uma pessoa em risco.
-- **Tickets novos:** a #25, agora CLOSED, define a matriz, os textos e as
-  rotas; a #26 pesquisa o código e define os números. O inventário de assets
-  (#8) depende agora somente da #26.
+- **Tickets concluídos:** a #25 define matriz, textos e rotas; a #26 define
+  números, seleção do pool e simulação. O inventário de assets (#8) está
+  liberado; a migração do sketch permanece posterior.
 
 ## Fontes por tarefa
 
@@ -244,12 +240,11 @@ Código:
 
 ## Lacunas que exigem consulta ou ticket
 
-- a seleção final do pool e os cálculos de consumo, custos, recompensas,
-  perdas, prazos e crises, no ticket [Simplificar mecânicas legadas e balancear
-  o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26);
+- a migração do novo ciclo de quests para o sketch e a captura desse fluxo,
+  após o inventário;
 - o inventário final de assets, dimensões, reutilização e ordem de produção,
   no ticket [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8),
-  bloqueado pelo #26;
+  agora disponível;
 - se a vitória permite continuar jogando depois da chegada;
 - se a derrota mostra os nomes dos sobreviventes ou apenas a contagem;
 - comportamento do nome vazio no menu: botão bloqueado versus fallback
@@ -286,29 +281,31 @@ Código:
 
 ## Última sessão registrada
 
-- Issue #25 implementada e fechada após a definição do contrato de conteúdo das
-  quests físicas.
-- `mechanics/ACTIONS.md` agora contém oito ordens preventivas (`V-01` a `S-02`),
-  quatro pares de comparação, quatorze soluções de incidente e os textos
-  canônicos de oferta, confirmação, coleta, entrega e falha.
-- `README.md` e `events/` registram as soluções técnicas, de casco, suprimentos
-  e tripulação. `interface/`, `characters/` e `code/SKETCH_ARCHITECTURE.md`
-  foram alinhados ao mesmo catálogo, às rotas de no máximo dois cômodos e às
-  etapas `COLETAR` → `ENTREGAR`.
-- A confirmação presencial, a impossibilidade de cancelamento, a devolução de
-  objeto em falha preventiva e a permanência do problema em falha urgente estão
-  documentadas.
-- O corpo da #1 foi atualizado: #25 CLOSED, #26 OPEN e disponível, #8 OPEN
-  bloqueada apenas por #26 e #7 OPEN independente.
-- A #26 e a #8 receberam comentários de dependência atualizada no Wayfinder.
-- Probe documental passou: oito preventivas, quatorze soluções, duas por
-  incidente, campos obrigatórios e 22 rotas sem violação do limite.
-- `node prototype/balance-model.mjs --simulate`, `--capture`, `--hit-test` e
-  `--ladder-test` passaram. Esses comandos comprovam o artefato anterior; o
-  sketch ainda não executa o novo ciclo.
-- Revisão Standards/Spec contra a issue #25 terminou sem achados remanescentes;
-  a duplicação entre fontes foi considerada intencional para o domínio.
-- `git diff --check` passou, com avisos apenas de conversão LF/CRLF.
+- A issue #26 foi implementada e fechada após a pesquisa do código e a
+  simulação do novo ciclo.
+- `prototype/balance-model.mjs` agora define estoque inicial `E80 O85 A80
+  C70 M80 P4`, consumo diário `E-7 O-4 A-6 C-6 M-2`, recompensas preventivas,
+  falhas, negligência, custos urgentes, prazos, crises, risco e socorro.
+- O pool usa quatro pares de referência em ciclo, filtra sobreviventes vivos e
+  preenche vagas sem repetir recurso. A partida interativa embaralha cinco dos
+  sete incidentes sem reposição.
+- O modelo cobre as etapas `COLETAR` → `ENTREGAR`, uma quest por dia, problemas
+  persistentes, falha urgente sem multa extra e retomada da mesma solução nos
+  dias seguintes. A negligência continua sendo aplicada quando o socorro ocupa
+  um dia sem incidente; socorro antes de incidente pendente é rejeitado.
+- `mechanics/ACTIONS.md`, `events/`, `interface/FLOW.md`, `interface/HUD.md`,
+  `interface/ROOMS.md`, `interface/MENU_VICTORY.md`,
+  `code/SKETCH_ARCHITECTURE.md` e ADR-0002 foram sincronizados com os valores.
+- `node --check prototype/balance-model.mjs` passou.
+- `node prototype/balance-model.mjs --simulate` passou com `BALANCE CHECK: PASS`,
+  três estratégias vencedoras, omissão derrotada e triagem vencedora em
+  `2520/2520` sequências.
+- A TUI foi exercitada e mostra objeto, origem, destino, recompensa, falha e
+  as duas soluções com custos antes da escolha.
+- O sketch Processing ainda implementa o ciclo anterior; nenhuma alteração foi
+  feita nos `.pde`. A migração visual fica posterior ao inventário da #8.
+- A #26 está CLOSED, a #8 está OPEN e disponível e a #7 continua OPEN,
+  independente. O próximo caminho crítico é #8.
 - Os quatro PNGs não rastreados em `assets/concept_arts/` foram preservados.
-- Resultado: documentação de domínio pronta para a #26; não é ainda protótipo
-  executável nem funcionalidade pronta do novo ciclo.
+- Resultado: contrato numérico e documentação prontos; não é ainda
+  funcionalidade pronta do novo ciclo no sketch.

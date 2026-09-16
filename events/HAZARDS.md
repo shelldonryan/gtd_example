@@ -6,25 +6,29 @@ indicado e o entrega no destino.
 
 ## Chuva de meteoros
 
-A nave atravessa uma região carregada e sofre dano no casco. A escolha usa duas
-quests físicas, ambas com o ponto de entrega sorteado uma única vez:
+A nave atravessa uma região carregada e sofre dano no casco. O problema cobra
+`-4 oxigênio por dia` e tem prazo inicial de 3 dias. Quando o prazo chega a zero,
+a crise aplica `-12 oxigênio` e reinicia o prazo em 2 dias.
+
+As duas soluções são quests físicas, ambas com o ponto de entrega sorteado uma
+única vez:
 
 | ID | Responsável | Objeto | Custo | Origem | Destino | Resultado | Se falhar |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| HUL-A | Sílvia | kit de vedação | peças | console da rota (Comando) | ponto de casco sorteado | fechar a ruptura | problema ativo; perda, prazo e crise do casco |
-| HUL-B | Sílvia | placa de blindagem | energia | console da rota (Comando) | ponto de casco sorteado | sustentar a placa | problema ativo; perda, prazo e crise do casco |
+| HUL-A | Sílvia | kit de vedação | `-1 peça` | console da rota (Comando) | ponto de casco sorteado | fechar a ruptura | `-4 oxigênio/dia; prazo 3; crise -12 oxigênio; prazo 2` |
+| HUL-B | Sílvia | placa de blindagem | `-6 energia` | console da rota (Comando) | ponto de casco sorteado | sustentar a placa | `-4 oxigênio/dia; prazo 3; crise -12 oxigênio; prazo 2` |
 
 O cartão informa responsável, objeto, custo, origem, destino, resultado e
-`SE FALHAR: PROBLEMA ATIVO; PERDA, PRAZO E CRISE DO CASCO`. O ponto de entrega é
-sorteado entre locais livres e alcançáveis dos quatro cômodos e permanece
-associado ao local até que a solução seja concluída.
+`SE FALHAR: PROBLEMA ATIVO; -4 OXIGÊNIO/DIA; PRAZO 3; CRISE -12 OXIGÊNIO`.
+O ponto de entrega é sorteado entre locais livres e alcançáveis dos quatro
+cômodos e permanece associado ao local até que a solução seja concluída.
 
 Como as duas origens ficam no Comando, o percurso até o dano usa no máximo dois
 cômodos distintos. O kit de vedação aparece apenas na solução `HUL-A`; ele
-nunca fica disponível para coleta livre. Os valores numéricos pertencem ao #26.
+nunca fica disponível para coleta livre.
 
 ## Estado
 
 O dano no casco e as duas rotas de solução estão definidos na matriz de quests
-da issue #25. O ticket #26 ainda define os valores numéricos de custo, perda,
-prazo e crise.
+da issue #25. Os valores numéricos acima são o contrato recalibrado da issue
+#26. O sketch ainda precisa migrar esse contrato para o fluxo visual.

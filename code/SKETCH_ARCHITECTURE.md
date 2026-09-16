@@ -83,16 +83,16 @@ por vez, com uma quest simples de socorro; sua morte reduz `A BORDO` sem
 recalcular custos.
 
 O hub, as quatro salas, o mapa consultável, o dano no casco alcançável e o
-objetivo de chegar a Marte permanecem. O catálogo de quests está fechado em
-`mechanics/ACTIONS.md` e `events/`; a migração e a verificação do sketch
-dependem do balanceamento da #26.
+objetivo de chegar a Marte permanecem. O catálogo e o balanceamento das quests
+estão em `mechanics/ACTIONS.md` e `events/`; a migração e a verificação do
+sketch são trabalho posterior.
 
 ## Implementação atual e migração
 
 O sketch atual ainda implementa o contrato anterior de problemas, contenções,
 intervenções e componentes. A arquitetura visual, o hub, o mapa, o pipeline de
-assets e a física continuam reaproveitáveis; a migração do ciclo pertence à #26,
-após a validação numérica e a simulação.
+assets e a física continuam reaproveitáveis; a migração do ciclo começa após a
+validação numérica e a simulação deste ticket.
 
 O alvo da migração é:
 
@@ -107,9 +107,9 @@ O alvo da migração é:
 - **Ciclo:** consumo diário, resultado da ordem e condições de término processados
   ao dormir.
 
-O catálogo, os textos e as rotas das quests estão definidos em
-`mechanics/ACTIONS.md` e `events/`. O ticket #26 ainda define os valores
-numéricos e a simulação antes da alteração do sketch.
+O catálogo, os textos, as rotas e os valores numéricos das quests estão
+definidos em `mechanics/ACTIONS.md` e `events/`. A alteração do sketch deve
+consumir esse contrato sem reintroduzir políticas, bônus ou limites paralelos.
 
 Números do movimento (grade lógica 640×360; render 1280×720 / 720p): personagem
 16×24, andar 1,5 px/quadro, pulo de 48 px, gravidade 0,5, escada 1,0 e
@@ -133,9 +133,9 @@ Nenhuma tela recebe parâmetro: as abas compartilham o mesmo estado do sketch.
 ## Números
 
 `mechanics/ACTIONS.md` é a fonte de regras. Os valores antigos do modelo da
-issue #20 estão **SUPERSEDED** pela estrutura de quests. O ticket de balanceamento
-deve pesquisar `game.pde`, `tasks.pde` e `prototype/balance-model.mjs` antes de
-definir consumo, custos, recompensas, perdas, prazos e crises.
+issue #20 estão **SUPERSEDED** pela estrutura de quests. Os valores vigentes do
+novo ciclo estão consolidados em `mechanics/ACTIONS.md` e no modelo executável;
+a migração do sketch deve consumi-los sem recalibração local.
 
 ## Viewport e input
 
@@ -201,8 +201,8 @@ As capturas atualizadas ficam em `last_horizon/output/` na branch do protótipo.
 | Falha urgente | problema permanece com perda, prazo e crise normais |
 | Vitória e derrota | continuam conforme `MENU_VICTORY.md` e `MENU_GAME_OVER.md` |
 
-Os valores exatos e o processamento numérico serão recalculados em [Simplificar
-mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
+Os valores exatos e o processamento numérico estão consolidados em
+`mechanics/ACTIONS.md` e simulados em `prototype/balance-model.mjs`.
 
 Nenhum sobrevivente vivo encerra a partida com mensagem própria: é a quinta causa
 de derrota. O técnico não entra na conta dos quatro.
@@ -245,7 +245,7 @@ Limitações observadas:
 ## Estado da revisão
 
 - **Código atual:** o protótipo comprovado ainda implementa o ciclo anterior;
-  a migração do novo contrato pertence à #26.
+  a migração do novo contrato é trabalho posterior ao balanceamento da #26.
 - **Contrato alvo:** cinco incidentes nos dias 2, 4, 6, 8 e 10, ordens
   preventivas nos demais dias, duas soluções físicas por incidente e uma
   conclusão de quest por dia.
@@ -253,8 +253,9 @@ Limitações observadas:
   separado de intervenção.
 - **Espaço preservado:** Comando em hub, mapa consultável, quatro salas e
   estações físicas com rotas curtas.
-- **Evidência existente:** `--capture`, `--hit-test`, `--ladder-test`,
-  `node prototype/balance-model.mjs --simulate` e `git diff --check` comprovam
-  o contrato anterior, não o novo ciclo.
-- **Próxima evidência:** a #26 deve registrar a verificação numérica e do novo
-  fluxo antes de atualizar este estado para implementado.
+- **Evidência existente:** `node prototype/balance-model.mjs --simulate` comprova
+  o contrato numérico novo; `--capture`, `--hit-test` e `--ladder-test` ainda
+  comprovam somente o ciclo anterior do sketch.
+- **Próxima evidência:** a migração deverá capturar as duas ofertas preventivas,
+  escolha presencial, coleta, entrega, falha, negligência, soluções urgentes,
+  problemas persistentes e risco individual.

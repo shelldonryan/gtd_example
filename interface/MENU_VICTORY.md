@@ -12,7 +12,7 @@ pelo menos um sobrevivente vivo. Qualquer outra combinação cai no
 | Elemento | Função |
 | --- | --- |
 | Título | Confirma a chegada à base marciana |
-| Resumo da viagem | Dias transcorridos e dias ganhos com "Aumentar potência" |
+| Resumo da viagem | Dias transcorridos e condição de chegada |
 | Sobreviventes | Quantos chegaram vivos, de quantos partiram — Vera, Bento, Neusa e Sílvia, por nome na variação com perdas |
 | Recursos finais | Barras restantes e peças |
 | Mensagem de Marte | Texto da base confirmando o recebimento da nave; usa o nome do técnico |

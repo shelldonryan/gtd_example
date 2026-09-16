@@ -1,15 +1,17 @@
 # Ações e custos
 
-Este arquivo registra o contrato mecânico vigente. A forma das quests está
-definida; o modelo numérico anterior da issue #20 foi **SUPERSEDED**. Estoques,
-consumos, custos, recompensas, perdas, prazos e crises serão fechados no #26.
+Este arquivo registra o contrato mecânico vigente do ciclo de quests. Os valores
+foram definidos e simulados na issue [Simplificar mecânicas legadas e balancear
+o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
 
 ## Regras base
 
 | Regra | Valor |
 | --- | --- |
 | Recursos em barra | energia, oxigênio, água, comida e moral |
-| Peças | contagem inteira |
+| Peças | contagem inteira, sem consumo diário |
+| Estoque inicial | energia 80; oxigênio 85; água 80; comida 70; moral 80; peças 4 |
+| Consumo diário | energia -7; oxigênio -4; água -6; comida -6; moral -2 |
 | Sobreviventes | 4 a bordo; o técnico não entra na conta |
 | Duração | 10 dias |
 | Incidentes | dias 2, 4, 6, 8 e 10 |
@@ -17,33 +19,42 @@ consumos, custos, recompensas, perdas, prazos e crises serão fechados no #26.
 | Famílias de incidente | falhas técnicas, suprimentos e tripulação |
 | Trabalho diário | uma quest concluída por dia |
 
-Os valores de estoque inicial, consumo, custos e recompensas serão consolidados
-em [Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26)
-após a pesquisa do código e a simulação. Esta fonte registra a forma vigente do
-sistema, não números provisórios.
+O consumo é aplicado uma vez ao dormir. Nenhuma ordem preventiva cancela o
+consumo normal. Ao dormir, o jogo aplica, nesta ordem: consequência da ordem
+preventiva incompleta ou negligência, consumo diário, perdas dos problemas
+ativos, contagem do risco individual, prazos e crises, limite dos recursos e
+condições de término.
 
 Economia e racionamento foram removidos. Também não existem bônus numéricos
 ocultos por sobrevivente nem um contador separado de intervenção. Os
 sobreviventes oferecem ordens, contextualizam os objetos e podem entrar em
-risco, mas não alteram silenciosamente os custos.
+risco,
+mas não alteram silenciosamente os custos.
 
-Encerrar o dia continua exigindo dormir no beliche do técnico no Dormitório.
-Dormir processa consumo, perdas, riscos, prazos, crises e condições de término.
-O jogador pode dormir sem cumprir a ordem, mas assume a consequência de
-negligência prevista para aquele dia.
+Encerrar o dia continua exigindo dormir no beliche do técnico no Dormitório. O
+jogador pode dormir sem cumprir a ordem, mas assume a consequência prevista para
+aquele dia.
 
 ## Consumo ao encerrar o dia
 
-O consumo diário continua sendo a pressão de base dos seis recursos. O cálculo
-final e a ordem exata do processamento serão definidos no ticket de
-balanceamento. Nenhuma ordem preventiva cancela o consumo normal do dia.
+| Recurso | Consumo por noite | Razão mecânica |
+| --- | ---: | --- |
+| Energia | -7 | mantém motor e sistemas |
+| Oxigênio | -4 | sustenta os sobreviventes |
+| Água | -6 | consumo humano diário |
+| Comida | -6 | consumo humano diário |
+| Moral | -2 | desgaste básico da viagem |
+| Peças | 0 | reserva para soluções técnicas |
 
+Energia, oxigênio e moral em zero encerram a partida. Água e comida podem
+chegar a zero, mas produzem pressão por escassez e não uma derrota instantânea;
+seus incidentes e crises continuam aplicando consequências.
 
 ## Ordens e problemas ativos
 
 O jogo não possui uma lista extensa de tarefas. O trabalho do dia é uma ordem
-física curta, com objeto, origem, destino, recompensa e consequência visíveis
-antes do compromisso.
+física curta, com objeto, origem, destino, recompensa ou resultado e consequência
+visíveis antes do compromisso.
 
 Nos dias sem incidente, os sobreviventes oferecem duas ordens preventivas. O
 jogador compara as duas, confirma uma presencialmente e pode concluir somente
@@ -52,92 +63,84 @@ dormir.
 
 Uma ordem preventiva concluída aumenta um recurso específico. Se a ordem aceita
 não for concluída, perde-se uma pequena quantidade do mesmo recurso. Se nenhuma
-ordem for aceita, perdem-se pequenas quantidades dos dois recursos associados às
-ofertas. Os valores exatos serão definidos no ticket de balanceamento.
+ordem for aceita, cada recurso protegido pelas duas ofertas perde uma quantidade
+maior. Assim, concluir é melhor que falhar depois de aceitar, e aceitar e falhar
+é melhor que ignorar as duas ofertas.
 
 Nos dias com incidente, o cartão apresenta duas soluções em formato de quest.
-Cada solução informa seu objeto, origem, destino, custo e resultado. A escolha
-é única e a solução precisa ser executada fisicamente.
+Cada solução informa seu objeto, origem, destino, custo e resultado. A escolha é
+única e a solução precisa ser executada fisicamente.
 
 Se a solução de um incidente não for concluída antes de dormir, o problema
 permanece ativo. Sua perda diária, prazo e crise seguem normalmente; não há uma
 multa extra pela quest não concluída.
 
-## Regras da ordem
+## Ordens preventivas
 
-| Regra | Aplicação |
-| --- | --- |
-| Etapas | coleta do objeto e entrega no destino |
-| Limite | uma quest concluída por dia |
-| Componentes | objetos de quest, carregados um por vez |
-| Recursos comuns | pagos ou recebidos no destino |
-| NPC | origem ou destino, sem bônus numérico |
-| Rota | curta e sem três cômodos distintos |
-| Diagnóstico | opcional e curto |
+O pool usa quatro pares de referência em ciclo: dia 1 usa `V-01 + B-01`, dia 3
+usa `V-02 + N-01`, dia 5 usa `B-02 + S-02`, dia 7 usa `N-02 + S-01` e dia 9
+reinicia o ciclo. Cada par protege recursos diferentes.
 
-Uma ordem pode usar um fusível, kit, caixa, ferramenta ou outro objeto produzido
-para a atividade. O objeto deve ter função mecânica e pode ser reutilizado em
-ordens diferentes.
-## Catálogo de ordens preventivas
-
-O pool de dias sem incidente possui oito ofertas. Cada oferta protege um único
-recurso; o valor numérico da recompensa e da perda pertence ao ticket de
-balanceamento. Os pares abaixo são combinações válidas para comparação:
-
-| ID | Responsável | Ordem | Objeto | Origem | Destino | Recompensa | Falha |
+| ID | Responsável | Ordem | Objeto | Origem | Destino | Recompensa | Se falhar |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| V-01 | Vera | Calibrar a antena | bobina de transmissão | reserva (Depósito) | antena (Comando) | moral + | moral - |
-| V-02 | Vera | Atualizar a rota | cartão de rota | Vera (Comando) | console da rota (Comando) | energia + | energia - |
-| B-01 | Bento | Reforçar a reserva | caixa de provisões | prateleira de reserva (Depósito) | estoque de comida (Depósito) | comida + | comida - |
-| B-02 | Bento | Separar peças de emergência | chave de torque | prateleira de reserva (Depósito) | Bento (Depósito) | peças + | peças - |
-| N-01 | Neusa | Preparar água do grupo | filtro de água | console da rota (Comando) | mesa comum (Dormitório) | água + | água - |
-| N-02 | Neusa | Abrir espaço para a conversa | cartões de mediação | Neusa (Dormitório) | mesa do grupo (Dormitório) | moral + | moral - |
-| S-01 | Sílvia | Regular a distribuição | módulo de relé | console da rota (Comando) | painel de distribuição (Máquinas) | energia + | energia - |
-| S-02 | Sílvia | Testar o suporte de vida | cartucho de oxigênio | console da rota (Comando) | painel de suporte de vida (Máquinas) | oxigênio + | oxigênio - |
+| V-01 | Vera | Calibrar a antena | bobina de transmissão | reserva (Depósito) | antena (Comando) | `+8 moral` | `-3 moral` |
+| V-02 | Vera | Atualizar a rota | cartão de rota | Vera (Comando) | console da rota (Comando) | `+8 energia` | `-3 energia` |
+| B-01 | Bento | Reforçar a reserva | caixa de provisões | prateleira de reserva (Depósito) | estoque de comida (Depósito) | `+8 comida` | `-3 comida` |
+| B-02 | Bento | Separar peças de emergência | chave de torque | prateleira de reserva (Depósito) | Bento (Depósito) | `+2 peças` | `-1 peça` |
+| N-01 | Neusa | Preparar água do grupo | filtro de água | console da rota (Comando) | mesa comum (Dormitório) | `+8 água` | `-3 água` |
+| N-02 | Neusa | Abrir espaço para a conversa | cartões de mediação | Neusa (Dormitório) | mesa do grupo (Dormitório) | `+8 moral` | `-3 moral` |
+| S-01 | Sílvia | Regular a distribuição | módulo de relé | console da rota (Comando) | painel de distribuição (Máquinas) | `+8 energia` | `-3 energia` |
+| S-02 | Sílvia | Testar o suporte de vida | cartucho de oxigênio | console da rota (Comando) | painel de suporte de vida (Máquinas) | `+8 oxigênio` | `-3 oxigênio` |
 
-Os pares de referência são `V-01 + B-01`, `V-02 + N-01`, `B-02 + S-02` e
-`N-02 + S-01`. Eles protegem recursos diferentes, usam rotas distintas e não
-criam uma opção universal. O ticket de balanceamento escolhe um par válido,
-remove as ordens de sobreviventes mortos e preserva esses invariantes. Se um par
-de referência deixar de existir, escolhe duas ofertas de sobreviventes vivos com
-recursos protegidos diferentes; se restar apenas uma pessoa, usa as duas ofertas
-dela. Sem sobreviventes, a partida já terminou.
+Se nenhuma preventiva for aceita, a perda é `-4` do recurso de cada oferta;
+para peças, a perda é `-2`. As recompensas ficam abaixo do estoque máximo e do
+consumo acumulado da campanha, portanto não anulam a pressão diária.
+
+Se o responsável de uma oferta morrer, a oferta é removida. O modelo preenche a
+vaga com a primeira oferta de sobrevivente vivo que proteja recurso diferente.
+Se restar somente uma pessoa viva, suas duas ofertas são usadas. Sem
+sobreviventes vivos, a partida já terminou.
 
 ## Matriz das soluções de incidente
 
-Cada incidente tem duas soluções físicas. O custo abaixo identifica o recurso
-que será calibrado no ticket de balanceamento; o resultado é a consequência
-positiva da entrega. A perda, o prazo e a crise de deixar o problema ativo
-continuam pertencendo à definição numérica do problema.
-
-O catálogo contém quatorze soluções: duas para cada um dos sete incidentes.
-Em cada solução de incidente, o campo `SE FALHAR` aparece como `PROBLEMA
-ATIVO: [perda/dia] | PRAZO [n] | CRISE [texto]`. Os valores de perda, prazo e
-crise são os da família do incidente e serão preenchidos no #26 antes da
-implementação.
+Cada incidente tem duas soluções físicas. O custo é pago na entrega. A perda
+diária começa quando a solução escolhida não é concluída antes de dormir. O
+prazo diminui uma unidade por noite; ao chegar a zero, a crise é aplicada e o
+prazo é reiniciado quando indicado.
 
 | Incidente | ID | Responsável | Objeto | Custo | Origem | Destino | Resultado | Se falhar |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Motor | ENG-A | Sílvia | chave de torque | peças | console da rota (Comando) | bancada do motor (Máquinas) | alinhar o eixo do motor | problema ativo; perda, prazo e crise do motor |
-| Motor | ENG-B | Sílvia | atuador do motor | energia | console da rota (Comando) | bancada do motor (Máquinas) | estabilizar a rotação | problema ativo; perda, prazo e crise do motor |
-| Casco | HUL-A | Sílvia | kit de vedação | peças | console da rota (Comando) | ponto de casco sorteado | fechar a ruptura | problema ativo; perda, prazo e crise do casco |
-| Casco | HUL-B | Sílvia | placa de blindagem | energia | console da rota (Comando) | ponto de casco sorteado | sustentar a placa | problema ativo; perda, prazo e crise do casco |
-| Suporte de vida | LIFE-A | Sílvia | cartucho de oxigênio | peças | console da rota (Comando) | painel de suporte de vida (Máquinas) | repor o cartucho | problema ativo; perda, prazo e crise do suporte |
-| Suporte de vida | LIFE-B | Sílvia | filtro de CO2 | energia | console da rota (Comando) | painel de suporte de vida (Máquinas) | recircular o ar | problema ativo; perda, prazo e crise do suporte |
-| Energia | PWR-A | Sílvia | fusível de potência | peças | console da rota (Comando) | painel de distribuição (Máquinas) | isolar o circuito | problema ativo; perda, prazo e crise da energia |
-| Energia | PWR-B | Sílvia | módulo de relé | moral | console da rota (Comando) | painel de distribuição (Máquinas) | redistribuir a carga | problema ativo; perda, prazo e crise da energia |
-| Comunicações | COM-A | Vera | bobina de transmissão | peças | console da rota (Comando) | antena (Comando) | restabelecer o contato | problema ativo; perda, prazo e crise das comunicações |
-| Comunicações | COM-B | Vera | célula de sinal | energia | console da rota (Comando) | antena (Comando) | manter a escuta | problema ativo; perda, prazo e crise das comunicações |
-| Comida | FOOD-A | Bento | caixa de provisões | peças | console da rota (Comando) | estoque de comida (Depósito) | recompor o estoque | problema ativo; perda, prazo e crise da comida |
-| Comida | FOOD-B | Bento | selante de estoque | moral | console da rota (Comando) | estoque de comida (Depósito) | proteger a reserva | problema ativo; perda, prazo e crise da comida |
-| Conflito | CON-A | Neusa | cartões de mediação | moral | console da rota (Comando) | mesa do grupo (Dormitório) | mediar a conversa | problema ativo; perda, prazo e crise do conflito |
-| Conflito | CON-B | Neusa | refeição quente | comida | console da rota (Comando) | mesa do grupo (Dormitório) | reunir o grupo | problema ativo; perda, prazo e crise do conflito |
+| Motor | ENG-A | Sílvia | chave de torque | `-2 peças` | console da rota (Comando) | bancada do motor (Máquinas) | alinhar o eixo do motor | `-4 energia/dia; prazo 3; crise: motor destruído` |
+| Motor | ENG-B | Sílvia | atuador do motor | `-8 energia` | console da rota (Comando) | bancada do motor (Máquinas) | estabilizar a rotação | `-4 energia/dia; prazo 3; crise: motor destruído` |
+| Casco | HUL-A | Sílvia | kit de vedação | `-1 peça` | console da rota (Comando) | ponto de casco sorteado | fechar a ruptura | `-4 oxigênio/dia; prazo 3; crise: -12 oxigênio; prazo 2` |
+| Casco | HUL-B | Sílvia | placa de blindagem | `-6 energia` | console da rota (Comando) | ponto de casco sorteado | sustentar a placa | `-4 oxigênio/dia; prazo 3; crise: -12 oxigênio; prazo 2` |
+| Suporte de vida | LIFE-A | Sílvia | cartucho de oxigênio | `-1 peça` | console da rota (Comando) | painel de suporte de vida (Máquinas) | repor o cartucho | `-3 oxigênio/dia; prazo 3; crise: -10 oxigênio e uma pessoa em risco; prazo 2` |
+| Suporte de vida | LIFE-B | Sílvia | filtro de CO2 | `-6 energia` | console da rota (Comando) | painel de suporte de vida (Máquinas) | recircular o ar | `-3 oxigênio/dia; prazo 3; crise: -10 oxigênio e uma pessoa em risco; prazo 2` |
+| Energia | PWR-A | Sílvia | fusível de potência | `-1 peça` | console da rota (Comando) | painel de distribuição (Máquinas) | isolar o circuito | `-3 energia/dia; prazo 3; crise: -10 energia; prazo 2` |
+| Energia | PWR-B | Sílvia | módulo de relé | `-5 moral` | console da rota (Comando) | painel de distribuição (Máquinas) | redistribuir a carga | `-3 energia/dia; prazo 3; crise: -10 energia; prazo 2` |
+| Comunicações | COM-A | Vera | bobina de transmissão | `-1 peça` | console da rota (Comando) | antena (Comando) | restabelecer o contato | `-2 moral/dia; prazo 4; crise: -8 moral; prazo 2` |
+| Comunicações | COM-B | Vera | célula de sinal | `-5 energia` | console da rota (Comando) | antena (Comando) | manter a escuta | `-2 moral/dia; prazo 4; crise: -8 moral; prazo 2` |
+| Comida | FOOD-A | Bento | caixa de provisões | `-1 peça` | console da rota (Comando) | estoque de comida (Depósito) | recompor o estoque | `-3 comida/dia; prazo 3; crise: -8 comida e uma pessoa em risco; prazo 2` |
+| Comida | FOOD-B | Bento | selante de estoque | `-4 moral` | console da rota (Comando) | estoque de comida (Depósito) | proteger a reserva | `-3 comida/dia; prazo 3; crise: -8 comida e uma pessoa em risco; prazo 2` |
+| Conflito | CON-A | Neusa | cartões de mediação | `-5 moral` | console da rota (Comando) | mesa do grupo (Dormitório) | mediar a conversa | `-3 moral/dia; prazo 3; crise: -8 moral e uma pessoa em risco; prazo 2` |
+| Conflito | CON-B | Neusa | refeição quente | `-4 comida` | console da rota (Comando) | mesa do grupo (Dormitório) | reunir o grupo | `-3 moral/dia; prazo 3; crise: -8 moral e uma pessoa em risco; prazo 2` |
+
+As soluções usam custos de recursos semanticamente relacionados às suas
+famílias. A reserva inicial de quatro peças, mais `+2 peças` de `B-02`, cobre
+uma campanha que priorize as soluções técnicas; energia, moral, comida e peças
+oferecem alternativas para outras estratégias.
 
 O ponto de casco é sorteado uma vez quando o problema nasce. Como as soluções
 partem do console da rota, a rota até qualquer cômodo tem no máximo dois
-cômodos distintos: Comando e o cômodo do dano. Os objetos compartilhados, como
-bobina, caixa, chave, filtro, cartões e relé, podem reaparecer em ordens
+cômodos distintos. Os objetos compartilhados podem reaparecer em ordens
 diferentes, mas nunca ficam disponíveis para coleta livre.
+
+## Socorro e risco individual
+
+Uma crise de comida, suporte de vida ou conflito pode iniciar um risco. Há no
+máximo uma pessoa em risco por vez. O prazo inicial é de 2 noites. Socorrer é
+uma quest simples com custo `-8 água` e `-2 comida`. Se o prazo chega a zero, a
+pessoa morre e `A BORDO` diminui; a morte não altera custos nem cria bônus.
 
 ## Estados da quest
 
@@ -148,10 +151,14 @@ confirmação, a etapa é `COLETAR`; após guardar o objeto, a etapa é `ENTREGA
 entrega confirmada conclui a única quest do dia.
 
 Dormir com uma ordem preventiva aceita e incompleta aplica a falha daquela
-ordem, devolve o objeto ao ponto de origem e limpa o item carregado. Dormir com
-uma solução de incidente incompleta não aplica multa extra: o problema segue
-ativo com sua perda, prazo e crise normais. A ordem não escolhida expira, e uma
-ordem aceita nunca pode ser cancelada.
+ordem, devolve o objeto ao ponto de origem e limpa o item carregado. Dormir sem
+aceitar preventiva aplica a negligência das duas ofertas. Dormir com uma solução
+urgente incompleta não aplica multa extra: o problema segue ativo com sua perda,
+prazo e crise normais.
+A mesma solução escolhida reaparece como retomada nos dias seguintes enquanto o
+problema permanecer ativo. Retomá-la continua consumindo a única conclusão diária
+e não altera o custo ou a consequência já exibidos.
+
 ## Vocabulário da interface da quest
 
 Os cartões e painéis usam frases curtas e os mesmos nomes da matriz:
@@ -170,10 +177,9 @@ Os cartões e painéis usam frases curtas e os mesmos nomes da matriz:
 | Nenhuma preventiva | `NENHUMA ORDEM ACEITA: -[n] [recurso 1] E -[n] [recurso 2].` |
 | Solução urgente incompleta | `SOLUÇÃO NÃO CONCLUÍDA. [PROBLEMA] PERMANECE ATIVO.` |
 
-
-Formato linear dos campos: `RESPONSÁVEL: [nome] | OBJETO: [objeto] | COLETA: [origem] | ENTREGA: [destino]`.
-`[n]` e `[custo]` são preenchidos pelo balanceamento. O texto não pode esconder
-o recurso afetado, a origem, o destino ou o estado da ordem.
+Formato linear dos campos: `RESPONSÁVEL: [nome] | OBJETO: [objeto] | COLETA:
+[origem] | ENTREGA: [destino]`. O texto não pode esconder o recurso afetado,
+a origem, o destino, o custo ou o estado da ordem.
 
 ## Calendário e processamento
 
@@ -182,85 +188,21 @@ partida, os sete tipos são embaralhados e cinco formam a viagem sem reposição
 Os tipos pertencem às famílias de falhas técnicas, suprimentos e tripulação.
 
 Nos dias sem incidente, duas ordens preventivas são oferecidas. O jogador deve
-aceitar e concluir uma para evitar a perda maior de negligência. As duas ofertas
-informam os recursos envolvidos antes da escolha e vêm de um pool validado.
+aceitar e concluir uma para evitar a perda maior de negligência. Nos dias com
+incidente, o cartão oferece duas soluções físicas; a escolhida deve ser
+concluída para remover o problema.
 
-Nos dias com incidente, o cartão oferece duas soluções em formato de quest. Cada
-solução possui objeto, origem, destino, custo e resultado. A solução escolhida
-deve ser concluída fisicamente para remover o problema.
-
-Ao dormir, o jogo processa o consumo diário, as perdas dos problemas ativos, o
-risco individual vigente, as crises que chegarem ao prazo e as condições de
-término. A ordem exata e os valores serão consolidados após a pesquisa e a
-simulação de [Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
-
-Uma ordem preventiva concluída aumenta um recurso específico. Se for aceita e
-não for concluída, perde-se uma pequena quantidade desse mesmo recurso. Se
-nenhuma ordem for aceita, perdem-se pequenas quantidades dos dois recursos
-associados às ofertas. Nenhuma ordem aceita pode ser cancelada.
-
-### Sete incidentes
-
-| Família | Tipos | Estrutura |
-| --- | --- | --- |
-| Falhas técnicas | motor, casco, suporte de vida, energia e comunicações | duas soluções físicas para reparar ou estabilizar o sistema |
-| Suprimentos | falta de comida | duas soluções físicas para recuperar ou proteger o estoque |
-| Tripulação | conflito no dormitório | duas soluções físicas para recuperar a convivência ou proteger o grupo |
-
-Os incidentes continuam criando problemas persistentes. A solução urgente não
-concluída deixa o problema ativo, com perda diária, prazo e crise. Não existe
-mais uma contenção separada da quest de solução.
-
-### Objetos e recursos
-
-Componentes especiais, como fusível e kit de vedação, são objetos de quest. A
-coleta não é livre: o item aparece como parte da ordem aceita, pode ser carregado
-um por vez e é consumido ou entregue no destino. Recursos comuns são pagos ou
-recebidos na estação correspondente.
-
-As ordens preventivas usam recompensas de um único recurso. Os valores de
-recompensa, falha e negligência devem ser pequenos em relação ao consumo diário,
-mas relevantes para a decisão. O ticket de balanceamento define os números e
-verifica que nenhuma oferta é inútil ou universalmente dominante.
-
-### Sobreviventes
-
-Vera, Bento, Neusa e Sílvia continuam nomeados e oferecem ordens relacionadas às
-suas áreas. Eles não alteram custos ou recompensas por bônus numérico.
-
-Uma crise pode colocar no máximo uma pessoa em risco. Socorrer é uma quest
-visível e simples. Se o prazo chegar a zero, a pessoa morre e `A BORDO` diminui;
-a morte não recalcula custos nem cria uma exceção de regra.
-
-### Mecânicas removidas
-
-- modo economia;
-- racionamento;
-- bônus de especialista;
-- contador separado de intervenção;
-- coleta livre de componentes;
-- seleção determinística complexa de riscos;
-- múltiplos riscos simultâneos;
-- contenção separada da solução física.
-
-### Estado do balanceamento
-
-Os números do modelo anterior da issue #20 estão **SUPERSEDED** pela estrutura
-de quests. O calendário, o consumo, os custos, as recompensas, as perdas, os
-prazos e as crises serão recalculados no ticket de balanceamento antes da
-implementação. O resultado deve manter uma campanha ganhável por mais de uma
-estratégia e perdível por negligência.
+Ao dormir, o jogo aplica consequência da preventiva, consumo, perdas dos
+problemas ativos, risco individual, prazos, crises e condições de término. Uma
+solução urgente não concluída deixa o problema ativo e não cria penalidade extra.
 
 ## Agravamento
 
 Todo problema ativo cobra sua perda ao encerrar o dia e reduz o prazo visível.
 Quando o prazo chega a zero, aplica uma crise coerente com sua família, não uma
-derrota universal. O motor pode ser destruído; crises de suprimentos, tripulação,
-casco ou comunicações produzem consequências próprias e podem continuar ativas.
-
-Uma crise pode colocar um sobrevivente nomeado em risco. Há no máximo uma pessoa
-em risco por vez. Essa pessoa recebe um prazo visível e uma quest simples de
-socorro. Se o prazo chegar a zero, a pessoa morre e `A BORDO` diminui.
+derrota universal. O motor pode ser destruído; crises de suprimentos,
+tripulação, casco ou comunicações produzem consequências próprias e podem
+continuar ativas após o reinício do prazo.
 
 ## Sobreviventes e fim de jogo
 
@@ -278,8 +220,10 @@ socorro. Se o prazo chegar a zero, a pessoa morre e `A BORDO` diminui.
 
 - A forma das ordens, incidentes e mecânicas simplificadas está confirmada.
 - O calendário vigente é 2, 4, 6, 8 e 10, com cinco incidentes de sete tipos.
-- Os valores antigos do modelo da issue #20 estão **SUPERSEDED** pela estrutura
-  nova e não devem ser reutilizados sem a recalibração de
-  [Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
-- O código atual ainda implementa o ciclo anterior; a migração e a verificação
-  pertencem ao trabalho posterior à validação numérica da #26.
+- O estoque, o consumo, os custos, as recompensas, as perdas, os prazos, as
+  crises, o socorro e a seleção do pool estão implementados no
+  `prototype/balance-model.mjs`.
+- O código do sketch ainda implementa o ciclo anterior; a migração visual e a
+  verificação do fluxo físico pertencem ao trabalho posterior ao balanceamento.
+- A simulação da issue #26 é a evidência numérica do contrato; não substitui a
+  futura captura do sketch migrado.

@@ -97,7 +97,8 @@ beliche no Dormitório e interagir. Antes de dormir, o resumo modal mostra:
 
 Dormir com uma preventiva aceita e incompleta mostra a perda, devolve o objeto à
 origem e encerra a ordem. Dormir com uma solução urgente incompleta mantém o
-problema sem penalidade adicional. O processamento numérico segue o ticket #26.
+problema sem penalidade adicional; a mesma solução reaparece como retomada nos
+dias seguintes. Os valores e a ordem do processamento estão em `mechanics/ACTIONS.md`.
 
 ## Estados da interface
 
@@ -143,5 +144,4 @@ ativado primeiro. A ordem não muda quando o jogador troca de sala.
 O mapa contém a comparação completa. A ficha da sala mostra, para cada problema,
 a perda diária, o prazo e a consequência quando ele chegar a zero. Para dano no
 casco, a ficha pertence ao cômodo que contém o local alcançável sorteado naquela
-ocorrência. A estrutura está em `mechanics/ACTIONS.md`; os valores numéricos
-serão confirmados no ticket #26.
+ocorrência. A estrutura e os valores numéricos estão em `mechanics/ACTIONS.md`.
