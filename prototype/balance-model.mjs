@@ -1048,7 +1048,7 @@ export function simulateAll() {
       && risk.deaths.length === 0 && risk.riskHistory.length > 0],
     ["limite recusa custo sem overdraft", nearLimit.attempted.lastMessage.includes("insuficientes")
       && nearLimit.attempted.resources.energy === nearLimit.beforeDelivery.resources.energy],
-    ["triagem vence as 2.520 sequências", robustWins === allSequences.length],
+    ["reserva de peças vence as 2.520 sequências", robustWins === allSequences.length],
   ];
 
   console.log(`\nROBUSTEZ: reserva de peças venceu ${robustWins}/${allSequences.length} sequências.`);
