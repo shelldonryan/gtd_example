@@ -3,7 +3,7 @@
 > Resumo operacional obrigatório. Leia antes de analisar, editar ou implementar
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
-Atualizado em: 2026-09-16 (issue #25 concluída; fronteira atualizada)
+Atualizado em: 2026-09-16 (issue #26 concluída; fronteira atualizada)
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Regras inegociáveis
@@ -118,7 +118,8 @@ prova da intenção nova.
 - Se nenhuma ordem preventiva for aceita, os dois recursos das ofertas sofrem
   pequenas perdas. Os valores exatos pertencem ao balanceamento.
 - Solução de incidente não concluída deixa o problema ativo, com perda diária,
-  prazo e crise normais, sem multa extra.
+  prazo e crise normais, sem multa extra; a mesma solução pode ser retomada nos
+  dias seguintes.
 - O sobrevivente responsável pode ser origem ou destino. A rota é curta e não
   exige três cômodos distintos.
 - Componentes especiais, como fusível e kit de vedação, existem como objetos de
