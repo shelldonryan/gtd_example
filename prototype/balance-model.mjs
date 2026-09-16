@@ -635,6 +635,58 @@ function rescue(state) {
   return next;
 }
 
+function applyQuestConsequences(state) {
+  const preventiveCommitted = state.acceptedQuest?.kind === "preventive"
+    || state.completedQuestKind === "preventive";
+  if (state.acceptedQuest) {
+    if (state.acceptedQuest.kind === "preventive") {
+      const order = PREVENTIVE_BY_ID[state.acceptedQuest.id];
+      state.resources[order.resource] -= order.failure;
+      state.questHistory.push({ day: state.day, kind: "preventive", id: order.id, completed: false });
+      state.lastMessage = `ORDEM NÃO CONCLUÍDA: -${order.failure} ${order.resource}.`;
+    } else {
+      state.questHistory.push({
+        day: state.day, kind: "incident", id: state.acceptedQuest.id, completed: false,
+      });
+      state.lastMessage = `SOLUÇÃO NÃO CONCLUÍDA. ${PROBLEMS[state.acceptedQuest.problemId].name} PERMANECE ATIVO.`;
+    }
+  }
+  if (state.dailyOffers.length === 0 || preventiveCommitted) return;
+
+  const losses = {};
+  for (const order of state.dailyOffers) {
+    losses[order.resource] = Math.max(losses[order.resource] ?? 0, PREVENTIVE_NEGLECT[order.resource]);
+  }
+  for (const [resource, amount] of Object.entries(losses)) state.resources[resource] -= amount;
+  state.questHistory.push({
+    day: state.day, kind: "preventive", id: "NONE", completed: false, losses,
+  });
+  const neglectMessage = "NENHUMA ORDEM ACEITA: as duas perdas de negligência foram aplicadas.";
+  state.lastMessage = state.acceptedQuest?.kind === "incident"
+    ? `${state.lastMessage} ${neglectMessage}`
+    : neglectMessage;
+}
+
+function clearDailyQuest(state) {
+  state.acceptedQuest = null;
+  state.selectedOffer = null;
+  state.dailyOffers = [];
+  state.loadedItem = null;
+}
+
+function processNight(state) {
+  for (const [resource, amount] of Object.entries(DAILY_CONSUMPTION)) {
+    state.resources[resource] -= amount;
+  }
+  for (const problem of state.activeProblems) {
+    const { resource, perDay } = PROBLEMS[problem.id].loss;
+    state.resources[resource] -= perDay;
+  }
+  processRisk(state);
+  processProblems(state);
+  clampResources(state);
+}
+
 function sleep(state) {
   const next = copyState(state);
   if (next.pendingIncident) {
@@ -643,66 +695,20 @@ function sleep(state) {
   }
   if (next.outcome !== "ongoing") return next;
 
-  const preventiveCommitted = next.acceptedQuest?.kind === "preventive"
-    || next.completedQuestKind === "preventive";
-  if (next.acceptedQuest) {
-    if (next.acceptedQuest.kind === "preventive") {
-      const order = PREVENTIVE_BY_ID[next.acceptedQuest.id];
-      next.resources[order.resource] -= order.failure;
-      next.questHistory.push({ day: next.day, kind: "preventive", id: order.id, completed: false });
-      next.lastMessage = `ORDEM NÃO CONCLUÍDA: -${order.failure} ${order.resource}.`;
-    } else {
-      next.questHistory.push({
-        day: next.day, kind: "incident", id: next.acceptedQuest.id, completed: false,
-      });
-      next.lastMessage = `SOLUÇÃO NÃO CONCLUÍDA. ${PROBLEMS[next.acceptedQuest.problemId].name} PERMANECE ATIVO.`;
-    }
-  }
-  if (next.dailyOffers.length > 0 && !preventiveCommitted) {
-    const losses = {};
-    for (const order of next.dailyOffers) {
-      losses[order.resource] = Math.max(losses[order.resource] ?? 0, PREVENTIVE_NEGLECT[order.resource]);
-    }
-    for (const [resource, amount] of Object.entries(losses)) next.resources[resource] -= amount;
-    next.questHistory.push({
-      day: next.day, kind: "preventive", id: "NONE", completed: false,
-      losses,
-    });
-    const neglectMessage = "NENHUMA ORDEM ACEITA: as duas perdas de negligência foram aplicadas.";
-    next.lastMessage = next.acceptedQuest?.kind === "incident"
-      ? `${next.lastMessage} ${neglectMessage}`
-      : neglectMessage;
-  }
-
-  next.acceptedQuest = null;
-  next.selectedOffer = null;
-  next.dailyOffers = [];
-  next.loadedItem = null;
-
-  for (const [resource, amount] of Object.entries(DAILY_CONSUMPTION)) {
-    next.resources[resource] -= amount;
-  }
-  for (const problem of next.activeProblems) {
-    const { resource, perDay } = PROBLEMS[problem.id].loss;
-    next.resources[resource] -= perDay;
-  }
-  processRisk(next);
-  processProblems(next);
-  clampResources(next);
+  applyQuestConsequences(next);
+  clearDailyQuest(next);
+  processNight(next);
   checkOutcome(next);
-
   if (next.outcome !== "ongoing") {
     next.lastMessage = `Derrota no dia ${next.day}: ${next.reason}.`;
     return next;
   }
-
   if (next.day >= 10) {
     next.outcome = "victory";
     next.reason = "chegada a Marte";
     next.lastMessage = "Vitória: a nave chegou a Marte.";
     return next;
   }
-
   next.questCompleted = false;
   next.day++;
   next.lastMessage = `Dia ${next.day} iniciado.`;
