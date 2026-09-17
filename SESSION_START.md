@@ -3,7 +3,11 @@
 > Resumo operacional obrigatório. Leia antes de analisar, editar ou implementar
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
-Atualizado após o encerramento da [issue #27](https://github.com/shelldonryan/gtd_example/issues/27), concluída depois da validação manual do retorno pelas portas.
+Atualizado após o encerramento da
+[issue #27](https://github.com/shelldonryan/gtd_example/issues/27), concluída
+depois da validação manual do retorno pelas portas; o delta da sessão foi
+commitado em seguida e as duas linhas residuais dos cartões de recurso foram
+alinhadas ao contrato.
 
 Destino Wayfinder: [issue #1](issue://1)
 
@@ -373,7 +377,17 @@ ser validado manualmente.
   ser posições fixas.
 - GitNexus continua sem indexar as funções `.pde`; a verificação funcional é a do
   Processing.
-- Nenhum commit ou push foi feito nesta sessão.
+- O delta desta sessão foi commitado depois do encerramento: `e1563e0` (sketch),
+  `89328d9` (docs), `f992cfb` (concept arts) e `d870f67` (vault); nenhum push foi
+  feito.
+- Alinhamento posterior: `SESSION_START.md` (contrato técnico) e
+  `interface/TEXT_FONTS.md` ainda diziam "cartões de recurso sem rótulo"; as duas
+  linhas passaram a registrar ícone + número + rótulo + barra, conforme a decisão
+  confirmada na #27 e o comentário da #8. Nenhuma decisão nova foi tomada.
+- Wayfinder desta sincronização: corpo e comentário da #1 atualizados com a
+  fronteira recalculada no grafo nativo, os commits acima e o alinhamento dos
+  rótulos. A fronteira não mudou: #8 é o próximo caminho crítico e #7 segue em
+  paralelo.
 - Resultado: funcionalidade pronta no jogo Processing — vinheta, transmissões,
   desfechos, NPCs, HUD e portais com limiar e chegada configuráveis —, não apenas
   documentação.
