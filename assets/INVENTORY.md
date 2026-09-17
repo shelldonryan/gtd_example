@@ -165,11 +165,26 @@ Em `data/map/`: `command.png`, `machines.png`, `depot.png` e `dormitory.png`.
 Uma miniatura por cômodo dentro do cartão do mapa consultável; a moldura, os
 textos e o `VOCÊ ESTÁ AQUI` continuam por código.
 
-## 10. Áudio — 2 arquivos, pendente
+## 10. Áudio — uma pasta por evento
 
-`data/audio/click.wav` e `data/audio/alerta.wav`, WAV PCM 16 bits, 44,1 kHz,
-mono, com a licença ao lado. Candidatos CC0 já levantados. Ficou
-**pendente por decisão**: o jogo continua mudo até a escolha do som.
+Os sons vivem em `data/audio/<evento>/`, cada pasta com o seu `LICENSE.txt`:
+
+| Pasta | Arquivos | Quando toca |
+| --- | --- | --- |
+| `audio/door/` | `door.wav` | uma vez no início da travessia de porta |
+| `audio/ladder/` | `ladder.wav`, `step_01..04.wav` | saída da escada; passos durante a subida/descida |
+
+Formato de todos: WAV PCM 16 bits, 44,1 kHz, mono. O engate da escada não tem
+som próprio — quem avisa que o técnico pegou a escada são os passos, a cada
+18 px lógicos.
+
+Créditos e receita ficam no `LICENSE.txt` de cada pasta: a escada usa passo de
+alumínio do congusbongus (CC-BY 3.0, derivado de *"fboots on aluminum ladder 01"*
+de Eelke — crédito obrigatório) com impacto da Kenney (CC0); a porta usa chiado
+de ar do rubberduck (CC0) com batente da Kenney (CC0), sem crédito obrigatório.
+
+Clique de UI, alerta de recurso crítico e os demais eventos ficaram fora — o
+alerta continua apenas visual ([[HUD]]).
 
 ## Ordem de produção
 
@@ -189,7 +204,8 @@ mais rápido e o que depende de posição já congelada.
    escadas, conveses e estações já definitivos.
 8. **Telas (3) e miniaturas do mapa (4)** — desfechos e mapa; não bloqueiam
    nada.
-9. **Áudio (2)** — quando a escolha do som for feita.
+9. **Áudio** — escada e porta decididas e integradas, em `data/audio/ladder/`
+   e `data/audio/door/`.
 
 ## O que continua em código
 
@@ -204,6 +220,6 @@ a verdade de posicionamento.
 
 - [#8 Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8)
 - [#10 Pipeline Aseprite → Processing](https://github.com/shelldonryan/gtd_example/issues/10)
-- [#28 Escolher e integrar os dois efeitos sonoros](https://github.com/shelldonryan/gtd_example/issues/28)
+- [#28 Escolher e integrar os efeitos sonoros](https://github.com/shelldonryan/gtd_example/issues/28)
 - [#29 Camada de assets: sketch pronto para receber a arte](https://github.com/shelldonryan/gtd_example/issues/29)
 

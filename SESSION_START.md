@@ -86,9 +86,11 @@ reporte e não escolha silenciosamente.
   com fallback geométrico, desenho 1:1 e travessia de porta em dois quadros.
 - #30 foi concluída nesta sessão: a aba principal não cita mais o harness, então
   a cópia entregue sai sem `capture.pde` e compila fora do repositório.
-- #28 está OPEN e disponível:
-  [Escolher e integrar os dois efeitos sonoros](https://github.com/shelldonryan/gtd_example/issues/28);
-  o jogo segue mudo até a escolha.
+- #28 está OPEN por decisão do usuário:
+  [Escolher e integrar os efeitos sonoros](https://github.com/shelldonryan/gtd_example/issues/28);
+  porta e escada estão escolhidas, integradas, verificadas e aprovadas na escuta
+  (D-136 a D-139), em `data/audio/<evento>/`. O ticket fica aberto para uma
+  possível ampliação de sons — hipótese registrada, nunca requisito (D-139).
 - As posições de escada e estação estão **fechadas** para a pintura dos fundos:
   escadas em 127/532 (Comando), 114/526 (Máquinas), 120/489 (Depósito) e 127/482
   (Dormitório), com as estações realocadas e folga mínima de 40 px do eixo de
@@ -114,7 +116,7 @@ Sincronizada com o grafo nativo depois da sessão do #7:
 | #29 Camada de assets | CLOSED | — | camada de arte com fallback, travessia de porta e drop-in documentado |
 | #30 Desacoplar o harness | CLOSED | — | cópia entregue sem `capture.pde`, testada fora do repositório |
 | #8 Inventário de assets | CLOSED | — | lista, canvas e ordem de produção em `assets/INVENTORY.md`; escadas e estações congeladas |
-| #28 Escolher e integrar os dois efeitos sonoros | OPEN | — | dependente da #3; o jogo segue mudo |
+| #28 Escolher e integrar os efeitos sonoros | OPEN | — | porta e escada entregues, integradas e validadas (D-136 a D-138); aberto por decisão do usuário para ampliação não decidida (D-139) |
 | #27 Portais, desfechos, transmissões, NPCs e HUD | CLOSED | — | escopo ampliado; concluído e validado |
 | #25 Redesenhar incidentes e ordens como quests físicas | CLOSED | — | catálogo e fluxo físico implementados no sketch |
 | #26 Simplificar mecânicas legadas e balancear o ciclo de quests | CLOSED | — | números, pool e consequências implementados no sketch |
@@ -339,6 +341,38 @@ Não replique aqui o histórico completo:
   partir da branch de trabalho (`node tools/snapshot-entrega.mjs`); código e
   documentação evoluem só na branch de trabalho e o snapshot é remontado antes
   de publicar — não existe atualização em dois lugares.
+- **D-135 (sessão #28, som):** o conjunto de sons foi definido evento por evento
+  e ficou em **travessia de porta e escada**; clique de UI, alerta de recurso
+  crítico e os demais eventos não têm som — o alerta continua apenas visual. A
+  cadência "uma vez na transição para o vermelho" chegou a ser confirmada e foi
+  revertida na mesma sessão, ficando **SUPERSEDED**; o par "clique + alerta" era
+  recorte de escopo da #3, nunca confirmado pelo usuário.
+- **D-136 (sessão #28, som):** o som da escada é a mistura de `footsteps/metal/4`
+  (congusbongus, CC-BY 3.0, crédito obrigatório de Eelke) com `impactMetal_004`
+  (Kenney, CC0), 60 ms entre as peças; vive em
+  `last_horizon/data/audio/ladder.wav`, com receita e créditos em
+  `LICENSE-ladder.txt`, e toca **apenas na saída** da escada — o engate não tem
+  som, porque a subida é coberta pelos passos (D-137). A porta segue pendente,
+  com a direção "pneumático metálico".
+- **D-137 (sessão #28, som):** a escada ganha **passos** enquanto o técnico sobe
+  ou desce — `step_01..04.wav` em rotação, um a cada 18 px lógicos
+  (`LADDER_STEP_SPACING` em `ship.pde`). O gatilho do `ladder.wav` é único, na
+  saída (`leaveLadderAtDeck`), o que também elimina o disparo duplo que existia
+  nas pontas da escada, quando engate e saída caíam no mesmo quadro. Os sons
+  foram suavizados a pedido do usuário: `ladder.wav` a −10 dBFS e os passos a
+  −20 dBFS com passa-baixas em 5 kHz.
+- **D-138 (sessão #28, som):** a porta usa `door.wav` — chiado de ar contínuo
+  (rubberduck, CC0) com batente metálico (Kenney, CC0) 480 ms depois, escolhido
+  pelo usuário entre seis candidatos; toca uma vez no início da travessia
+  (`enterRoomThroughDoor`), nos dois caminhos, com ou sem a arte da porta. Os
+  sons ficaram separados em `data/audio/<evento>/`, cada pasta com o seu
+  `LICENSE.txt`. A porta foi suavizada por medição: pico em -10 dBFS e RMS em
+  -25,8 dBFS, igualando a saída da escada que o usuário aprovou.
+- **D-139 (sessão #28, som):** o escopo do #28 — porta e escada — está entregue,
+  integrado e aprovado na escuta. O ticket permanece **aberto por decisão do
+  usuário**, que cogitou acrescentar outros sons se sobrar tempo; essa ampliação
+  é **PROVISÓRIA** — hipótese registrada, nunca requisito, e nada além de porta e
+  escada deve ser tratado como escopo.
 
 ## Fontes por tarefa
 
@@ -382,8 +416,6 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
 
 ## Lacunas que exigem consulta ou ticket
 
-- a escolha do som: o inventário reserva `data/audio/click.wav` e
-  `data/audio/alerta.wav` e o jogo segue mudo;
 - a seleção da arte, na ordem de `assets/INVENTORY.md` — ícones, porta, casco,
   objetos, NPCs, estações, retratos, fundos, telas e miniaturas do mapa; quem
   seleciona é o usuário, e arte gerada por IA é proibida pelo professor;
@@ -414,6 +446,46 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
       funcionalidade pronta.
 
 ## Última sessão registrada
+
+Sessão da [issue #28](https://github.com/shelldonryan/gtd_example/issues/28) —
+som da escada e da porta escolhidos com o usuário, integrados e verificados.
+
+- Fronteira recalculada no grafo nativo antes desta sessão: apenas #1 e #28
+  abertas; #28 sem bloqueadores.
+- **Correção de escopo:** o ticket afirmava "dois efeitos (clique e alerta)",
+  herdados do recorte da #3, sem confirmação do usuário. A definição passou a ser
+  **evento por evento**, a partir dos eventos reais do código — 18 candidatos
+  levantados com âncora em `ship.pde`, `game.pde`, `hud.pde` e `tasks.pde` —, e a
+  procedência ficou registrada no ticket.
+- **Decisões do usuário:** clique de UI e alerta de recurso crítico **sem som**
+  (a cadência "uma vez na transição para o vermelho" foi confirmada e revertida
+  na mesma sessão — **SUPERSEDED**); a escada toca na **saída** e ganha **passos**
+  na subida e na descida; a porta toca **uma vez na travessia** (D-135 a D-138).
+- **Escolha por escuta, em quatro rodadas:** a Kenney foi reprovada pelo usuário;
+  entraram qubodup (portas reais), yd (porta deslizante), BMacZero (mecânica),
+  rubberduck (ar) e congusbongus (escada de alumínio). A porta final — "tsssss
+  contínuo + metal" — trocou a camada de ar, que era gravação de porta de
+  madeira, por chiado real: ZCR 4.070 → ~13.400.
+- **Defeito corrigido:** engate e saída da escada no mesmo quadro disparavam o
+  som em rajada — 5 disparos no mesmo quadro no teste do harness, 1 depois. Com
+  o gatilho único na saída, o caso deixou de existir por construção.
+- **Níveis medidos, não estimados:** escada a −10 dBFS de pico e passos a
+  −20 dBFS com passa-baixas em 5 kHz; porta a −10 dBFS de pico e −25,8 dBFS de
+  RMS, alinhada à escada aprovada (estava 6,8 dB acima dela).
+- **Estrutura:** os sons ficaram em `data/audio/<evento>/`, cada pasta com o seu
+  `LICENSE.txt`.
+- **Evidência:** `--ladder-test` → 6 `OK`; `--capture` → **145 asserções `OK`**,
+  zero `FALHOU`, `QUEST CHECK: PASS`, `som: 6 de 6 carregados`; com a pasta de som
+  ausente, `5 de 6 carregados`, jogo mudo e sem exceção.
+- **Wayfinder:** #28 permanece OPEN por decisão do usuário (D-139), com o corpo
+  reescrito no estado entregue; a #1 registra a entrega e a hipótese.
+- **Commits:** nenhum — a árvore segue no working tree, pela regra de não
+  commitar sem solicitação. A branch `entrega` precisa ser remontada
+  (`node tools/snapshot-entrega.mjs`) antes de publicar.
+- Resultado: funcionalidade pronta no jogo Processing — som de porta e de escada,
+  com licenças e níveis documentados.
+
+### Sessão anterior — #7
 
 Sessão da [issue #7](https://github.com/shelldonryan/gtd_example/issues/7) —
 entrega montada, documentação separada da verificação e sketch pronto para

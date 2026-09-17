@@ -179,7 +179,8 @@ em [[ROOMS]].
 Um recurso em vermelho (de 1 a 29) avisa por três canais ao mesmo tempo: a cor,
 um **ícone de aviso** ao lado do número e a **borda do cartão piscando** (meio
 segundo aceso, meio apagado). A cor sozinha deixa quem não a distingue sem
-nenhuma pista.
+nenhuma pista. O alerta **não tem canal sonoro**: o aviso é só visual, por
+decisão da [#28](https://github.com/shelldonryan/gtd_example/issues/28).
 
 Alertas críticos usam os cartões de recurso: cor, ícone de aviso e borda
 piscando. Alerta não gera linha de texto: o problema ativo aparece na quarta
