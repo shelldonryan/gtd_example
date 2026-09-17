@@ -565,6 +565,8 @@ reajuste do andar para casar com a animação de caminhada.
   `QUEST CHECK: PASS`; `--ladder-test` → 6 `OK`; `--hit-test` → 5 `OK`;
   `--asset-pipeline-test` → `OK`. A aferição do deslize é medida, mas o veredito
   continua sendo o playtest.
+- **Commits** na branch `prototype/sketch-architecture`, sem push: `730d57b`
+  (sketch) e `8ac6494` (documentos), mais este registro.
 - **Resultado:** funcionalidade ajustada no jogo Processing — andar casado com a
   animação; nenhuma outra tecla, faixa ou velocidade mudou.
 
