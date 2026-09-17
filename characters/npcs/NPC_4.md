@@ -17,14 +17,14 @@ Sílvia oferece e confirma as ordens técnicas:
 - `HUL-A` e `HUL-B`: soluções físicas do dano no casco;
 - `LIFE-A`, `LIFE-B`, `PWR-A` e `PWR-B`: soluções físicas dos sistemas.
 
-Ela pode ser a origem ou o destino de uma ordem. Suas ordens não recebem bônus
-numérico. Se morrer, deixa de oferecer ordens; o pool validado usa os
-sobreviventes vivos.
+Ela pode ser a origem ou o destino de uma ordem ([[ACTIONS]]). Suas ordens não
+recebem bônus numérico. Se morrer, deixa de oferecer ordens; o pool validado usa
+os sobreviventes vivos.
 
 ## Vínculos
 
-- Técnico: entrega o diagnóstico e cobra a decisão dele.
-- Sobreviventes: trabalha para que Vera, Bento e Neusa cheguem inteiros.
+- Técnico: entrega o diagnóstico e cobra a decisão dele ([[PLAYER]]).
+- Sobreviventes: trabalha para que [[NPC_1]], [[NPC_2]] e [[NPC_3]] cheguem inteiros.
 - Terra: aprendeu o ofício no planeta que a nave deixou para trás.
 - Marte: mantém o motor vivo para a nave alcançar a base.
 
@@ -33,3 +33,8 @@ sobreviventes vivos.
 - Não anda sozinha: fica no ponto fixo da Sala de máquinas.
 - Não combate e não sai da nave.
 - Depende das decisões do técnico sobre potência e reparo.
+
+## Referências
+
+- [#14 Decisões pendentes: roster, derrota, objetivos das salas e vocabulário](https://github.com/shelldonryan/gtd_example/issues/14)
+- [#25 Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)

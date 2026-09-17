@@ -16,14 +16,15 @@ Bento oferece e confirma as ordens de estoque e logística:
 - `B-02`: separar peças de emergência com chave de torque;
 - `FOOD-A` e `FOOD-B`: soluções físicas da falta de comida.
 
-Ele pode ser a origem ou o destino de uma ordem. O objeto só aparece quando
-pertence à ordem aceita; não entrega recursos comuns fora da etapa de entrega.
-Se morrer, deixa de oferecer ordens; o pool validado usa os sobreviventes vivos.
+Ele pode ser a origem ou o destino de uma ordem ([[ACTIONS]]). O objeto só
+aparece quando pertence à ordem aceita; não entrega recursos comuns fora da
+etapa de entrega. Se morrer, deixa de oferecer ordens; o pool validado usa os
+sobreviventes vivos.
 
 ## Vínculos
 
-- Técnico: só solta o estoque depois que ele decide o que priorizar.
-- Sobreviventes: responde pelo que Vera, Neusa e Sílvia consomem na viagem.
+- Técnico: só solta o estoque depois que ele decide o que priorizar ([[PLAYER]]).
+- Sobreviventes: responde pelo que [[NPC_1]], [[NPC_3]] e [[NPC_4]] consomem na viagem.
 - Terra: o estoque que ele guarda foi carregado no planeta que ficou para trás.
 - Marte: guarda o suficiente para a nave chegar à base.
 
@@ -32,3 +33,8 @@ Se morrer, deixa de oferecer ordens; o pool validado usa os sobreviventes vivos.
 - Não anda sozinho: fica no ponto fixo do Depósito.
 - Não combate e não sai da nave.
 - Depende das decisões do técnico para abrir ou segurar o estoque.
+
+## Referências
+
+- [#14 Decisões pendentes: roster, derrota, objetivos das salas e vocabulário](https://github.com/shelldonryan/gtd_example/issues/14)
+- [#25 Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)

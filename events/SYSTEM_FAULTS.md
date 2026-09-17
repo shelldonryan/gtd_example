@@ -38,7 +38,14 @@ Assim, a rota usa no máximo o Comando e o cômodo afetado.
 
 ## Estado
 
-A família, os destinos e as duas soluções físicas estão definidos na matriz de
-quests da issue #25. Os valores numéricos acima são o contrato recalibrado da
-issue #26. O sketch `last_horizon/` executa esse contrato no fluxo físico,
+A família, os destinos e as duas soluções físicas estão na matriz de
+[[ACTIONS]]; os valores numéricos são o contrato vigente do ciclo. Os eventos
+externos estão em [[HAZARDS]] e as necessidades de tripulação e suprimentos, em
+[[CREW_ISSUES]]. O sketch `last_horizon/` executa esse contrato no fluxo físico,
 incluindo a retomada da mesma solução sem reiniciar seu prazo.
+
+## Referências
+
+- [#17 Implementar no sketch as falhas de suporte, energia e comunicações](https://github.com/shelldonryan/gtd_example/issues/17)
+- [#25 Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+- [#26 Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26)

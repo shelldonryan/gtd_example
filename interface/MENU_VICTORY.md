@@ -5,7 +5,7 @@
 Encerrar a partida informando que a nave chegou a Marte. A tela só existe
 quando a condição de vitória é atingida: dia final alcançado, motor operante e
 pelo menos um sobrevivente vivo. Qualquer outra combinação cai no
-`MENU_GAME_OVER`, com o motivo da derrota.
+[[MENU_GAME_OVER]], com o motivo da derrota.
 
 ## Elementos
 
@@ -16,7 +16,7 @@ pelo menos um sobrevivente vivo. Qualquer outra combinação cai no
 | Sobreviventes | Quantos chegaram vivos, de quantos partiram — Vera, Bento, Neusa e Sílvia, por nome na variação com perdas |
 | Recursos finais | Barras restantes e peças |
 | Mensagem de Marte | Texto da base confirmando o recebimento da nave; usa o nome do técnico |
-| Botão "Nova partida" | Volta para o `MENU_INIT` |
+| Botão "Nova partida" | Volta para o [[MENU_INIT]] |
 A tela de vitória é o desfecho modal e incorpora a mensagem de Marte; não há
 um cartão adicional antes ou depois dela.
 
@@ -47,4 +47,10 @@ técnico.
 - Reparo no limite: `MARTE: [NOME], RECEBEMOS A NAVE. O MOTOR CHEGOU NO LIMITE, MAS VOCÊS CONSEGUIRAM.`
 
 **Reparo no limite** é a solução do motor entregue com o prazo do problema em 1,
-ou seja, a uma noite da crise. A variação só prevalece quando houver perdas.
+ou seja, a uma noite da crise ([[ACTIONS]]). A variação só prevalece quando
+houver perdas.
+
+## Referências
+
+- [#11 Roteiro da vinheta, mensagens e textos do jogo](https://github.com/shelldonryan/gtd_example/issues/11)
+- [#27 Corrigir desfechos, transmissões e parametrizar portas, escadas, NPCs e HUD](https://github.com/shelldonryan/gtd_example/issues/27)

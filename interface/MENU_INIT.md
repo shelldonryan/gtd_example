@@ -2,7 +2,8 @@
 
 ## Objetivo
 
-Abrir a partida: apresentar o jogo e registrar quem é o técnico.
+Abrir a partida: apresentar o jogo e registrar quem é o técnico. É a primeira
+tela do fluxo descrito em [[FLOW]].
 
 ## Elementos
 
@@ -21,4 +22,10 @@ Abrir a partida: apresentar o jogo e registrar quem é o técnico.
 
 ## Regra de mensagens
 
-O nome digitado para o técnico aparece nas transmissões da Terra e de Marte.
+O nome digitado para o técnico aparece nas transmissões da Terra e de Marte
+([[MENU_VICTORY]], [[MENU_GAME_OVER]]).
+
+## Referências
+
+- [#11 Roteiro da vinheta, mensagens e textos do jogo](https://github.com/shelldonryan/gtd_example/issues/11)
+- [#27 Corrigir desfechos, transmissões e parametrizar portas, escadas, NPCs e HUD](https://github.com/shelldonryan/gtd_example/issues/27)

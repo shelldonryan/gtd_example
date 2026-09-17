@@ -14,6 +14,12 @@ O ciclo anterior acumulava seis recursos, políticas persistentes, bônus numér
 
 A ordem preventiva, a solução urgente e o socorro compartilham a mesma unidade
 diária. Os valores de recompensas, perdas, custos, prazos e crises estão
-consolidados em `mechanics/ACTIONS.md`, simulados em
-`prototype/balance-model.mjs` e executados no sketch `last_horizon/`.
+consolidados em [[ACTIONS]] e executados no sketch `last_horizon/`
+([[SKETCH_ARCHITECTURE]]); o risco
+individual e o socorro estão em [[CREW_ISSUES]].
 Esta ADR registra a forma do sistema e as remoções que a simplificação exigiu.
+
+## Referências
+
+- [#19 Redesenhar o ciclo diário e a origem das tarefas](https://github.com/shelldonryan/gtd_example/issues/19)
+- [#26 Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26)

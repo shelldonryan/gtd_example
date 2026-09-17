@@ -1,31 +1,30 @@
 # Arquitetura do sketch
 
-Este documento descreve o esqueleto inicial do ticket [#9](https://github.com/shelldonryan/gtd_example/issues/9).
-Ele continua válido para o viewport, o HUD e o estado global. O mapa macro agora
-abre salas 2D jogáveis, e o técnico é controlável dentro delas.
+Este documento descreve a arquitetura do sketch: as abas, o pipeline de assets,
+o contrato de gameplay, o estado da partida, o viewport, o input e a
+legibilidade. Ele continua válido para o viewport, o HUD e o estado global. O
+mapa macro agora abre salas 2D jogáveis, e o técnico é controlável dentro delas.
 
-
-A especificação vigente das salas e quests está em `interface/ROOMS.md`.
-O sketch permanece plano e executa o contrato das issues #25 e #26.
+A especificação vigente das salas e quests está em [[ROOMS]]. O sketch permanece
+plano e executa o contrato descrito em [[ACTIONS]] e nas notas de `events/`.
 
 ## Onde o código mora
 
-`last_horizon/` na branch `prototype/sketch-architecture`. A pasta é o pacote da
-disciplina: `last_horizon.pde` + abas + `data/` (fonte) + `output/` (PNGs de prova).
-O sketch já foi validado pelo CLI e permanece pronto para a próxima etapa de arte.
+`last_horizon/` é o pacote da disciplina: `last_horizon.pde` + abas + `data/`
+(fonte). A pasta `data/` é o diretório de assets do Processing.
 
 ## Abas
 
 | Aba | O que tem |
 | --- | --- |
 | `last_horizon.pde` | canvas, telas, ações, regras, paleta, estado da partida, viewport, input |
+| `assets.pde` | camada de arte: catálogo por arquivo, carregamento com fallback geométrico e desenho 1:1 |
 | `ui.pde` | painéis, diálogos, retratos procedurais, texto, botões, hit-test e AABB |
 | `hud.pde` | cartões do topo, faixa do problema mais urgente e rodapé |
 | `screens.pde` | máquina de estados, camadas modais, menus, vinheta, pausa e desfechos |
 | `ship.pde` | hub, quatro salas, portais configuráveis, mapa consultável, plataformas, escadas, NPCs e estações |
 | `game.pde` | calendário, turno, incidentes, consumo, crises e condições de término |
 | `tasks.pde` | catálogo e estado de ordens, soluções, retomadas, problemas, sobreviventes, risco e objetos |
-| `capture.pde` | captura visual das quests e verificações de ciclo, campanhas, hub, clique e escada |
 
 ## Pipeline de assets
 
@@ -33,9 +32,10 @@ O sketch já foi validado pelo CLI e permanece pronto para a próxima etapa de a
   junto das exportações. O runtime não depende do arquivo `.aseprite`.
 - Para qualquer animação do jogo, a exportação oficial usa uma spritesheet única
   em PNG com JSON de metadados; não há PNG separado por quadro.
-- O sketch carrega os assets de produção com `loadImage()` e
-  `loadJSONObject()` em `loadPlayerAssets()` durante `setup()`. A pasta `data/`
-  é o diretório de assets do Processing.
+- O sketch carrega os assets com `loadImage()` e `loadJSONObject()` durante
+  `setup()`: `loadPlayerAssets()` traz o técnico e `loadArtAssets()` traz o
+  restante pela camada de arte. A pasta `data/` é o diretório de assets do
+  Processing.
 - `player_sheet.png` mede 640×64 e contém 10 quadros de 64×64.
 - `player_sheet.json` registra `idle` nos quadros 0–1 e `walk` nos quadros 2–9,
   com 500 ms por quadro parado e 100 ms por quadro em movimento.
@@ -48,17 +48,17 @@ O sketch já foi validado pelo CLI e permanece pronto para a próxima etapa de a
   redefinido conforme a entrada pela porta ou o reinício da sala.
 - Se o carregamento falhar, `drawPlayerFallback()` preserva a execução e a
   caixa física, sem alterar o contrato de movimento.
-- O modo de prova `--asset-pipeline-test` continua separado dos assets do jogo.
-- `pipeline_probe.aseprite` e `pipeline_probe_frame_1.png` são o fixture do
-  ticket #10, não assets finais nem convenção de produção. O probe tem 16×16
-  pixels e é exibido duas vezes na grade lógica, no render físico 1280×720.
-- O modo de prova prepara uma camada `PGraphics` sem interpolação antes de
-  `beginDraw()`. A camada é composta no buffer principal, preservando a
-  suavização do texto.
-- A prova do pipeline é:
-  `"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --asset-pipeline-test`
-  Ela salva `last_horizon/output/pipeline_probe.png` e
-  `pipeline_probe_window.png`.
+
+### Contrato de drop-in da arte
+
+- A camada `last_horizon/assets.pde` carrega a arte por arquivo, sem mudar
+  código: `data/icons`, `data/stations`, `data/objects`, `data/npc`,
+  `data/doors`, `data/rooms`, `data/portraits`, `data/screens` e `data/map`.
+- Sem o arquivo, a peça cai no desenho geométrico do protótipo e o jogo continua
+  rodando; por isso o sketch pode ser entregue antes da arte ficar pronta.
+- O canvas de cada peça é o tamanho que ela ocupa na tela, em pixels do render
+  1280×720: o desenho é 1:1, sem escala. A lista por arquivo está em
+  [[INVENTORY]].
 
 
 ## Contrato de gameplay implementado
@@ -84,14 +84,14 @@ recalcular custos.
 
 O hub, as quatro salas, o mapa consultável, o dano no casco alcançável e o
 objetivo de chegar a Marte permanecem. O catálogo e o balanceamento das quests
-estão em `mechanics/ACTIONS.md` e `events/` e são executados no sketch.
+estão em [[ACTIONS]] e nas notas de `events/` e são executados no sketch.
 
 ## Implementação do ciclo
 
-O sketch usa as mesmas regras do modelo `prototype/balance-model.mjs`.
+O sketch usa as mesmas regras de [[ACTIONS]].
 Hub, mapa consultável, física, spritesheet e viewport foram preservados.
-A migração foi solicitada explicitamente antes do inventário de assets #8;
-as estações e objetos usam a representação geométrica do protótipo.
+A migração da lógica veio antes do inventário de assets; as estações e objetos
+usam a representação geométrica do protótipo.
 
 O ciclo implementado contém:
 
@@ -107,7 +107,7 @@ O ciclo implementado contém:
   ao dormir.
 
 O catálogo, os textos, as rotas e os valores numéricos das quests estão
-definidos em `mechanics/ACTIONS.md` e `events/`. Não há contenção separada,
+definidos em [[ACTIONS]] e nas notas de `events/`. Não há contenção separada,
 economia, racionamento, acelerador, bônus de NPC ou coleta livre.
 
 Números do movimento (grade lógica 640×360; render 1280×720 / 720p): personagem
@@ -155,10 +155,9 @@ Nenhuma tela recebe parâmetro: as abas compartilham o mesmo estado do sketch.
 
 ## Números
 
-`mechanics/ACTIONS.md` é a fonte de regras. Os valores antigos do modelo da
-issue #20 estão **SUPERSEDED** pela estrutura de quests. Os valores vigentes do
-novo ciclo estão consolidados em `mechanics/ACTIONS.md` e no modelo executável;
-o sketch os utiliza sem recalibração local.
+[[ACTIONS]] é a fonte de regras. Os valores vigentes do ciclo estão
+consolidados nessa nota e no modelo executável; o sketch os utiliza sem
+recalibração local.
 
 ## Viewport e input
 
@@ -205,22 +204,21 @@ passam por `text`, `textCentered` ou `drawTextWrapped`, que aplicam o piso de
 O contrato de portais usa `door_room`, `door_target`, `door_x`, `door_y`,
 `door_deck`, `door_arrival_x`, `door_arrival_y` e `door_arrival_facing`. O
 `door_y` é o limiar dos pés e não precisa coincidir com um deck; `door_deck`
-`-1` marca uma abertura livre. A porta responde por proximidade horizontal e
+`-1` marca uma abertura livre. No Comando, a porta das Máquinas fica no centro
+do deck inferior (`x = 320`). A porta responde por proximidade horizontal e
 vertical; a chegada configurada vale na primeira travessia e o retorno imediato
 reaproveita a posição de saída.
 
 
 O HUD implementa os seis cartões de recurso com **ícone de 16×16 + número +
 rótulo + barra**; os rótulos (`ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS`,
-`MORAL`) são texto provisório e o inventário #8 troca apenas os ícones por
+`MORAL`) são texto provisório e [[INVENTORY]] troca apenas os ícones por
 assets. O cartão de quantos estão a bordo usa **A BORDO**; o recurso crítico
 pisca a borda e ganha ícone de aviso, sem linha de texto de alerta. A faixa
 inferior tem quatro linhas de campos fixos e o rodapé tem `MAPA`, `ORDENS` e o
 botão `?`, que abre o modal de ajuda. O mapa macro não imprime nome de nave.
 O botão `ORDENS` recebe o selo `!` quando há oferta ou retomada. Círculo e
 exclamação geométrica compartilham escala, cor e centro durante o pulso de 1,4 s.
-
-As capturas atualizadas ficam em `last_horizon/output/` na branch do protótipo.
 
 ## Leitura das regras do contrato novo
 
@@ -235,90 +233,17 @@ As capturas atualizadas ficam em `last_horizon/output/` na branch do protótipo.
 | Bônus | sobreviventes não alteram custos ou recompensas |
 | Risco | no máximo uma pessoa em risco, com socorro simples |
 | Falha urgente | problema permanece com perda, prazo e crise normais |
-| Vitória e derrota | continuam conforme `MENU_VICTORY.md` e `MENU_GAME_OVER.md` |
+| Vitória e derrota | continuam conforme [[MENU_VICTORY]] e [[MENU_GAME_OVER]] |
 
-Os valores exatos e o processamento numérico estão consolidados em
-`mechanics/ACTIONS.md`, simulados em `prototype/balance-model.mjs` e executados
-em `last_horizon/game.pde` e `last_horizon/tasks.pde`.
+Os valores exatos e o processamento numérico estão consolidados em [[ACTIONS]]
+e executados em `last_horizon/game.pde` e `last_horizon/tasks.pde`.
 
 Nenhum sobrevivente vivo encerra a partida com mensagem própria: é a quinta causa
 de derrota. O técnico não entra na conta dos quatro.
 
-## Como rodar
+## Referências
 
-Na instalação usada, `processing-java` não existe e também não existe
-`C:\Program Files\Processing\runtime\bin\java.exe`. O launcher suportado é o
-CLI embutido no `Processing.exe`. Os comandos abaixo são executados a partir da
-raiz do repositório:
-
-```
-"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run
-"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --capture
-"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --hit-test
-"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --ladder-test
-```
-
-`--capture`, `--hit-test` e `--ladder-test` são a fronteira pública de
-verificação. `--capture` salva 34 estados do novo ciclo, os cartões e HUDs do
-catálogo, `orders_badge_pulse.png` e as capturas do modal de ajuda e da
-transmissão da Terra; exerce aceite presencial, coleta, entrega, custo inviável,
-falha, negligência, retomada pela interface, exclusividade diária, crises,
-socorro, morte e filtragem do pool. As asserções cobrem também os seis portais
-pela tabela, uma porta fora da borda, uma abertura sem deck, limiar acima de
-um deck, chegada independente em outro canto, retorno imediato à posição de
-entrada, porta coincidente com ponto de quest, escada em x arbitrário, as falas
-de NPC por estado, transmissões (motor, casco, primeira perda, uma vez por
-partida) e as três variações da mensagem de Marte. Asserção falha imprime
-`FALHOU`, marca o resultado como reprovado e encerra o harness:
-`QUEST CHECK: PASS` só aparece quando nenhuma asserção falhou.
-As verificações de campanha executam uma etapa por frame; enquanto elas rodam,
-o sketch mostra uma tela estável de verificação sem expor os recursos mutáveis
-dos cenários internos. O mesmo modo executa três estratégias vencedoras,
-omissão derrotada e 2.520/2.520 sequências vencidas pela reserva de peças no
-próprio Processing. Os modos de hit-test e escada continuam cobrindo as quatro
-salas, o letterbox e as rotas físicas.
-
-Limitações observadas:
-
-- A rota manual solicitada pelo ticket seria verificada com
-  `Test-Path 'C:\Program Files\Processing\runtime\bin\java.exe'`. O resultado
-  nesta instalação é `False`; portanto não há comando manual executável de
-  compilação usando esse runtime. O launcher suportado é o CLI do Processing.
-- A captura não usa bibliotecas externas do sketch: usa somente o core carregado
-  pelo CLI e a família Segoe UI instalada no Windows. Não há biblioteca adicional
-  ausente bloqueando o harness.
-- O CLI emite os avisos `display count needs to be implemented for non-AWT` e
-  `AWT disabled`, mas compila, executa, salva as imagens e encerra com sucesso.
-  A execução headless não foi validada nesta sessão.
-
-## Estado da revisão
-
-- **Código atual:** `last_horizon/*.pde` executa as issues #25, #26 e #27, não
-  apenas o modelo Node.
-- **Contrato:** cinco incidentes nos dias 2, 4, 6, 8 e 10; oito ordens
-  preventivas e quatorze soluções físicas; uma conclusão por dia.
-- **Mecânicas removidas:** contenção separada, políticas, bônus numéricos,
-  acelerador, coleta livre e contador paralelo de intervenção.
-- **Espaço preservado:** Comando em hub, mapa consultável, quatro salas,
-  portas, escadas, física e animação.
-- **Layout congelado para a arte:** escadas em 127/532 (Comando), 114/526
-  (Máquinas), 120/489 (Depósito) e 127/482 (Dormitório), com as estações
-  realocadas e nenhuma delas a menos de 40 px de um eixo de escada. A lista de
-  imagens a produzir, com canvas e ordem de produção, está em
-  `assets/INVENTORY.md`.
-- **Ajustes desta rodada:** vinheta do #11, transmissões da Terra e mensagem de
-  Marte, portais com limiar e chegada configurável (retorno imediato à posição
-  de saída), porta das Máquinas no Comando validada manualmente no centro do deck
-  inferior (`x = 320`), escadas em tabela
-  (qualquer ponto configurável), NPCs com fala por estado, cartões de recurso
-  rotulados, faixa inferior em campos fixos e modal de ajuda `?`; o nome vazio
-  mantém `INICIAR` bloqueado.
-- **Evidência:** `--capture` retorna 140 asserções `OK` e `QUEST CHECK: PASS`,
-  incluindo a prioridade de quest sobre portal coincidente e a cobertura
-  incremental de 2.520 campanhas; `--hit-test` e `--ladder-test` passam; o
-  modelo Node retorna `BALANCE CHECK: PASS`.
-- **Capturas conferidas:** ofertas, confirmação presencial, coleta/entrega,
-  objeto carregado, mapa, incidentes de motor/casco/suporte, retomada, socorro,
-  resumo noturno denso, vitória e derrota em `last_horizon/output/`.
-- **Limite visual:** a arte final dos objetos e estações permanece no inventário
-  #8; a lógica física já funciona com a representação geométrica existente.
+- [#9 Arquitetura do sketch](https://github.com/shelldonryan/gtd_example/issues/9)
+- [#27 Corrigir desfechos, transmissões e parametrizar portas, escadas, NPCs e HUD](https://github.com/shelldonryan/gtd_example/issues/27)
+- [#29 Camada de assets: sketch pronto para receber a arte](https://github.com/shelldonryan/gtd_example/issues/29)
+- [#30 Desacoplar o harness do jogo para a entrega](https://github.com/shelldonryan/gtd_example/issues/30)

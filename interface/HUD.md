@@ -43,7 +43,7 @@ Os seis recursos usam **ícones de 16×16** na paleta do HUD — energia, oxigê
 texto** — `ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS`, `MORAL` — e, nos
 recursos de barra, a barra de preenchimento. O rótulo é texto provisório: o
 inventário troca os ícones geométricos por assets de 32×32 em `data/icons/`,
-listados em `assets/INVENTORY.md`, sem mudar o restante do cartão.
+listados em [[INVENTORY]], sem mudar o restante do cartão.
 
 ## Onde cada elemento fica
 
@@ -143,9 +143,13 @@ Dormir com uma preventiva aceita e incompleta mostra a perda, devolve o objeto �
 origem e encerra a ordem. Dormir com uma solução urgente incompleta mantém o
 problema sem penalidade adicional; a mesma solução reaparece como retomada nos
 dias seguintes. Em dia com incidente novo, o cartão novo tem prioridade e a
-retomada volta a aparecer no próximo dia sem incidente. Os valores e a ordem do processamento estão em `mechanics/ACTIONS.md`.
+retomada volta a aparecer no próximo dia sem incidente. Os valores e a ordem do
+processamento estão em [[ACTIONS]].
 
 ## Estados da interface
+
+O fluxo completo de telas está em [[FLOW]] e os pontos de interação de cada sala
+em [[ROOMS]].
 
 - **Salas de interior:** o Comando é o hub; Dormitório, Depósito e Máquinas
   ligam-se somente a ele.
@@ -179,10 +183,8 @@ nenhuma pista.
 
 Alertas críticos usam os cartões de recurso: cor, ícone de aviso e borda
 piscando. Alerta não gera linha de texto: o problema ativo aparece na quarta
-linha da faixa e o recurso crítico se identifica pelo próprio cartão. As nove
-linhas do painel `SISTEMA` do [#11](https://github.com/shelldonryan/gtd_example/issues/11)
-ficam **superseded** — economia e racionamento saíram pela ADR-0002 e os estados
-restantes já são cobertos pelo cartão e pela faixa. A faixa de urgência mostra:
+linha da faixa e o recurso crítico se identifica pelo próprio cartão. A faixa de
+urgência mostra:
 
 1. problema ativo com menor prazo;
 2. prazo restante;
@@ -197,4 +199,10 @@ ativado primeiro. A ordem não muda quando o jogador troca de sala.
 O mapa contém a comparação completa. A ficha da sala mostra, para cada problema,
 a perda diária, o prazo e a consequência quando ele chegar a zero. Para dano no
 casco, a ficha pertence ao cômodo que contém o local alcançável sorteado naquela
-ocorrência. A estrutura e os valores numéricos estão em `mechanics/ACTIONS.md`.
+ocorrência. A estrutura e os valores numéricos estão em [[ACTIONS]].
+
+## Referências
+
+- [#8 Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8)
+- [#16 HUD: ícones, alerta e rótulos](https://github.com/shelldonryan/gtd_example/issues/16)
+- [#27 Corrigir desfechos, transmissões e parametrizar portas, escadas, NPCs e HUD](https://github.com/shelldonryan/gtd_example/issues/27)

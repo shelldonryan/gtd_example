@@ -1,8 +1,7 @@
 # Inventário de assets
 
 Lista final de imagens a produzir no Aseprite, com canvas, onde cada uma aparece
-e se é estática ou animada — mais a ordem de produção. Fonte do ticket
-[Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8).
+e se é estática ou animada — mais a ordem de produção.
 
 O que decide tamanho: **1 pixel de arte = 1 pixel no render 1280×720**. A grade
 640×360 só posiciona; o sketch desenha em unidades lógicas e o render
@@ -11,11 +10,24 @@ escala: o quadro do técnico tem 64×64 e é desenhado em 32×32 lógicos = 64×
 pixels reais. Um objeto desenhado com 24 px de altura dentro de um canvas de
 64×64 aparece com 24 px.
 
+O sketch já carrega por esses nomes de arquivo e cai no desenho geométrico
+quando o arquivo não existe ([[SKETCH_ARCHITECTURE]]), então este inventário é o
+**contrato de drop-in da arte**: criar o PNG no caminho indicado basta para a
+peça entrar no jogo.
+
 Convenções que continuam valendo: nomes ASCII em `snake_case`, `.aseprite`
 acompanha a exportação quando disponível, e todo asset **animado** é uma
 spritesheet PNG única com JSON de metadados, no mesmo padrão de
-`data/player/player_sheet.png`. Animação é só onde foi decidido: NPCs, porta e
-casco.
+`data/player/player_sheet.png` ([[PLAYER]]). Animação é só onde foi decidido:
+NPCs, porta e casco.
+
+## Origem da arte
+
+- **Arte gerada por IA é proibida** pelo professor.
+- Arte com licença aberta **CC0 ou CC-BY** e spritesheets são permitidas, com o
+  crédito e a licença registrados junto do arquivo.
+- A seleção da arte é do usuário: o agente não escolhe nem produz arte.
+
 
 ## Posições congeladas (entrada para a pintura)
 
@@ -32,7 +44,7 @@ colisão. Escadas e conveses abaixo são definitivos:
 Conveses em `y = 128`, `202` e `278`; a faixa útil da sala é `x` de 8 a 632 e
 `y` de 56 a 284. As portas continuam sendo sprites e podem mudar de lugar sem
 repintura. Regra de folga: nenhuma estação fica a menos de 40 px do eixo de uma
-escada.
+escada. Os pontos de interação de cada sala estão em [[ROOMS]].
 
 ## 1. Fundos das salas — 4 imagens, 1280×456, estáticas
 
@@ -126,7 +138,7 @@ abrir o quadro `aberta`, trocar de sala e voltar a `fechada`.
 Em `data/icons/`, substituindo os vetores atuais na caixa de 16×16 lógicos:
 `energia.png`, `oxigenio.png`, `agua.png`, `comida.png`, `pecas.png`,
 `moral.png` e `aviso.png` (o triângulo que acompanha o recurso em vermelho).
-O cartão mantém rótulo, número e barra: só o ícone troca.
+O cartão mantém rótulo, número e barra: só o ícone troca ([[HUD]]).
 
 ## 7. Retratos — 4 imagens, 224×276, estáticas
 
@@ -156,8 +168,7 @@ textos e o `VOCÊ ESTÁ AQUI` continuam por código.
 ## 10. Áudio — 2 arquivos, pendente
 
 `data/audio/click.wav` e `data/audio/alerta.wav`, WAV PCM 16 bits, 44,1 kHz,
-mono, com a licença ao lado. Candidatos CC0 já levantados em
-`research/AUDIO_PROCESSING.md` (branch `research/audio-processing`). Ficou
+mono, com a licença ao lado. Candidatos CC0 já levantados. Ficou
 **pendente por decisão**: o jogo continua mudo até a escolha do som.
 
 ## Ordem de produção
@@ -189,10 +200,10 @@ menus, a moldura do mapa e todo o texto (Segoe UI). Quando os fundos entrarem,
 pintados — e a colisão, o `point_x`, o `point_y` e o `ladder_x` continuam sendo
 a verdade de posicionamento.
 
-## Verificação
+## Referências
 
-- `--hit-test` → 5 `OK`; `--ladder-test` → 6 `OK`.
-- `--capture` → 142 asserções `OK` e `QUEST CHECK: PASS`, com as escadas por
-  sala e as estações realocadas.
-- Inspeção visual das capturas: escadas em 0,20/0,83 (Comando), 0,18/0,82
-  (Máquinas) e 0,20/0,75 (Dormitório), nenhuma estação sob a escada.
+- [#8 Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8)
+- [#10 Pipeline Aseprite → Processing](https://github.com/shelldonryan/gtd_example/issues/10)
+- [#28 Escolher e integrar os dois efeitos sonoros](https://github.com/shelldonryan/gtd_example/issues/28)
+- [#29 Camada de assets: sketch pronto para receber a arte](https://github.com/shelldonryan/gtd_example/issues/29)
+

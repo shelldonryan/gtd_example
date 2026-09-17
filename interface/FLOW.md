@@ -17,8 +17,8 @@
 | Transmissão da Terra | primeira falha do motor, primeira chuva de meteoros e primeira perda | cartão modal com a mensagem; fecha com clique, `ENTER` ou `ESC` e não consome dia, tarefa ou recurso |
 | Ajuda | botão `?` do rodapé | modal com as teclas e os botões do jogo |
 | Pausa | ESC nas salas | continuar, reiniciar ou sair |
-| Vitória | fim da viagem, com motor operante e sobrevivente vivo | ver `MENU_VICTORY.md` |
-| Derrota | recurso crítico, motor destruído ou nenhum sobrevivente vivo | ver `MENU_GAME_OVER.md` |
+| Vitória | fim da viagem, com motor operante e sobrevivente vivo | ver [[MENU_VICTORY]] |
+| Derrota | recurso crítico, motor destruído ou nenhum sobrevivente vivo | ver [[MENU_GAME_OVER]] |
 
 ## Grafo
 
@@ -103,7 +103,8 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
 
 - A Sala de comando continua sendo o hub e a topologia padrão continua em
   estrela, mas a navegação é dirigida pela tabela de portais: cada porta escolhe
-  sala, destino e coordenadas próprias.
+  sala, destino e coordenadas próprias. Os pontos de interação de cada cômodo
+  estão em [[ROOMS]].
 - `door_x` e `door_y` posicionam a abertura em qualquer ponto do espaço da sala;
   `door_deck = -1` permite um limiar sem deck ou acima do piso. A interação usa
   proximidade horizontal e vertical ao limiar, não uma borda ou convés fixo.
@@ -119,7 +120,7 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
 - Fechar o mapa retorna à mesma sala e à mesma posição.
 - O HUD mostra na ordem ativa o estágio `COLETAR` ou `ENTREGAR`, além de
   responsável, objeto, origem, destino, recompensa e falha. Problemas ativos
-  continuam mostrando perda, prazo e crise.
+  continuam mostrando perda, prazo e crise ([[HUD]]).
 - Nos dias sem incidente, as oito ofertas do pool são filtradas para um par
   válido. As duas ordens são apresentadas remotamente; a escolhida só se torna
   aceita ao encontrar o sobrevivente responsável.
@@ -153,3 +154,9 @@ Os botões exibem no próprio rótulo o atalho de teclado que controla a ação:
 `ACEITAR ORDEM (ENTER)`, `ENTREGAR (ENTER)`, `ENCERRAR DIA (ENTER)`,
 `VOLTAR (ESC)` e `FECHAR (ESC)`. Botões sem atalho de teclado permanecem
 acionados pelo mouse.
+
+## Referências
+
+- [#5 Fluxo de telas e navegação](https://github.com/shelldonryan/gtd_example/issues/5)
+- [#25 Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+- [#27 Corrigir desfechos, transmissões e parametrizar portas, escadas, NPCs e HUD](https://github.com/shelldonryan/gtd_example/issues/27)

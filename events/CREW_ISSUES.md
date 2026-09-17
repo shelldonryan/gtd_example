@@ -47,8 +47,13 @@ custos nem cria bônus ou penalidades ocultos.
 
 ## Estado
 
-As soluções físicas e os objetos de comida e convivência estão definidos na
-matriz de quests da issue #25. Os valores numéricos acima são o contrato
-recalibrado da issue #26, agora executado em `last_horizon/`. O socorro exige
-presença no beliche da pessoa em risco e confirmação do custo, sem uma cadeia
-adicional de coleta; usa a mesma conclusão diária das demais quests.
+As soluções físicas e os objetos de comida e convivência estão na matriz de
+[[ACTIONS]]; os valores numéricos são o contrato vigente do ciclo. As falhas de
+sistema estão em [[SYSTEM_FAULTS]] e os eventos externos, em [[HAZARDS]]. O
+socorro exige presença no beliche da pessoa em risco e confirmação do custo, sem
+uma cadeia adicional de coleta; usa a mesma conclusão diária das demais quests.
+
+## Referências
+
+- [#25 Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+- [#26 Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26)

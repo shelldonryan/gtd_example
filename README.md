@@ -44,12 +44,12 @@ O padrão de animação vale para todo asset animado do projeto: uma spritesheet
 única em PNG com JSON de metadados. Não há exportação de PNG separado por
 quadro; o `.aseprite` de origem acompanha a spritesheet quando disponível.
 A lista final de imagens a produzir — canvas, tela onde aparece, estática ou
-animada e ordem de produção — está em `assets/INVENTORY.md`.
+animada e ordem de produção — está em [[INVENTORY]].
 
 ## Executar o jogo
 
-As quests das issues #25, #26 e #27 estão implementadas em `last_horizon/*.pde`;
-`prototype/balance-model.mjs` é a referência numérica separada, não o jogo.
+As quests do ciclo estão implementadas em `last_horizon/*.pde`; os valores e
+regras estão em [[ACTIONS]].
 Abra `last_horizon/last_horizon.pde` no Processing 4.5.6 e execute.
 O botão `ORDENS` compara as ofertas e reabre os detalhes da quest. Em dias
 tranquilos ele não abre sozinho: o selo `!` pulsa quando há oferta ou retomada.
@@ -58,7 +58,7 @@ Estações fora da etapa atual ficam apagadas e não respondem a `E`; os
 sobreviventes respondem sempre, com fala e painel conforme o estado do dia.
 Confirme a preventiva com seu responsável, colete e entregue usando `E` e
 `ENTER`, e durma no seu beliche. A migração não depende da conclusão do
-inventário #8. Comandos CLI e captura: `code/SKETCH_ARCHITECTURE.md`.
+inventário de assets.
 
 ## Mecanica principal
 
@@ -170,7 +170,27 @@ O objetivo é garantir uma versão em duas semanas, com foco na navegação entr
 mapa macro e os cômodos, no controle direto do técnico, no controle dos
 recursos e nas consequências das decisões.
 
+## Notas do projeto
+
+Documentação de design do jogo, por assunto:
+
+- **Fluxo e interface:** [[FLOW]], [[HUD]], [[ROOMS]], [[TEXT_FONTS]]
+- **Menus e desfechos:** [[MENU_INIT]], [[MENU_PAUSE]], [[MENU_VICTORY]], [[MENU_GAME_OVER]]
+- **Mecânicas:** [[ACTIONS]]
+- **Eventos e ameaças:** [[HAZARDS]], [[SYSTEM_FAULTS]], [[CREW_ISSUES]]
+- **Personagens:** [[PLAYER]], [[NPC_1]], [[NPC_2]], [[NPC_3]], [[NPC_4]]
+- **Decisões de arquitetura:** [[0001-ordens-e-incidentes-como-quests]], [[0002-simplificacao-do-ciclo-diario]]
+- **Arte e implementação:** [[INVENTORY]], [[SKETCH_ARCHITECTURE]]
+- **Narrativa:** [[CONTEXT]]
+
 ## Referências
 
 - Fallout Shelter
 - Jogos 2D de gerenciamento e sobrevivencia
+
+Issues do projeto:
+
+- [#1 Mapa: Last Horizon — gameplay fechado e plano de construção](https://github.com/shelldonryan/gtd_example/issues/1)
+- [#7 Documento de entrega e como o jogo roda na apresentação](https://github.com/shelldonryan/gtd_example/issues/7)
+- [#25 Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+- [#26 Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26)

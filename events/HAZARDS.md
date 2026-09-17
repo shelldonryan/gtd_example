@@ -29,7 +29,13 @@ nunca fica disponível para coleta livre.
 
 ## Estado
 
-O dano no casco e as duas rotas de solução estão definidos na matriz de quests
-da issue #25. Os valores numéricos acima são o contrato recalibrado da issue
-#26. O sketch `last_horizon/` executa a coleta no console e a entrega no ponto
-do casco sorteado, que permanece fixo durante as retomadas.
+O dano no casco e as duas rotas de solução estão na matriz de [[ACTIONS]]; os
+valores numéricos são o contrato vigente do ciclo. As falhas internas estão em
+[[SYSTEM_FAULTS]] e as necessidades humanas, em [[CREW_ISSUES]]. O sketch
+`last_horizon/` executa a coleta no console e a entrega no ponto do casco
+sorteado, que permanece fixo durante as retomadas.
+
+## Referências
+
+- [#25 Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+- [#26 Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26)

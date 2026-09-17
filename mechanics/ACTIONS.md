@@ -1,8 +1,9 @@
 # Ações e custos
 
-Este arquivo registra o contrato mecânico vigente do ciclo de quests. Os valores
-foram definidos e simulados na issue [Simplificar mecânicas legadas e balancear
-o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26).
+Este arquivo registra o contrato mecânico vigente do ciclo de quests; os valores
+foram definidos e simulados no modelo numérico e no sketch. Os eventos que
+alimentam essas ordens estão em [[HAZARDS]], [[SYSTEM_FAULTS]] e
+[[CREW_ISSUES]], e as rotas físicas e os pontos de interação estão em [[ROOMS]].
 
 ## Regras base
 
@@ -223,9 +224,14 @@ continuar ativas após o reinício do prazo.
 - A forma das ordens, incidentes e mecânicas simplificadas está confirmada.
 - O calendário vigente é 2, 4, 6, 8 e 10, com cinco incidentes de sete tipos.
 - O estoque, o consumo, os custos, as recompensas, as perdas, os prazos, as
-  crises, o socorro e a seleção do pool estão implementados em
-  `prototype/balance-model.mjs` e no sketch `last_horizon/`.
+  crises, o socorro e a seleção do pool estão implementados
+  no sketch `last_horizon/`.
 - O sketch executa as oito preventivas e quatorze soluções com confirmação,
   coleta e entrega físicas, retomadas e socorro no beliche de risco.
-- `--capture` verifica o fluxo no Processing e salva a evidência visual;
-  o modelo Node continua sendo a referência numérica independente.
+
+## Referências
+
+- [#20 Balancear problemas persistentes e intervenções](https://github.com/shelldonryan/gtd_example/issues/20)
+- [#25 Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+- [#26 Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26)
+

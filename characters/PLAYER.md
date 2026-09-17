@@ -13,12 +13,12 @@
 O protagonista é o jogador dentro da nave. Ele controla diretamente o técnico
 pelos quatro cômodos. A Sala de comando é o hub; suas portas por convés levam
 ao Dormitório, ao Depósito e à Sala de máquinas. O mapa apenas consulta posição
-e problemas.
+e problemas. Os pontos de interação de cada cômodo estão em [[ROOMS]].
 
 Incidentes criam problemas locais persistentes. Nos dias com incidente, o técnico
-escolhe uma entre duas soluções físicas e executa a rota correspondente. Nos
-dias sem incidente, compara duas ordens preventivas e confirma uma
-presencialmente com o sobrevivente responsável.
+escolhe uma entre duas soluções físicas e executa a rota correspondente
+([[ACTIONS]]). Nos dias sem incidente, compara duas ordens preventivas e confirma
+uma presencialmente com o sobrevivente responsável.
 
 Uma quest tem as etapas `COLETAR` e `ENTREGAR`. O técnico carrega somente o
 objeto da ordem aceita, que aparece no ponto de origem e é entregue no destino.
@@ -52,9 +52,11 @@ por uma porta. Os assets pixel art são amostrados sem interpolação.
 | Interagir | E |
 | Pausa | ESC |
 
+As mesmas teclas e as telas onde valem estão em [[FLOW]].
+
 ## Vínculos
 
-- **Sobreviventes:** Vera, Bento, Neusa e Sílvia ficam nos cômodos e respondem às interações do técnico; dependem das decisões dele para permanecer vivos.
+- **Sobreviventes:** Vera, Bento, Neusa e Sílvia ficam nos cômodos e respondem às interações do técnico; dependem das decisões dele para permanecer vivos. O grupo está descrito em [[CONTEXT]].
 - **Base em Marte:** representa o destino da missão e a possibilidade de um
   novo começo para a humanidade.
 - **Terra:** permanece como uma lembrança da civilização que ficou para trás e
@@ -82,3 +84,9 @@ O personagem não recebe novos poderes durante a primeira versão do jogo. A
 progressão acontece por meio do conhecimento do jogador sobre os sistemas da
 nave e pelas consequências acumuladas de suas decisões ao longo dos dez dias
 de viagem.
+
+## Referências
+
+- [#10 Pipeline Aseprite → Processing](https://github.com/shelldonryan/gtd_example/issues/10)
+- [#15 Sala jogável: movimento, colisão, escadas e interação](https://github.com/shelldonryan/gtd_example/issues/15)
+- [#18 Reestruturar navegação, tarefas e feedback após playtest](https://github.com/shelldonryan/gtd_example/issues/18)

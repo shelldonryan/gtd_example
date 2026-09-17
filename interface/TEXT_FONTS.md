@@ -8,9 +8,8 @@
   os recursos de barra somam a barra de preenchimento. Os rótulos são
   `ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS` e `MORAL`, além dos cartões
   `DIA` e `A BORDO`. O número é o destaque do cartão. O rótulo é texto
-  provisório: o inventário
-  [#8](https://github.com/shelldonryan/gtd_example/issues/8) troca apenas os
-  ícones geométricos por assets do Aseprite.
+  provisório: o inventário [[INVENTORY]] troca apenas os ícones geométricos por
+  assets do Aseprite.
 
 ## MENU
 
@@ -34,8 +33,13 @@
   com suavização; assets pixel art usam amostragem sem interpolação.
 - As regras de suavização do texto e de amostragem dos assets são independentes.
 - O sketch usa a família instalada no sistema; não há arquivo de fonte adicional
-  nem biblioteca externa.
+  nem biblioteca externa ([[SKETCH_ARCHITECTURE]]).
 
-## Evidência
+A validação visual do desenho 1:1 acompanha [[HUD]].
 
-A fonte foi validada visualmente no sketch e na captura de estados da interface.
+## Referências
+
+- [#2 Fonte pixel com acentuação PT-BR no Processing](https://github.com/shelldonryan/gtd_example/issues/2)
+- [#6 Escala e estilo visual](https://github.com/shelldonryan/gtd_example/issues/6)
+- [#8 Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8)
+- [#18 Reestruturar navegação, tarefas e feedback após playtest](https://github.com/shelldonryan/gtd_example/issues/18)

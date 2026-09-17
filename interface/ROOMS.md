@@ -16,7 +16,7 @@ As posições acima são indicativas; o ajuste fino é da implementação, desde
 cada estação fique alcançável andando ou subindo escada. O pulo de 48 px
 **não** alcança o convés de cima: trocar de nível é papel da escada.
 As posições definitivas de escadas e estações, congeladas para a pintura dos
-fundos, estão em `assets/INVENTORY.md`.
+fundos, estão em [[INVENTORY]].
 
 ## Pontos de interação
 
@@ -56,8 +56,8 @@ Regras que valem em todos os cômodos:
 - A ordem ativa usa somente pontos que aparecem na oferta. O objeto não fica
   disponível no mapa antes da confirmação da ordem.
 - A matriz completa das oito ordens preventivas e das quatorze soluções de
-  incidente está em `mechanics/ACTIONS.md`; estes pontos preservam as rotas
-  físicas e a leitura local.
+  incidente está em [[ACTIONS]]; estes pontos preservam as rotas físicas e a
+  leitura local.
 
 
 ## Sala de comando
@@ -150,12 +150,12 @@ Os incidentes e os dias tranquilos usam a mesma estrutura de ordem: responsável
 objeto, origem, destino e consequência. Nos dias sem incidente, duas ordens
 preventivas chegam remotamente e uma é confirmada ao encontrar o sobrevivente
 responsável. Os pares válidos protegem recursos diferentes e ficam no catálogo
-de `mechanics/ACTIONS.md`.
+de [[ACTIONS]].
 
 Nos dias com incidente, o cartão apresenta duas soluções físicas. A escolhida
 substitui a contenção separada e precisa ser executada na estação correspondente.
 O cartão informa também o custo e o resultado; os valores numéricos estão em
-`mechanics/ACTIONS.md`.
+[[ACTIONS]].
 
 | Ordem | Tipo | Origem | Onde conclui |
 | --- | --- | --- | --- |
@@ -198,8 +198,16 @@ Quando o dano no casco estiver ativo, ele pertence ao cômodo sorteado para aque
 ocorrência e a quest aponta para o local alcançável correspondente. A origem das
 duas soluções é o console da rota no Comando.
 
-O catálogo de quests e o balanceamento numérico estão em `mechanics/ACTIONS.md`
-e `events/`. O sketch `last_horizon/` executa esse contrato. O botão `ORDENS`
+O catálogo de quests e o balanceamento numérico estão em [[ACTIONS]] e nas notas
+de `events/`. O sketch `last_horizon/` executa esse contrato. O botão `ORDENS`
 reabre as ofertas ou os detalhes da quest; `OFERTAS / PRÓXIMA RETOMADA` permite
 consultar as soluções pendentes em dias sem incidente. A arte das estações e
-dos objetos ainda usa a representação geométrica do protótipo.
+dos objetos ainda usa a representação geométrica do protótipo. O que o jogador
+vê na tela está em [[HUD]], e a ordem das telas está em [[FLOW]].
+
+## Referências
+
+- [#8 Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8)
+- [#15 Sala jogável: movimento, colisão, escadas e interação](https://github.com/shelldonryan/gtd_example/issues/15)
+- [#25 Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
+- [#27 Corrigir desfechos, transmissões e parametrizar portas, escadas, NPCs e HUD](https://github.com/shelldonryan/gtd_example/issues/27)

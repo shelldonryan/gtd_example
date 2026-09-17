@@ -31,7 +31,8 @@ plataformas e interagir com pessoas, sistemas e objetos.
 
 Quatro sobreviventes viajam a bordo, além do técnico: **Vera**, a piloto, no
 comando; **Bento**, o intendente, no depósito; **Neusa**, a enfermeira, no
-dormitório; e **Sílvia**, a mecânica, na Sala de máquinas. Eles ficam parados em
+dormitório; e **Sílvia**, a mecânica, na Sala de máquinas ([[NPC_1]], [[NPC_2]],
+[[NPC_3]] e [[NPC_4]]). Eles ficam parados em
 pontos dos cômodos e respondem quando o técnico interage com eles. Não possuem
 rotinas autônomas. Se uma pessoa morrer, ela deixa de oferecer ordens e reduz
 a contagem a bordo; os custos das soluções não mudam.
@@ -47,10 +48,10 @@ comando; os seguintes, no Dormitório. Incidentes surgem nos dias 2, 4, 6, 8 e
 10. Existem sete tipos de incidente, cinco escolhidos por partida sem
 reposição, organizados em falhas técnicas, suprimentos e tripulação.
 
-Cada incidente apresenta duas soluções físicas. O técnico escolhe uma, aceita a
-ordem, coleta o objeto indicado e o entrega no destino. Se a solução não for
-concluída antes de dormir, o problema permanece ativo, cobra sua perda diária,
-reduz o prazo e pode chegar à crise.
+Cada incidente apresenta duas soluções físicas ([[ACTIONS]]). O técnico escolhe
+uma, aceita a ordem, coleta o objeto indicado e o entrega no destino. Se a
+solução não for concluída antes de dormir, o problema permanece ativo, cobra sua
+perda diária, reduz o prazo e pode chegar à crise.
 
 Nos dias sem incidente, os sobreviventes oferecem duas ordens preventivas. O
 técnico escolhe uma, confirma a ordem presencialmente e executa uma rota curta de
@@ -88,3 +89,8 @@ decisões do jogador.
 O foco será a viagem, a administração da nave e a exploração controlável dos
 cômodos. A visão macro organiza a navegação; as cenas laterais transformam cada
 cômodo em um espaço jogável para cumprir os objetivos da viagem.
+
+## Referências
+
+- [#11 Roteiro da vinheta, mensagens e textos do jogo](https://github.com/shelldonryan/gtd_example/issues/11)
+- [#14 Decisões pendentes: roster, derrota, objetivos das salas e vocabulário](https://github.com/shelldonryan/gtd_example/issues/14)
