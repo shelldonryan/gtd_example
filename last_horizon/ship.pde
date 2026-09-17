@@ -19,7 +19,8 @@ int[] ladder_room = {
   SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_MACHINES, SCREEN_MACHINES,
   SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DORMITORY, SCREEN_DORMITORY
 };
-float[] ladder_x = {190, 445, 190, 445, 190, 445, 190, 445};
+/* Cada registro pode ocupar qualquer x; o par abaixo é o definitivo por sala. */
+float[] ladder_x = {127, 532, 114, 526, 120, 489, 127, 482};
 
 /* Portas são portais de dados; x/y são o centro e o limiar dos pés. */
 final int DOOR_DECK_NONE = -1;
@@ -105,8 +106,8 @@ int[] point_room = {
   SCREEN_DORMITORY, SCREEN_NONE
 };
 float[] point_x = {
-  540, 260, 100, 400, 90, 540, 90, 520, 80, 310, 510, 420,
-  100, 330, 470, 500, 120, 530
+  575, 260, 85, 400, 155, 570, 215, 485, 70, 310, 530, 420,
+  85, 330, 440, 525, 170, 530
 };
 float[] point_y = {
   128, 202, 278, 128, 278, 202, 202, 128, 128, 202, 128, 202,
