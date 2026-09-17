@@ -52,11 +52,13 @@ estão documentados em `last_horizon/data/player/LICENSE.txt`.
 
 ## Deslocamento
 
-Andar custa 1,5 px lógicos por quadro; correr com `Shift` custa 2,4. A corrida
-vale só no convés: escada e ar mantêm o ritmo normal, e o pulo não muda de
-altura. Parado, `Shift` não anima nada — não existe corrida no lugar. Se a
-spritesheet não trouxer a faixa de `run`, o passo acelera e a animação continua
-na caminhada.
+Andar custa 1,0 px lógico por quadro; correr com `Shift` custa 2,4. A caminhada
+foi calibrada pelo ciclo de 800 ms da própria animação: 1,0 px/quadro cobre 48 px
+lógicos por ciclo, perto de duas alturas do técnico, e foi o valor que reduziu o
+deslize dos pés sem tornar a navegação lenta (D-154). A corrida vale só no
+convés: escada e ar mantêm o ritmo normal, e o pulo não muda de altura. Parado,
+`Shift` não anima nada — não existe corrida no lugar. Se a spritesheet não
+trouxer a faixa de `run`, o passo acelera e a animação continua na caminhada.
 
 ## Controles
 

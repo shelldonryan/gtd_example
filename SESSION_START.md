@@ -4,11 +4,10 @@
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
 Atualizado após a conclusão da
-[issue #33](https://github.com/shelldonryan/gtd_example/issues/33), que integrou a
-corrida com `Shift` no convés usando a faixa `run` da spritesheet, com fallback
-para a caminhada quando a arte não traz a faixa (D-153). A #32 antecede esta
-sessão: entrega direta na confirmação de preventivas (V-02 e N-02), fala de
-orientação dos NPCs pós-entrega e melhorias no HUD e mapa.
+[issue #34](https://github.com/shelldonryan/gtd_example/issues/34), que recalibrou
+a velocidade da caminhada (1,5 → 1,0 px/quadro) para casar com o ciclo da
+animação de `walk`, com a corrida da [issue #33](https://github.com/shelldonryan/gtd_example/issues/33)
+intacta (D-153, D-154).
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Regras inegociáveis
@@ -120,16 +119,19 @@ reporte e não escolha silenciosamente.
 - #33 foi concluída: corrida com `Shift` no convés a 2,4 px/quadro, com a faixa
   `run` do LPC (linha 41, 8 quadros de 75 ms) e fallback para a caminhada quando a
   spritesheet não traz a faixa (D-153).
+- #34 foi concluída: o andar caiu de 1,5 para **1,0 px/quadro** para casar com o
+  ciclo de 800 ms da animação de caminhada, com a corrida intacta (D-154).
 - O próximo caminho crítico na arte é a seleção dos assets CC0/CC-BY pelo usuário
   na ordem de `assets/INVENTORY.md`, iniciando pelo Bloco 1 (Ícones do HUD em
   `data/icons/`).
 
 ### Fronteira Wayfinder
 
-Sincronizada com o grafo nativo depois da sessão do #33:
+Sincronizada com o grafo nativo depois da sessão do #34:
 
 | Issue | Estado | Bloqueadores abertos | Relação |
 |---|---|---|---|
+| #34 Calibrar a velocidade da caminhada | CLOSED | — | andar a 1,0 px/quadro casado com o ciclo de 800 ms; corrida intacta |
 | #33 Adicionar corrida com Shift | CLOSED | — | corrida a 2,4 px/quadro com a faixa `run` do LPC e fallback; verificada no harness |
 | #32 Refinamento do fluxo de quests | CLOSED | — | entrega direta na confirmação (V-02, N-02), fala de orientação de NPCs, HUD e mapa refinados |
 | #31 Suportar spritesheets Aseprite e LPC | CLOSED | — | suporte híbrido transparente, climb e jump para LPC e novo player integrado |
@@ -260,7 +262,7 @@ Topologia e ordens: `interface/ROOMS.md`.
   `door_arrival_facing`; escadas usam `ladder_room` e `ladder_x`. O limiar da
   porta não precisa coincidir com um deck e a chegada configurada vale na
   primeira travessia; no retorno imediato, o jogador reaparece no `x/y` de saída.
-- Jogador: colisão 16×24; andar 1,5 px/quadro; correr 2,4 px/quadro com `Shift`
+- Jogador: colisão 16×24; andar 1,0 px/quadro; correr 2,4 px/quadro com `Shift`
   no convés; pulo 48 px; gravidade 0,5; escada 1,0; interação 12 px; plataformas
   atravessáveis por baixo.
 - Controles: setas/WASD, `Shift` para correr, espaço, E, ENTER em diálogos/modais,
@@ -466,6 +468,11 @@ Não replique aqui o histórico completo:
   caminhada. Velocidade e animação saem do mesmo predicado, então nunca
   discordam. O modal `AJUDA — CONTROLES` ganhou a linha `CORRER: SHIFT` e passou
   a dimensionar a altura pelo número de linhas.
+- **D-154 (sessão #34, caminhada):** o playtest reprovou o andar a 1,5 px/quadro
+  por deslizar em relação à animação de 8 quadros a 100 ms. `PLAYER_SPEED` caiu
+  para **1,0 px/quadro**: 48 px lógicos por ciclo, perto de duas alturas do
+  técnico, mantendo a navegação da nave em ~10 s de ponta a ponta. A corrida
+  (2,4 px/quadro) foi aprovada no playtest e ficou intacta.
 
 ## Fontes por tarefa
 
@@ -539,17 +546,40 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
 - [x] Declarar se o resultado é documentação, protótipo executável ou
       funcionalidade pronta.
 
-### Sessão atual — #33 corrida com Shift
+### Sessão atual — #34 calibração da caminhada
+Sessão da [issue #34](https://github.com/shelldonryan/gtd_example/issues/34) —
+reajuste do andar para casar com a animação de caminhada.
+
+- **Relato do playtest:** o técnico deslizava andando; a corrida com `Shift` está
+  aprovada e **não foi tocada**.
+- **Decisão (D-154):** `PLAYER_SPEED` foi de 1,5 para **1,0 px/quadro**. A
+  animação de caminhada tem 8 quadros de 100 ms (ciclo de 800 ms) e um passo
+  curto: a 1,5 px/quadro o técnico cobria 72 px lógicos por ciclo (três alturas)
+  e os pés patinavam. Com 1,0 px/quadro o ciclo cobre 48 px lógicos (duas
+  alturas) e o deslize por quadro de animação cai cerca de um terço (medido nas
+  solas: de 15–24 para 9–18 px de arte por quadro). O passo lateral ao sair da
+  escada (`leaveLadderAtDeck`) usa a mesma constante e encolhe junto.
+- **Código alterado:** `last_horizon/last_horizon.pde` (`PLAYER_SPEED` com o
+  comentário de calibração).
+- **Evidência:** `--capture` → **159 asserções `OK`**, zero `FALHOU`,
+  `QUEST CHECK: PASS`; `--ladder-test` → 6 `OK`; `--hit-test` → 5 `OK`;
+  `--asset-pipeline-test` → `OK`. A aferição do deslize é medida, mas o veredito
+  continua sendo o playtest.
+- **Resultado:** funcionalidade ajustada no jogo Processing — andar casado com a
+  animação; nenhuma outra tecla, faixa ou velocidade mudou.
+
+### Sessão anterior — #33 corrida com Shift
 Sessão da [issue #33](https://github.com/shelldonryan/gtd_example/issues/33) —
 corrida acionada por `Shift`, com a faixa `run` da spritesheet.
 
 - **Decisão confirmada (D-153):** `Shift` com uma direção horizontal corre no
-  convés a 2,4 px/quadro (caminhada, 1,5) e anima a linha 41 do LPC (8 quadros de
-  75 ms, espelhada para Oeste); soltar a tecla volta imediatamente a caminhada ou
-  repouso. Correr é decisão de convés: escada e ar mantêm velocidade e animação
-  próprias, `Shift` parado não anima nada e um sprite sem a faixa de `run` acelera
-  o passo mantendo a caminhada. Velocidade e animação compartilham o mesmo
-  predicado (`playerIsRunning()`), então sprite e passo nunca discordam.
+  convés a 2,4 px/quadro (caminhada, 1,5 na época; recalculada na #34) e anima a
+  linha 41 do LPC (8 quadros de 75 ms, espelhada para Oeste); soltar a tecla volta
+  imediatamente a caminhada ou repouso. Correr é decisão de convés: escada e ar
+  mantêm velocidade e animação próprias, `Shift` parado não anima nada e um sprite
+  sem a faixa de `run` acelera o passo mantendo a caminhada. Velocidade e animação
+  compartilham o mesmo predicado (`playerIsRunning()`), então sprite e passo nunca
+  discordam.
 - **Código alterado:** `last_horizon/last_horizon.pde` (`PLAYER_RUN_SPEED`,
   `run_held`, faixa de `run`, `SHIFT` no mapa de teclas), `last_horizon/ship.pde`
   (carga da linha 41, tag `run` do Aseprite, estados `PLAYER_ANIM_*`,

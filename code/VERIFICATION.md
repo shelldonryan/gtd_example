@@ -70,7 +70,7 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
   `--ladder-test` passam identicamente.
 - **Animação do jogador na verificação:** `checkPlayerAnimationLoop()` confere
   que idle e walk entram em loop, e `checkPlayerRun()` cobre a corrida com
-  `Shift`: passo acelerado no convés (1,5 → 2,4 px por quadro, com e sem a faixa
+  `Shift`: passo acelerado no convés (1,0 → 2,4 px por quadro, com e sem a faixa
   de `run`), avanço de um quadro a cada 75 ms, ciclo fechado nos 8 quadros,
   comparação pixel a pixel provando que a faixa vem da linha 41 do LPC e não da
   caminhada, regresso à caminhada ao soltar a tecla, ausência de corrida parado,

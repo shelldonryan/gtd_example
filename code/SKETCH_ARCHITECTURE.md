@@ -120,8 +120,9 @@ definidos em [[ACTIONS]] e nas notas de `events/`. Não há contenção separada
 economia, racionamento, acelerador, bônus de NPC ou coleta livre.
 
 Números do movimento (grade lógica 640×360; render 1280×720 / 720p): personagem
-16×24, andar 1,5 px/quadro, correr 2,4 px/quadro com `Shift` no convés, pulo de
-48 px, gravidade 0,5, escada 1,0 e plataformas atravessáveis por baixo. O estado
+16×24, andar 1,0 px/quadro, correr 2,4 px/quadro com `Shift` no convés, pulo de
+48 px, gravidade 0,5, escada 1,0 e plataformas atravessáveis por baixo. O andar
+foi calibrado pelo ciclo de 800 ms da animação de caminhada (D-154). O estado
 de animação do técnico (`idle`, `walk`, `climb`, `jump`, `run`) decide quadro e
 velocidade pelo mesmo predicado, então sprite e passo nunca discordam; sem a
 faixa de `run` na spritesheet, a corrida cai para a caminhada.
