@@ -55,7 +55,10 @@ final String PLAYER_SHEET_FILE = "player/player_sheet.png";
 final String PLAYER_SHEET_DATA_FILE = "player/player_sheet.json";
 final int PLAYER_DRAW_W = 32;
 final int PLAYER_DRAW_H = 32;
-final float PLAYER_SPEED = 1.5;
+/* Walk speed matches the 800 ms walk cycle: 1,0 px por quadro cobre 48 px
+   lógicos por ciclo, perto de duas alturas do técnico, e reduz o deslize dos
+   pés. O sprint usa a faixa de corrida do LPC e fica em 2,4 (D-153, D-154). */
+final float PLAYER_SPEED = 1.0;
 final float PLAYER_RUN_SPEED = 2.4;
 final float JUMP_HEIGHT = 48;
 final float GRAVITY = 0.5;
