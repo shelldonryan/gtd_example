@@ -79,9 +79,12 @@ reporte e não escolha silenciosamente.
 
 - A migração foi solicitada explicitamente antes do inventário #8. O jogo já
   executa o novo ciclo; estações e objetos ainda usam a arte geométrica.
-- #8 foi trabalhada nesta sessão: a lista de imagens, os canvas e a ordem de
-  produção estão em `assets/INVENTORY.md`. Falta apenas a escolha do som, que o
-  usuário deixou para depois.
+- #8 foi concluída nesta sessão: a lista de imagens, os canvas e a ordem de
+  produção estão em `assets/INVENTORY.md`, e o layout de escadas e estações
+  ficou congelado para a pintura dos fundos.
+- #28 está OPEN e disponível:
+  [Escolher e integrar os dois efeitos sonoros](https://github.com/shelldonryan/gtd_example/issues/28);
+  o jogo segue mudo até a escolha.
 - As posições de escada e estação estão **fechadas** para a pintura dos fundos:
   escadas em 127/532 (Comando), 114/526 (Máquinas), 120/489 (Depósito) e 127/482
   (Dormitório), com as estações realocadas e folga mínima de 40 px do eixo de
@@ -98,7 +101,8 @@ Sincronizada com o grafo nativo depois da sessão do #8:
 | Issue | Estado | Bloqueadores abertos | Relação |
 |---|---|---|---|
 | #7 Documento de entrega | OPEN | — | independente e disponível |
-| #8 Inventário de assets | OPEN | — | lista, canvas e ordem de produção em `assets/INVENTORY.md`; som pendente |
+| #8 Inventário de assets | CLOSED | — | lista, canvas e ordem de produção em `assets/INVENTORY.md`; escadas e estações congeladas |
+| #28 Escolher e integrar os dois efeitos sonoros | OPEN | — | dependente da #3; único item que saiu da #8 |
 | #27 Portais, desfechos, transmissões, NPCs e HUD | CLOSED | — | escopo ampliado; concluído e validado |
 | #25 Redesenhar incidentes e ordens como quests físicas | CLOSED | — | catálogo e fluxo físico implementados no sketch |
 | #26 Simplificar mecânicas legadas e balancear o ciclo de quests | CLOSED | — | números, pool e consequências implementados no sketch |
@@ -397,8 +401,15 @@ inventário de assets e congelamento do layout para a pintura.
 
 - Fontes sincronizadas: `assets/INVENTORY.md`, `interface/ROOMS.md`,
   `interface/HUD.md`, `code/SKETCH_ARCHITECTURE.md`, `README.md` e este arquivo.
+- Commits na branch `prototype/sketch-architecture`, sem push: `d7010c5`
+  (sketch), `006334c` (inventário), `edfae19` (fontes) e este registro.
+- Wayfinder: #8 CLOSED com decisões, arquivos e evidência no ticket; #28 criada,
+  rotulada `wayfinder:task` e ligada como sub-issue da #1; corpo e comentário da
+  #1 atualizados com a fronteira.
 
-- Pendência: o som continua sem escolha; nenhuma decisão de áudio foi tomada.
+- Pendência: o som foi para a #28; nenhuma decisão de áudio foi tomada nesta
+  sessão. A #27 não está ligada como sub-issue da #1 — só o corpo dela diz
+  "Part of #1"; registrado sem alteração.
 - Resultado: documentação de arte fechada e layout congelado no protótipo
   executável — não é a arte final, que segue a ordem de produção.
 
