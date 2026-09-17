@@ -29,19 +29,25 @@ coleta livre de componentes ou cadeia universal de visitas.
 
 O técnico é carregado a partir de uma spritesheet única em
 `last_horizon/data/player/player_sheet.png`, com as faixas definidas por
-`last_horizon/data/player/player_sheet.json`. O PNG tem 640×64 e dez quadros de
-64×64:
+`last_horizon/data/player/player_sheet.json`. O carregador suporta
+transparentemente os padrões **Universal LPC** e **Aseprite** (D-140 a D-142):
 
-- `idle`: quadros 0–1, 500 ms por quadro;
-- `walk`: quadros 2–9, 100 ms por quadro.
+- **Universal LPC (ativo):** matriz 13×54 de células 64×64 (`player_sheet.png`, 832×3456).
+  Extrai `idle` (2 quadros de 500 ms, linha 25), `walk` (8 quadros de 100 ms,
+  linha 11), `climb` (6 quadros de 120 ms, linha 21, na escada) e `jump`
+  (13 quadros de 70 ms, linha 49, no ar).
+- **Aseprite (backup / compatibilidade):** tira horizontal de 640×64 com 10 quadros
+  de 64×64 (`player_sheet_aseprite.*`), contendo `idle` (0–1) e `walk` (2–9).
+  Quando o sprite é Aseprite, `climb` e `jump` degradam graciosamente para
+  idle/walk.
 
-As durações do JSON controlam o loop no runtime. O quadro visual é desenhado em
-32×32 na grade lógica e centralizado sobre a caixa física original de 16×24.
-Uma única arte atende as duas direções: `player_facing` espelha o personagem
-quando o técnico anda para a esquerda ou para a direita, inclusive ao entrar
-por uma porta. Os assets pixel art são amostrados sem interpolação.
-
-
+A detecção é automática: se o JSON tiver a chave `"frames"`, processa como
+Aseprite; caso contrário, processa como Universal LPC. O quadro visual é
+desenhado em 32×32 na grade lógica e centralizado sobre a caixa física original
+de 16×24. Uma única arte atende as duas direções: `player_facing` espelha o
+personagem quando o técnico anda para a esquerda ou para a direita, inclusive ao
+entrar por uma porta. Os créditos e licenças abertas (CC-BY / OGA-BY) do LPC
+estão documentados em `last_horizon/data/player/LICENSE.txt`.
 ## Controles
 
 | Ação | Tecla |

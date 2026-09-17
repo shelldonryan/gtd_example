@@ -30,17 +30,23 @@ plano e executa o contrato descrito em [[ACTIONS]] e nas notas de `events/`.
 
 - A origem Aseprite, quando disponível, pode permanecer em `last_horizon/data/`
   junto das exportações. O runtime não depende do arquivo `.aseprite`.
-- Para qualquer animação do jogo, a exportação oficial usa uma spritesheet única
-  em PNG com JSON de metadados; não há PNG separado por quadro.
+- Para as animações do jogo, o sketch suporta dois formatos transparentemente:
+  - **Aseprite:** tira horizontal em PNG com JSON de metadados (`"frames": [...]`);
+  - **Universal LPC:** matriz em PNG (células 64×64) com JSON do gerador LPC
+    (`"version"`, `"layers"`).
 - O sketch carrega os assets com `loadImage()` e `loadJSONObject()` durante
   `setup()`: `loadPlayerAssets()` traz o técnico e `loadArtAssets()` traz o
   restante pela camada de arte. A pasta `data/` é o diretório de assets do
   Processing.
-- `player_sheet.png` mede 640×64 e contém 10 quadros de 64×64.
-- `player_sheet.json` registra `idle` nos quadros 0–1 e `walk` nos quadros 2–9,
-  com 500 ms por quadro parado e 100 ms por quadro em movimento.
-- `playerCurrentFrame()` soma as durações da faixa selecionada e usa módulo
-  pelo total para repetir `idle` e `walk` continuamente.
+- Para o técnico (`player_sheet.*`), o formato LPC extrai `idle` (2 quadros, linha 25),
+  `walk` (8 quadros, linha 11), `climb` (6 quadros, linha 21) e `jump` (13 quadros,
+  linha 49). No Aseprite (`player_sheet_aseprite.*`), o formato mantém `idle` (0–1) e
+  `walk` (2–9), com fallback gracioso de climb e jump para idle e walk (D-140).
+- Para os NPCs em `last_horizon/assets.pde`, o formato LPC extrai a visão frontal
+  (Sul / linha 24, 2 quadros de respiração), enquanto o Aseprite lê as coordenadas
+  do array `"frames"` (D-141).
+- `playerCurrentFrame()` e `playerCurrentAnimationState()` gerenciam o ciclo de
+  animação conforme o estado (idle, walk, climb na escada, jump no ar).
 - A física mantém o personagem em 16×24 na grade lógica. O quadro visual é
   desenhado em 32×32 lógicos e centralizado sobre a caixa de colisão.
 - A direção usa `player_facing`: `1` para a direita e `-1` para a esquerda.
@@ -48,7 +54,6 @@ plano e executa o contrato descrito em [[ACTIONS]] e nas notas de `events/`.
   redefinido conforme a entrada pela porta ou o reinício da sala.
 - Se o carregamento falhar, `drawPlayerFallback()` preserva a execução e a
   caixa física, sem alterar o contrato de movimento.
-
 ### Contrato de drop-in da arte
 
 - A camada `last_horizon/assets.pde` carrega a arte por arquivo, sem mudar

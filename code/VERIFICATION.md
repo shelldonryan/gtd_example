@@ -60,9 +60,14 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
   devolvem o estado anterior no fim. A travessia em dois quadros tem teste
   próprio (`checkDoorTraversalArt()`), que instala um par de quadros e confere
   abrir, trocar de sala e fechar.
+- **Áudio na verificação:** a camada de áudio (`last_horizon/audio.pde`) usa
+  `javax.sound.sampled` da JVM e carrega 6 de 6 clipes (`som: 6 de 6 carregados`).
+  Se a pasta `data/audio/` ou qualquer arquivo estiver ausente, o carregador
+  emite aviso no console e o sketch continua executando mudo, sem exceção; os
+  testes de `--capture` e `--ladder-test` passam identicamente.
 - **Contagem atual:** `--capture` fecha em **145 asserções `OK`** com
-  `QUEST CHECK: PASS`. Medido em três execuções seguidas no repositório sem
-  arte, na cópia com as 57 fixtures e no híbrido sem os fundos de sala.
+  `QUEST CHECK: PASS`. Medido no repositório com os sons integrados, na cópia
+  sem arte, na cópia com as 57 fixtures e no híbrido sem os fundos de sala.
 
 ## Fixture do pipeline
 

@@ -113,16 +113,15 @@ mesmo PNG é usado no ponto de coleta, na mão do técnico (com a linha
 | `objects/selante_estoque.png` | selante de estoque | FOOD-B |
 | `objects/refeicao_quente.png` | refeição quente | CON-B |
 
-## 4. NPCs — 4 spritesheets, 128×64 (2 quadros de 64×64)
+## 4. NPCs — 4 spritesheets (integrados em data/npc/)
 
-Em `data/npc/`, com JSON ao lado. Mesmo enquadramento do técnico: quadro 64×64
-desenhado em 32×32 lógicos, centrado na caixa de 16×24. Idle de dois quadros,
-500 ms por quadro — respiração ou pequeno movimento de olhar; os sobreviventes
-não andam por contrato.
+Em `data/npc/` com `LICENSE.txt`. Mesmo enquadramento do técnico: quadro 64×64
+desenhado em 32×32 lógicos, centrado na caixa de 16×24. Suporta os formatos
+Universal LPC e Aseprite. No LPC, o NPC vira dinamicamente na direção do técnico
+(linha 23 para a esquerda, linha 25 para a direita, linha 24 frontal), com idle
+de 2 quadros de respiração a 500 ms por quadro. Os sobreviventes não andam por contrato.
 
-`npc/vera.png` + `npc/vera.json`, `npc/bento.png` + `npc/bento.json`,
-`npc/neusa.png` + `npc/neusa.json`, `npc/silvia.png` + `npc/silvia.json`.
-
+Integrados: `npc/vera.png`, `npc/bento.png`, `npc/neusa.png` e `npc/silvia.png`.
 ## 5. Porta — 1 spritesheet, 128×128 (2 quadros de 64×128)
 
 `doors/door_sheet.png` + `doors/door_sheet.json`. Quadros `fechada` e `aberta`.
