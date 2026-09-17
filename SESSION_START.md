@@ -570,6 +570,8 @@ corrida acionada por `Shift`, com a faixa `run` da spritesheet.
 - **Wayfinder:** #33 fechada com o relatório da sessão; a fronteira fica #28
   (áudio, aberta por decisão do usuário) e a arte na ordem de
   `assets/INVENTORY.md`.
+- **Commits** na branch `prototype/sketch-architecture`, sem push: `3962d52`
+  (sketch) e `2b91c24` (documentos), mais este registro.
 - **Resultado:** funcionalidade pronta no jogo Processing — corrida no convés com
   animação própria e fallback.
 
