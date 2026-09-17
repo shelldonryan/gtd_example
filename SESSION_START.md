@@ -3,11 +3,10 @@
 > Resumo operacional obrigatório. Leia antes de analisar, editar ou implementar
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
-Atualizado após o encerramento da
-[issue #27](https://github.com/shelldonryan/gtd_example/issues/27), concluída
-depois da validação manual do retorno pelas portas; o delta da sessão foi
-commitado em seguida e as duas linhas residuais dos cartões de recurso foram
-alinhadas ao contrato.
+Atualizado após a sessão da
+[issue #8](https://github.com/shelldonryan/gtd_example/issues/8), que fechou a
+lista de imagens em `assets/INVENTORY.md` e congelou o layout de escadas e
+estações para a pintura dos fundos.
 
 Destino Wayfinder: [issue #1](issue://1)
 
@@ -80,23 +79,26 @@ reporte e não escolha silenciosamente.
 
 - A migração foi solicitada explicitamente antes do inventário #8. O jogo já
   executa o novo ciclo; estações e objetos ainda usam a arte geométrica.
-- #8 está OPEN e disponível após o fechamento da #26:
-  [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8).
+- #8 foi trabalhada nesta sessão: a lista de imagens, os canvas e a ordem de
+  produção estão em `assets/INVENTORY.md`. Falta apenas a escolha do som, que o
+  usuário deixou para depois.
+- As posições de escada e estação estão **fechadas** para a pintura dos fundos:
+  escadas em 127/532 (Comando), 114/526 (Máquinas), 120/489 (Depósito) e 127/482
+  (Dormitório), com as estações realocadas e folga mínima de 40 px do eixo de
+  uma escada. As portas continuam sendo sprites e mudam sem repintura.
 - #7 está OPEN, disponível e independente:
   [Documento de entrega e como o jogo roda na apresentação](https://github.com/shelldonryan/gtd_example/issues/7).
-- O próximo caminho crítico é #8 para arte final; a expansão técnica dos portais
-  não bloqueia o inventário.
-- A escolha visual das posições finais de portas e escadas continua aberta; a
-  infraestrutura aceita coordenadas arbitrárias sem nova alteração de lógica.
+- O próximo caminho crítico é produzir a arte na ordem de `assets/INVENTORY.md`,
+  começando pelos ícones do HUD.
 
 ### Fronteira Wayfinder
 
-Sincronizada com o grafo nativo após a conclusão da #27:
+Sincronizada com o grafo nativo depois da sessão do #8:
 
 | Issue | Estado | Bloqueadores abertos | Relação |
 |---|---|---|---|
 | #7 Documento de entrega | OPEN | — | independente e disponível |
-| #8 Inventário de assets | OPEN | — | disponível após #26; próximo caminho crítico |
+| #8 Inventário de assets | OPEN | — | lista, canvas e ordem de produção em `assets/INVENTORY.md`; som pendente |
 | #27 Portais, desfechos, transmissões, NPCs e HUD | CLOSED | — | escopo ampliado; concluído e validado |
 | #25 Redesenhar incidentes e ordens como quests físicas | CLOSED | — | catálogo e fluxo físico implementados no sketch |
 | #26 Simplificar mecânicas legadas e balancear o ciclo de quests | CLOSED | — | números, pool e consequências implementados no sketch |
@@ -181,6 +183,11 @@ por solicitação explícita do usuário; arte final continua fora desta mudanç
   `COMIDA`, `PEÇAS`, `MORAL`); o inventário #8 troca apenas os ícones por assets.
 - O rodapé tem `MAPA`, `ORDENS` e `?`; a dica de teclas virou o modal
   `AJUDA — CONTROLES`. Textos e estética de modais e cartões ficam deferidos.
+- A arte final está especificada em `assets/INVENTORY.md`: fundo em imagem por
+  sala, com o piso e as escadas **pintados** no fundo e a colisão mantida no
+  código; estações, objetos, NPCs, portas, ícones, retratos, telas e miniaturas
+  do mapa são sprites; painéis, cartões, barras, faixas, botões, o selo `!` e
+  todo o texto continuam em código.
 
 O catálogo concreto, seus IDs, objetos, origens, destinos, resultados e textos
 estão em `mechanics/ACTIONS.md` e `events/`. Os valores numéricos e a seleção
@@ -201,7 +208,13 @@ Topologia e ordens: `interface/ROOMS.md`.
   reduzir até 10 px somente para caber.
 - Pixel art sem interpolação. Asset animado: uma spritesheet PNG + JSON; nomes
   ASCII; `.aseprite` acompanha a exportação quando disponível.
-- Sala: três conveses, duas escadas por sala, sem câmera.
+- Asset estático: canvas = tamanho na tela, porque 1 pixel de arte = 1 pixel do
+  render 1280×720. Base 64×64; porta 64×128; ícones 32×32; retratos 224×276;
+  fundos de sala 1280×456; telas 1280×720; miniaturas do mapa 240×144. Lista
+  completa por arquivo em `assets/INVENTORY.md`.
+- Sala: três conveses, duas escadas por sala, sem câmera. Escadas finais:
+  127/532, 114/526, 120/489 e 127/482; nenhuma estação a menos de 40 px de um
+  eixo de escada.
 - Portais e escadas vivem em tabelas. Portas usam `door_room`, `door_target`,
   `door_x`, `door_y`, `door_deck`, `door_arrival_x`, `door_arrival_y` e
   `door_arrival_facing`; escadas usam `ladder_room` e `ladder_x`. O limiar da
@@ -270,6 +283,18 @@ Não replique aqui o histórico completo:
   independente de deck e a chegada usa `x/y/direção` configurável; no retorno
   imediato, o jogador reaparece na posição de saída da sala anterior. Isso
   permite aberturas sem deck e surgimento inicial em qualquer ponto válido.
+- **D-118 a D-125 (sessão #8, inventário de assets):** o fundo de cada sala é
+  uma imagem e o piso e a escada passam a ser **pintados** nela, com a colisão
+  mantida no código (D-118); escadas definitivas por sala — 127/532, 114/526,
+  120/489 e 127/482 — medidas na composição dos concept arts, com as estações
+  realocadas e folga mínima de 40 px (D-119); 14 estações com desenho próprio em
+  canvas 64×64, com o casco sorteado em qualquer ponto (D-120); NPCs, porta e
+  casco animados em dois quadros e o restante estático (D-121); canvas = tamanho
+  na tela, com base 64×64 e exceções por peça (D-122); menu e vinheta com a nave
+  de fora e a Terra ao fundo, vitória com a base em Marte e derrota com o espaço
+  vazio (D-123); o som fica pendente e o jogo segue mudo (D-124); a lista e a
+  ordem de produção vivem em `assets/INVENTORY.md`, começando pelos ícones do
+  HUD (D-125).
 
 ## Fontes por tarefa
 
@@ -293,28 +318,32 @@ Interface e desfechos:
   `interface/MENU_VICTORY.md`;
 - #11 e assets visuais relevantes.
 
+Arte e layout:
+
+- `assets/INVENTORY.md`;
+- `assets/concept_arts/*.png` (linguagem visual e composição, nunca nomes,
+  números ou dimensões).
+
 Código:
 
 - `code/SKETCH_ARCHITECTURE.md`;
 - todos os `.pde` de `last_horizon/`;
 - comandos e evidências de captura da issue afetada.
 
-`interface/MENU_CONFIGURATION.md` está fora do escopo. Arquivos
-`research/*.md` podem existir apenas nas branches `research/*`.
+`interface/MENU_CONFIGURATION.md` foi removido; o menu de configuração segue fora
+do escopo. Arquivos `research/*.md` podem existir apenas nas branches
+`research/*`.
 
 ## Lacunas que exigem consulta ou ticket
 
-- a arte final dos objetos e estações, que ainda usam representação geométrica;
-- o inventário final de assets, dimensões, reutilização e ordem de produção,
-  no ticket [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8),
-  agora disponível;
-- As posições finais de portas e escadas continuam sendo uma decisão visual do
-  usuário; a infraestrutura já aceita coordenadas arbitrárias e não depende de
-  novas alterações de lógica.
+- a escolha do som: o inventário reserva `data/audio/click.wav` e
+  `data/audio/alerta.wav` e o jogo segue mudo;
+- a produção da arte, na ordem de `assets/INVENTORY.md` — ícones, porta, casco,
+  objetos, NPCs, estações, retratos, fundos, telas e miniaturas do mapa;
+- a definição visual das **portas**, que são sprite e mudam sem repintura; as
+  escadas, que são pintadas, estão fechadas;
 - o texto e a estética dos modais e cartões, deferidos por decisão da #27;
-- qualquer nome, retrato ou história além de Vera, Bento, Neusa e Sílvia;
-- os quatro concept arts de interior em `assets/concept_arts/` ainda precisam ser
-  rastreados no inventário final.
+- qualquer nome, retrato ou história além de Vera, Bento, Neusa e Sílvia.
 
 ## Checklist de abertura
 
@@ -337,6 +366,43 @@ Código:
       funcionalidade pronta.
 
 ## Última sessão registrada
+
+Sessão da [issue #8](https://github.com/shelldonryan/gtd_example/issues/8) —
+inventário de assets e congelamento do layout para a pintura.
+
+- Fronteira recalculada no grafo nativo antes desta sessão: apenas #1, #7 e #8
+  estão OPEN, e os bloqueadores nativos da #8 estão todos CLOSED.
+
+- Decisões confirmadas pelo usuário, uma a uma: fundo em imagem por sala, com
+  piso e escadas **pintados** no fundo e colisão mantida no código; escadas
+  definitivas por sala, medidas na composição dos concept arts; 14 estações com
+  desenho próprio; NPCs com idle, porta com abertura e casco com brilho
+  animados; menu e vinheta com a nave de fora e a Terra ao fundo; vitória com a
+  base em Marte; derrota com o espaço vazio; som deixado para depois.
+
+- Layout aplicado em `last_horizon/ship.pde`: `ladder_x` por sala (127/532,
+  114/526, 120/489, 127/482) e dez estações realocadas — mais Vera (540→575) e
+  Sílvia (540→570), que ficariam sobre a escada. Folga mínima de 40 px do eixo
+  de escada e 60 px entre estações; nenhuma coordenada estava cravada no harness.
+
+- Documento novo: `assets/INVENTORY.md` — 57 PNGs e 6 JSONs, com canvas por
+  peça, tela onde aparece, estática ou animada, o que continua em código e a
+  ordem de produção (ícones → porta e casco → objetos → NPCs → estações →
+  retratos → fundos → telas e mapa).
+
+- Evidência: `--hit-test` → 5 `OK`; `--ladder-test` → 6 `OK`; `--capture` → 142
+  asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS`; inspeção visual das
+  capturas novas confirmou as escadas em 0,20/0,83 (Comando), 0,18/0,82
+  (Máquinas) e 0,20/0,75 (Dormitório), sem estação sob escada.
+
+- Fontes sincronizadas: `assets/INVENTORY.md`, `interface/ROOMS.md`,
+  `interface/HUD.md`, `code/SKETCH_ARCHITECTURE.md`, `README.md` e este arquivo.
+
+- Pendência: o som continua sem escolha; nenhuma decisão de áudio foi tomada.
+- Resultado: documentação de arte fechada e layout congelado no protótipo
+  executável — não é a arte final, que segue a ordem de produção.
+
+### Sessão anterior — #27
 
 Sessão da [issue #27](https://github.com/shelldonryan/gtd_example/issues/27),
 concluída após o trabalho ser desviado do inventário #8 e o retorno pelas portas

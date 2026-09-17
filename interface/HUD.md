@@ -42,8 +42,8 @@ Os seis recursos usam **ícones de 16×16** na paleta do HUD — energia, oxigê
 água, comida, peças e moral. Cada cartão mostra **ícone + número + rótulo de
 texto** — `ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS`, `MORAL` — e, nos
 recursos de barra, a barra de preenchimento. O rótulo é texto provisório: o
-inventário [#8](https://github.com/shelldonryan/gtd_example/issues/8) troca os
-ícones geométricos por assets do Aseprite, sem mudar o restante do cartão.
+inventário troca os ícones geométricos por assets de 32×32 em `data/icons/`,
+listados em `assets/INVENTORY.md`, sem mudar o restante do cartão.
 
 ## Onde cada elemento fica
 

@@ -15,6 +15,8 @@ três salas periféricas não possuem portas entre si. O mapa é apenas consult�
 As posições acima são indicativas; o ajuste fino é da implementação, desde que
 cada estação fique alcançável andando ou subindo escada. O pulo de 48 px
 **não** alcança o convés de cima: trocar de nível é papel da escada.
+As posições definitivas de escadas e estações, congeladas para a pintura dos
+fundos, estão em `assets/INVENTORY.md`.
 
 ## Pontos de interação
 
@@ -135,7 +137,12 @@ a uma superfície alcançável; fora de uma superfície, a gravidade continua
 normalmente.
 
 Escadas continuam usando `ladder_room` e `ladder_x`; cada registro pode ocupar
-qualquer posição horizontal do cômodo sem alterar a lógica de travessia.
+qualquer posição horizontal do cômodo sem alterar a lógica de travessia. As
+posições finais vieram da composição dos concept arts e estão fechadas para a
+pintura dos fundos: **127 e 532** no Comando, **114 e 526** na Sala de máquinas,
+**120 e 489** no Depósito e **127 e 482** no Dormitório. Nenhuma estação fica a
+menos de 40 px do eixo de uma escada. Com os fundos em imagem, o piso e a
+escada passam a ser pintados e a colisão continua a mesma.
 
 ## Ordens
 

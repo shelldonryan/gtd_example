@@ -43,6 +43,8 @@ espelha o quadro conforme a direção do movimento. A aparência é desenhada em
 O padrão de animação vale para todo asset animado do projeto: uma spritesheet
 única em PNG com JSON de metadados. Não há exportação de PNG separado por
 quadro; o `.aseprite` de origem acompanha a spritesheet quando disponível.
+A lista final de imagens a produzir — canvas, tela onde aparece, estática ou
+animada e ordem de produção — está em `assets/INVENTORY.md`.
 
 ## Executar o jogo
 

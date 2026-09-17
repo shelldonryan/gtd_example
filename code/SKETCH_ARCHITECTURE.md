@@ -135,7 +135,9 @@ Portais e escadas vivem em tabelas. Cada porta declara `door_room`, `door_target
 abertura sem deck. `door_arrival_x`, `door_arrival_y` e `door_arrival_facing`
 definem a chegada padrão na sala destino; `enterRoomThroughDoor` reaproveita a
 posição `x/y` de saída quando o jogador retorna imediatamente pela sala anterior.
-As escadas declaram `ladder_room` e `ladder_x`. Transmissões usam
+As escadas declaram `ladder_room` e `ladder_x`; o par final é 127/532 (Comando),
+114/526 (Máquinas), 120/489 (Depósito) e 127/482 (Dormitório), com folga mínima
+de 40 px entre estação e eixo de escada. Transmissões usam
 `transmission_open`, `transmission_text` e as travas `earth_engine_sent`,
 `earth_hull_sent` e `earth_loss_sent`; a mensagem de Marte depende de
 `survivors` e de `engine_repaired_at_limit`. O modal de ajuda usa `help_open`.
@@ -299,6 +301,11 @@ Limitações observadas:
   acelerador, coleta livre e contador paralelo de intervenção.
 - **Espaço preservado:** Comando em hub, mapa consultável, quatro salas,
   portas, escadas, física e animação.
+- **Layout congelado para a arte:** escadas em 127/532 (Comando), 114/526
+  (Máquinas), 120/489 (Depósito) e 127/482 (Dormitório), com as estações
+  realocadas e nenhuma delas a menos de 40 px de um eixo de escada. A lista de
+  imagens a produzir, com canvas e ordem de produção, está em
+  `assets/INVENTORY.md`.
 - **Ajustes desta rodada:** vinheta do #11, transmissões da Terra e mensagem de
   Marte, portais com limiar e chegada configurável (retorno imediato à posição
   de saída), porta das Máquinas no Comando validada manualmente no centro do deck
