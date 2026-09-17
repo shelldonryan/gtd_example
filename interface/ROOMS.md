@@ -33,7 +33,9 @@ fundos, estão em [[INVENTORY]].
 Regras que valem em todos os cômodos:
 
 - Alcance de interação de 12 px para estações e portas, e 22 px lateral para NPCs
-  (D-144), na mesma altura, e o ponto se destaca quando o técnico entra no alcance.
+  (D-144), na mesma altura. NPCs vivos mantêm o nome; ao entrar no alcance, o
+  sprite recebe contorno/halo cyan e o `E` aparece na diagonal superior direita,
+  próximo da cabeça, sem moldura geométrica.
 - O técnico carrega **um objeto de quest por vez**. O item aparece como parte da
   ordem aceita e é entregue no destino; não há coleta livre de componentes.
 - Coleta e entrega são as duas etapas leves de uma ordem. A entrega aplica custo,

@@ -46,7 +46,8 @@ plano e executa o contrato descrito em [[ACTIONS]] e nas notas de `events/`.
   D-153).
 - Para os NPCs em `last_horizon/assets.pde`, o formato LPC extrai a visão frontal
   (Sul / linha 24, 2 quadros de respiração), enquanto o Aseprite lê as coordenadas
-  do array `"frames"` (D-141).
+  do array `"frames"` (D-141). O destaque de proximidade usa máscaras cyan
+  pré-calculadas a partir da transparência dos frames e não altera os PNGs.
 - `playerCurrentFrame()` e `playerCurrentAnimationState()` gerenciam o ciclo de
   animação conforme o estado (idle, walk, run no convés com `Shift`, climb na
   escada, jump no ar). `playerIsRunning()` é o predicado único que decide o passo

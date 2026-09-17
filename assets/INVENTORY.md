@@ -120,6 +120,8 @@ desenhado em 32×32 lógicos, centrado na caixa de 16×24. Suporta os formatos
 Universal LPC e Aseprite. No LPC, o NPC vira dinamicamente na direção do técnico
 (linha 23 para a esquerda, linha 25 para a direita, linha 24 frontal), com idle
 de 2 quadros de respiração a 500 ms por quadro. Os sobreviventes não andam por contrato.
+Quando o técnico entra no raio de interação, o destaque é um contorno/halo cyan
+gerado em runtime a partir da transparência do frame; ele não é gravado no PNG.
 
 Integrados: `npc/vera.png`, `npc/bento.png`, `npc/neusa.png` e `npc/silvia.png`.
 ## 5. Porta — 1 spritesheet, 128×128 (2 quadros de 64×128)
@@ -132,12 +134,14 @@ dado de tabela, uma única arte serve as seis portas. O destaque de alcance
 Como hoje a travessia é instantânea, o sketch ganha um **estado de travessia**:
 abrir o quadro `aberta`, trocar de sala e voltar a `fechada`.
 
-## 6. Ícones do HUD — 7 imagens, 32×32, estáticas
+## 6. Ícones do HUD — 6 imagens, 32×32, estáticas
 
 Em `data/icons/`, substituindo os vetores atuais na caixa de 16×16 lógicos:
-`energia.png`, `oxigenio.png`, `agua.png`, `comida.png`, `pecas.png`,
-`moral.png` e `aviso.png` (o triângulo que acompanha o recurso em vermelho).
-O cartão mantém rótulo, número e barra: só o ícone troca ([[HUD]]).
+`energia.png`, `oxigenio.png`, `agua.png`, `comida.png`, `pecas.png` e
+`moral.png`.
+O cartão mantém rótulo, número e barra: só o ícone troca ([[HUD]]). O alerta
+crítico (`aviso`) permanece desenhado exclusivamente em código; não há
+`aviso.png`.
 
 ## 7. Retratos — 4 imagens, 224×276, estáticas
 
@@ -191,7 +195,7 @@ alerta continua apenas visual ([[HUD]]).
 Cada bloco é utilizável sozinho; a ordem segue o que desbloqueia leitura de jogo
 mais rápido e o que depende de posição já congelada.
 
-1. **Ícones (7)** — troca direta no HUD, sem mexer em layout.
+1. **Ícones (6)** — troca direta no HUD, sem mexer em layout.
 2. **Porta (1 sheet) e casco (1 sheet)** — fecham a leitura de interação; a
    porta pede o estado de travessia no sketch.
 3. **Objetos (16)** — fecham a leitura das 22 quests: ponto de coleta, mão e

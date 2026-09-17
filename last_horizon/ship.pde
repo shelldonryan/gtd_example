@@ -492,15 +492,18 @@ void drawRoomPoint(PGraphics g, int point){
   }
   boolean available = pointIsAvailable(point);
   boolean nearby = available && isPointInRange(point);
+  boolean npc = point_kind[point] == POINT_NPC;
   int colour = nearby || nextQuestPoint() == point ? COL_CYAN : (available ? COL_TEXT : COL_DIM);
   float x = point_x[point];
   float y = point_y[point];
 
   if (!drawPointArt(g, point, x, y)){
-    g.stroke(nearby ? COL_CYAN : COL_BORDER);
-    g.fill(nearby ? COL_CYAN_DARK : COL_PANEL);
-    g.rect(x - 12, y - 22, 24, 18, 2);
-    if (available) text(g, str(pointMarker(point_kind[point])), x - 3, y - 22, 16, colour);
+    if (!npc){
+      g.stroke(nearby ? COL_CYAN : COL_BORDER);
+      g.fill(nearby ? COL_CYAN_DARK : COL_PANEL);
+      g.rect(x - 12, y - 22, 24, 18, 2);
+      if (available) text(g, str(pointMarker(point_kind[point])), x - 3, y - 22, 16, colour);
+    }
   }
   textCentered(g, pointDisplayLabel(point), x, y - 44, 16, colour);
   if (point == nextQuestPoint()){
@@ -509,17 +512,22 @@ void drawRoomPoint(PGraphics g, int point){
     if (active_quest >= 0 && quest_stage == QUEST_COLLECT) drawQuestObject(g, x + 18, y - 12);
   }
 
-  if (nearby){
+  if (nearby && !npc){
     g.noFill();
     g.stroke(COL_CYAN);
     g.rect(x - 16, y - 26, 32, 26, 2);
     text(g, "E", x - 3, y + 6, 16, COL_CYAN);
+  }
+  if (nearby && npc){
+    text(g, "E", x + 6, y - 24, 16, COL_CYAN);
   }
 
   if (point_kind[point] == POINT_NPC){
     drawNpc(g, x, y, point_label[point], nearby);
   }
 }
+
+
 
 
 /* Art of a station or of the hull replaces the generic rectangle; NPC sprites
@@ -570,9 +578,16 @@ void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
     facing = (player_x + PLAYER_W / 2.0 < x) ? -1 : 1;
   }
 
-  PImage art = artFrame(crewArtFramesFacing(name, facing), ART_NPC_FRAME_MS);
+  PImage[] frames = crewArtFramesFacing(name, facing);
+  PImage[] glow_frames = crewArtGlowFramesFacing(name, facing);
+  int frame_count = frames == null ? 0 : frames.length;
+  int frame_index = artFrameIndex(frame_count, ART_NPC_FRAME_MS);
+  PImage art = frame_count == 0 ? null : frames[frame_index];
 
   if (art != null){
+    if (nearby && glow_frames != null && frame_index < glow_frames.length){
+      drawArt(g, glow_frames[frame_index], x, y - PLAYER_H / 2.0, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
+    }
     drawArt(g, art, x, y - PLAYER_H / 2.0, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
     return;
   }
@@ -585,6 +600,7 @@ void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
   g.rect(x - 4 + eye_offset, y - 19, 2, 2);
   g.rect(x + 2 + eye_offset, y - 19, 2, 2);
 }
+
 
 
 void drawPlayer(PGraphics g){

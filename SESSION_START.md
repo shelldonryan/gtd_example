@@ -121,9 +121,21 @@ reporte e não escolha silenciosamente.
   spritesheet não traz a faixa (D-153).
 - #34 foi concluída: o andar caiu de 1,5 para **1,0 px/quadro** para casar com o
   ciclo de 800 ms da animação de caminhada, com a corrida intacta (D-154).
-- O próximo caminho crítico na arte é a seleção dos assets CC0/CC-BY pelo usuário
-  na ordem de `assets/INVENTORY.md`, iniciando pelo Bloco 1 (Ícones do HUD em
-  `data/icons/`).
+- O destaque de proximidade dos NPCs foi refinado em D-155: as molduras
+  geométricas foram removidas; o sprite recebe contorno/halo cyan gerado em
+  runtime quando o técnico entra nos 22 px do gatilho, mantendo o `E`.
+- D-156 reposiciona o `E` dos NPCs para a diagonal superior direita, próximo
+  da cabeça (`x + 6`, `y - 24`), sem alterar o gatilho, o raio de interação
+  ou os demais marcadores da sala.
+- D-157 integrou os seis ícones de recursos em `data/icons/` como PNGs
+  estáticos de 32×32 (`energia`, `oxigenio`, `agua`, `comida`, `pecas` e
+  `moral`); o alerta crítico continua desenhado exclusivamente pelo código.
+
+
+- Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
+  pelo carregador existente em `last_horizon/assets.pde`.
+- O próximo caminho crítico na arte é a seleção dos assets restantes pelo
+  usuário na ordem de `assets/INVENTORY.md`.
 
 ### Fronteira Wayfinder
 
@@ -139,6 +151,7 @@ Sincronizada com o grafo nativo depois da sessão do #34:
 | #29 Camada de assets | CLOSED | — | camada de arte com fallback, travessia de porta e drop-in documentado |
 | #30 Desacoplar o harness | CLOSED | — | cópia entregue sem `capture.pde`, testada fora do repositório |
 | #8 Inventário de assets | CLOSED | — | lista, canvas e ordem de produção em `assets/INVENTORY.md`; escadas e estações congeladas |
+| #35 Reestilizar e integrar ícones de recursos do HUD | OPEN | — | seis PNGs integrados; alerta crítico permanece via código; aguardando autorização para encerramento |
 | #28 Escolher e integrar os efeitos sonoros | OPEN | — | porta e escada entregues, integradas e validadas (D-136 a D-138); aberto por decisão do usuário para ampliação não decidida (D-139) |
 | #27 Portais, desfechos, transmissões, NPCs e HUD | CLOSED | — | escopo ampliado; concluído e validado |
 | #25 Redesenhar incidentes e ordens como quests físicas | CLOSED | — | catálogo e fluxo físico implementados no sketch |
@@ -373,25 +386,28 @@ Não replique aqui o histórico completo:
   recorte de escopo da #3, nunca confirmado pelo usuário.
 - **D-136 (sessão #28, som):** o som da escada é a mistura de `footsteps/metal/4`
   (congusbongus, CC-BY 3.0, crédito obrigatório de Eelke) com `impactMetal_004`
-  (Kenney, CC0), 60 ms entre as peças; vive em
-  `last_horizon/data/audio/ladder.wav`, com receita e créditos em
-  `LICENSE-ladder.txt`, e toca **apenas na saída** da escada — o engate não tem
-  som, porque a subida é coberta pelos passos (D-137). A porta segue pendente,
-  com a direção "pneumático metálico".
-- **D-137 (sessão #28, som):** a escada ganha **passos** enquanto o técnico sobe
-  ou desce — `step_01..04.wav` em rotação, um a cada 18 px lógicos
-  (`LADDER_STEP_SPACING` em `ship.pde`). O gatilho do `ladder.wav` é único, na
-  saída (`leaveLadderAtDeck`), o que também elimina o disparo duplo que existia
-  nas pontas da escada, quando engate e saída caíam no mesmo quadro. Os sons
-  foram suavizados a pedido do usuário: `ladder.wav` a −10 dBFS e os passos a
-  −20 dBFS com passa-baixas em 5 kHz.
+  (Kenney, CC0), 60 ms entre as peças; os arquivos vivem em
+  `last_horizon/data/audio/ladder/`, com receita e créditos em
+  `LICENSE.txt`, e toca **apenas na saída** da escada — o engate não tem som,
+  porque a subida é coberta pelos passos (D-137). Nesta etapa, a porta ainda
+  estava pendente (**SUPERSEDED por D-138**), com a direção "pneumático metálico".
+- **D-137 (sessão #28, som):** a escada ganhou **passos** enquanto o técnico sobe
+  ou desce — a cadência inicialmente registrada de 18 px lógicos por passo está
+  **SUPERSEDED** pelo ajuste final posterior: `LADDER_STEP_SPACING = 27` px
+  lógicos (~450 ms), conforme o código atual e a licença do asset.
+  O gatilho do `ladder.wav` é único, na saída (`leaveLadderAtDeck`), o que também
+  elimina o disparo duplo que existia nas pontas da escada, quando engate e saída
+  caíam no mesmo quadro. A medição inicial registrava `ladder.wav` a −10 dBFS;
+  esse nível está **SUPERSEDED por D-150**, que o atenuou para −18,6 dBFS de pico
+  e −34,1 dBFS de RMS, mantendo os passos a −20 dBFS com passa-baixas em 5 kHz.
 - **D-138 (sessão #28, som):** a porta usa `door.wav` — chiado de ar contínuo
   (rubberduck, CC0) com batente metálico (Kenney, CC0) 480 ms depois, escolhido
   pelo usuário entre seis candidatos; toca uma vez no início da travessia
   (`enterRoomThroughDoor`), nos dois caminhos, com ou sem a arte da porta. Os
   sons ficaram separados em `data/audio/<evento>/`, cada pasta com o seu
-  `LICENSE.txt`. A porta foi suavizada por medição: pico em -10 dBFS e RMS em
-  -25,8 dBFS, igualando a saída da escada que o usuário aprovou.
+  `LICENSE.txt`. A porta foi suavizada por medição: pico em −10 dBFS e RMS em
+  −25,8 dBFS; a escada foi atenuada posteriormente em D-150 para −18,6 dBFS de
+  pico e −34,1 dBFS de RMS, portanto os níveis finais não são iguais.
 - **D-139 (sessão #28, som):** o escopo do #28 — porta e escada — está entregue,
   integrado e aprovado na escuta. O ticket permanece **aberto por decisão do
   usuário**, que cogitou acrescentar outros sons se sobrar tempo; essa ampliação
@@ -473,6 +489,20 @@ Não replique aqui o histórico completo:
   para **1,0 px/quadro**: 48 px lógicos por ciclo, perto de duas alturas do
   técnico, mantendo a navegação da nave em ~10 s de ponta a ponta. A corrida
   (2,4 px/quadro) foi aprovada no playtest e ficou intacta.
+- **D-155 (sessão complementar, destaque visual dos NPCs):** as molduras
+  geométricas do ponto de NPC foram removidas. A camada de assets pré-calcula
+  máscaras cyan a partir da transparência de cada frame LPC/Aseprite e
+  desenha o contorno/halo somente quando o NPC está dentro do alcance de 22 px.
+  O `E` permanece como prompt de interação; colisão, interação e sprites
+  originais não mudam.
+- **D-156 (sessão complementar, posição do prompt de NPC):** quando o técnico
+  está no alcance, o `E` aparece na diagonal superior direita, próximo da
+  cabeça (`x + 6`, `y - 24`). Estações, portas, quests e o raio de interação
+  permanecem iguais.
+- **D-157 (sessão complementar, ícones de recursos do HUD):** os seis recursos
+  usam PNGs estáticos de 32×32 em `data/icons/`; o alerta crítico continua
+  desenhado exclusivamente em código, sem `aviso.png`.
+
 
 ## Fontes por tarefa
 
@@ -546,7 +576,34 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
 - [x] Declarar se o resultado é documentação, protótipo executável ou
       funcionalidade pronta.
 
-### Sessão atual — #34 calibração da caminhada
+### Sessão atual — sincronização dos quatro conflitos de áudio
+Sessão de alinhamento documental com o código atual, sem alteração de gameplay
+ou do sketch.
+
+- **Cadência final:** `LADDER_STEP_SPACING = 27` px lógicos (~450 ms), com
+  primeiro passo em 1 px. Os registros anteriores de 18 e 25 px foram marcados
+  como **SUPERSEDED** no histórico local.
+- **Níveis finais:** `ladder.wav` em −18,6 dBFS de pico e −34,1 dBFS de RMS,
+  com passa-baixas em 5 kHz; passos em −20 dBFS com passa-baixas em 5 kHz;
+  `door.wav` em −10 dBFS de pico e −25,8 dBFS de RMS.
+- **Escopo vigente:** somente travessia de porta e escada. Clique de UI e alerta
+  de recurso crítico permanecem sem som.
+- **Evidência vigente:** o código e `code/VERIFICATION.md` registram
+  `--capture` com 159 `OK`, `--ladder-test` com 6 `OK`, `--hit-test` com 5
+  `OK` e `--asset-pipeline-test` com `OK`. Contagens 145/146 permanecem como
+  baseline histórico das sessões anteriores.
+- **Wayfinder:** corpos das issues #1, #8 e #28 atualizados; comentários de
+  sincronização registrados em #1, #8 e #28. A fronteira não mudou: #1 e #28
+  continuam OPEN; #28 permanece aberta por D-139, sem ampliação aprovada; #8 e
+  todas as demais tarefas continuam CLOSED.
+- **Arquivos locais atualizados:** este resumo e
+  `last_horizon/data/audio/{door,ladder}/LICENSE.txt`. Nenhum arquivo `.pde`
+  foi alterado. A conferência final foi documental, sem nova execução do harness.
+
+**Resultado:** conflitos resolvidos contra o contrato implementado; a produção
+da arte continua como próximo caminho crítico, iniciando pelos ícones do HUD.
+
+### Sessão anterior — #34 calibração da caminhada
 Sessão da [issue #34](https://github.com/shelldonryan/gtd_example/issues/34) —
 reajuste do andar para casar com a animação de caminhada.
 
@@ -635,8 +692,10 @@ refinamento do fluxo de quests, eliminação de redundâncias e polimento do HUD
   (V-02 e N-02) avançando direto para `QUEST_DELIVER`; diálogo de orientação atualizado;
   linha de rota no HUD exibindo `NA MÃO:` quando item carregado; mapa consultável exibindo
   apenas entrega na etapa de entrega; sincronização da cadência sonora da escada
-  com a animação de climb (passos a 25 px / 420 ms, partida instantânea em 1 px); e atenuação do
-  som de saída da escada (`ladder.wav` a −18,6 dBFS com passa-baixas em 5 kHz).
+  com a animação de climb (o valor intermediário de 25 px foi **SUPERSEDED** pelo
+  ajuste final posterior para 27 px / ~450 ms, com partida instantânea em 1 px);
+  e atenuação do som de saída da escada (`ladder.wav` a −18,6 dBFS de pico,
+  −34,1 dBFS de RMS, com passa-baixas em 5 kHz).
 - **Código alterado:** `tasks.pde` (`acceptPreventive`, `interactNpc`), `hud.pde` (`orderRouteLine`),
   `ship.pde` (`drawRoomCard`), `capture.pde` (`captureCompleteQuest`, asserção de entrega direta)
   e `prototype/balance-model.mjs` (`acceptPreventive`).
@@ -688,23 +747,26 @@ som da escada e da porta escolhidos com o usuário, integrados e verificados.
 - **Decisões do usuário:** clique de UI e alerta de recurso crítico **sem som**
   (a cadência "uma vez na transição para o vermelho" foi confirmada e revertida
   na mesma sessão — **SUPERSEDED**); a escada toca na **saída** e ganha **passos**
-  na subida e na descida; a porta toca **uma vez na travessia** (D-135 a D-138).
+  na subida e na descida, com o primeiro passo em 1 px e os seguintes a cada
+  27 px lógicos (~450 ms); a porta toca **uma vez na travessia** (D-135 a D-138).
 - **Escolha por escuta, em quatro rodadas:** a Kenney foi reprovada pelo usuário;
   entraram qubodup (portas reais), yd (porta deslizante), BMacZero (mecânica),
   rubberduck (ar) e congusbongus (escada de alumínio). A porta final — "tsssss
   contínuo + metal" — trocou a camada de ar, que era gravação de porta de
   madeira, por chiado real: ZCR 4.070 → ~13.400.
 - **Defeito corrigido:** engate e saída da escada no mesmo quadro disparavam o
-  som em rajada — 5 disparos no mesmo quadro no teste do harness, 1 depois. Com
+  som em rajada — 5 disparos no mesmo quadro no teste do harness → 1 depois. Com
   o gatilho único na saída, o caso deixou de existir por construção.
-- **Níveis medidos, não estimados:** escada a −10 dBFS de pico e passos a
-  −20 dBFS com passa-baixas em 5 kHz; porta a −10 dBFS de pico e −25,8 dBFS de
-  RMS, alinhada à escada aprovada (estava 6,8 dB acima dela).
+- **Níveis finais medidos, não estimados:** `ladder.wav` a −18,6 dBFS de pico e
+  −34,1 dBFS de RMS, com passa-baixas em 5 kHz; passos a −20 dBFS com passa-baixas
+  em 5 kHz; porta a −10 dBFS de pico e −25,8 dBFS de RMS.
 - **Estrutura:** os sons ficaram em `data/audio/<evento>/`, cada pasta com o seu
   `LICENSE.txt`.
-- **Evidência:** `--ladder-test` → 6 `OK`; `--capture` → **145 asserções `OK`**,
-  zero `FALHOU`, `QUEST CHECK: PASS`, `som: 6 de 6 carregados`; com a pasta de som
-  ausente, `5 de 6 carregados`, jogo mudo e sem exceção.
+- **Evidência da integração:** `--ladder-test` → 6 `OK`; `--capture` →
+  **145 asserções `OK`** no baseline daquela sessão, zero `FALHOU`,
+  `QUEST CHECK: PASS`, `som: 6 de 6 carregados`; com a pasta de som ausente,
+  `5 de 6 carregados`, jogo mudo e sem exceção. O estado atual consolidado do
+  sketch fecha em **159 asserções `OK`**, conforme `code/VERIFICATION.md`.
 - **Wayfinder:** #28 permanece OPEN por decisão do usuário (D-139), com o corpo
   reescrito no estado entregue; a #1 registra a entrega e a hipótese.
 - **Commits** na branch `prototype/sketch-architecture`, sem push: `f11ca5b`
@@ -871,3 +933,50 @@ ser validado manualmente.
 - Resultado: funcionalidade pronta no jogo Processing — vinheta, transmissões,
   desfechos, NPCs, HUD e portais com limiar e chegada configuráveis —, não apenas
   documentação.
+
+### Sessão anterior — destaque visual dos NPCs
+
+Refinamento complementar do fluxo de interação, solicitado após a inspeção
+visual das molduras duplas nos personagens.
+
+- **Decisão D-155:** remover os dois retângulos geométricos que envolviam NPCs.
+  O feedback de proximidade passa a ser um contorno/halo cyan pixelado,
+  calculado em runtime a partir da transparência do frame atual do sprite.
+- O efeito é pré-calculado no carregamento para os frames frontal, esquerdo e
+  direito de cada NPC; os PNGs não foram alterados. Isso preserva o idle LPC e
+  o fallback geométrico.
+- O raio lateral continua em 22 px; o `E` aparece na diagonal superior direita,
+  próximo da cabeça, somente quando o ponto está disponível e o técnico está
+  na mesma altura.
+- **Arquivos alterados:** `last_horizon/assets.pde`,
+  `last_horizon/ship.pde`, `interface/ROOMS.md`,
+  `code/SKETCH_ARCHITECTURE.md`, `assets/INVENTORY.md` e
+  `code/VERIFICATION.md`.
+- **Evidência:** `--capture` → 159 asserções `OK`, `QUEST CHECK: PASS`;
+  `--hit-test` → 5 `OK`; `--asset-pipeline-test` → `pipeline: OK`.
+  A inspeção visual confirmou as molduras removidas e o contorno pixelado
+  preservando a leitura do NPC.
+
+**Resultado:** funcionalidade pronta no jogo Processing; documentação local
+sincronizada. A seleção de arte CC0/CC-BY continua sendo o próximo caminho
+crítico.
+
+### Sessão atual — ícones de recursos do HUD
+
+Os seis ícones fornecidos pelo usuário foram exportados para o contrato do HUD
+e integrados pelo carregador de assets existente.
+
+- **Decisão D-157:** usar `energia.png`, `oxigenio.png`, `agua.png`,
+  `comida.png`, `pecas.png` e `moral.png` em `last_horizon/data/icons/`.
+- Os PNGs finais têm canvas 32×32, são estáticos e são desenhados no cartão em
+  16×16 unidades lógicas.
+- O alerta crítico permanece geométrico e desenhado exclusivamente em código;
+  `aviso.png` não faz parte do conjunto.
+- O layout dos cartões, valores, barras, limiares críticos e gameplay não
+  foram alterados.
+- **Estado Wayfinder:** `Reestilizar e integrar ícones de recursos do HUD`
+  permanece OPEN até autorização explícita para encerramento.
+- **Evidência D-157:** `--asset-pipeline-test` carregou os seis PNGs
+  (`arte: 14 de 56 imagens carregadas`, `pipeline: OK`); `--hit-test`
+  retornou 5 `OK`; `--capture` concluiu com `QUEST CHECK: PASS`. A inspeção
+  visual do HUD confirmou os seis ícones nos cartões sem alteração do layout.

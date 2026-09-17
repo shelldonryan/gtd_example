@@ -27,7 +27,6 @@ final String ART_SCREEN_VICTORY = "screens/victory_mars.png";
 final String ART_SCREEN_DEFEAT = "screens/defeat_space.png";
 
 /* canvas -> drawn size, in logical units */
-final int ART_ICON_WARNING = 6;
 final float ART_ICON_DRAW = 16;
 final float ART_SPRITE_DRAW = 32;
 final float ART_DOOR_W = 32;
@@ -42,9 +41,9 @@ final int ART_NPC_FRAME_MS = 500;
 final int ART_HULL_FRAME_MS = 500;
 final int ART_DOOR_PHASE_MS = 180;
 
-/* 6 resources plus the warning icon, in data/icons/ */
+/* 6 resource icons in data/icons/; the critical alert remains code-drawn */
 String[] art_icon_file = {
-  "energia", "oxigenio", "agua", "comida", "pecas", "moral", "aviso"
+  "energia", "oxigenio", "agua", "comida", "pecas", "moral"
 };
 
 /* 13 stations, in data/stations/; null on NPC and hull points */
@@ -71,6 +70,10 @@ PImage[] art_screen = new PImage[3];
 PImage[][] art_crew_frames;
 PImage[][] art_crew_frames_left;
 PImage[][] art_crew_frames_right;
+PImage[][] art_crew_glow;
+PImage[][] art_crew_glow_left;
+PImage[][] art_crew_glow_right;
+
 PImage[] art_door_frames = new PImage[2];
 PImage[] art_hull_frames = new PImage[2];
 
@@ -204,6 +207,69 @@ void loadNpcArtFrames(int crew, String sheet_path, String data_path){
     art_crew_frames_left[crew][1] = flipHorizontal(f);
   }
 }
+void prepareNpcGlow(int crew){
+  for (int frame = 0; frame < 2; frame++){
+    art_crew_glow[crew][frame] = buildNpcGlow(art_crew_frames[crew][frame]);
+    art_crew_glow_left[crew][frame] = buildNpcGlow(art_crew_frames_left[crew][frame]);
+    art_crew_glow_right[crew][frame] = buildNpcGlow(art_crew_frames_right[crew][frame]);
+  }
+}
+
+
+PImage buildNpcGlow(PImage source){
+  if (source == null){
+    return null;
+  }
+
+  PImage glow = createImage(source.width, source.height, ARGB);
+  source.loadPixels();
+  glow.loadPixels();
+  int cyan_rgb = COL_CYAN & 0x00FFFFFF;
+
+  for (int y = 0; y < source.height; y++){
+    for (int x = 0; x < source.width; x++){
+      int index = y * source.width + x;
+      int source_alpha = (source.pixels[index] >>> 24) & 0xFF;
+      if (source_alpha > 24){
+        continue;
+      }
+
+      int strongest_alpha = 0;
+      for (int offset_y = -2; offset_y <= 2; offset_y++){
+        for (int offset_x = -2; offset_x <= 2; offset_x++){
+          int distance = offset_x * offset_x + offset_y * offset_y;
+          if (distance == 0 || distance > 4){
+            continue;
+          }
+
+          int sample_x = x + offset_x;
+          int sample_y = y + offset_y;
+          if (sample_x < 0 || sample_x >= source.width
+            || sample_y < 0 || sample_y >= source.height){
+            continue;
+          }
+
+          int sample = source.pixels[sample_y * source.width + sample_x];
+          int sample_alpha = (sample >>> 24) & 0xFF;
+          if (sample_alpha <= 24){
+            continue;
+          }
+
+          int opacity = distance == 1 ? 150 : 70;
+          strongest_alpha = max(strongest_alpha, min(opacity, sample_alpha));
+        }
+      }
+
+      if (strongest_alpha > 0){
+        glow.pixels[index] = (strongest_alpha << 24) | cyan_rgb;
+      }
+    }
+  }
+
+  glow.updatePixels();
+  return glow;
+}
+
 
 
 void loadArtAssets(){
@@ -216,6 +282,10 @@ void loadArtAssets(){
   art_crew_frames = new PImage[CREW_COUNT][2];
   art_crew_frames_left = new PImage[CREW_COUNT][2];
   art_crew_frames_right = new PImage[CREW_COUNT][2];
+  art_crew_glow = new PImage[CREW_COUNT][2];
+  art_crew_glow_left = new PImage[CREW_COUNT][2];
+  art_crew_glow_right = new PImage[CREW_COUNT][2];
+
 
   for (int i = 0; i < art_icon_file.length; i++){
     art_icon[i] = loadArt(ART_ICON_DIR + art_icon_file[i] + ".png");
@@ -235,6 +305,7 @@ void loadArtAssets(){
     loadNpcArtFrames(crew,
       ART_NPC_DIR + art_crew_file[crew] + ".png",
       ART_NPC_DIR + art_crew_file[crew] + ".json");
+    prepareNpcGlow(crew);
     art_portrait[crew] = loadArt(ART_PORTRAIT_DIR + art_crew_file[crew] + ".png");
     if (art_portrait[crew] == null){
       art_portrait[crew] = loadArt(ART_NPC_DIR + art_crew_file[crew] + "_portrait.png");
@@ -303,6 +374,25 @@ PImage[] crewArtFramesFacing(String name, int facing){
   }
   return null;
 }
+
+PImage[] crewArtGlowFramesFacing(String name, int facing){
+  for (int crew = 0; crew < CREW_COUNT && crew < crew_name.length; crew++){
+    if (crew_name[crew].equals(name) || art_crew_file[crew].equalsIgnoreCase(name)){
+      if (facing < 0 && art_crew_glow_left != null && art_crew_glow_left[crew][0] != null){
+        return art_crew_glow_left[crew];
+      }
+      if (facing > 0 && art_crew_glow_right != null && art_crew_glow_right[crew][0] != null){
+        return art_crew_glow_right[crew];
+      }
+      if (art_crew_glow != null && art_crew_glow[crew][0] != null){
+        return art_crew_glow[crew];
+      }
+      return null;
+    }
+  }
+  return null;
+}
+
 
 
 PImage[] crewArtFrames(String name){

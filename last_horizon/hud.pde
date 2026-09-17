@@ -11,6 +11,7 @@ final int ICON_WATER = 2;
 final int ICON_FOOD = 3;
 final int ICON_PARTS = 4;
 final int ICON_MORALE = 5;
+PGraphics resource_icon_layer;
 
 
 void drawHeader(PGraphics g){
@@ -73,7 +74,30 @@ void drawResourceCard(PGraphics g, float x, int icon, float value, int accent, f
 
 void drawResourceIcon(PGraphics g, int icon, float x, float y, int colour){
   if (art_icon != null && art_icon[icon] != null){
-    drawArt(g, art_icon[icon], x + ART_ICON_DRAW / 2, y + ART_ICON_DRAW / 2, ART_ICON_DRAW, ART_ICON_DRAW);
+    if (resource_icon_layer == null){
+      int size = round(ART_ICON_DRAW * RENDER_SCALE);
+      resource_icon_layer = createGraphics(size, size);
+      resource_icon_layer.noSmooth();
+    }
+
+    resource_icon_layer.beginDraw();
+    resource_icon_layer.clear();
+    resource_icon_layer.imageMode(CENTER);
+    resource_icon_layer.image(art_icon[icon],
+      resource_icon_layer.width / 2.0,
+      resource_icon_layer.height / 2.0,
+      resource_icon_layer.width,
+      resource_icon_layer.height
+    );
+    resource_icon_layer.endDraw();
+
+    g.imageMode(CENTER);
+    g.image(resource_icon_layer,
+      round(x + ART_ICON_DRAW / 2),
+      round(y + ART_ICON_DRAW / 2),
+      ART_ICON_DRAW,
+      ART_ICON_DRAW
+    );
     return;
   }
 
@@ -132,17 +156,13 @@ String resourceIconLabel(int icon){
 
 
 void drawWarningIcon(PGraphics g, float x, float y){
-  if (art_icon != null && art_icon[ART_ICON_WARNING] != null){
-    drawArt(g, art_icon[ART_ICON_WARNING], x + ART_ICON_DRAW / 2, y + ART_ICON_DRAW / 2, ART_ICON_DRAW, ART_ICON_DRAW);
-    return;
-  }
-
   g.fill(COL_RED);
   g.triangle(x + 8, y, x + 16, y + 16, x, y + 16);
   g.fill(COL_BG);
   g.rect(x + 7, y + 5, 2, 6);
   g.rect(x + 7, y + 13, 2, 2);
 }
+
 
 
 void drawObjectiveStrip(PGraphics g){

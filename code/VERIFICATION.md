@@ -82,6 +82,16 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
   dela; a recontagem no commit `fd62b7a` mostra que a referência de 146 estava
   defasada). Medido no repositório com os sons integrados, na cópia sem arte, na
   cópia com as 57 fixtures e no híbrido sem os fundos de sala.
+- **Feedback visual de NPC (D-155):** os retângulos geométricos foram removidos
+  da cena. O contorno/halo cyan é derivado dos frames carregados em runtime e
+  só aparece no raio de interação, sem alterar o hit-test nem o sprite original.
+- **Ícones de recursos (D-157):** os seis PNGs estáticos de 32×32 em
+  `data/icons/` substituem os vetores dos cartões por uma camada `PGraphics`
+  sem interpolação; o alerta crítico permanece geométrico e não carrega
+  `aviso.png`. `--asset-pipeline-test` → `arte: 14 de 56 imagens carregadas`,
+  `pipeline: OK`; `--hit-test` → 5 `OK`;
+  `--capture` → `QUEST CHECK: PASS`. A inspeção visual confirmou energia,
+  oxigênio, água, comida, peças e moral nos cartões.
 
 ## Fixture do pipeline
 
