@@ -12,7 +12,7 @@ O sketch permanece plano e executa o contrato das issues #25 e #26.
 
 `last_horizon/` na branch `prototype/sketch-architecture`. A pasta é o pacote da
 disciplina: `last_horizon.pde` + abas + `data/` (fonte) + `output/` (PNGs de prova).
-Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como está.
+O sketch já foi validado pelo CLI e permanece pronto para a próxima etapa de arte.
 
 ## Abas
 
@@ -22,7 +22,7 @@ Quando a arquitetura for validada com playtest, a pasta sobe para a `main` como 
 | `ui.pde` | painéis, diálogos, retratos procedurais, texto, botões, hit-test e AABB |
 | `hud.pde` | cartões do topo, faixa do problema mais urgente e rodapé |
 | `screens.pde` | máquina de estados, camadas modais, menus, vinheta, pausa e desfechos |
-| `ship.pde` | hub, quatro salas, portas por convés, mapa consultável, plataformas, escadas, NPCs e estações |
+| `ship.pde` | hub, quatro salas, portais configuráveis, mapa consultável, plataformas, escadas, NPCs e estações |
 | `game.pde` | calendário, turno, incidentes, consumo, crises e condições de término |
 | `tasks.pde` | catálogo e estado de ordens, soluções, retomadas, problemas, sobreviventes, risco e objetos |
 | `capture.pde` | captura visual das quests e verificações de ciclo, campanhas, hub, clique e escada |
@@ -130,6 +130,18 @@ reiniciam `problem_deadline`. `opened_day` impede reinicializar o mesmo turno.
 O custo urgente é validado e pago apenas na entrega; a falta de recursos nunca
 trava a escolha inicial nem força uma crise imediata.
 
+Portais e escadas vivem em tabelas. Cada porta declara `door_room`, `door_target`,
+`door_x` e `door_y`; `door_deck` documenta o convés ou recebe `-1` para uma
+abertura sem deck. `door_arrival_x`, `door_arrival_y` e `door_arrival_facing`
+definem a chegada padrão na sala destino; `enterRoomThroughDoor` reaproveita a
+posição `x/y` de saída quando o jogador retorna imediatamente pela sala anterior.
+As escadas declaram `ladder_room` e `ladder_x`. Transmissões usam
+`transmission_open`, `transmission_text` e as travas `earth_engine_sent`,
+`earth_hull_sent` e `earth_loss_sent`; a mensagem de Marte depende de
+`survivors` e de `engine_repaired_at_limit`. O modal de ajuda usa `help_open`.
+NPCs vivos respondem sempre: `interactNpc` escolhe entre diálogo com retrato e
+painel técnico conforme o estado do dia.
+
 `ORDENS` abre comparação ou detalhes. O aceite preventivo valida presença junto
 ao responsável; coleta, entrega e sono validam o ponto físico. `E` apenas abre
 o painel; `ENTER` confirma. Fechar o painel não cancela a ordem aceita.
@@ -153,7 +165,7 @@ o sketch os utiliza sem recalibração local.
   e letterbox centralizado.
 - `view_scale = max(1, int(min(width / 1280, height / 720)))`; a conversão da
   janela para a grade lógica divide também pelo fator 2.
-- O mouse aciona apenas controles da interface, como `MAPA` e opções modais. O
+- O mouse aciona controles da interface, como `MAPA`, `ORDENS` e opções modais. O
   mapa preserva a sala e a posição; a movimentação entre cômodos usa portas e
   interação por `E`.
 - **Teclas modais:** `ENTER` avança diálogos, confirma ordens e soluções,
@@ -184,14 +196,27 @@ Os helpers tipográficos usam **16 px** para leitura, com **entrelinha de 18 px*
 Os botões tentam 16 px e reduzem somente quando a frase não cabe na largura
 disponível; o limite é 10 px. `COL_MUTED` e `COL_DIM` também foram clareados
 para manter contraste com o fundo.
-
 Nenhum desenho de texto chama `g.textSize` direto: o HUD, as salas e os modais
 passam por `text`, `textCentered` ou `drawTextWrapped`, que aplicam o piso de
 16 px. Só `drawButton` reduz, pelo `fitTextSize`, e só quando a frase não cabe.
 
-O HUD implementa os seis cartões de recurso com **ícone de 16×16 + número + barra**,
-sem rótulo de texto; o cartão de quantos estão a bordo usa **A BORDO**; e o recurso
-crítico pisca a borda e ganha ícone de aviso. O mapa macro não imprime nome de nave.
+O contrato de portais usa `door_room`, `door_target`, `door_x`, `door_y`,
+`door_deck`, `door_arrival_x`, `door_arrival_y` e `door_arrival_facing`. O
+`door_y` é o limiar dos pés e não precisa coincidir com um deck; `door_deck`
+`-1` marca uma abertura livre. A porta responde por proximidade horizontal e
+vertical; a chegada configurada vale na primeira travessia e o retorno imediato
+reaproveita a posição de saída.
+
+
+O HUD implementa os seis cartões de recurso com **ícone de 16×16 + número +
+rótulo + barra**; os rótulos (`ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS`,
+`MORAL`) são texto provisório e o inventário #8 troca apenas os ícones por
+assets. O cartão de quantos estão a bordo usa **A BORDO**; o recurso crítico
+pisca a borda e ganha ícone de aviso, sem linha de texto de alerta. A faixa
+inferior tem quatro linhas de campos fixos e o rodapé tem `MAPA`, `ORDENS` e o
+botão `?`, que abre o modal de ajuda. O mapa macro não imprime nome de nave.
+O botão `ORDENS` recebe o selo `!` quando há oferta ou retomada. Círculo e
+exclamação geométrica compartilham escala, cor e centro durante o pulso de 1,4 s.
 
 As capturas atualizadas ficam em `last_horizon/output/` na branch do protótipo.
 
@@ -211,7 +236,8 @@ As capturas atualizadas ficam em `last_horizon/output/` na branch do protótipo.
 | Vitória e derrota | continuam conforme `MENU_VICTORY.md` e `MENU_GAME_OVER.md` |
 
 Os valores exatos e o processamento numérico estão consolidados em
-`mechanics/ACTIONS.md` e simulados em `prototype/balance-model.mjs`.
+`mechanics/ACTIONS.md`, simulados em `prototype/balance-model.mjs` e executados
+em `last_horizon/game.pde` e `last_horizon/tasks.pde`.
 
 Nenhum sobrevivente vivo encerra a partida com mensagem própria: é a quinta causa
 de derrota. O técnico não entra na conta dos quatro.
@@ -231,14 +257,24 @@ raiz do repositório:
 ```
 
 `--capture`, `--hit-test` e `--ladder-test` são a fronteira pública de
-verificação. `--capture` salva 30 estados do novo ciclo, além dos cartões e HUDs
-do catálogo, e exerce aceite presencial, coleta, entrega, custo inviável,
+verificação. `--capture` salva 34 estados do novo ciclo, os cartões e HUDs do
+catálogo, `orders_badge_pulse.png` e as capturas do modal de ajuda e da
+transmissão da Terra; exerce aceite presencial, coleta, entrega, custo inviável,
 falha, negligência, retomada pela interface, exclusividade diária, crises,
-socorro, morte e filtragem do pool. Asserções falhas interrompem a execução.
-O mesmo modo executa três estratégias vencedoras, omissão derrotada e
-2.520/2.520 sequências vencidas pela reserva de peças no próprio Processing.
-Os modos de hit-test e escada continuam cobrindo as quatro salas, o letterbox e
-as rotas físicas.
+socorro, morte e filtragem do pool. As asserções cobrem também os seis portais
+pela tabela, uma porta fora da borda, uma abertura sem deck, limiar acima de
+um deck, chegada independente em outro canto, retorno imediato à posição de
+entrada, porta coincidente com ponto de quest, escada em x arbitrário, as falas
+de NPC por estado, transmissões (motor, casco, primeira perda, uma vez por
+partida) e as três variações da mensagem de Marte. Asserção falha imprime
+`FALHOU`, marca o resultado como reprovado e encerra o harness:
+`QUEST CHECK: PASS` só aparece quando nenhuma asserção falhou.
+As verificações de campanha executam uma etapa por frame; enquanto elas rodam,
+o sketch mostra uma tela estável de verificação sem expor os recursos mutáveis
+dos cenários internos. O mesmo modo executa três estratégias vencedoras,
+omissão derrotada e 2.520/2.520 sequências vencidas pela reserva de peças no
+próprio Processing. Os modos de hit-test e escada continuam cobrindo as quatro
+salas, o letterbox e as rotas físicas.
 
 Limitações observadas:
 
@@ -255,16 +291,25 @@ Limitações observadas:
 
 ## Estado da revisão
 
-- **Código atual:** `last_horizon/*.pde` executa as issues #25 e #26, não apenas
-  o modelo Node.
+- **Código atual:** `last_horizon/*.pde` executa as issues #25, #26 e #27, não
+  apenas o modelo Node.
 - **Contrato:** cinco incidentes nos dias 2, 4, 6, 8 e 10; oito ordens
   preventivas e quatorze soluções físicas; uma conclusão por dia.
 - **Mecânicas removidas:** contenção separada, políticas, bônus numéricos,
   acelerador, coleta livre e contador paralelo de intervenção.
 - **Espaço preservado:** Comando em hub, mapa consultável, quatro salas,
   portas, escadas, física e animação.
-- **Evidência:** `--capture` retorna `QUEST CHECK: PASS`; `--hit-test` e
-  `--ladder-test` passam; o modelo Node retorna `BALANCE CHECK: PASS`.
+- **Ajustes desta rodada:** vinheta do #11, transmissões da Terra e mensagem de
+  Marte, portais com limiar e chegada configurável (retorno imediato à posição
+  de saída), porta das Máquinas no Comando validada manualmente no centro do deck
+  inferior (`x = 320`), escadas em tabela
+  (qualquer ponto configurável), NPCs com fala por estado, cartões de recurso
+  rotulados, faixa inferior em campos fixos e modal de ajuda `?`; o nome vazio
+  mantém `INICIAR` bloqueado.
+- **Evidência:** `--capture` retorna 140 asserções `OK` e `QUEST CHECK: PASS`,
+  incluindo a prioridade de quest sobre portal coincidente e a cobertura
+  incremental de 2.520 campanhas; `--hit-test` e `--ladder-test` passam; o
+  modelo Node retorna `BALANCE CHECK: PASS`.
 - **Capturas conferidas:** ofertas, confirmação presencial, coleta/entrega,
   objeto carregado, mapa, incidentes de motor/casco/suporte, retomada, socorro,
   resumo noturno denso, vitória e derrota em `last_horizon/output/`.

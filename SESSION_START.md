@@ -3,7 +3,8 @@
 > Resumo operacional obrigatório. Leia antes de analisar, editar ou implementar
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
-Atualizado em: 2026-09-16 (issues #25 e #26 migradas e verificadas no sketch)
+Atualizado após o encerramento da [issue #27](https://github.com/shelldonryan/gtd_example/issues/27), concluída depois da validação manual do retorno pelas portas.
+
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Regras inegociáveis
@@ -66,22 +67,33 @@ reporte e não escolha silenciosamente.
   agora com confirmação, coleta e entrega físicas em `last_horizon/`.
 - #26 foi concluída: números, pool, falhas, negligência, crises, risco e socorro
   estão implementados tanto no modelo Node quanto no sketch Processing.
+- #27 foi concluída após validação manual do retorno pelas portas. Nesta sessão,
+  os portais ganharam limiar `x/y` independente de deck e chegada configurável
+  (`x/y/direção`) em qualquer ponto válido da sala; a porta das Máquinas no
+  Comando está no centro do deck inferior (`x = 320`) e foi validada manualmente.
+  O harness mantém a tela estável durante as campanhas internas e prioriza
+  pontos de quest quando coincidem com um portal.
+
 - A migração foi solicitada explicitamente antes do inventário #8. O jogo já
   executa o novo ciclo; estações e objetos ainda usam a arte geométrica.
 - #8 está OPEN e disponível após o fechamento da #26:
   [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8).
 - #7 está OPEN, disponível e independente:
   [Documento de entrega e como o jogo roda na apresentação](https://github.com/shelldonryan/gtd_example/issues/7).
-- O próximo caminho crítico é #8 para arte final; a migração funcional já terminou.
+- O próximo caminho crítico é #8 para arte final; a expansão técnica dos portais
+  não bloqueia o inventário.
+- A escolha visual das posições finais de portas e escadas continua aberta; a
+  infraestrutura aceita coordenadas arbitrárias sem nova alteração de lógica.
 
 ### Fronteira Wayfinder
 
-Sincronizada com o grafo nativo após o fechamento do balanceamento:
+Sincronizada com o grafo nativo após a conclusão da #27:
 
 | Issue | Estado | Bloqueadores abertos | Relação |
 |---|---|---|---|
 | #7 Documento de entrega | OPEN | — | independente e disponível |
-| #8 Inventário de assets | OPEN | — | disponível após #26 |
+| #8 Inventário de assets | OPEN | — | disponível após #26; próximo caminho crítico |
+| #27 Portais, desfechos, transmissões, NPCs e HUD | CLOSED | — | escopo ampliado; concluído e validado |
 | #25 Redesenhar incidentes e ordens como quests físicas | CLOSED | — | catálogo e fluxo físico implementados no sketch |
 | #26 Simplificar mecânicas legadas e balancear o ciclo de quests | CLOSED | — | números, pool e consequências implementados no sketch |
 | #19 Redesenhar o ciclo | CLOSED | — | contrato anterior superseded |
@@ -109,6 +121,8 @@ por solicitação explícita do usuário; arte final continua fora desta mudanç
   prejuízo maior de negligência.
 - Ajuste de playtest: dias tranquilos começam sem modal; `ORDENS` mostra `!`
   pulsante enquanto houver escolha disponível, até selecionar uma ordem.
+- O selo de `ORDENS` usa círculo e exclamação geométrica centralizados, com
+  pulso conjunto de tamanho e cor em ciclo de 1,4 s.
 - Só o ponto da etapa atual permite interação. Demais estações e NPCs ficam
   sem marcador de ação e sem resposta a `E`; NPCs vivos permanecem visíveis.
   Portas, beliche do técnico e socorro com risco/quest livre são preservados.
@@ -142,14 +156,36 @@ por solicitação explícita do usuário; arte final continua fora desta mudanç
 - Vitória: chegar após o décimo dia com motor operante e ao menos um
   sobrevivente. Derrota: energia, oxigênio ou moral em zero, motor destruído ou
   nenhum sobrevivente vivo.
+- Todo NPC vivo responde a `E` a qualquer momento, com texto e tipo de painel
+  conforme o estado do dia; estações fora da etapa atual continuam apagadas.
+- Portais são dados: cada porta declara sala, destino, `x/y` do limiar, referência
+  opcional de convés (`door_deck`) e `x/y/direção` de chegada. `door_deck = -1`
+  permite abertura sem deck ou acima do piso; a proximidade usa os dois eixos.
+- Transmissões da Terra (primeira falha do motor, primeira chuva de meteoros e
+  primeira perda) abrem uma vez por partida, antes do cartão do incidente, e não
+  consomem dia, tarefa, recurso ou ação.
+- A vitória traz a mensagem de Marte em três variações e lista os sobreviventes
+  por nome quando houver perdas. "Reparo no limite" é a solução do motor entregue
+  com o prazo do problema em 1 e só prevalece quando houver perdas.
+- A derrota mostra apenas a contagem de sobreviventes e encerra a partida: não
+  existe continuar jogando depois da chegada.
+- O nome do técnico é obrigatório: `INICIAR (ENTER)` e a tecla `ENTER` ficam
+  bloqueados enquanto o campo estiver vazio.
+- Alertas não têm linha de texto: cor, ícone de aviso e borda piscando no cartão
+  do recurso, e o problema ativo na faixa de urgência.
+- Os cartões de recurso mostram rótulo de texto (`ENERGIA`, `OXIGÊNIO`, `ÁGUA`,
+  `COMIDA`, `PEÇAS`, `MORAL`); o inventário #8 troca apenas os ícones por assets.
+- O rodapé tem `MAPA`, `ORDENS` e `?`; a dica de teclas virou o modal
+  `AJUDA — CONTROLES`. Textos e estética de modais e cartões ficam deferidos.
 
 O catálogo concreto, seus IDs, objetos, origens, destinos, resultados e textos
 estão em `mechanics/ACTIONS.md` e `events/`. Os valores numéricos e a seleção
-final do pool foram definidos e simulados no ticket #26.
+final do pool foram definidos e simulados no ticket #26, e são executados pelo
+sketch `last_horizon/`.
 
 Números, custos, recompensas, perdas, prazos e ordem final do processamento:
-`mechanics/ACTIONS.md` e o modelo executável
-`prototype/balance-model.mjs`. Topologia e ordens: `interface/ROOMS.md`.
+`mechanics/ACTIONS.md`, `prototype/balance-model.mjs` e `last_horizon/game.pde`.
+Topologia e ordens: `interface/ROOMS.md`.
 
 ## Contrato técnico
 
@@ -161,12 +197,17 @@ Números, custos, recompensas, perdas, prazos e ordem final do processamento:
   reduzir até 10 px somente para caber.
 - Pixel art sem interpolação. Asset animado: uma spritesheet PNG + JSON; nomes
   ASCII; `.aseprite` acompanha a exportação quando disponível.
-- Sala: três conveses, duas escadas, sem câmera.
+- Sala: três conveses, duas escadas por sala, sem câmera.
+- Portais e escadas vivem em tabelas. Portas usam `door_room`, `door_target`,
+  `door_x`, `door_y`, `door_deck`, `door_arrival_x`, `door_arrival_y` e
+  `door_arrival_facing`; escadas usam `ladder_room` e `ladder_x`. O limiar da
+  porta não precisa coincidir com um deck e a chegada configurada vale na
+  primeira travessia; no retorno imediato, o jogador reaparece no `x/y` de saída.
 - Jogador: colisão 16×24; andar 1,5 px/quadro; pulo 48 px; gravidade 0,5;
   escada 1,0; interação 12 px; plataformas atravessáveis por baixo.
 - Controles: setas/WASD, espaço, E, ENTER em diálogos/modais, ESC para pausa e
-  mouse no botão `MAPA`.
-- HUD: seis ícones 16×16; cartões de recurso sem rótulo.
+  mouse nos botões `MAPA` e `ORDENS`.
+- HUD: seis ícones 16×16; cartões de recurso com ícone, número, rótulo e barra.
 - Áudio offline: `javax.sound.sampled`, WAV PCM 16 bits em `data/`.
 
 Concept arts definem linguagem visual e composição, nunca nomes, números,
@@ -200,8 +241,8 @@ Não replique aqui o histórico completo:
   quests das issues #25 e #26, agora implementadas no sketch.
 - D-108: os incidentes ocorrem nos dias 2, 4, 6, 8 e 10 e o dia 1 fica sem
   incidente; decisão preservada no novo contrato.
-- D-109: confirmação de ações importantes; o princípio permanece, mas os painéis
-  e ações concretas serão adaptados ao fluxo de ordens do novo ciclo.
+- D-109: confirmação de ações importantes; o princípio permanece e os painéis
+  e ações concretas foram adaptados e implementados no fluxo de quests do sketch.
 - D-110: coleta com confirmação; o princípio de objeto explicado permanece, mas
   coleta livre e uso exclusivo de fusível ou kit ficam **SUPERSEDED** pelo
   modelo de objetos de quest.
@@ -214,6 +255,17 @@ Não replique aqui o histórico completo:
 - **Tickets concluídos:** a #25 define matriz, textos e rotas; a #26 define
   números, seleção do pool e simulação. Ambos foram migrados para o sketch.
   O inventário de assets (#8) continua disponível como próximo caminho.
+- **D-111 a D-117 (sessão #27):** fala de NPC por estado (D-111); portas e
+  escadas em tabela (D-112); HUD com rótulos nos cartões, faixa inferior em
+  campos fixos e modal de ajuda `?` (D-113); nome vazio mantém `INICIAR`
+  bloqueado (D-114); derrota sem nomes e inexistência de pós-vitória (D-115);
+  transmissões da Terra antes do incidente e mensagens de Marte, com "reparo no
+  limite" definido como entrega com prazo 1 (D-116); alertas do #11
+  **superseded**, sem linha de texto (D-117).
+- **Ampliação técnica da #27 nesta sessão:** o limiar do portal usa `x/y`
+  independente de deck e a chegada usa `x/y/direção` configurável; no retorno
+  imediato, o jogador reaparece na posição de saída da sala anterior. Isso
+  permite aberturas sem deck e surgimento inicial em qualquer ponto válido.
 
 ## Fontes por tarefa
 
@@ -252,16 +304,10 @@ Código:
 - o inventário final de assets, dimensões, reutilização e ordem de produção,
   no ticket [Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8),
   agora disponível;
-- se a vitória permite continuar jogando depois da chegada;
-- se a derrota mostra os nomes dos sobreviventes ou apenas a contagem;
-- comportamento do nome vazio no menu: botão bloqueado versus fallback
-  `Técnico`;
-- vinheta implementada com texto provisório diferente do roteiro confirmado no
-  #11;
-- as nove linhas de alerta do painel `SISTEMA` ainda não foram classificadas
-  como superseded;
-- transmissões da Terra e a mensagem de Marte na vitória ainda não
-  implementadas;
+- As posições finais de portas e escadas continuam sendo uma decisão visual do
+  usuário; a infraestrutura já aceita coordenadas arbitrárias e não depende de
+  novas alterações de lógica.
+- o texto e a estética dos modais e cartões, deferidos por decisão da #27;
 - qualquer nome, retrato ou história além de Vera, Bento, Neusa e Sílvia;
 - os quatro concept arts de interior em `assets/concept_arts/` ainda precisam ser
   rastreados no inventário final.
@@ -288,48 +334,46 @@ Código:
 
 ## Última sessão registrada
 
-- Correção do selo de ordens: círculo e exclamação agora compartilham a mesma
-  transformação e pulsam juntos (tamanho e cor, ciclo de 1,4 s). Antes o glifo
-  tinha tamanho fixo e só o círculo variava.
-- A exclamação passou a ser geométrica (barra e ponto) e centrada no círculo:
-  a medição da caixa de tinta acusava deslocamento `+1,50, -1,50` px lógicos com
-  o glifo de fonte e agora registra `0,00, 0,00`.
-- `checkOrdersBadge` mede altura da tinta (`5,50 -> 7,50` px) e o centro do
-  glifo em duas fases fixas do pulso, e salva `output/orders_badge_pulse.png`
-  como prova visual.
-- `verify` falho agora imprime `FALHOU` e encerra o harness com `exit()`; antes
-  lançava exceção a cada quadro e o Processing ficava preso sem terminar.
-- Ajuste anterior de playtest: removida a abertura automática de ordens;
-  adicionado `!` pulsante no botão e disponibilidade contextual dos pontos.
-  Captura no Processing passou com `QUEST CHECK: PASS`, incluindo início livre,
-  antena/reserva inativas e ativação de origem/destino conforme a etapa.
-- Por solicitação explícita, as issues #25 e #26 foram migradas para as oito
-  abas de `last_horizon/`, sem aguardar o inventário #8.
-- O jogo contém oito preventivas, quatorze soluções, comparação remota, aceite
-  presencial, coleta, um objeto carregado e entrega confirmada.
-- `ORDENS` reabre ofertas/detalhes e percorre retomadas. Problemas conservam
-  a solução escolhida e o prazo; incidente novo tem prioridade.
-- Estoque, consumo, recompensas, falha, negligência, custos, crises, risco único
-  e socorro seguem o modelo Node. Retomada e socorro não apagam negligência.
-- Removidos contenção separada, políticas, bônus, aceleração e coleta livre.
-  Preservados hub, portas, escadas, animação, física e viewport.
-- `--capture` no Processing passou com `QUEST CHECK: PASS`: 22 quests,
-  exclusividade, confirmações físicas, custo inviável, noites, retomada via
-  interface, risco, morte, pool e casco alcançável.
-- Três estratégias vencem; omissão perde; reserva de peças vence
-  `2520/2520` sequências no próprio sketch.
-- `--hit-test` e `--ladder-test` passaram. O modelo Node continua retornando
-  `BALANCE CHECK: PASS`.
-- Capturas de ofertas, confirmação, coleta/entrega, mapa, objeto carregado,
-  incidentes, retomada, socorro, resumo denso, vitória e derrota estão em
-  `last_horizon/output/`; a inspeção visual incluiu textos longos de casco e suporte.
-- GitNexus retornou `UNKNOWN` para funções `.pde`; não há cobertura do grafo
-  dessas funções. A verificação funcional foi feita no Processing.
-- Fontes de mecânicas, eventos, interface, arquitetura, README, contexto e
-  ADR-0002 foram sincronizadas com a migração.
-- #25 e #26 permanecem CLOSED; #8 OPEN e disponível; #7 OPEN independente.
-  O corpo da #1 e os comentários das duas issues registram a mesma fronteira.
-- Os quatro concept arts não rastreados foram preservados. Sem commit ou push
-  nesta sessão.
-- Resultado: novo ciclo funcional no jogo Processing, com arte geométrica;
-  não apenas documentação ou simulador Node.
+Sessão da [issue #27](https://github.com/shelldonryan/gtd_example/issues/27),
+concluída após o trabalho ser desviado do inventário #8 e o retorno pelas portas
+ser validado manualmente.
+
+- Fronteira recalculada no grafo nativo antes desta sessão: #7 e #8 estão OPEN;
+  #27 está CLOSED; #8 segue como próximo caminho crítico.
+
+- Decisões confirmadas pelo usuário, uma a uma: NPCs voltam a ser interativos com
+  texto por estado; portas viram portais com limiar e chegada configurável,
+  retornando imediatamente à posição `x/y` de saída na sala anterior; escadas
+  viram dados aceitando posições arbitrárias; HUD com rótulos de texto nos
+  cartões, faixa inferior em campos fixos e rodapé com `?`; nome vazio mantém
+  `INICIAR` bloqueado; derrota só com contagem; pós-vitória inexistente; alertas
+  sem linha de texto; "reparo no limite" é a solução do motor entregue com prazo 1.
+
+- Vinheta trocada pelo roteiro confirmado no #11; transmissões da Terra e a
+  mensagem de Marte implementadas com o nome do técnico.
+- Defeito corrigido: `enterRoom()` usava o destino da porta em vez da sala da
+  própria porta — entrar no Depósito levava ao Comando.
+- Harness endurecido: asserção falha reprova o resultado e `QUEST CHECK: PASS`
+  não é mais impresso depois de uma falha.
+- Evidência: `--capture` → 140 asserções `OK` e `QUEST CHECK: PASS`, incluindo
+  abertura sem deck, limiar acima de deck, chegada independente em outro canto,
+  retorno da porta à posição de entrada, prioridade de quest sobre portal
+  coincidente e 2.520/2.520 campanhas sem travar a janela; `--hit-test` → 5
+  `OK`; `--ladder-test` → 6 `OK` (inclui escada em x arbitrário); `node
+  prototype/balance-model.mjs --simulate` → `BALANCE CHECK: PASS`.
+- Capturas novas em `last_horizon/output/`: `32_help_panel.png`,
+  `34_earth_transmission.png`, `29_victory.png` (mensagem de Marte),
+  `28_defeat.png` (contagem, sem nomes) e `catalogue_*_hud.png` (cartões
+  rotulados e faixa em campos fixos); a inspeção visual confirmou os textos.
+- Fontes sincronizadas: `interface/` (MENU_INIT, MENU_VICTORY, MENU_GAME_OVER,
+  HUD, FLOW, ROOMS), `code/SKETCH_ARCHITECTURE.md`, `README.md` e este arquivo.
+- Wayfinder: #27 CLOSED após validação manual, com o corpo atualizado para os
+  portais ampliados; corpo e comentário da #1 atualizados; comentário na #8
+  registrando que os cartões passam a ter rótulo e que portas/escadas deixaram de
+  ser posições fixas.
+- GitNexus continua sem indexar as funções `.pde`; a verificação funcional é a do
+  Processing.
+- Nenhum commit ou push foi feito nesta sessão.
+- Resultado: funcionalidade pronta no jogo Processing — vinheta, transmissões,
+  desfechos, NPCs, HUD e portais com limiar e chegada configuráveis —, não apenas
+  documentação.

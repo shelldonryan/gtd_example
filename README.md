@@ -46,19 +46,33 @@ quadro; o `.aseprite` de origem acompanha a spritesheet quando disponível.
 
 ## Executar o jogo
 
-As quests das issues #25 e #26 estão implementadas em `last_horizon/*.pde`;
+As quests das issues #25, #26 e #27 estão implementadas em `last_horizon/*.pde`;
 `prototype/balance-model.mjs` é a referência numérica separada, não o jogo.
 Abra `last_horizon/last_horizon.pde` no Processing 4.5.6 e execute.
-O botão `ORDENS` compara as ofertas e reabre os detalhes da quest. Confirme a
-preventiva com seu responsável, colete e entregue usando `E` e `ENTER`, e
-durma no seu beliche. A migração não depende da conclusão do inventário #8.
-Comandos CLI e captura: `code/SKETCH_ARCHITECTURE.md`.
+O botão `ORDENS` compara as ofertas e reabre os detalhes da quest. Em dias
+tranquilos ele não abre sozinho: o selo `!` pulsa quando há oferta ou retomada.
+O botão `?` do rodapé abre a ajuda com teclas e botões.
+Estações fora da etapa atual ficam apagadas e não respondem a `E`; os
+sobreviventes respondem sempre, com fala e painel conforme o estado do dia.
+Confirme a preventiva com seu responsável, colete e entregue usando `E` e
+`ENTER`, e durma no seu beliche. A migração não depende da conclusão do
+inventário #8. Comandos CLI e captura: `code/SKETCH_ARCHITECTURE.md`.
 
 ## Mecanica principal
 
 A partida representa uma viagem de dez dias por quatro cômodos. A Sala de
-comando é o hub central e possui uma porta por convés para Dormitório, Depósito
-e Sala de máquinas; as salas periféricas não se conectam entre si.
+comando é o hub central e a topologia padrão possui uma porta por convés para
+Dormitório, Depósito e Sala de máquinas; as salas periféricas não se conectam
+entre si.
+
+As portas são portais configuráveis por dados. `door_x` e `door_y` posicionam
+cada abertura em qualquer ponto horizontal ou vertical da sala; `door_deck = -1`
+representa uma abertura sem deck ou acima do piso. O acionamento usa proximidade
+horizontal e vertical ao limiar. A transição declara `door_arrival_x`,
+`door_arrival_y` e `door_arrival_facing` para a chegada padrão em qualquer canto
+ou convés válido da tela de destino. No retorno imediato para a sala anterior,
+o jogo reaproveita a posição `x/y` em que o jogador saiu; outros percursos usam
+a chegada padrão configurada.
 
 Incidentes surgem nos dias 2, 4, 6, 8 e 10. Existem sete tipos, cinco escolhidos
 por partida sem reposição, organizados em falhas técnicas, suprimentos e

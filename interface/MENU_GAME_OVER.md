@@ -32,4 +32,6 @@ Oxigênio em zero, energia em zero, moral em zero, motor destruído ou nenhum so
 
 ## Pendências
 
-- Se a derrota mostra os sobreviventes ou apenas a contagem.
+Nenhuma. A derrota mostra a contagem, não os nomes: a linha de resumo é
+`DIA [n] DE 10   SOBREVIVENTES: [n]`, seguida do estado do motor. Os nomes dos
+sobreviventes aparecem apenas na vitória, na variação com perdas.

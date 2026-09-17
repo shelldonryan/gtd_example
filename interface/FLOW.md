@@ -10,10 +10,12 @@
 | Sala de máquinas | pela porta inferior do Comando | cena 2D jogável, motor, energia, suporte e ordens técnicas |
 | Depósito | pela porta média do Comando | cena 2D jogável, estoques, componentes e ordens logísticas |
 | Dormitório | pela porta superior do Comando e no início de cada novo dia | cena 2D jogável, descanso, saúde, moral, Neusa e ordens da tripulação |
-| Ordens | botão `ORDENS`, sem abertura automática | duas ordens preventivas comparáveis, com objeto, rota, recompensa e perda |
+| Ordens | botão `ORDENS`, sem abertura automática; `!` pulsante quando disponível | duas ordens preventivas comparáveis, com objeto, rota, recompensa e perda |
 | Mapa | botão `MAPA` | sobreposição com posição, ordens ativas e problemas por sala; nunca transporta |
 | Diálogo | interação com sobrevivente | retrato e caixa inferior; oferece ou confirma uma ordem |
 | Incidente | no início dos dias 2, 4, 6, 8 e 10 | cartão modal com duas soluções físicas |
+| Transmissão da Terra | primeira falha do motor, primeira chuva de meteoros e primeira perda | cartão modal com a mensagem; fecha com clique, `ENTER` ou `ESC` e não consome dia, tarefa ou recurso |
+| Ajuda | botão `?` do rodapé | modal com as teclas e os botões do jogo |
 | Pausa | ESC nas salas | continuar, reiniciar ou sair |
 | Vitória | fim da viagem, com motor operante e sobrevivente vivo | ver `MENU_VICTORY.md` |
 | Derrota | recurso crítico, motor destruído ou nenhum sobrevivente vivo | ver `MENU_GAME_OVER.md` |
@@ -26,10 +28,12 @@ graph LR
   COMANDO <-->|porta superior| DORMITORIO["Dormitório"]
   COMANDO <-->|porta média| DEPOSITO["Depósito"]
   COMANDO <-->|porta inferior| MAQUINAS["Sala de máquinas"]
-  DORMITORIO -.->|dia sem incidente| ORDENS["duas ordens preventivas"]
+  DORMITORIO -.->|dia sem incidente / botão ORDENS + !| ORDENS["duas ordens preventivas"]
   ORDENS -->|escolher uma| CONFIRMA["confirmar com sobrevivente"]
   CONFIRMA --> QUEST["coletar → entregar"]
   COMANDO -.->|dia com incidente| INCIDENTE["duas soluções físicas"]
+  DORMITORIO -.->|primeira falha grave ou perda| TRANSMISSAO["transmissão da Terra"]
+  TRANSMISSAO -.->|fechar| INCIDENTE
   INCIDENTE -->|escolher e confirmar| QUEST
   QUEST -->|recompensa ou correção| DORMITORIO
   DORMITORIO -->|beliche: dormir| DORMITORIO
@@ -48,12 +52,16 @@ graph LR
 1. O primeiro dia começa na Sala de comando; os seguintes, no Dormitório.
 2. Nos dias sem incidente, o jogador começa livre na sala. O botão `ORDENS`
    mostra uma exclamação pulsante enquanto houver uma ordem disponível e nenhuma
-   seleção ou quest em andamento. O jogador abre o cartão quando quiser; a
-   seleção fica pendente até a confirmação presencial com o sobrevivente.
+   seleção ou quest em andamento. Círculo e exclamação geométrica crescem,
+   mudam de cor e permanecem centralizados como um único selo. O jogador abre o
+   cartão quando quiser; a seleção fica pendente até a confirmação presencial
+   com o sobrevivente.
 3. A confirmação presencial transforma a seleção em ordem aceita. A ordem aceita
    não pode ser cancelada; a outra oferta expira.
 4. Nos dias 2, 4, 6, 8 e 10, um incidente apresenta duas soluções físicas. O
    jogador escolhe e confirma uma no cartão; não existe contenção separada.
+   Quando a transmissão da Terra dispara nesse dia, ela aparece antes do cartão:
+   fechá-la revela as duas soluções.
 5. A ordem ativa passa por `COLETAR` e `ENTREGAR`. A coleta confirma o objeto e
    sua finalidade; a entrega confirma o resultado antes de aplicar.
 6. Uma única quest pode ser concluída por dia. Somente o ponto da etapa atual
@@ -85,6 +93,7 @@ manutenção.
 | Continuar diálogos, confirmar modal e dormir | ENTER |
 | Abrir o mapa | botão `MAPA`, com o mouse |
 | Rever ofertas, ordem ativa e retomadas | botão `ORDENS`, com o mouse |
+| Ver teclas e botões | botão `?`, com o mouse |
 | Pausa, fechar/voltar modal e continuar na pausa | ESC |
 
 O dia não avança por tecla ou botão persistente. Encerrá-lo exige chegar ao
@@ -92,9 +101,17 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
 
 ## Regras de navegação
 
-- A Sala de comando é o único hub. Sua porta superior leva ao Dormitório, a
-  média ao Depósito e a inferior à Sala de máquinas. As salas periféricas não
-  possuem portas entre si.
+- A Sala de comando continua sendo o hub e a topologia padrão continua em
+  estrela, mas a navegação é dirigida pela tabela de portais: cada porta escolhe
+  sala, destino e coordenadas próprias.
+- `door_x` e `door_y` posicionam a abertura em qualquer ponto do espaço da sala;
+  `door_deck = -1` permite um limiar sem deck ou acima do piso. A interação usa
+  proximidade horizontal e vertical ao limiar, não uma borda ou convés fixo.
+- Na primeira travessia, o registro da própria porta define
+  `door_arrival_x`, `door_arrival_y` e `door_arrival_facing`, permitindo chegada
+  em qualquer canto ou convés válido. Ao retornar imediatamente para a sala
+  anterior, o jogo reutiliza o `x/y` em que o técnico saiu; outros percursos
+  usam a chegada padrão configurada.
 - A composição espacial toma `COMMAND_ROOM_CONCEPT_ART.png` como referência,
   sem adotar nomes ou números ilustrativos da imagem.
 - O mapa é uma sobreposição consultável. Marca `VOCÊ ESTÁ AQUI`, mostra a ordem
@@ -128,11 +145,8 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
 - Se nenhuma ordem preventiva for aceita, os dois recursos das ofertas sofrem
   pequenas perdas. Se uma solução de incidente falhar, o problema permanece com
   suas perdas, prazo e crise normais, sem multa adicional.
-- NPCs usam retrato e caixa inferior modal. Ordens e soluções mostram confirmação
-  antes do compromisso; coleta, entrega e dormir exibem o custo ou resultado
-  relevante antes de aplicar.
-- A pausa não consome tempo nem recursos. Portas e escadas continuam sendo
-  indicações contextuais.
+- Pontos fora da etapa atual ficam apagados e não respondem a `E`; o selo de
+  `ORDENS` é a única indicação persistente de uma oferta ou retomada disponível.
 
 Os botões exibem no próprio rótulo o atalho de teclado que controla a ação:
 `INICIAR (ENTER)`, `CONTINUAR (ENTER)`, `CONTINUAR (ESC)`, `CONFIRMAR (ENTER)`,

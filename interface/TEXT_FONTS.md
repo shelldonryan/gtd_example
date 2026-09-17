@@ -4,9 +4,13 @@
 
 - Fonte **Segoe UI**, instalada no Windows, 16 px no render nativo, entrelinha
   de 18 px.
-- Os seis cartões de recurso usam ícone de 16×16 + número + barra, **sem rótulo
-  de texto** — os únicos cartões com rótulo são DIA e A BORDO. O número é o
-  destaque do cartão.
+- Os seis cartões de recurso usam ícone de 16×16 + número + **rótulo de texto**;
+  os recursos de barra somam a barra de preenchimento. Os rótulos são
+  `ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS` e `MORAL`, além dos cartões
+  `DIA` e `A BORDO`. O número é o destaque do cartão. O rótulo é texto
+  provisório: o inventário
+  [#8](https://github.com/shelldonryan/gtd_example/issues/8) troca apenas os
+  ícones geométricos por assets do Aseprite.
 
 ## MENU
 

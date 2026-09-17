@@ -39,9 +39,11 @@ As peças são uma contagem numérica, sem barra.
 ## Ícones
 
 Os seis recursos usam **ícones de 16×16** na paleta do HUD — energia, oxigênio,
-água, comida, peças e moral. O cartão do recurso passa a ser ícone + número
-(+ barra), **sem rótulo de texto**: só DIA e A BORDO têm rótulo. Os ícones entram
-no inventário de assets.
+água, comida, peças e moral. Cada cartão mostra **ícone + número + rótulo de
+texto** — `ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS`, `MORAL` — e, nos
+recursos de barra, a barra de preenchimento. O rótulo é texto provisório: o
+inventário [#8](https://github.com/shelldonryan/gtd_example/issues/8) troca os
+ícones geométricos por assets do Aseprite, sem mudar o restante do cartão.
 
 ## Onde cada elemento fica
 
@@ -51,7 +53,7 @@ no inventário de assets.
 | Centro | sala 2D jogável usando toda a largura |
 | Faixa de ordem | estágio, responsável, objeto, origem, destino, recompensa ou resultado e perda da ordem ativa |
 | Faixa de urgência | problema com menor prazo e quantidade dos demais |
-| Rodapé | botões `MAPA` e `ORDENS`, e orientação de controles |
+| Rodapé | botões `MAPA`, `ORDENS` e `?`; `!` pulsante quando há oferta ou retomada |
 | Sobreposição | ordens, mapa, diálogos, incidentes e resumo ao dormir |
 
 O mapa abre pelo botão `MAPA`, mostra `VOCÊ ESTÁ AQUI`, a ordem ativa e todas as
@@ -99,7 +101,35 @@ Os botões dos modais repetem o atalho no rótulo: `FECHAR (ESC)`, `VOLTAR (ESC)
 `CONFIRMAR (ENTER)`, `ACEITAR ORDEM (ENTER)`, `ENTREGAR (ENTER)` e o botão de
 dormir. O botão de pausa é `CONTINUAR (ESC)`.
 
+### Ajuda
+
+O botão `?` do rodapé abre um modal `AJUDA — CONTROLES` com a lista de teclas e
+botões, fechado por `FECHAR (ESC)`, clique ou `ESC`. A dica de teclas fixa que
+antes ocupava o rodapé saiu: o rodapé tem apenas `MAPA`, `ORDENS` e `?`.
+
+### Faixa de ordem e urgência
+
+A faixa inferior tem quatro linhas fixas, para o jogador não precisar reler a
+tela a cada quadro:
+
+1. `[ESTÁGIO]: [objeto] | RESPONSÁVEL: [nome]` — ou `CONFIRMAR COM [nome] EM [ponto] | OBJETO: [objeto]` antes do aceite;
+2. `COLETA: [ponto (sala)] | ENTREGA: [ponto (sala)]`;
+3. `[RECOMPENSA: +n] ou [CUSTO: -n] | SE FALHAR: [perda; prazo; crise]`;
+4. problema mais urgente, prazo, sala, quantidade dos demais e pessoa em risco — ou a mensagem de sistema em vigor.
+
+Sem ordem ativa, as duas primeiras linhas exibem o estado da quest do dia
+(`NENHUMA ORDEM ATIVA — COMPARE AS DUAS OFERTAS EM ORDENS`, `UMA QUEST POR DIA.
+ACEITA: NÃO PODE SER CANCELADA.`).
+
+### Transmissões
+
+Uma transmissão da Terra ocupa o centro da tela com título, texto e
+`CONTINUAR (ENTER)`. Ela bloqueia a exploração e não consome dia, tarefa,
+recurso ou ação. Quando coincide com o incidente do dia, a transmissão aparece
+primeiro; fechá-la revela o cartão do incidente.
+
 ### Encerrar o dia
+
 Não existe botão persistente `Passar dia`. O técnico precisa chegar ao próprio
 beliche no Dormitório e interagir. Antes de dormir, o resumo modal mostra:
 
@@ -134,6 +164,10 @@ retomada volta a aparecer no próximo dia sem incidente. Os valores e a ordem do
   até a escolha e confirmação.
 - **Falha de preventiva:** exibe a perda do recurso protegido e devolve o objeto
   à origem ao dormir.
+- **Transmissão da Terra:** modal central aberto na primeira falha do motor, na
+  primeira chuva de meteoros e na primeira perda; fecha com clique, `ENTER` ou
+  `ESC` e não consome dia, tarefa, recurso ou ação.
+- **Ajuda:** modal `AJUDA — CONTROLES` aberto pelo botão `?` do rodapé.
 - **Transmissão e desfecho:** permanecem modais.
 
 ## Avisos
@@ -144,7 +178,11 @@ segundo aceso, meio apagado). A cor sozinha deixa quem não a distingue sem
 nenhuma pista.
 
 Alertas críticos usam os cartões de recurso: cor, ícone de aviso e borda
-piscando. A faixa de urgência mostra:
+piscando. Alerta não gera linha de texto: o problema ativo aparece na quarta
+linha da faixa e o recurso crítico se identifica pelo próprio cartão. As nove
+linhas do painel `SISTEMA` do [#11](https://github.com/shelldonryan/gtd_example/issues/11)
+ficam **superseded** — economia e racionamento saíram pela ADR-0002 e os estados
+restantes já são cobertos pelo cartão e pela faixa. A faixa de urgência mostra:
 
 1. problema ativo com menor prazo;
 2. prazo restante;

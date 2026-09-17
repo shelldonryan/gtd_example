@@ -42,10 +42,13 @@ Regras que valem em todos os cômodos:
   confirmada presencialmente com o sobrevivente responsável.
 - Nos dias com incidente, o cartão apresenta duas soluções físicas e a escolhida
   deve ser executada no espaço jogável.
-- Pontos fora da etapa atual ficam apagados, sem marcador de ação, destaque ou
-  resposta a `E`. NPCs vivos continuam visíveis, mas só interagem quando são
-  necessários à confirmação, coleta ou entrega. Portas e beliche do técnico
-  permanecem acessíveis; socorro habilita com pessoa em risco e quest diária livre.
+- Estações fora da etapa atual ficam apagadas, sem marcador de ação, destaque ou
+  resposta a `E`. NPCs vivos respondem a `E` a qualquer momento, com texto e tipo
+  de painel conforme o estado: oferta própria do dia, confirmação presencial,
+  ordem ativa sob sua responsabilidade, ordem ativa de outra pessoa, quest do dia
+  concluída, problema ativo sem escolha ou nada pendente. Portas e beliche do
+  técnico permanecem acessíveis; socorro habilita com pessoa em risco e quest
+  diária livre.
 - O mapa mostra a origem e o destino, mas não transporta o técnico.
 - Indicações usam ações concretas, nunca termos internos.
 - A ordem ativa usa somente pontos que aparecem na oferta. O objeto não fica
@@ -111,6 +114,28 @@ O cômodo concentra descanso, saúde, moral e encerramento do turno.
 | superior | mesa comum — destino de ordens de moral | entrega |
 | superior | beliche do técnico — resumo e dormir | leitura técnica e encerramento |
 | acesso | porta única para o convés superior do Comando | porta |
+
+## Portas e escadas
+
+Portas usam uma tabela de portais, sem depender das bordas. Cada registro
+declara `door_room`, `door_target`, `door_x` e `door_y`; `door_x` é o centro
+horizontal e `door_y` é o limiar vertical dos pés do técnico. O campo
+`door_deck` é apenas uma referência opcional do layout: `0`, `1` e `2`
+identificam um convés e `-1` permite uma abertura sem deck, inclusive acima do
+piso.
+
+O portal responde a `E` quando o técnico fica até 18 px do centro e até 18 px
+verticalmente do limiar. Na primeira travessia, `door_arrival_x` (centro),
+`door_arrival_y` (pés) e `door_arrival_facing` definem a chegada padrão na sala
+de destino, inclusive em outro canto ou convés válido. Ao retornar imediatamente
+pela porta que leva à sala anterior, o jogo reaproveita o `x/y` exato em que o
+técnico saiu, em vez de usar a posição antiga da porta inversa. Em qualquer
+outro percurso, aplica a chegada padrão configurada. A posição deve corresponder
+a uma superfície alcançável; fora de uma superfície, a gravidade continua
+normalmente.
+
+Escadas continuam usando `ladder_room` e `ladder_x`; cada registro pode ocupar
+qualquer posição horizontal do cômodo sem alterar a lógica de travessia.
 
 ## Ordens
 

@@ -16,9 +16,8 @@ Abrir a partida: apresentar o jogo e registrar quem é o técnico.
 
 ## Regras
 
-- Nome vazio: o jogo usa "Técnico".
-- O botão `Iniciar (Enter)` e a tecla `ENTER` iniciam a partida.
-- Limite curto de caracteres, para caber na largura da tela.
+- Nome vazio: `Iniciar (Enter)` e a tecla `ENTER` permanecem bloqueados; a partida exige um nome.
+- Limite de 12 caracteres, para caber na largura da tela.
 
 ## Regra de mensagens
 

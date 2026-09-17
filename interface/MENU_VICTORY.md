@@ -32,4 +32,19 @@ resumo continua listando os sobreviventes.
 
 ## Pendências
 
-- Se a tela permite continuar jogando depois da chegada.
+Nenhuma. A tela encerra a partida: não existe continuar jogando depois da
+chegada. O botão `NOVA PARTIDA` volta ao `MENU_INIT`.
+
+## Implementação
+
+`drawVictoryScreen` monta a lista de sobreviventes por nome quando houve perdas
+(`SOBREVIVENTES: 3 DE 4 — BENTO, NEUSA, SÍLVIA`) e usa `SOBREVIVENTES: 4 DE 4`
+quando todos chegaram. A mensagem de Marte ocupa uma linha e usa o nome do
+técnico.
+
+- Todos vivos: `MARTE: [NOME], RECEBEMOS OS QUATRO SOBREVIVENTES. A BASE ESTÁ PRONTA.`
+- Com perdas: `MARTE: [NOME], RECEBEMOS OS SOBREVIVENTES QUE RESTARAM. A BASE ESTÁ PRONTA.`
+- Reparo no limite: `MARTE: [NOME], RECEBEMOS A NAVE. O MOTOR CHEGOU NO LIMITE, MAS VOCÊS CONSEGUIRAM.`
+
+**Reparo no limite** é a solução do motor entregue com o prazo do problema em 1,
+ou seja, a uma noite da crise. A variação só prevalece quando houver perdas.
