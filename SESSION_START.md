@@ -3,10 +3,12 @@
 > Resumo operacional obrigatório. Leia antes de analisar, editar ou implementar
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
-Atualizado durante a sessão da
-[issue #32](https://github.com/shelldonryan/gtd_example/issues/32), que implementou
-o refinamento do fluxo de quests com entrega direta na confirmação de preventivas
-(V-02 e N-02), fala de orientação dos NPCs pós-entrega e melhorias no HUD e mapa.
+Atualizado após a conclusão da
+[issue #33](https://github.com/shelldonryan/gtd_example/issues/33), que integrou a
+corrida com `Shift` no convés usando a faixa `run` da spritesheet, com fallback
+para a caminhada quando a arte não traz a faixa (D-153). A #32 antecede esta
+sessão: entrega direta na confirmação de preventivas (V-02 e N-02), fala de
+orientação dos NPCs pós-entrega e melhorias no HUD e mapa.
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Regras inegociáveis
@@ -102,16 +104,34 @@ reporte e não escolha silenciosamente.
 - #7 foi concluída:
   [Documento de entrega e como o jogo roda na apresentação](https://github.com/shelldonryan/gtd_example/issues/7);
   o plano B é uma gravação curta de partida, a ser feita pelo usuário até 23/09.
-- O próximo caminho crítico é a arte: o usuário seleciona os assets CC0/CC-BY e
-  o sketch já os recebe por arquivo, na ordem de `assets/INVENTORY.md`.
+- #31 foi concluída: suporte híbrido aos formatos Aseprite e Universal LPC, novo
+  player LPC integrado com animações extras de climb na escada e jump no ar, e
+  NPCs com olhar dinâmico por convés e alcance de interação ajustado para 22 px
+  (D-140 a D-144).
+- #32 foi concluída: entrega direta na confirmação presencial de preventivas com o
+  responsável (V-02 e N-02, D-145), diálogo de orientação pós-entrega (D-146),
+  HUD com `NA MÃO:` (D-147), mapa sem coleta concluída (D-148), cadência dos
+  passos na escada a 27 px lógicos (~450 ms) com primeiro passo instantâneo em
+  1 px e atenuação do som de saída (D-149, D-150).
+- Os 4 retratos de NPCs foram integrados em `data/portraits/` com fundo sólido do
+  card em `ui.pde` (D-151), a animação de pulo LPC foi corrigida para a linha 29
+  com sequência canônica `0-1-2-3-4-1` em 450 ms (D-152) e o mixer de áudio
+  recebeu pré-aquecimento no `setup()` com `primeSound()`.
+- #33 foi concluída: corrida com `Shift` no convés a 2,4 px/quadro, com a faixa
+  `run` do LPC (linha 41, 8 quadros de 75 ms) e fallback para a caminhada quando a
+  spritesheet não traz a faixa (D-153).
+- O próximo caminho crítico na arte é a seleção dos assets CC0/CC-BY pelo usuário
+  na ordem de `assets/INVENTORY.md`, iniciando pelo Bloco 1 (Ícones do HUD em
+  `data/icons/`).
 
 ### Fronteira Wayfinder
 
-Sincronizada com o grafo nativo depois da sessão do #31:
+Sincronizada com o grafo nativo depois da sessão do #33:
 
 | Issue | Estado | Bloqueadores abertos | Relação |
 |---|---|---|---|
-| #32 Refinamento do fluxo de quests | OPEN | — | entrega direta na confirmação (V-02, N-02), fala de orientação de NPCs, HUD e mapa refinados |
+| #33 Adicionar corrida com Shift | CLOSED | — | corrida a 2,4 px/quadro com a faixa `run` do LPC e fallback; verificada no harness |
+| #32 Refinamento do fluxo de quests | CLOSED | — | entrega direta na confirmação (V-02, N-02), fala de orientação de NPCs, HUD e mapa refinados |
 | #31 Suportar spritesheets Aseprite e LPC | CLOSED | — | suporte híbrido transparente, climb e jump para LPC e novo player integrado |
 | #7 Documento de entrega | CLOSED | — | entrega pelo GitHub (repo privado, acesso do professor) e plano B por gravação curta |
 | #29 Camada de assets | CLOSED | — | camada de arte com fallback, travessia de porta e drop-in documentado |
@@ -240,10 +260,11 @@ Topologia e ordens: `interface/ROOMS.md`.
   `door_arrival_facing`; escadas usam `ladder_room` e `ladder_x`. O limiar da
   porta não precisa coincidir com um deck e a chegada configurada vale na
   primeira travessia; no retorno imediato, o jogador reaparece no `x/y` de saída.
-- Jogador: colisão 16×24; andar 1,5 px/quadro; pulo 48 px; gravidade 0,5;
-  escada 1,0; interação 12 px; plataformas atravessáveis por baixo.
-- Controles: setas/WASD, espaço, E, ENTER em diálogos/modais, ESC para pausa e
-  mouse nos botões `MAPA` e `ORDENS`.
+- Jogador: colisão 16×24; andar 1,5 px/quadro; correr 2,4 px/quadro com `Shift`
+  no convés; pulo 48 px; gravidade 0,5; escada 1,0; interação 12 px; plataformas
+  atravessáveis por baixo.
+- Controles: setas/WASD, `Shift` para correr, espaço, E, ENTER em diálogos/modais,
+  ESC para pausa e mouse nos botões `MAPA` e `ORDENS`.
 - HUD: seis ícones 16×16; cartões de recurso com ícone, número, rótulo e barra.
 - Áudio offline: `javax.sound.sampled`, WAV PCM 16 bits em `data/audio/<evento>/` (porta e escada integradas; alerta e clique sem som).
 - A arte entra por arquivo em `data/` (`icons/`, `stations/`, `objects/`,
@@ -426,16 +447,25 @@ Não replique aqui o histórico completo:
   (pico de −10,0 dBFS para −18,6 dBFS; RMS de −25,6 dBFS para −34,1 dBFS) e filtrado com
   passa-baixas em 5 kHz, eliminando o estalo metálico agudo e nivelando a presença sonora
   diretamente à faixa dos passos da subida.
-- **D-151 (sessão atual, retratos dos NPCs no diálogo):** os 4 retratos em pixel art
+- **D-151 (sessão complementar, retratos dos NPCs no diálogo):** os 4 retratos em pixel art
   foram integrados em `data/portraits/` (`vera.png`, `bento.png`, `neusa.png`, `silvia.png`),
   com fallback automático para `data/npc/*_portrait.png` em `assets.pde`. Em `ui.pde`,
-  `drawPortrait` agora desenha o fundo sólido do card (`COL_PANEL` e `COL_BORDER`) antes
-- **D-152 (sessão atual, sequência canônica de pulo LPC 0-1-2-3-4-1 na linha 29):** a animação de pulo
+  `drawPortrait` agora desenha o fundo sólido do card (`COL_PANEL` e `COL_BORDER`) antes da arte com transparência, eliminando vazamento visual do cenário atrás do busto.
+- **D-152 (sessão complementar, sequência canônica de pulo LPC 0-1-2-3-4-1 na linha 29):** a animação de pulo
   do técnico no padrão Universal LPC foi corrigida para a linha correta de pulo (linha 29, Leste / perfil direito,
   pertencente ao bloco de 4 direções das linhas 26–29 com 5 quadros cada), usando a sequência canônica
   `0-1-2-3-4-1` (6 quadros a 75 ms), totalizando 450 ms, sincronizada perfeitamente
   com o tempo de voo físico de 462 ms (28 frames a 60 FPS). Em quedas prolongadas, o frame é
   fixado na pose final de aterrissagem via `min(raw_elapsed, total_duration - 1)`, sem repetir o agachamento no ar.
+- **D-153 (sessão #33, corrida com Shift):** `Shift` com uma direção horizontal
+  acelera o técnico de 1,5 para 2,4 px/quadro no convés e ativa a faixa `run` da
+  spritesheet (linha 41 do LPC, 8 quadros de 75 ms, espelhada para Oeste), com
+  regresso imediato a caminhada ou repouso ao soltar a tecla. Correr é decisão de
+  convés: escada e ar mantêm velocidade e animação próprias, `Shift` parado não
+  anima nada, e um sprite sem a faixa de `run` acelera o passo mantendo a
+  caminhada. Velocidade e animação saem do mesmo predicado, então nunca
+  discordam. O modal `AJUDA — CONTROLES` ganhou a linha `CORRER: SHIFT` e passou
+  a dimensionar a altura pelo número de linhas.
 
 ## Fontes por tarefa
 
@@ -509,7 +539,41 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
 - [x] Declarar se o resultado é documentação, protótipo executável ou
       funcionalidade pronta.
 
-### Sessão atual — áudio da escada, retratos de NPC e animação do pulo
+### Sessão atual — #33 corrida com Shift
+Sessão da [issue #33](https://github.com/shelldonryan/gtd_example/issues/33) —
+corrida acionada por `Shift`, com a faixa `run` da spritesheet.
+
+- **Decisão confirmada (D-153):** `Shift` com uma direção horizontal corre no
+  convés a 2,4 px/quadro (caminhada, 1,5) e anima a linha 41 do LPC (8 quadros de
+  75 ms, espelhada para Oeste); soltar a tecla volta imediatamente a caminhada ou
+  repouso. Correr é decisão de convés: escada e ar mantêm velocidade e animação
+  próprias, `Shift` parado não anima nada e um sprite sem a faixa de `run` acelera
+  o passo mantendo a caminhada. Velocidade e animação compartilham o mesmo
+  predicado (`playerIsRunning()`), então sprite e passo nunca discordam.
+- **Código alterado:** `last_horizon/last_horizon.pde` (`PLAYER_RUN_SPEED`,
+  `run_held`, faixa de `run`, `SHIFT` no mapa de teclas), `last_horizon/ship.pde`
+  (carga da linha 41, tag `run` do Aseprite, estados `PLAYER_ANIM_*`,
+  `playerIsRunning()` e passo do convés), `last_horizon/ui.pde` (linha
+  `CORRER: SHIFT COM ← → OU A/D` e painel de ajuda que dimensiona pelo número de
+  linhas) e `last_horizon/capture.pde` (`checkPlayerRun()`).
+- **Evidência:** `--capture` → **159 asserções `OK`**, zero `FALHOU`,
+  `QUEST CHECK: PASS`, `som: 6 de 6 carregados`, `arte: 8 de 57 imagens carregadas`;
+  `--ladder-test` → 6 `OK`; `--hit-test` → 5 `OK`; `--asset-pipeline-test` → `OK`.
+  A linha de base medida no commit `fd62b7a` fecha em 148 asserções, então o
+  delta é de +11, sem remoções. Revisão de código independente antes do commit:
+  oito achados, todos tratados (guardas do teste sem faixa de `run`, asserções
+  por mutação — linha 39 no lugar da 41, passo antes da gravidade e perda do
+  passo acelerado reprovam —, tecla vazada no harness, termo inerte em
+  `player_animation_moving`, ordem do passo no quadro da decolagem e
+  enumerações da arquitetura). Inspeção visual do modal de ajuda confirma a nova
+  linha e o botão com folga.
+- **Wayfinder:** #33 fechada com o relatório da sessão; a fronteira fica #28
+  (áudio, aberta por decisão do usuário) e a arte na ordem de
+  `assets/INVENTORY.md`.
+- **Resultado:** funcionalidade pronta no jogo Processing — corrida no convés com
+  animação própria e fallback.
+
+### Sessão anterior — áudio da escada, retratos de NPC e animação do pulo
 Sessão de correção do áudio da escada, integração dos 4 retratos de diálogo e alinhamento da animação de pulo LPC.
 
 - **Áudio da escada (D-149, D-150):** `primeSound()` agora aquece os clips em frame 0
@@ -523,7 +587,8 @@ Sessão de correção do áudio da escada, integração dos 4 retratos de diálo
   casando perfeitamente com os 462 ms de tempo no ar da física do pulo (28 frames a 60 FPS).
   Em quedas longas, o frame congela no quadro final de descida/aterrissagem sem repetir agachamento no ar.
 - **Evidência:** `--ladder-test` → 6 `OK`, `som: 6 de 6 carregados`, `arte: 8 de 57 imagens carregadas`;
-  `--hit-test` → 5 `OK`; `--capture` → `QUEST CHECK: PASS`, 146 asserções `OK`.
+  `--hit-test` → 5 `OK`; `--capture` → `QUEST CHECK: PASS`, 148 asserções `OK`
+  (recontadas no commit `fd62b7a`; o número 146 registrado na sessão estava defasado).
 - **Commit na branch `prototype/sketch-architecture` (sem push):**
   `7cde3f9` — `feat(sketch): integrar retratos dos NPCs, corrigir pulo LPC e ajustar audio`
 - **Wayfinder:** #28 reivindicada e mantida OPEN para validação acústica no ambiente de apresentação;

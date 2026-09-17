@@ -34,12 +34,13 @@ transparentemente os padrões **Universal LPC** e **Aseprite** (D-140 a D-142):
 
 - **Universal LPC (ativo):** matriz 13×54 de células 64×64 (`player_sheet.png`, 832×3456).
   Extrai `idle` (2 quadros de 500 ms, linha 25), `walk` (8 quadros de 100 ms,
-  linha 11), `climb` (6 quadros de 120 ms, linha 21, na escada) e `jump`
-  (13 quadros de 70 ms, linha 49, no ar).
+  linha 11), `climb` (6 quadros de 140 ms, linha 21, na escada), `jump`
+  (sequência canônica `0-1-2-3-4-1`, 6 quadros de 75 ms, linha 29, no ar) e
+  `run` (8 quadros de 75 ms, linha 41, com `Shift` no convés).
 - **Aseprite (backup / compatibilidade):** tira horizontal de 640×64 com 10 quadros
-  de 64×64 (`player_sheet_aseprite.*`), contendo `idle` (0–1) e `walk` (2–9).
-  Quando o sprite é Aseprite, `climb` e `jump` degradam graciosamente para
-  idle/walk.
+  de 64×64, contendo `idle` (0–1) e `walk` (2–9). Quando o sprite é Aseprite,
+  `climb`, `jump` e `run` degradam graciosamente para idle/walk; o passo acelerado
+  do `Shift` continua valendo.
 
 A detecção é automática: se o JSON tiver a chave `"frames"`, processa como
 Aseprite; caso contrário, processa como Universal LPC. O quadro visual é
@@ -48,11 +49,21 @@ de 16×24. Uma única arte atende as duas direções: `player_facing` espelha o
 personagem quando o técnico anda para a esquerda ou para a direita, inclusive ao
 entrar por uma porta. Os créditos e licenças abertas (CC-BY / OGA-BY) do LPC
 estão documentados em `last_horizon/data/player/LICENSE.txt`.
+
+## Deslocamento
+
+Andar custa 1,5 px lógicos por quadro; correr com `Shift` custa 2,4. A corrida
+vale só no convés: escada e ar mantêm o ritmo normal, e o pulo não muda de
+altura. Parado, `Shift` não anima nada — não existe corrida no lugar. Se a
+spritesheet não trouxer a faixa de `run`, o passo acelera e a animação continua
+na caminhada.
+
 ## Controles
 
 | Ação | Tecla |
 | --- | --- |
 | Andar | ← → ou A/D |
+| Correr | `Shift` com ← → ou A/D |
 | Usar escada | ↑ ↓ ou W/S |
 | Pular | espaço |
 | Interagir | E |

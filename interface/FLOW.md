@@ -90,6 +90,7 @@ manutenção.
 | Ação | Tecla ou controle |
 | --- | --- |
 | Andar | ← → ou A/D |
+| Correr | `Shift` com ← → ou A/D |
 | Usar escada | ↑ ↓ ou W/S |
 | Pular | espaço |
 | Interagir e abrir portas | E |

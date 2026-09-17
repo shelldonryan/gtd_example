@@ -39,14 +39,18 @@ plano e executa o contrato descrito em [[ACTIONS]] e nas notas de `events/`.
   restante pela camada de arte. A pasta `data/` é o diretório de assets do
   Processing.
 - Para o técnico (`player_sheet.*`), o formato LPC extrai `idle` (2 quadros, linha 25),
-  `walk` (8 quadros, linha 11), `climb` (6 quadros, linha 21) e `jump` (sequência
-  canônica LPC 0-1-2-3-4-1, 6 quadros a 75 ms, linha 29). No Aseprite, o formato
-  mantém fallback gracioso de climb e jump para idle e walk (D-140, D-151, D-152).
+  `walk` (8 quadros, linha 11), `climb` (6 quadros, linha 21), `jump` (sequência
+  canônica LPC 0-1-2-3-4-1, 6 quadros a 75 ms, linha 29) e `run` (8 quadros a
+  75 ms, linha 41, ativo com `Shift` no convés). No Aseprite, o formato mantém
+  fallback gracioso de climb, jump e run para idle e walk (D-140, D-151, D-152,
+  D-153).
 - Para os NPCs em `last_horizon/assets.pde`, o formato LPC extrai a visão frontal
   (Sul / linha 24, 2 quadros de respiração), enquanto o Aseprite lê as coordenadas
   do array `"frames"` (D-141).
 - `playerCurrentFrame()` e `playerCurrentAnimationState()` gerenciam o ciclo de
-  animação conforme o estado (idle, walk, climb na escada, jump no ar).
+  animação conforme o estado (idle, walk, run no convés com `Shift`, climb na
+  escada, jump no ar). `playerIsRunning()` é o predicado único que decide o passo
+  acelerado e o estado `run`, então sprite e velocidade não divergem.
 - A física mantém o personagem em 16×24 na grade lógica. O quadro visual é
   desenhado em 32×32 lógicos e centralizado sobre a caixa de colisão.
 - A direção usa `player_facing`: `1` para a direita e `-1` para a esquerda.
@@ -116,8 +120,11 @@ definidos em [[ACTIONS]] e nas notas de `events/`. Não há contenção separada
 economia, racionamento, acelerador, bônus de NPC ou coleta livre.
 
 Números do movimento (grade lógica 640×360; render 1280×720 / 720p): personagem
-16×24, andar 1,5 px/quadro, pulo de 48 px, gravidade 0,5, escada 1,0 e
-plataformas atravessáveis por baixo.
+16×24, andar 1,5 px/quadro, correr 2,4 px/quadro com `Shift` no convés, pulo de
+48 px, gravidade 0,5, escada 1,0 e plataformas atravessáveis por baixo. O estado
+de animação do técnico (`idle`, `walk`, `climb`, `jump`, `run`) decide quadro e
+velocidade pelo mesmo predicado, então sprite e passo nunca discordam; sem a
+faixa de `run` na spritesheet, a corrida cai para a caminhada.
 
 **Sem classes e sem hierarquia.** O Processing junta todas as abas numa classe
 só; o estilo permanece em globais agrupadas, funções curtas e `update` separado

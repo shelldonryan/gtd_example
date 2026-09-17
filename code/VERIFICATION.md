@@ -68,9 +68,20 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
   qualquer arquivo estiver ausente, o carregador emite aviso no console e o
   sketch continua executando mudo, sem exceção; os testes de `--capture` e
   `--ladder-test` passam identicamente.
-- **Contagem atual:** `--capture` fecha em **146 asserções `OK`** com
-  `QUEST CHECK: PASS`. Medido no repositório com os sons integrados, na cópia
-  sem arte, na cópia com as 57 fixtures e no híbrido sem os fundos de sala.
+- **Animação do jogador na verificação:** `checkPlayerAnimationLoop()` confere
+  que idle e walk entram em loop, e `checkPlayerRun()` cobre a corrida com
+  `Shift`: passo acelerado no convés (1,5 → 2,4 px por quadro, com e sem a faixa
+  de `run`), avanço de um quadro a cada 75 ms, ciclo fechado nos 8 quadros,
+  comparação pixel a pixel provando que a faixa vem da linha 41 do LPC e não da
+  caminhada, regresso à caminhada ao soltar a tecla, ausência de corrida parado,
+  prioridade da escada e do pulo sobre a corrida e passo do ar já no quadro da
+  decolagem. As duas últimas foram conferidas por mutação: ler a linha 39, mover
+  o passo para antes da gravidade e remover o passo acelerado reprovam o harness.
+- **Contagem atual:** `--capture` fecha em **159 asserções `OK`** com
+  `QUEST CHECK: PASS`, medidas em 2026-09-17 com a corrida integrada (148 antes
+  dela; a recontagem no commit `fd62b7a` mostra que a referência de 146 estava
+  defasada). Medido no repositório com os sons integrados, na cópia sem arte, na
+  cópia com as 57 fixtures e no híbrido sem os fundos de sala.
 
 ## Fixture do pipeline
 
