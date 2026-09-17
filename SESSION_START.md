@@ -448,6 +448,12 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
 - o texto e a estética dos modais e cartões, deferidos por decisão da #27;
 - qualquer nome, retrato ou história além de Vera, Bento, Neusa e Sílvia.
 
+
+## Backlog
+
+- **Redundância na rota de preventivas (origem igual ao responsável):**
+  - **Problema:** Ao selecionar uma ordem preventiva no menu `ORDENS` cujo responsável é também a origem do objeto (ex.: V-02 com Vera ou N-02 com Neusa), o jogador precisa ir até o sobrevivente para confirmar presencialmente (`E`) e, imediatamente no quadro seguinte, é exigido interagir novamente com o mesmo sobrevivente no mesmo ponto físico para "coletar" o item. Isso gera duas confirmações redundantes consecutivas no mesmo NPC sem nenhum deslocamento pelo cenário.
+  - **Solução proposta a decidir:** Evitar sequências em que o responsável seja a origem da coleta (mudando a origem para uma estação física ou console), ou fazer com que a própria confirmação presencial já entregue o objeto diretamente na mão do técnico quando o responsável for a origem da quest.
 ## Checklist de abertura
 
 - [x] Ler este arquivo antes de qualquer avanço.
