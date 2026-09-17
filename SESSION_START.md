@@ -94,10 +94,10 @@ reporte e não escolha silenciosamente.
   (Dormitório), com as estações realocadas e folga mínima de 40 px do eixo de
   uma escada. As portas continuam sendo sprites e mudam sem repintura.
 - A entrega vai pelo GitHub: o repositório é privado e o professor tem acesso;
-  a branch local `entrega` é o snapshot curado (notas de design, concept arts e
-  o sketch de 8 abas), e o push é ação do usuário. Uma cópia equivalente está em
-  `../entrega_last_horizon/`. A apresentação roda na máquina dele abrindo
-  `last_horizon/last_horizon.pde` no Processing.
+  a branch `entrega` é **gerada** — `node tools/snapshot-entrega.mjs` remonta o
+  snapshot a partir da branch de trabalho (D-134) —, e o push é ação do usuário.
+  Uma cópia equivalente está em `../entrega_last_horizon/`. A apresentação roda
+  na máquina dele abrindo `last_horizon/last_horizon.pde` no Processing.
 - #7 foi concluída:
   [Documento de entrega e como o jogo roda na apresentação](https://github.com/shelldonryan/gtd_example/issues/7);
   o plano B é uma gravação curta de partida, a ser feita pelo usuário até 23/09.
@@ -335,6 +335,10 @@ Não replique aqui o histórico completo:
   repositório é privado e o professor tem acesso —, com uma branch `entrega`
   curada como snapshot (D-132); o plano B da apresentação é uma gravação curta
   de partida feita pelo usuário (D-133).
+- **D-134 (workflow da entrega):** a branch `entrega` é artefato **gerado** a
+  partir da branch de trabalho (`node tools/snapshot-entrega.mjs`); código e
+  documentação evoluem só na branch de trabalho e o snapshot é remontado antes
+  de publicar — não existe atualização em dois lugares.
 
 ## Fontes por tarefa
 

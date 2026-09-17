@@ -122,6 +122,27 @@ arquivo. O modelo é a referência numérica independente do sketch.
 Nenhuma arte de teste entra no repositório: a verificação usa só a cópia
 temporária.
 
+## Snapshot de entrega
+
+A branch `entrega` é um artefato **gerado**, não um lugar de edição: protótipo e
+documentação evoluem na branch de trabalho, e o snapshot é remontado quando for
+publicar.
+
+```
+node tools/snapshot-entrega.mjs
+git push origin entrega
+```
+
+- O script lê a árvore da branch de trabalho por índice temporário — não toca no
+  working tree, então o Obsidian aberto não atrapalha — e cria um commit novo em
+  cima do snapshot anterior: o push é sempre normal, sem force.
+- Fora do snapshot: `SESSION_START.md`, `code/VERIFICATION.md`, `prototype/`,
+  `tools/`, `skills-lock.json`, `.obsidian/`, `last_horizon/capture.pde` e os
+  fixtures `pipeline_probe.*`.
+- Se a árvore não mudou desde o último snapshot, o script não cria commit.
+- A pasta `../entrega_last_horizon/` é uma cópia local do mesmo corte, para
+  conferência; a fonte continua sendo a branch de trabalho.
+
 ## Limitações observadas
 
 - O runtime manual não existe nesta instalação:
