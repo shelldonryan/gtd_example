@@ -65,7 +65,7 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
   Se a pasta `data/audio/` ou qualquer arquivo estiver ausente, o carregador
   emite aviso no console e o sketch continua executando mudo, sem exceção; os
   testes de `--capture` e `--ladder-test` passam identicamente.
-- **Contagem atual:** `--capture` fecha em **145 asserções `OK`** com
+- **Contagem atual:** `--capture` fecha em **146 asserções `OK`** com
   `QUEST CHECK: PASS`. Medido no repositório com os sons integrados, na cópia
   sem arte, na cópia com as 57 fixtures e no híbrido sem os fundos de sala.
 

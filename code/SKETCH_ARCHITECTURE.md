@@ -150,9 +150,10 @@ NPCs vivos respondem sempre: `interactNpc` escolhe entre diálogo com retrato e
 painel técnico conforme o estado do dia.
 
 `ORDENS` abre comparação ou detalhes. O aceite preventivo valida presença junto
-ao responsável; coleta, entrega e sono validam o ponto físico. `E` apenas abre
-o painel; `ENTER` confirma. Fechar o painel não cancela a ordem aceita.
-
+ao responsável; quando o responsável é também a origem da quest (como V-02 e N-02),
+a confirmação já entrega o objeto em mãos (`held_item = active_quest + 1`), avançando
+direto para `QUEST_DELIVER`. Coleta, entrega e sono validam o ponto físico. `E` apenas
+abre o painel; `ENTER` confirma. Fechar o painel não cancela a ordem aceita.
 O estado de risco individual mantém no máximo uma pessoa em risco. Sobreviventes
 mortos deixam de oferecer ordens, mas não alteram custos.
 

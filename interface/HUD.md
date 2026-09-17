@@ -113,7 +113,7 @@ A faixa inferior tem quatro linhas fixas, para o jogador não precisar reler a
 tela a cada quadro:
 
 1. `[ESTÁGIO]: [objeto] | RESPONSÁVEL: [nome]` — ou `CONFIRMAR COM [nome] EM [ponto] | OBJETO: [objeto]` antes do aceite;
-2. `COLETA: [ponto (sala)] | ENTREGA: [ponto (sala)]`;
+2. `COLETA: [ponto (sala)] | ENTREGA: [ponto (sala)]` (ou `NA MÃO: [objeto] | ENTREGA: [ponto (sala)]` quando o objeto já está com o jogador);
 3. `[RECOMPENSA: +n] ou [CUSTO: -n] | SE FALHAR: [perda; prazo; crise]`;
 4. problema mais urgente, prazo, sala, quantidade dos demais e pessoa em risco — ou a mensagem de sistema em vigor.
 

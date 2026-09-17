@@ -147,10 +147,12 @@ pessoa morre e `A BORDO` diminui; a morte não altera custos nem cria bônus.
 
 Antes do compromisso, o cartão mostra responsável, objeto, origem, destino,
 recompensa ou resultado e consequência da falha. Uma ordem preventiva escolhida
-fica pendente até a confirmação presencial com seu responsável. Depois da
-confirmação, a etapa é `COLETAR`; após guardar o objeto, a etapa é `ENTREGAR`; a
-entrega confirmada conclui a única quest do dia.
-
+fica pendente até a confirmação presencial com seu responsável. Quando a origem
+coincide com o próprio responsável (como em `V-02` com Vera ou `N-02` com Neusa),
+a confirmação já entrega o objeto diretamente na mão do técnico, avançando a etapa
+imediatamente para `ENTREGAR`. Nos demais casos, a etapa pós-aceite é `COLETAR`;
+após obter o objeto, a etapa é `ENTREGAR`; a entrega confirmada conclui a única
+quest do dia.
 Dormir com uma ordem preventiva aceita e incompleta aplica a falha daquela
 ordem, devolve o objeto ao ponto de origem e limpa o item carregado. Dormir sem
 aceitar preventiva aplica a negligência das duas ofertas. Dormir com uma solução

@@ -3,10 +3,10 @@
 > Resumo operacional obrigatório. Leia antes de analisar, editar ou implementar
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
-Atualizado após a sessão da
-[issue #31](https://github.com/shelldonryan/gtd_example/issues/31), que implementou
-o suporte híbrido aos padrões Aseprite e Universal LPC para o player e NPCs,
-ativou animações de climb e jump para o player LPC e integrou o novo player.
+Atualizado durante a sessão da
+[issue #32](https://github.com/shelldonryan/gtd_example/issues/32), que implementou
+o refinamento do fluxo de quests com entrega direta na confirmação de preventivas
+(V-02 e N-02), fala de orientação dos NPCs pós-entrega e melhorias no HUD e mapa.
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Regras inegociáveis
@@ -111,6 +111,7 @@ Sincronizada com o grafo nativo depois da sessão do #31:
 
 | Issue | Estado | Bloqueadores abertos | Relação |
 |---|---|---|---|
+| #32 Refinamento do fluxo de quests | OPEN | — | entrega direta na confirmação (V-02, N-02), fala de orientação de NPCs, HUD e mapa refinados |
 | #31 Suportar spritesheets Aseprite e LPC | CLOSED | — | suporte híbrido transparente, climb e jump para LPC e novo player integrado |
 | #7 Documento de entrega | CLOSED | — | entrega pelo GitHub (repo privado, acesso do professor) e plano B por gravação curta |
 | #29 Camada de assets | CLOSED | — | camada de arte com fallback, travessia de porta e drop-in documentado |
@@ -396,6 +397,35 @@ Não replique aqui o histórico completo:
   interação com NPCs foi ajustado para 22 px (`NPC_INTERACTION_RANGE = 22`), após
   redução de ~30% em relação aos 32 px iniciais, proporcionando um encaixe justo
   e natural ao lado do sobrevivente. Estações e portas mantêm o raio padrão de 12 px.
+- **D-145 (sessão #32, entrega direta em preventivas):** quando a origem de uma
+  ordem preventiva coincide com o próprio responsável (`V-02` com Vera e `N-02` com
+  Neusa), a confirmação presencial entrega o objeto diretamente na mão do técnico
+  (`held_item = active_quest + 1`) e avança a etapa imediatamente para `QUEST_DELIVER`,
+  eliminando a segunda interação redundante no mesmo ponto físico.
+- **D-146 (sessão #32, fala de orientação pós-entrega):** ao interagir novamente
+  com o responsável da quest com o objeto já em mãos, o diálogo orienta a rota de
+  entrega no destino ("SIGA A ORDEM: JÁ ENTREGUEI [OBJETO]. LEVE ATÉ [DESTINO]."),
+  reforçando a clareza da etapa atual.
+- **D-147 (sessão #32, linha de rota no HUD com item na mão):** em `hud.pde`,
+  quando o técnico carrega um item (`held_item != ITEM_NONE`), a segunda linha da
+  faixa de ordem exibe `NA MÃO: [OBJETO] | ENTREGA: [DESTINO]`, alinhada à terminologia
+  canônica de `INVENTORY.md`.
+- **D-148 (sessão #32, mapa consultável na etapa de entrega):** em `ship.pde`,
+  a ficha da sala no mapa oculta a linha de `COLETA` quando a etapa já avançou para
+  `QUEST_DELIVER`, exibindo apenas `ENTREGA` na sala de destino.
+- **D-149 (sessão #32, sincronização de som e animação da escada):** o ritmo dos
+  passos na escada foi recalibrado para uma cadência mais cadenciada e natural:
+  animação com quadros de 140 ms (420 ms por passada no LPC de 6 quadros) e
+  `LADDER_STEP_SPACING = 25` px lógicos (~417 ms a 60 FPS), eliminando a sensação
+  acelerada do valor anterior. O primeiro passo dispara em `LADDER_FIRST_STEP = 1` px lógico
+  (~16 ms / 1 quadro), o temporizador `player_animation_started_at` passa a ser
+  reiniciado ao iniciar o movimento na escada, e o subsistema de áudio passa por
+  pré-aquecimento no `setup()` com `primeSound()`.
+- **D-150 (sessão #32, atenuação do som de saída da escada):** atendendo ao pedido
+  de menos destaque ao final do curso da escada, `ladder.wav` foi atenuado em −8,5 dB
+  (pico de −10,0 dBFS para −18,6 dBFS; RMS de −25,6 dBFS para −34,1 dBFS) e filtrado com
+  passa-baixas em 5 kHz, eliminando o estalo metálico agudo e nivelando a presença sonora
+  diretamente à faixa dos passos da subida.
 
 ## Fontes por tarefa
 
@@ -449,11 +479,6 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
 - qualquer nome, retrato ou história além de Vera, Bento, Neusa e Sílvia.
 
 
-## Backlog
-
-- **Redundância na rota de preventivas (origem igual ao responsável):**
-  - **Problema:** Ao selecionar uma ordem preventiva no menu `ORDENS` cujo responsável é também a origem do objeto (ex.: V-02 com Vera ou N-02 com Neusa), o jogador precisa ir até o sobrevivente para confirmar presencialmente (`E`) e, imediatamente no quadro seguinte, é exigido interagir novamente com o mesmo sobrevivente no mesmo ponto físico para "coletar" o item. Isso gera duas confirmações redundantes consecutivas no mesmo NPC sem nenhum deslocamento pelo cenário.
-  - **Solução proposta a decidir:** Evitar sequências em que o responsável seja a origem da coleta (mudando a origem para uma estação física ou console), ou fazer com que a própria confirmação presencial já entregue o objeto diretamente na mão do técnico quando o responsável for a origem da quest.
 ## Checklist de abertura
 
 - [x] Ler este arquivo antes de qualquer avanço.
@@ -475,6 +500,29 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
       funcionalidade pronta.
 
 ## Última sessão registrada
+Sessão da [issue #32](https://github.com/shelldonryan/gtd_example/issues/32) —
+refinamento do fluxo de quests, eliminação de redundâncias e polimento do HUD/mapa.
+
+- **Decisões confirmadas (D-145 a D-150):** entrega direta na confirmação de preventivas
+  (V-02 e N-02) avançando direto para `QUEST_DELIVER`; diálogo de orientação atualizado;
+  linha de rota no HUD exibindo `NA MÃO:` quando item carregado; mapa consultável exibindo
+  apenas entrega na etapa de entrega; sincronização da cadência sonora da escada
+  com a animação de climb (passos a 25 px / 420 ms, partida instantânea em 1 px); e atenuação do
+  som de saída da escada (`ladder.wav` a −18,6 dBFS com passa-baixas em 5 kHz).
+- **Código alterado:** `tasks.pde` (`acceptPreventive`, `interactNpc`), `hud.pde` (`orderRouteLine`),
+  `ship.pde` (`drawRoomCard`), `capture.pde` (`captureCompleteQuest`, asserção de entrega direta)
+  e `prototype/balance-model.mjs` (`acceptPreventive`).
+- **Evidência:** `--hit-test` → 5 `OK`; `--ladder-test` → 6 `OK`; `--capture` → **146 asserções `OK`**,
+  zero `FALHOU`, `QUEST CHECK: PASS`, `som: 6 de 6 carregados`, `arte: 4 de 57 imagens carregadas`.
+  `node prototype/balance-model.mjs --simulate` → `BALANCE CHECK: PASS` (2520/2520 sequências).
+- **Wayfinder:** #32 aberta e mantida OPEN por decisão expressa do usuário, ligada como sub-issue da #1.
+- **Fontes sincronizadas:** `mechanics/ACTIONS.md`, `interface/FLOW.md`, `interface/HUD.md`,
+  `code/SKETCH_ARCHITECTURE.md`, `code/VERIFICATION.md` e este arquivo.
+- **Commits** na branch `prototype/sketch-architecture`, sem push: `a8aeed6` (sketch), `0e632ba` (áudio) e este registro de documentação.
+- Resultado: funcionalidade refinada e verificada no Processing — fluxo de preventivas sem cliques redundantes.
+
+### Sessão anterior — #31
+
 Sessão da [issue #31](https://github.com/shelldonryan/gtd_example/issues/31) —
 suporte híbrido aos padrões Aseprite e Universal LPC, novas animações do player e integração.
 

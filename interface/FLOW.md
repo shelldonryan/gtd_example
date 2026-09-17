@@ -56,14 +56,17 @@ graph LR
    mudam de cor e permanecem centralizados como um único selo. O jogador abre o
    cartão quando quiser; a seleção fica pendente até a confirmação presencial
    com o sobrevivente.
-3. A confirmação presencial transforma a seleção em ordem aceita. A ordem aceita
-   não pode ser cancelada; a outra oferta expira.
+3. A confirmação presencial transforma a seleção em ordem aceita. Quando a origem
+   coincide com o responsável (como em `V-02` e `N-02`), o sobrevivente entrega o
+   objeto diretamente na mão do técnico e a etapa avança imediatamente para `ENTREGAR`.
+   A ordem aceita não pode ser cancelada; a outra oferta expira.
 4. Nos dias 2, 4, 6, 8 e 10, um incidente apresenta duas soluções físicas. O
    jogador escolhe e confirma uma no cartão; não existe contenção separada.
    Quando a transmissão da Terra dispara nesse dia, ela aparece antes do cartão:
    fechá-la revela as duas soluções.
-5. A ordem ativa passa por `COLETAR` e `ENTREGAR`. A coleta confirma o objeto e
-   sua finalidade; a entrega confirma o resultado antes de aplicar.
+5. A ordem ativa passa por `COLETAR` (quando originada em estação física) e `ENTREGAR`
+   (ou diretamente `ENTREGAR` quando entregue em mãos pelo responsável). A coleta
+   confirma o objeto e sua finalidade; a entrega confirma o resultado antes de aplicar.
 6. Uma única quest pode ser concluída por dia. Somente o ponto da etapa atual
    permite interação: responsável da confirmação, origem da coleta ou destino.
 7. Se nenhuma ordem preventiva for aceita, os dois recursos oferecidos sofrem
