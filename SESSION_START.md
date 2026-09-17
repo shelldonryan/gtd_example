@@ -4,10 +4,9 @@
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
 Atualizado após a sessão da
-[issue #7](https://github.com/shelldonryan/gtd_example/issues/7), que separou a
-documentação de design do material de verificação, montou o pacote de entrega e
-preparou o sketch para receber a arte.
-
+[issue #31](https://github.com/shelldonryan/gtd_example/issues/31), que implementou
+o suporte híbrido aos padrões Aseprite e Universal LPC para o player e NPCs,
+ativou animações de climb e jump para o player LPC e integrou o novo player.
 Destino Wayfinder: [issue #1](issue://1)
 
 ## Regras inegociáveis
@@ -108,10 +107,11 @@ reporte e não escolha silenciosamente.
 
 ### Fronteira Wayfinder
 
-Sincronizada com o grafo nativo depois da sessão do #7:
+Sincronizada com o grafo nativo depois da sessão do #31:
 
 | Issue | Estado | Bloqueadores abertos | Relação |
 |---|---|---|---|
+| #31 Suportar spritesheets Aseprite e LPC | CLOSED | — | suporte híbrido transparente, climb e jump para LPC e novo player integrado |
 | #7 Documento de entrega | CLOSED | — | entrega pelo GitHub (repo privado, acesso do professor) e plano B por gravação curta |
 | #29 Camada de assets | CLOSED | — | camada de arte com fallback, travessia de porta e drop-in documentado |
 | #30 Desacoplar o harness | CLOSED | — | cópia entregue sem `capture.pde`, testada fora do repositório |
@@ -244,7 +244,7 @@ Topologia e ordens: `interface/ROOMS.md`.
 - Controles: setas/WASD, espaço, E, ENTER em diálogos/modais, ESC para pausa e
   mouse nos botões `MAPA` e `ORDENS`.
 - HUD: seis ícones 16×16; cartões de recurso com ícone, número, rótulo e barra.
-- Áudio offline: `javax.sound.sampled`, WAV PCM 16 bits em `data/`.
+- Áudio offline: `javax.sound.sampled`, WAV PCM 16 bits em `data/audio/<evento>/` (porta e escada integradas; alerta e clique sem som).
 - A arte entra por arquivo em `data/` (`icons/`, `stations/`, `objects/`,
   `npc/`, `doors/`, `rooms/`, `portraits/`, `screens/`, `map/`), com fallback
   geométrico quando o arquivo não existe, desenho 1:1 no render 1280×720 e
@@ -373,6 +373,29 @@ Não replique aqui o histórico completo:
   usuário**, que cogitou acrescentar outros sons se sobrar tempo; essa ampliação
   é **PROVISÓRIA** — hipótese registrada, nunca requisito, e nada além de porta e
   escada deve ser tratado como escopo.
+- **D-140 (sessão #31, spritesheet do jogador):** o sketch suporta
+  transparentemente os formatos Aseprite e Universal LPC; no LPC, o player ativa
+  `climb` (6 quadros, linha 21) na escada e `jump` (13 quadros, linha 49) no ar,
+  com fallback gracioso para idle/walk quando o sprite for Aseprite.
+- **D-141 (sessão #31, spritesheet de NPCs):** na camada de arte (`assets.pde`),
+  os NPCs suportam transparentemente o formato Universal LPC com orientação
+  frontal (Sul / linha 24, 2 quadros de respiração), além do formato Aseprite com
+  array `"frames"`.
+- **D-142 (sessão #31, organização de assets do jogador):** substituição direta
+  com backup — `player_sheet.png` e `player_sheet.json` passam a ser o novo sprite
+  LPC (832×3456), com o original mantido como `player_sheet_aseprite.*`, backup
+  explícito em `player_sheet_lpc.*` e créditos/licença em `LICENSE.txt`.
+- **D-143 (sessão #31, integração de NPCs e olhar por deck):** os 4 NPCs
+  (`vera.png`, `bento.png`, `neusa.png` e `silvia.png`) foram integrados em `data/npc/`
+  no padrão Universal LPC com `LICENSE.txt`. Em `ship.pde`, `drawNpc` verifica se o
+  jogador está no mesmo convés (`same_deck`): se estiver no mesmo deck, o sobrevivente
+  vira dinamicamente para o técnico (linha 23 para a esquerda, linha 25 para a direita);
+  se estiver em deck diferente ou em escada, mantém a pose neutra/frontal (linha 24),
+  preservando o fallback geométrico caso o asset não exista.
+- **D-144 (sessão #31, raio de interação dos NPCs):** o alcance lateral de
+  interação com NPCs foi ajustado para 22 px (`NPC_INTERACTION_RANGE = 22`), após
+  redução de ~30% em relação aos 32 px iniciais, proporcionando um encaixe justo
+  e natural ao lado do sobrevivente. Estações e portas mantêm o raio padrão de 12 px.
 
 ## Fontes por tarefa
 
@@ -446,6 +469,29 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
       funcionalidade pronta.
 
 ## Última sessão registrada
+Sessão da [issue #31](https://github.com/shelldonryan/gtd_example/issues/31) —
+suporte híbrido aos padrões Aseprite e Universal LPC, novas animações do player e integração.
+
+- **Decisões do usuário (D-140 a D-142):** suporte híbrido transparente a Aseprite e LPC;
+  ativação de `climb` (6 quadros, linha 21) na escada e `jump` (13 quadros, linha 49) no ar
+  para sprites LPC, com fallback gracioso para Aseprite; orientação frontal (Sul / linha 24)
+  para NPCs no formato LPC; substituição direta com backup (`player_sheet_aseprite.*` e `LICENSE.txt`).
+- **Código:** `assets.pde` detecta automaticamente JSON Aseprite (`"frames"`) vs LPC;
+  carrega perfis esquerdo (linha 23) e direito (linha 25) para os NPCs virarem
+  dinamicamente na direção do técnico (D-143); `ship.pde` gerencia máquina de
+  estados com idle, walk, climb e jump.
+- **Assets integrados:** os 4 NPCs foram colocados em `data/npc/` (`vera.png`,
+  `bento.png`, `neusa.png`, `silvia.png`) com `LICENSE.txt`.
+- **Evidência:** `--hit-test` → 5 `OK`; `--ladder-test` → 6 `OK`; `--capture` → **145 asserções `OK`**,
+  zero `FALHOU`, `QUEST CHECK: PASS`, `arte: 4 de 57 imagens carregadas`.
+  Inspeção visual confirma Vera, Bento, Neusa e Sílvia desenhados no convés e olhando
+  para o jogador.
+- **Wayfinder:** #31 criada, rotulada `wayfinder:task`, vinculada como sub-issue da #1 e concluída com evidência.
+- **Commits** na branch `prototype/sketch-architecture`, sem push: `ec99d12` (sketch),
+  `84cfe48` (assets), `5c46a74` (documentos), `a509fe0` (vault) e este registro.
+- Resultado: funcionalidade pronta no jogo Processing — player e 4 NPCs integrados em LPC, com animações e olhar dinâmico.
+### Sessão anterior — #28
+
 
 Sessão da [issue #28](https://github.com/shelldonryan/gtd_example/issues/28) —
 som da escada e da porta escolhidos com o usuário, integrados e verificados.
