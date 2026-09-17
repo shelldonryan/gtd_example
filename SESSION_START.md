@@ -426,6 +426,16 @@ Não replique aqui o histórico completo:
   (pico de −10,0 dBFS para −18,6 dBFS; RMS de −25,6 dBFS para −34,1 dBFS) e filtrado com
   passa-baixas em 5 kHz, eliminando o estalo metálico agudo e nivelando a presença sonora
   diretamente à faixa dos passos da subida.
+- **D-151 (sessão atual, retratos dos NPCs no diálogo):** os 4 retratos em pixel art
+  foram integrados em `data/portraits/` (`vera.png`, `bento.png`, `neusa.png`, `silvia.png`),
+  com fallback automático para `data/npc/*_portrait.png` em `assets.pde`. Em `ui.pde`,
+  `drawPortrait` agora desenha o fundo sólido do card (`COL_PANEL` e `COL_BORDER`) antes
+- **D-152 (sessão atual, sequência canônica de pulo LPC 0-1-2-3-4-1 na linha 29):** a animação de pulo
+  do técnico no padrão Universal LPC foi corrigida para a linha correta de pulo (linha 29, Leste / perfil direito,
+  pertencente ao bloco de 4 direções das linhas 26–29 com 5 quadros cada), usando a sequência canônica
+  `0-1-2-3-4-1` (6 quadros a 75 ms), totalizando 450 ms, sincronizada perfeitamente
+  com o tempo de voo físico de 462 ms (28 frames a 60 FPS). Em quedas prolongadas, o frame é
+  fixado na pose final de aterrissagem via `min(raw_elapsed, total_duration - 1)`, sem repetir o agachamento no ar.
 
 ## Fontes por tarefa
 
@@ -499,7 +509,23 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
 - [x] Declarar se o resultado é documentação, protótipo executável ou
       funcionalidade pronta.
 
-## Última sessão registrada
+### Sessão atual — áudio da escada, retratos de NPC e animação do pulo
+Sessão de correção do áudio da escada, integração dos 4 retratos de diálogo e alinhamento da animação de pulo LPC.
+
+- **Áudio da escada (D-149, D-150):** `primeSound()` agora aquece os clips em frame 0
+  por 50 ms em silêncio durante `setup()`, eliminando a latência do mixer; cadência
+  dos passos calibrada em 27 px lógicos (~450 ms) com o primeiro passo instantâneo em 1 px.
+- **Retratos dos NPCs (D-151):** 4 portraits integrados em `data/portraits/` (`vera.png`,
+  `bento.png`, `neusa.png`, `silvia.png`) com fallback para `data/npc/*_portrait.png`;
+- **Animação do pulo (D-152):** o pulo LPC foi corrigido para a linha real de pulo
+  (linha 29, Leste / perfil direito do bloco 26–29 de 5 quadros), usando a sequência canônica
+  do Universal LPC Generator `0-1-2-3-4-1` (6 quadros a 75 ms), totalizando 450 ms,
+  casando perfeitamente com os 462 ms de tempo no ar da física do pulo (28 frames a 60 FPS).
+  Em quedas longas, o frame congela no quadro final de descida/aterrissagem sem repetir agachamento no ar.
+  `--hit-test` → 5 `OK`; `--capture` → `QUEST CHECK: PASS`, 146 asserções `OK`.
+- **Wayfinder:** #28 reivindicada e mantida OPEN para validação acústica no ambiente de apresentação;
+  #32 mantida OPEN.
+### Sessão anterior — #32
 Sessão da [issue #32](https://github.com/shelldonryan/gtd_example/issues/32) —
 refinamento do fluxo de quests, eliminação de redundâncias e polimento do HUD/mapa.
 

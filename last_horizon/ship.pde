@@ -689,12 +689,12 @@ void loadPlayerAssets(){
     boolean can_idle = player_sheet.height >= 26 * 64;
     boolean can_walk = player_sheet.height >= 12 * 64;
     boolean can_climb = player_sheet.height >= 22 * 64;
-    boolean can_jump = player_sheet.height >= 50 * 64;
+    boolean can_jump = player_sheet.height >= 30 * 64;
 
     int idle_count = can_idle ? 2 : 1;
     int walk_count = can_walk ? 8 : 1;
     int climb_count = can_climb ? 6 : 0;
-    int jump_count = can_jump ? 13 : 0;
+    int jump_count = can_jump ? 6 : 0;
     int total_frames = idle_count + walk_count + climb_count + jump_count;
 
     player_frame_images = new PImage[total_frames];
@@ -744,12 +744,13 @@ void loadPlayerAssets(){
       player_has_climb = true;
     }
 
-    /* 4. Jump: linha 49 (pulo perfil direito), 13 quadros de 70 ms (cols 0..12) */
+    /* 4. Jump: linha 29 (Leste / perfil direito), sequencia canonica LPC 0-1-2-3-4-1 (6 quadros de 75 ms) */
     if (can_jump){
       player_jump_start = idx;
-      for (int col = 0; col < 13; col++){
-        player_frame_images[idx] = player_sheet.get(col * 64, 49 * 64, 64, 64);
-        player_frame_durations[idx] = 70;
+      int[] jump_cols = {0, 1, 2, 3, 4, 1};
+      for (int i = 0; i < jump_cols.length; i++){
+        player_frame_images[idx] = player_sheet.get(jump_cols[i] * 64, 29 * 64, 64, 64);
+        player_frame_durations[idx] = 75;
         idx++;
       }
       player_jump_end = idx - 1;
@@ -831,9 +832,10 @@ int playerCurrentFrame(){
   }
 
   int frame = first;
-  int elapsed = total_duration > 0
-    ? max(0, millis() - player_animation_started_at) % total_duration
-    : 0;
+  int raw_elapsed = max(0, millis() - player_animation_started_at);
+  int elapsed = (state == 3)
+    ? min(raw_elapsed, total_duration - 1)
+    : (total_duration > 0 ? raw_elapsed % total_duration : 0);
 
   while (frame < last){
     int duration = max(1, player_frame_durations[frame]);
@@ -1201,9 +1203,10 @@ int ladderDeckAt(float old_y, float new_y, boolean allow_nearby){
 
 /* The grab sound plays when the technician leaves the ladder, never on mount:
    the climb itself is covered by the steps (#28).
-   Cadence: 25 px matches the 420 ms half-cycle (3 frames @ 140 ms) of LPC climb;
+   Cadence: 27 px gives a small pause between takes while staying close to the
+   420 ms half-cycle (3 frames @ 140 ms) of LPC climb;
    initial step at 1 px ensures instant audio feedback upon starting to climb. */
-final float LADDER_STEP_SPACING = 25;
+final float LADDER_STEP_SPACING = 27;
 final float LADDER_FIRST_STEP = 1;
 float ladder_step_accum = 0;
 int ladder_steps_taken = 0;

@@ -57,14 +57,51 @@ void playSound(Clip clip){
 }
 void primeSound(Clip clip){
   if (clip == null) return;
+
+  FloatControl gain = null;
+  BooleanControl mute = null;
+  float original_gain = 0;
+  boolean original_mute = false;
+
   try {
-    clip.setFramePosition(clip.getFrameLength());
-    clip.start();
+    /*
+      Clip.open() decodes the file but does not necessarily start the
+      platform mixer. Starting at the end, as before, could leave that
+      initialization for the first real step.
+    */
+    if (clip.isControlSupported(BooleanControl.Type.MUTE)){
+      mute = (BooleanControl) clip.getControl(BooleanControl.Type.MUTE);
+      original_mute = mute.getValue();
+      mute.setValue(true);
+    } else if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)){
+      gain = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+      original_gain = gain.getValue();
+      gain.setValue(gain.getMinimum());
+    } else if (clip.isControlSupported(FloatControl.Type.VOLUME)){
+      gain = (FloatControl) clip.getControl(FloatControl.Type.VOLUME);
+      original_gain = gain.getValue();
+      gain.setValue(gain.getMinimum());
+    }
+
     clip.stop();
     clip.setFramePosition(0);
+    clip.start();
+    Thread.sleep(50);
   }
   catch (Exception error) {
     // Silenciosamente ignora se o mixer nao suportar pre-roll
+  }
+  finally {
+    clip.stop();
+    clip.setFramePosition(0);
+
+    if (mute != null){
+      mute.setValue(original_mute);
+    }
+
+    if (gain != null){
+      gain.setValue(original_gain);
+    }
   }
 }
 

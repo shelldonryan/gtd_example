@@ -236,6 +236,9 @@ void loadArtAssets(){
       ART_NPC_DIR + art_crew_file[crew] + ".png",
       ART_NPC_DIR + art_crew_file[crew] + ".json");
     art_portrait[crew] = loadArt(ART_PORTRAIT_DIR + art_crew_file[crew] + ".png");
+    if (art_portrait[crew] == null){
+      art_portrait[crew] = loadArt(ART_NPC_DIR + art_crew_file[crew] + "_portrait.png");
+    }
   }
 
   for (int room = 0; room < ROOM_COUNT; room++){

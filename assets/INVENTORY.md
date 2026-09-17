@@ -174,8 +174,9 @@ Os sons vivem em `data/audio/<evento>/`, cada pasta com o seu `LICENSE.txt`:
 | `audio/ladder/` | `ladder.wav`, `step_01..04.wav` | saída da escada; passos durante a subida/descida |
 
 Formato de todos: WAV PCM 16 bits, 44,1 kHz, mono. O engate da escada não tem
-som próprio — quem avisa que o técnico pegou a escada são os passos, a cada
-18 px lógicos.
+som próprio — o primeiro passo avisa que o técnico pegou a escada após 1 px
+lógico; os passos seguintes tocam a cada 27 px lógicos (~450 ms), sincronizados
+à animação.
 
 Créditos e receita ficam no `LICENSE.txt` de cada pasta: a escada usa passo de
 alumínio do congusbongus (CC-BY 3.0, derivado de *"fboots on aluminum ladder 01"*

@@ -39,9 +39,9 @@ plano e executa o contrato descrito em [[ACTIONS]] e nas notas de `events/`.
   restante pela camada de arte. A pasta `data/` é o diretório de assets do
   Processing.
 - Para o técnico (`player_sheet.*`), o formato LPC extrai `idle` (2 quadros, linha 25),
-  `walk` (8 quadros, linha 11), `climb` (6 quadros, linha 21) e `jump` (13 quadros,
-  linha 49). No Aseprite (`player_sheet_aseprite.*`), o formato mantém `idle` (0–1) e
-  `walk` (2–9), com fallback gracioso de climb e jump para idle e walk (D-140).
+  `walk` (8 quadros, linha 11), `climb` (6 quadros, linha 21) e `jump` (sequência
+  canônica LPC 0-1-2-3-4-1, 6 quadros a 75 ms, linha 29). No Aseprite, o formato
+  mantém fallback gracioso de climb e jump para idle e walk (D-140, D-151, D-152).
 - Para os NPCs em `last_horizon/assets.pde`, o formato LPC extrai a visão frontal
   (Sul / linha 24, 2 quadros de respiração), enquanto o Aseprite lê as coordenadas
   do array `"frames"` (D-141).

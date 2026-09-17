@@ -28,4 +28,4 @@ Niveis finais (pedido do usuario: menos destaque e volume suavizado no fim do cu
 
 Uso no jogo: ladder.wav apenas na saida da escada (o engate nao tem som); os
 passos tocam ao subir/descer sincronizados com a animacao de climb (primeiro
-passo em 1 px logico, passos seguintes a cada 25 px logicos — issue #32).
+passo em 1 px logico, passos seguintes a cada 27 px logicos — issue #32).

@@ -62,9 +62,12 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
   abrir, trocar de sala e fechar.
 - **Áudio na verificação:** a camada de áudio (`last_horizon/audio.pde`) usa
   `javax.sound.sampled` da JVM e carrega 6 de 6 clipes (`som: 6 de 6 carregados`).
-  Se a pasta `data/audio/` ou qualquer arquivo estiver ausente, o carregador
-  emite aviso no console e o sketch continua executando mudo, sem exceção; os
-  testes de `--capture` e `--ladder-test` passam identicamente.
+  Durante o `setup()`, cada clip é iniciado no frame 0 por 50 ms em modo silencioso
+  (`MUTE`, `MASTER_GAIN` ou `VOLUME` mínimo), depois é parado, reposicionado e
+  aquece o mixer antes do primeiro passo real. Se a pasta `data/audio/` ou
+  qualquer arquivo estiver ausente, o carregador emite aviso no console e o
+  sketch continua executando mudo, sem exceção; os testes de `--capture` e
+  `--ladder-test` passam identicamente.
 - **Contagem atual:** `--capture` fecha em **146 asserções `OK`** com
   `QUEST CHECK: PASS`. Medido no repositório com os sons integrados, na cópia
   sem arte, na cópia com as 57 fixtures e no híbrido sem os fundos de sala.

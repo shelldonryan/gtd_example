@@ -154,6 +154,10 @@ void drawDialogue(PGraphics g){
 
 
 void drawPortrait(PGraphics g, String name, float x, float y){
+  g.stroke(COL_BORDER);
+  g.fill(COL_PANEL);
+  g.rect(x, y, ART_PORTRAIT_W, ART_PORTRAIT_H, 4);
+
   PImage art = crewPortraitArt(name);
 
   if (art != null){
@@ -165,9 +169,6 @@ void drawPortrait(PGraphics g, String name, float x, float y){
     : name.equals("SÍLVIA") ? COL_ORANGE
     : name.equals("BENTO") ? COL_GREEN : COL_YELLOW;
 
-  g.stroke(COL_BORDER);
-  g.fill(COL_PANEL);
-  g.rect(x, y, 112, 138, 4);
   g.noStroke();
   g.fill(colour);
   g.ellipse(x + 56, y + 40, 46, 46);
