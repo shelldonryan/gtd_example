@@ -214,6 +214,10 @@ void drawMapRoomCard(PGraphics g, int index){
   int border = selected ? COL_CYAN : (hover ? COL_CYAN : COL_BORDER);
 
   drawPanel(g, room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H, border);
+  drawArtCorner(g, art_map == null ? null : art_map[index], room_x[index], MAP_ROOM_Y, ART_MAP_W, ART_MAP_H);
+  g.noFill();
+  g.stroke(border);
+  g.rect(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H, 3);
   textCentered(g, room_label[index], room_x[index] + MAP_ROOM_W / 2.0,
     MAP_ROOM_Y + 8, 16, selected ? COL_CYAN : COL_TEXT);
   textCentered(g, roomProblemCount(room_screen[index]) + " PROBLEMA(S)",
@@ -276,10 +280,18 @@ String roomSystems(int index){
 
 
 void drawRoom(PGraphics g){
-  drawBackdrop(g, ROOM_LEFT, ROOM_TOP, ROOM_RIGHT - ROOM_LEFT, ROOM_BOTTOM - ROOM_TOP);
+  PImage backdrop = art_backdrop == null ? null : art_backdrop[roomIndex(screen)];
+
+  if (backdrop != null){
+    /* painted floor and ladders replace the geometry; collision stays in code */
+    drawArtCorner(g, backdrop, 0, ART_BACKDROP_TOP, BASE_W, ART_BACKDROP_H);
+  } else {
+    drawBackdrop(g, ROOM_LEFT, ROOM_TOP, ROOM_RIGHT - ROOM_LEFT, ROOM_BOTTOM - ROOM_TOP);
+    drawDecks(g);
+    drawLadders(g);
+  }
+
   drawRoomTitle(g);
-  drawDecks(g);
-  drawLadders(g);
   drawDoors(g);
 
   for (int i = 0; i < POINT_COUNT; i++){
@@ -346,9 +358,21 @@ void drawDoors(PGraphics g){
     float x = door_x[i];
     float y = door_y[i];
     boolean nearby = doorInRange(i);
-    g.fill(nearby ? COL_CYAN_DARK : COL_PANEL_2);
-    g.stroke(nearby ? COL_CYAN : COL_BORDER);
-    g.rect(x - DOOR_W / 2.0, y - DOOR_H, DOOR_W, DOOR_H);
+    PImage art = doorFrame(i);
+
+    if (art != null){
+      drawArt(g, art, x, y - ART_DOOR_H / 2, ART_DOOR_W, ART_DOOR_H);
+      if (nearby){
+        g.noFill();
+        g.stroke(COL_CYAN);
+        g.rect(x - DOOR_W / 2.0, y - DOOR_H, DOOR_W, DOOR_H);
+      }
+    } else {
+      g.fill(nearby ? COL_CYAN_DARK : COL_PANEL_2);
+      g.stroke(nearby ? COL_CYAN : COL_BORDER);
+      g.rect(x - DOOR_W / 2.0, y - DOOR_H, DOOR_W, DOOR_H);
+    }
+
     if (!nearby) continue;
 
     String label = "E - " + roomTitle(door_target[i]);
@@ -358,6 +382,85 @@ void drawDoors(PGraphics g){
       text(g, label, x - 210, y - 58, 16, COL_CYAN);
     }
   }
+}
+
+
+final int DOOR_PHASE_CLOSED = 0;
+final int DOOR_PHASE_OPENING = 1;
+final int DOOR_PHASE_CLOSING = 2;
+
+int door_transition_door = -1;
+int door_transition_phase = DOOR_PHASE_CLOSED;
+int door_transition_started = 0;
+int door_transition_target = SCREEN_NONE;
+int door_transition_return_door = -1;
+float door_transition_arrival_x = 0;
+float door_transition_arrival_y = 0;
+int door_transition_facing = 1;
+
+
+/* Closed frame by default; the travelling door shows the open frame while the
+   room changes. With no door art, the geometric door stays as it is. */
+PImage doorFrame(int index){
+  PImage closed = artFrame(art_door_frames, 0);
+  PImage open = art_door_frames != null && art_door_frames.length > 1 ? art_door_frames[1] : null;
+
+  if (open != null && door_transition_door == index && doorTransitionActive()){
+    return open;
+  }
+
+  return closed;
+}
+
+
+boolean doorTransitionActive(){
+  return door_transition_phase != DOOR_PHASE_CLOSED;
+}
+
+
+void startDoorTransition(int door){
+  int from_screen = screen;
+  int target_screen = door_target[door];
+  boolean returning = last_portal_valid
+    && last_portal_from_room == target_screen
+    && last_portal_to_room == from_screen;
+
+  door_transition_door = door;
+  door_transition_phase = DOOR_PHASE_OPENING;
+  door_transition_started = millis();
+  door_transition_target = target_screen;
+  door_transition_return_door = doorInRoomLeadingTo(target_screen, from_screen);
+  door_transition_arrival_x = returning ? last_portal_from_x : door_arrival_x[door];
+  door_transition_arrival_y = returning ? last_portal_from_y : door_arrival_y[door];
+  door_transition_facing = door_arrival_facing[door];
+
+  last_portal_valid = true;
+  last_portal_from_room = from_screen;
+  last_portal_to_room = target_screen;
+  last_portal_from_x = player_x + PLAYER_W / 2.0;
+  last_portal_from_y = player_y + PLAYER_H;
+}
+
+
+/* The player stays put while the door art opens; the room changes at the end of
+   the opening phase and the arrival door closes right after. */
+void updateDoorTransition(){
+  if (millis() - door_transition_started < ART_DOOR_PHASE_MS){
+    return;
+  }
+
+  door_transition_started = millis();
+
+  if (door_transition_phase == DOOR_PHASE_OPENING){
+    enterRoomAtPosition(door_transition_target, door_transition_arrival_y,
+      door_transition_arrival_x, door_transition_facing);
+    door_transition_door = door_transition_return_door;
+    door_transition_phase = DOOR_PHASE_CLOSING;
+    return;
+  }
+
+  door_transition_door = -1;
+  door_transition_phase = DOOR_PHASE_CLOSED;
 }
 
 
@@ -393,10 +496,12 @@ void drawRoomPoint(PGraphics g, int point){
   float x = point_x[point];
   float y = point_y[point];
 
-  g.stroke(nearby ? COL_CYAN : COL_BORDER);
-  g.fill(nearby ? COL_CYAN_DARK : COL_PANEL);
-  g.rect(x - 12, y - 22, 24, 18, 2);
-  if (available) text(g, str(pointMarker(point_kind[point])), x - 3, y - 22, 16, colour);
+  if (!drawPointArt(g, point, x, y)){
+    g.stroke(nearby ? COL_CYAN : COL_BORDER);
+    g.fill(nearby ? COL_CYAN_DARK : COL_PANEL);
+    g.rect(x - 12, y - 22, 24, 18, 2);
+    if (available) text(g, str(pointMarker(point_kind[point])), x - 3, y - 22, 16, colour);
+  }
   textCentered(g, pointDisplayLabel(point), x, y - 44, 16, colour);
   if (point == nextQuestPoint()){
     String step = active_quest < 0 ? "CONFIRMAR" : quest_stage == QUEST_COLLECT ? "COLETAR" : "ENTREGAR";
@@ -414,6 +519,26 @@ void drawRoomPoint(PGraphics g, int point){
   if (point_kind[point] == POINT_NPC){
     drawNpc(g, x, y, point_label[point], nearby);
   }
+}
+
+
+/* Art of a station or of the hull replaces the generic rectangle; NPC sprites
+   are drawn by drawNpc. Returns false when the point keeps the geometry. */
+boolean drawPointArt(PGraphics g, int point, float x, float y){
+  if (point_kind[point] == POINT_NPC){
+    return false;
+  }
+
+  PImage art = point == POINT_HULL
+    ? artFrame(art_hull_frames, ART_HULL_FRAME_MS)
+    : (art_station == null ? null : art_station[point]);
+
+  if (art == null){
+    return false;
+  }
+
+  drawArt(g, art, x, y - ART_SPRITE_DRAW / 2, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
+  return true;
 }
 
 
@@ -439,6 +564,13 @@ char pointMarker(int kind){
 
 
 void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
+  PImage art = artFrame(crewArtFrames(name), ART_NPC_FRAME_MS);
+
+  if (art != null){
+    drawArt(g, art, x, y - PLAYER_H / 2.0, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
+    return;
+  }
+
   g.noStroke();
   g.fill(nearby ? COL_CYAN : COL_ORANGE);
   g.rect(x - PLAYER_W / 2.0, y - PLAYER_H, PLAYER_W, PLAYER_H);
@@ -658,6 +790,11 @@ int doorInRoomLeadingTo(int room_id, int target){
 }
 
 void enterRoomThroughDoor(int door){
+  if (doorFrame(door) != null){
+    startDoorTransition(door);
+    return;
+  }
+
   int from_screen = screen;
   int target_screen = door_target[door];
   boolean returning_to_previous_room =
@@ -739,6 +876,13 @@ boolean useNearbyDoor(){
 
 
 void updateRoom(){
+  if (doorTransitionActive()){
+    updateDoorTransition();
+    jump_queued = false;
+    interact_queued = false;
+    return;
+  }
+
   if (paused || modalOpen()){
     jump_queued = false;
     interact_queued = false;
@@ -1001,8 +1145,25 @@ boolean isPointInRange(int point){
 }
 
 void drawQuestObject(PGraphics g, float x, float y){
+  PImage art = questObjectArt(questObjectShown());
+
+  if (art != null){
+    drawArt(g, art, x, y, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
+    return;
+  }
+
   g.stroke(COL_ORANGE);
   g.fill(COL_PANEL_2);
   g.rect(x - 4, y - 4, 8, 8);
   g.line(x - 2, y, x + 2, y);
+}
+
+
+/* Object on screen: the one in hand, or the quest at its collect step. */
+int questObjectShown(){
+  if (held_item > 0){
+    return held_item - 1;
+  }
+
+  return active_quest >= 0 ? active_quest : selected_order;
 }

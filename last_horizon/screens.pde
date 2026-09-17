@@ -231,8 +231,20 @@ void nextVignettePage(){
 }
 
 
-void drawInitScreen(PGraphics g){
+void drawScreenBackdrop(PGraphics g, int index){
+  PImage art = art_screen == null ? null : art_screen[index];
+
+  if (art != null){
+    drawArtCorner(g, art, 0, 0, BASE_W, BASE_H);
+    return;
+  }
+
   drawStars(g);
+}
+
+
+void drawInitScreen(PGraphics g){
+  drawScreenBackdrop(g, 0);
 
   textCentered(g, "LAST HORIZON", BASE_W / 2.0, 62, 32, COL_CYAN);
   textCentered(g, "A TERRA FICOU PARA TRÁS. MARTE É O DESTINO.", BASE_W / 2.0, 108, 10, COL_MUTED);
@@ -249,7 +261,7 @@ void drawInitScreen(PGraphics g){
 
 
 void drawVignetteScreen(PGraphics g){
-  drawStars(g);
+  drawScreenBackdrop(g, 0);
 
   float y = 132;
 
@@ -266,7 +278,7 @@ void drawVignetteScreen(PGraphics g){
 
 
 void drawVictoryScreen(PGraphics g){
-  drawStars(g);
+  drawScreenBackdrop(g, 1);
 
   String trip = (day >= trip_days) ? str(trip_days) : str(day);
 
@@ -282,7 +294,7 @@ void drawVictoryScreen(PGraphics g){
 
 
 void drawGameOverScreen(PGraphics g){
-  drawStars(g);
+  drawScreenBackdrop(g, 2);
 
   textCentered(g, "FIM DA VIAGEM", BASE_W / 2.0, 52, 20, COL_RED);
   textCentered(g, gameOverTitle(), BASE_W / 2.0, 88, 14, COL_ORANGE);

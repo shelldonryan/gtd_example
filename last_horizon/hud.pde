@@ -72,6 +72,11 @@ void drawResourceCard(PGraphics g, float x, int icon, float value, int accent, f
 
 
 void drawResourceIcon(PGraphics g, int icon, float x, float y, int colour){
+  if (art_icon != null && art_icon[icon] != null){
+    drawArt(g, art_icon[icon], x + ART_ICON_DRAW / 2, y + ART_ICON_DRAW / 2, ART_ICON_DRAW, ART_ICON_DRAW);
+    return;
+  }
+
   g.noStroke();
   g.fill(colour);
 
@@ -127,6 +132,11 @@ String resourceIconLabel(int icon){
 
 
 void drawWarningIcon(PGraphics g, float x, float y){
+  if (art_icon != null && art_icon[ART_ICON_WARNING] != null){
+    drawArt(g, art_icon[ART_ICON_WARNING], x + ART_ICON_DRAW / 2, y + ART_ICON_DRAW / 2, ART_ICON_DRAW, ART_ICON_DRAW);
+    return;
+  }
+
   g.fill(COL_RED);
   g.triangle(x + 8, y, x + 16, y + 16, x, y + 16);
   g.fill(COL_BG);

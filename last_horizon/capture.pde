@@ -36,6 +36,65 @@ String[] capture_label = {
   "survivor_rescued", "pause", "defeat", "victory", "dense_night_forecast",
   "day_3_night_modal", "help_panel", "day_2_free_dormitory", "earth_transmission"
 };
+/* The harness lives only in the repository sketch: the delivered copy leaves
+   this tab out. It installs its hooks in the main tab's extension points and
+   returns false outside the verification modes, letting the game draw. */
+boolean harness_installed = installHarness();
+
+
+boolean installHarness(){
+  harness_setup = () -> {
+    readArgs();
+    if (hit_test_mode){
+      surface.setSize(1400, 900);
+    }
+  };
+  harness_update = () -> updateCapture();
+  harness_scene = (target) -> harnessDrawScene(target);
+  return true;
+}
+
+
+PImage[] door_art_saved;
+boolean door_art_cleared = false;
+
+
+/* Os testes de portal assumem a travessia instantânea: o bloco limpa a arte da
+   porta e devolve o estado anterior no fim. */
+void clearDoorArt(){
+  if (!door_art_cleared){
+    door_art_saved = art_door_frames;
+    door_art_cleared = true;
+  }
+
+  art_door_frames = new PImage[2];
+}
+
+
+void restoreDoorArt(){
+  if (door_art_cleared){
+    art_door_frames = door_art_saved;
+    door_art_saved = null;
+    door_art_cleared = false;
+  }
+}
+
+
+boolean harnessDrawScene(PGraphics target){
+  if (pipeline_test_mode){
+    drawPipelineProbe(target);
+    return true;
+  }
+
+  if (capture_mode && capture_step >= capture_label.length && campaign_checks_running){
+    drawCaptureCheckScreen(target);
+    return true;
+  }
+
+  return false;
+}
+
+
 void readArgs(){
   if (args == null){
     return;
@@ -309,7 +368,11 @@ void runCaptureStep(int step){
 void captureStartDay(int target){
   resetRun();
   day = target;
-  incident_sequence[0] = PROBLEM_ENGINE;
+  /* deterministico: o sorteio podia repetir o motor no dia 4 e aceitar a
+     solucao do problema anterior, quebrando a assercao de prioridade */
+  int[] capture_sequence = {PROBLEM_ENGINE, PROBLEM_HULL, PROBLEM_FOOD,
+    PROBLEM_CONFLICT, PROBLEM_LIFE_SUPPORT};
+  arrayCopy(capture_sequence, incident_sequence);
   enterRoom(target == 1 ? SCREEN_COMMAND : SCREEN_DORMITORY);
   openDay();
   transmission_open = false;
@@ -435,6 +498,7 @@ void checkTransmissionMessages(){
 
 void runRuleChecks(){
   checkConnectedDoors();
+  if (!checks_failed) checkDoorTraversalArt();
   if (!checks_failed) checkNpcDialogue();
   if (!checks_failed) checkPlayerFacing();
   if (!checks_failed) checkPlayerAnimationLoop();
@@ -811,11 +875,13 @@ void checkPlayerFacing(){
   verify("jogador olha para a direita", player_facing == 1);
 
   move_right_held = false;
+  clearDoorArt();
   enterRoom(SCREEN_MACHINES);
   placePlayerAtDoor(doorInRoomLeadingTo(SCREEN_MACHINES, SCREEN_COMMAND));
   useNearbyDoor();
   verify("retorno ao hub olha para a esquerda",
     screen == SCREEN_COMMAND && player_facing == -1);
+  restoreDoorArt();
 }
 
 void checkPlayerAnimationLoop(){
@@ -840,7 +906,39 @@ void checkPlayerAnimationLoop(){
 }
 
 
+/* A travessia em dois quadros só existe quando há arte de porta: o teste
+   instala um par de quadros e confere abrir -> trocar de sala -> fechar. */
+void checkDoorTraversalArt(){
+  int door = doorInRoomLeadingTo(SCREEN_COMMAND, SCREEN_MACHINES);
+  clearDoorArt();
+  resetRun();
+  event_open = false;
+  enterRoom(SCREEN_COMMAND);
+  placePlayerAtDoor(door);
+  art_door_frames[0] = createGraphics(64, 128);
+  art_door_frames[1] = createGraphics(64, 128);
+
+  verify("arte da porta assume a travessia em dois quadros",
+    doorFrame(door) != null && useNearbyDoor()
+    && screen == SCREEN_COMMAND && doorTransitionActive());
+
+  door_transition_started = millis() - ART_DOOR_PHASE_MS - 1;
+  updateRoom();
+  verify("travessia troca de sala com o quadro aberto",
+    screen == SCREEN_MACHINES && doorTransitionActive());
+
+  door_transition_started = millis() - ART_DOOR_PHASE_MS - 1;
+  updateRoom();
+  verify("travessia fecha o quadro ao chegar",
+    !doorTransitionActive() && screen == SCREEN_MACHINES);
+
+  restoreDoorArt();
+}
+
+
 void checkConnectedDoors(){
+  clearDoorArt();
+
   for (int door = 0; door < DOOR_COUNT; door++){
     resetRun();
     event_open = false;
@@ -873,6 +971,7 @@ void checkConnectedDoors(){
     && abs(player_y + PLAYER_H - entered_feet_y) <= 0.1);
 
   checkDoorAnywhere();
+  restoreDoorArt();
 }
 
 
@@ -892,6 +991,7 @@ void placePlayerAtDoor(int door){
 
 
 void checkDoorAnywhere(){
+  clearDoorArt();
   final int door = 1;
   float saved_x = door_x[door];
   float saved_y = door_y[door];
@@ -975,6 +1075,7 @@ void checkDoorAnywhere(){
   door_arrival_x[door] = saved_arrival_x;
   door_arrival_y[door] = saved_arrival_y;
   door_arrival_facing[door] = saved_arrival_facing;
+  restoreDoorArt();
 }
 void runHitTest(){
   resetRun();

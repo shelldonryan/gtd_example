@@ -73,6 +73,16 @@ String[] quest_object = {
   "CARTUCHO DE OXIGÊNIO", "FILTRO DE CO2", "FUSÍVEL DE POTÊNCIA", "MÓDULO DE RELÉ",
   "BOBINA DE TRANSMISSÃO", "CÉLULA DE SINAL"
 };
+/* Art file of each object, in data/objects/ (assets/INVENTORY.md); objects
+   reused across quests share the same PNG. */
+String[] quest_object_file = {
+  "bobina_transmissao", "cartao_rota", "caixa_provisoes", "chave_torque",
+  "filtro_agua", "cartoes_mediacao", "modulo_rele", "cartucho_oxigenio",
+  "chave_torque", "atuador_motor", "kit_vedacao", "placa_blindagem",
+  "caixa_provisoes", "selante_estoque", "cartoes_mediacao", "refeicao_quente",
+  "cartucho_oxigenio", "filtro_co2", "fusivel_potencia", "modulo_rele",
+  "bobina_transmissao", "celula_sinal"
+};
 int[] quest_owner = {0, 0, 1, 1, 2, 2, 3, 3, 3, 3, 3, 3, 1, 1, 2, 2, 3, 3, 3, 3, 0, 0};
 int[] quest_origin = {
   POINT_RESERVE, POINT_VERA, POINT_RESERVE, POINT_RESERVE, POINT_ROUTE, POINT_NEUSA, POINT_ROUTE, POINT_ROUTE,

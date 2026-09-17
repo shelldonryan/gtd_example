@@ -200,6 +200,18 @@ boolean key_char_pressed = false;
 char key_char = ' ';
 
 
+/* Verification seam — the harness tab exists only in the repository sketch and
+   installs its hooks at construction. The delivered copy keeps the inert
+   defaults below, so the game compiles and runs without the harness. */
+interface SceneHook {
+  boolean draw(PGraphics target);
+}
+
+Runnable harness_setup = () -> {};
+Runnable harness_update = () -> {};
+SceneHook harness_scene = (target) -> false;
+
+
 void settings(){
   size(RENDER_W, RENDER_H);
   noSmooth();
@@ -217,12 +229,9 @@ void setup(){
 
   frameRate(60);
   cursor(ARROW);
-  readArgs();
   loadPlayerAssets();
-
-  if (hit_test_mode){
-    surface.setSize(1400, 900);
-  }
+  loadArtAssets();
+  harness_setup.run();
 }
 
 
@@ -238,7 +247,7 @@ void draw(){
   updateCursor();
   drawWindow();
 
-  updateCapture();
+  harness_update.run();
 }
 
 
@@ -257,12 +266,7 @@ void drawBase(){
   resetButtons();
 
   draw_layer = LAYER_SCENE;
-  if (pipeline_test_mode){
-    drawPipelineProbe(base);
-  } else if (capture_mode && capture_step >= capture_label.length
-    && campaign_checks_running){
-    drawCaptureCheckScreen(base);
-  } else {
+  if (!harness_scene.draw(base)){
     drawScreen(base);
 
     if (!isMenuScreen()){

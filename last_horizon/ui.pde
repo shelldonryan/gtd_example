@@ -154,6 +154,13 @@ void drawDialogue(PGraphics g){
 
 
 void drawPortrait(PGraphics g, String name, float x, float y){
+  PImage art = crewPortraitArt(name);
+
+  if (art != null){
+    drawArtCorner(g, art, x, y, ART_PORTRAIT_W, ART_PORTRAIT_H);
+    return;
+  }
+
   int colour = name.equals("VERA") ? COL_CYAN
     : name.equals("SÍLVIA") ? COL_ORANGE
     : name.equals("BENTO") ? COL_GREEN : COL_YELLOW;
