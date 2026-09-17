@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "characters/npcs/NPC_1.md",
-                "mode": "source",
+                "file": "SESSION_START.md",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "NPC_1"
+              "title": "SESSION_START"
             }
           }
         ]
@@ -190,22 +190,7 @@
   },
   "active": "6df08084aed092ca",
   "lastOpenFiles": [
-    "prototype/font_preview/font_preview.png",
-    "prototype/font_preview/font_preview.pde",
-    "prototype/font_preview",
-    "prototype",
-    "characters/npcs/NPC_1.md",
     "mechanics/ACTIONS.md",
-    "last_horizon/output/08_silvia_dialog_window.png",
-    "last_horizon/output/08_silvia_dialog.png",
-    "last_horizon/output/22_game_over_window.png",
-    "last_horizon/output/22_game_over.png",
-    "last_horizon/output/20_event_result_window.png",
-    "last_horizon/output/20_event_result.png",
-    "last_horizon/output/19_event_modal_window.png",
-    "last_horizon/output/19_event_modal.png",
-    "last_horizon/output/18_end_day_confirm_window.png",
-    "last_horizon/output/18_end_day_confirm.png",
     "interface/TEXT_FONTS.md",
     "interface/ROOMS.md",
     "interface/MENU_VICTORY.md",
@@ -219,14 +204,30 @@
     "events/SYSTEM_FAULTS.md",
     "events/HAZARDS.md",
     "events/CREW_ISSUES.md",
+    "docs/adr/0001-ordens-e-incidentes-como-quests.md",
+    "docs/adr/0002-simplificacao-do-ciclo-diario.md",
     "code/SKETCH_ARCHITECTURE.md",
     "characters/PLAYER.md",
-    "SESSION_START.md",
-    "README.md",
-    "AGENTS.md",
     "characters/npcs/NPC_4.md",
     "characters/npcs/NPC_3.md",
     "characters/npcs/NPC_2.md",
+    "characters/npcs/NPC_1.md",
+    "prototype/font_preview/font_preview.png",
+    "prototype/font_preview/font_preview.pde",
+    "prototype/font_preview",
+    "prototype",
+    "last_horizon/output/08_silvia_dialog_window.png",
+    "last_horizon/output/08_silvia_dialog.png",
+    "last_horizon/output/22_game_over_window.png",
+    "last_horizon/output/22_game_over.png",
+    "last_horizon/output/20_event_result_window.png",
+    "last_horizon/output/20_event_result.png",
+    "last_horizon/output/19_event_modal_window.png",
+    "last_horizon/output/19_event_modal.png",
+    "last_horizon/output/18_end_day_confirm_window.png",
+    "SESSION_START.md",
+    "README.md",
+    "AGENTS.md",
     "last_horizon/tasks.pde",
     "assets/concept_arts",
     "last_horizon/screens.pde",
@@ -234,7 +235,6 @@
     "last_horizon/ui.pde",
     "last_horizon/output",
     "last_horizon/data/m5x7.ttf",
-    "mechanics/economy/MONEY.md",
-    "mechanics/economy/BUYABLE.md"
+    "mechanics/economy/MONEY.md"
   ]
 }
