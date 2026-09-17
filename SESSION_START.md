@@ -479,8 +479,11 @@ som da escada e da porta escolhidos com o usuário, integrados e verificados.
   ausente, `5 de 6 carregados`, jogo mudo e sem exceção.
 - **Wayfinder:** #28 permanece OPEN por decisão do usuário (D-139), com o corpo
   reescrito no estado entregue; a #1 registra a entrega e a hipótese.
-- **Commits:** nenhum — a árvore segue no working tree, pela regra de não
-  commitar sem solicitação. A branch `entrega` precisa ser remontada
+- **Commits** na branch `prototype/sketch-architecture`, sem push: `f11ca5b`
+  (sketch), `274aa4a` (sons), `ce7098a` (documentos), `34dda16` (vault) e o
+  próprio registro de commits. A
+  árvore fica limpa, exceto `last_horizon/data/player/player_sheet_new.*`, que
+  não é desta sessão. A branch `entrega` precisa ser remontada
   (`node tools/snapshot-entrega.mjs`) antes de publicar.
 - Resultado: funcionalidade pronta no jogo Processing — som de porta e de escada,
   com licenças e níveis documentados.
