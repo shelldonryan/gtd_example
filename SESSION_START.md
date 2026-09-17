@@ -456,8 +456,14 @@ receber arte.
 - Wayfinder: #29 e #30 CLOSED com evidência; #7 desbloqueada no grafo (as duas
   dependências concluídas) e fechada no fim da sessão com entrega pelo GitHub e
   plano B por gravação curta.
-- Pendências: som (#28) e a seleção da arte seguem abertos; nada foi commitado
-  nesta sessão — o delta está no working tree.
+- Commits da sessão na branch de trabalho, sem push: `acca499` (sketch),
+  `9124fbf` (documentos), `6d52247` (resumo), `8ff4f26` (Obsidian) e `00bc5fa`
+  (script do snapshot e regra D-134).
+- A branch `entrega` foi gerada por `tools/snapshot-entrega.mjs` — 42 arquivos,
+  sem material de verificação — e o script não cria commit quando a árvore não
+  mudou.
+- Pendências: som (#28) e a seleção da arte seguem abertos, e a gravação do
+  plano B é ação do usuário até 23/09.
 - Resultado: protótipo executável pronto para receber arte e pacote de entrega
   montado e verificado.
 
