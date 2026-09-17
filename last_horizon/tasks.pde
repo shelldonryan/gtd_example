@@ -287,10 +287,17 @@ void acceptPreventive(){
   active_quest = q;
   selected_order = -1;
   preventive_committed = true;
-  quest_stage = QUEST_COLLECT;
   dialog_open = false;
   pending_quest_action = ACTION_NONE;
-  system_message = "ORDEM CONFIRMADA. COLETE " + quest_object[q] + ".";
+  if (quest_origin[q] == crew_point[quest_owner[q]]){
+    held_item = active_quest + 1;
+    quest_stage = QUEST_DELIVER;
+    system_message = "ORDEM CONFIRMADA. " + crew_name[quest_owner[q]] + " ENTREGOU " + quest_object[q] + ".";
+  } else {
+    held_item = ITEM_NONE;
+    quest_stage = QUEST_COLLECT;
+    system_message = "ORDEM CONFIRMADA. COLETE " + quest_object[q] + ".";
+  }
 }
 
 void acceptSolution(int q){
@@ -481,8 +488,13 @@ void interactNpc(int point){
   }
 
   if (active_quest >= 0 && quest_owner[active_quest] == owner){
-    openDialogue(name, "SIGA A ORDEM: " + questStageLabel(active_quest) + " " + quest_object[active_quest]
-      + " — " + pointLocation(nextQuestPoint()) + ". " + questEffect(active_quest) + ".");
+    if (quest_stage == QUEST_DELIVER && quest_origin[active_quest] == crew_point[owner]){
+      openDialogue(name, "SIGA A ORDEM: JÁ ENTREGUEI " + quest_object[active_quest] + ". LEVE ATÉ "
+        + pointLocation(nextQuestPoint()) + ". " + questEffect(active_quest) + ".");
+    } else {
+      openDialogue(name, "SIGA A ORDEM: " + questStageLabel(active_quest) + " " + quest_object[active_quest]
+        + " — " + pointLocation(nextQuestPoint()) + ". " + questEffect(active_quest) + ".");
+    }
     return;
   }
 

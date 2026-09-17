@@ -249,7 +249,7 @@ void drawMapRoomDetails(PGraphics g){
   float y = 183;
   if (active_quest >= 0){
     int q = active_quest;
-    if (point_room[quest_origin[q]] == selected_room)
+    if (quest_stage == QUEST_COLLECT && point_room[quest_origin[q]] == selected_room)
       y = drawTextWrapped(g, "COLETA: " + quest_object[q] + " — " + point_label[quest_origin[q]], 50, y, 540, 16, 18, COL_CYAN);
     if (point_room[quest_destination[q]] == selected_room)
       y = drawTextWrapped(g, "ENTREGA: " + point_label[quest_destination[q]] + " | " + questEffect(q), 50, y, 540, 16, 18, COL_GREEN);
@@ -732,12 +732,12 @@ void loadPlayerAssets(){
     }
     player_walk_end = idx - 1;
 
-    /* 3. Climb: linha 21 (subida de costas), 6 quadros de 120 ms (cols 0..5) */
+    /* 3. Climb: linha 21 (subida de costas), 6 quadros de 140 ms (cols 0..5) */
     if (can_climb){
       player_climb_start = idx;
       for (int col = 0; col < 6; col++){
         player_frame_images[idx] = player_sheet.get(col * 64, 21 * 64, 64, 64);
-        player_frame_durations[idx] = 120;
+        player_frame_durations[idx] = 140;
         idx++;
       }
       player_climb_end = idx - 1;
@@ -801,9 +801,10 @@ int playerCurrentFrame(){
   }
 
   int state = playerCurrentAnimationState();
-  if (state != player_anim_state){
+  boolean climb_moving = (state == 2 && (move_up_held || move_down_held));
+  if (state != player_anim_state || (state == 2 && climb_moving != player_animation_moving)){
     player_anim_state = state;
-    player_animation_moving = (state == 1);
+    player_animation_moving = (state == 1 || climb_moving);
     player_animation_started_at = millis();
   }
 
@@ -977,6 +978,9 @@ void resetRoomState(){
   player_on_ladder = false;
   ladder_vertical_release_required = false;
   jump_queued = false;
+  ladder_climbing_active = false;
+  ladder_steps_taken = 0;
+  ladder_step_accum = 0;
   interact_queued = false;
   held_item = ITEM_NONE;
   map_open = false;
@@ -1098,7 +1102,9 @@ void updatePlayerOnDeck(){
       player_grounded = false;
       player_x = ladder_x[ladder] - PLAYER_W / 2.0;
       player_velocity_y = 0;
-      ladder_step_y = player_y;
+      ladder_climbing_active = false;
+      ladder_steps_taken = 0;
+      ladder_step_accum = 0;
       updatePlayerOnLadder();
     }
   }
@@ -1132,9 +1138,24 @@ void updatePlayerOnLadder(){
   float bottom = deck_y[DECK_COUNT - 1] - PLAYER_H;
   player_y = constrain(player_y, top, bottom);
 
-  if (abs(player_y - ladder_step_y) >= LADDER_STEP_SPACING){
-    ladder_step_y = player_y;
-    playStepSound();
+  float dy = abs(player_y - old_y);
+  if (dy > 0){
+    if (!ladder_climbing_active){
+      ladder_climbing_active = true;
+      ladder_steps_taken = 0;
+      ladder_step_accum = 0;
+    }
+    ladder_step_accum += dy;
+    float threshold = (ladder_steps_taken == 0) ? LADDER_FIRST_STEP : LADDER_STEP_SPACING;
+    if (ladder_step_accum >= threshold){
+      ladder_step_accum = 0;
+      ladder_steps_taken++;
+      playStepSound();
+    }
+  } else {
+    ladder_climbing_active = false;
+    ladder_steps_taken = 0;
+    ladder_step_accum = 0;
   }
 
   boolean wants_deck = horizontal != 0 || vertical == 0;
@@ -1179,9 +1200,14 @@ int ladderDeckAt(float old_y, float new_y, boolean allow_nearby){
 
 
 /* The grab sound plays when the technician leaves the ladder, never on mount:
-   the climb itself is covered by the steps (#28). */
-final float LADDER_STEP_SPACING = 18;
-float ladder_step_y = 0;
+   the climb itself is covered by the steps (#28).
+   Cadence: 25 px matches the 420 ms half-cycle (3 frames @ 140 ms) of LPC climb;
+   initial step at 1 px ensures instant audio feedback upon starting to climb. */
+final float LADDER_STEP_SPACING = 25;
+final float LADDER_FIRST_STEP = 1;
+float ladder_step_accum = 0;
+int ladder_steps_taken = 0;
+boolean ladder_climbing_active = false;
 
 
 void leaveLadderAtDeck(int deck, int horizontal){
@@ -1193,6 +1219,9 @@ void leaveLadderAtDeck(int deck, int horizontal){
   player_grounded = true;
   player_velocity_y = 0;
   ladder_vertical_release_required = move_up_held || move_down_held;
+  ladder_climbing_active = false;
+  ladder_steps_taken = 0;
+  ladder_step_accum = 0;
 }
 
 

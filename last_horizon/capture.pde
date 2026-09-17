@@ -394,7 +394,9 @@ void captureSleep(){
 
 void captureCompleteQuest(){
   int q = active_quest;
-  captureInteract(quest_origin[q]); pressEnter();
+  if (quest_stage == QUEST_COLLECT){
+    captureInteract(quest_origin[q]); pressEnter();
+  }
   captureInteract(quest_destination[q]); pressEnter();
 }
 
@@ -635,6 +637,17 @@ void checkQuestBoundaries(){
   captureInteract(POINT_RISK_BUNK); pressEnter();
   verify("segunda quest e socorro bloqueados", active_quest < 0 && quest_completed && urgentRisk() >= 0);
   closeTopModal();
+  captureStartDay(3);
+  choosePreventive(0);
+  captureInteract(POINT_VERA); pressEnter();
+  verify("aceite de preventiva do responsável entrega em mãos",
+    active_quest == 1 && quest_stage == QUEST_DELIVER && held_item == 2 && nextQuestPoint() == POINT_ROUTE && pointIsAvailable(POINT_ROUTE));
+  captureInteract(POINT_VERA);
+  verify("responsável pós-entrega orienta a rota no destino",
+    dialog_open && dialog_text.indexOf("JÁ ENTREGUEI") >= 0);
+  closeTopModal();
+  captureInteract(POINT_ROUTE); pressEnter();
+  verify("entrega conclui preventiva direta", quest_completed && held_item == ITEM_NONE);
 
   captureStartDay(2);
   parts = 0; energy = 1;

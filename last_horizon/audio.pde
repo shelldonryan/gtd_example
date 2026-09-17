@@ -55,6 +55,19 @@ void playSound(Clip clip){
   clip.setFramePosition(0);
   clip.start();
 }
+void primeSound(Clip clip){
+  if (clip == null) return;
+  try {
+    clip.setFramePosition(clip.getFrameLength());
+    clip.start();
+    clip.stop();
+    clip.setFramePosition(0);
+  }
+  catch (Exception error) {
+    // Silenciosamente ignora se o mixer nao suportar pre-roll
+  }
+}
+
 
 
 /* Steps alternate between takes so a climb does not sound like a machine gun. */
@@ -71,6 +84,12 @@ void loadGameAudio(){
 
   for (int i = 0; i < AUDIO_STEP_FILES.length; i++){
     sound_step[i] = loadSound(AUDIO_STEP_FILES[i]);
+  }
+
+  primeSound(sound_ladder);
+  primeSound(sound_door);
+  for (int i = 0; i < sound_step.length; i++){
+    primeSound(sound_step[i]);
   }
 
   println("som: " + audio_loaded + " de " + audio_expected + " carregados");

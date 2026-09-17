@@ -524,13 +524,20 @@ function acceptPreventive(state) {
     next.lastMessage = `${order.responsible} não pode confirmar esta ordem.`;
     return next;
   }
+  const isDirectDelivery = order.origin.includes(order.responsible);
   next.acceptedQuest = {
     kind: "preventive", id: order.id, object: order.object,
-    resource: order.resource, destination: order.destination, stage: "COLETAR",
+    resource: order.resource, destination: order.destination,
+    stage: isDirectDelivery ? "ENTREGAR" : "COLETAR",
   };
+  if (isDirectDelivery) {
+    next.loadedItem = order.object;
+  }
   next.selectedOffer = null;
   next.dailyOffers = [];
-  next.lastMessage = `${order.responsible}: ordem confirmada. Ela não pode ser cancelada.`;
+  next.lastMessage = isDirectDelivery
+    ? `${order.responsible}: ordem confirmada. ${order.object} entregue em mãos.`
+    : `${order.responsible}: ordem confirmada. Ela não pode ser cancelada.`;
   return next;
 }
 
