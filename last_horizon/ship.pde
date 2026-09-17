@@ -564,7 +564,13 @@ char pointMarker(int kind){
 
 
 void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
-  PImage art = artFrame(crewArtFrames(name), ART_NPC_FRAME_MS);
+  boolean same_deck = player_grounded && abs((player_y + PLAYER_H) - y) < 8;
+  int facing = 0;
+  if (same_deck){
+    facing = (player_x + PLAYER_W / 2.0 < x) ? -1 : 1;
+  }
+
+  PImage art = artFrame(crewArtFramesFacing(name, facing), ART_NPC_FRAME_MS);
 
   if (art != null){
     drawArt(g, art, x, y - PLAYER_H / 2.0, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
@@ -575,8 +581,9 @@ void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
   g.fill(nearby ? COL_CYAN : COL_ORANGE);
   g.rect(x - PLAYER_W / 2.0, y - PLAYER_H, PLAYER_W, PLAYER_H);
   g.fill(COL_TEXT);
-  g.rect(x - 4, y - 19, 2, 2);
-  g.rect(x + 2, y - 19, 2, 2);
+  int eye_offset = facing < 0 ? -2 : (facing > 0 ? 2 : 0);
+  g.rect(x - 4 + eye_offset, y - 19, 2, 2);
+  g.rect(x + 2 + eye_offset, y - 19, 2, 2);
 }
 
 
@@ -618,46 +625,135 @@ void loadPlayerAssets(){
     return;
   }
 
-  player_sheet_frames = player_sheet_data.getJSONArray("frames");
-  if (player_sheet_frames == null || player_sheet_frames.size() == 0){
-    println("player: no frames in JSON");
-    return;
-  }
+  player_has_climb = false;
+  player_has_jump = false;
+  player_climb_start = -1;
+  player_climb_end = -1;
+  player_jump_start = -1;
+  player_jump_end = -1;
 
-  int frame_count = player_sheet_frames.size();
-  player_frame_images = new PImage[frame_count];
-  player_frame_durations = new int[frame_count];
+  if (player_sheet_data.hasKey("frames")){
+    /* Formato Aseprite: tira horizontal + metadados de frames */
+    player_sheet_frames = player_sheet_data.getJSONArray("frames");
+    if (player_sheet_frames == null || player_sheet_frames.size() == 0){
+      println("player: no frames in JSON");
+      return;
+    }
 
-  for (int i = 0; i < frame_count; i++){
-    JSONObject frame_data = player_sheet_frames.getJSONObject(i);
-    JSONObject frame_rect = frame_data.getJSONObject("frame");
-    player_frame_images[i] = player_sheet.get(
-      frame_rect.getInt("x"),
-      frame_rect.getInt("y"),
-      frame_rect.getInt("w"),
-      frame_rect.getInt("h")
-    );
-    player_frame_durations[i] = max(1, frame_data.getInt("duration"));
-  }
+    int frame_count = player_sheet_frames.size();
+    player_frame_images = new PImage[frame_count];
+    player_frame_durations = new int[frame_count];
 
-  player_idle_start = 0;
-  player_idle_end = 0;
-  player_walk_start = 0;
-  player_walk_end = frame_count - 1;
+    for (int i = 0; i < frame_count; i++){
+      JSONObject frame_data = player_sheet_frames.getJSONObject(i);
+      JSONObject frame_rect = frame_data.getJSONObject("frame");
+      player_frame_images[i] = player_sheet.get(
+        frame_rect.getInt("x"),
+        frame_rect.getInt("y"),
+        frame_rect.getInt("w"),
+        frame_rect.getInt("h")
+      );
+      player_frame_durations[i] = max(1, frame_data.getInt("duration"));
+    }
 
-  JSONObject meta = player_sheet_data.getJSONObject("meta");
-  if (meta != null && meta.hasKey("frameTags")){
-    JSONArray tags = meta.getJSONArray("frameTags");
-    for (int i = 0; i < tags.size(); i++){
-      JSONObject tag = tags.getJSONObject(i);
-      String name = tag.getString("name");
-      if (name.equals("idle")){
-        player_idle_start = tag.getInt("from");
-        player_idle_end = tag.getInt("to");
-      } else if (name.equals("walk")){
-        player_walk_start = tag.getInt("from");
-        player_walk_end = tag.getInt("to");
+    player_idle_start = 0;
+    player_idle_end = 0;
+    player_walk_start = 0;
+    player_walk_end = frame_count - 1;
+
+    JSONObject meta = player_sheet_data.getJSONObject("meta");
+    if (meta != null && meta.hasKey("frameTags")){
+      JSONArray tags = meta.getJSONArray("frameTags");
+      for (int i = 0; i < tags.size(); i++){
+        JSONObject tag = tags.getJSONObject(i);
+        String name = tag.getString("name");
+        if (name.equals("idle")){
+          player_idle_start = tag.getInt("from");
+          player_idle_end = tag.getInt("to");
+        } else if (name.equals("walk")){
+          player_walk_start = tag.getInt("from");
+          player_walk_end = tag.getInt("to");
+        } else if (name.equals("climb")){
+          player_climb_start = tag.getInt("from");
+          player_climb_end = tag.getInt("to");
+          player_has_climb = true;
+        } else if (name.equals("jump")){
+          player_jump_start = tag.getInt("from");
+          player_jump_end = tag.getInt("to");
+          player_has_jump = true;
+        }
       }
+    }
+  } else {
+    /* Formato Universal LPC (Liberated Pixel Cup): matriz 64x64 */
+    boolean can_idle = player_sheet.height >= 26 * 64;
+    boolean can_walk = player_sheet.height >= 12 * 64;
+    boolean can_climb = player_sheet.height >= 22 * 64;
+    boolean can_jump = player_sheet.height >= 50 * 64;
+
+    int idle_count = can_idle ? 2 : 1;
+    int walk_count = can_walk ? 8 : 1;
+    int climb_count = can_climb ? 6 : 0;
+    int jump_count = can_jump ? 13 : 0;
+    int total_frames = idle_count + walk_count + climb_count + jump_count;
+
+    player_frame_images = new PImage[total_frames];
+    player_frame_durations = new int[total_frames];
+
+    int idx = 0;
+
+    /* 1. Idle: linha 25 (Leste / perfil direito), 2 quadros de 500 ms */
+    player_idle_start = idx;
+    if (can_idle){
+      for (int col = 0; col < 2; col++){
+        player_frame_images[idx] = player_sheet.get(col * 64, 25 * 64, 64, 64);
+        player_frame_durations[idx] = 500;
+        idx++;
+      }
+    } else {
+      player_frame_images[idx] = player_sheet.get(0, 11 * 64, 64, 64);
+      player_frame_durations[idx] = 500;
+      idx++;
+    }
+    player_idle_end = idx - 1;
+
+    /* 2. Walk: linha 11 (Leste / perfil direito), 8 passos de 100 ms (cols 1..8) */
+    player_walk_start = idx;
+    if (can_walk){
+      for (int col = 1; col <= 8; col++){
+        player_frame_images[idx] = player_sheet.get(col * 64, 11 * 64, 64, 64);
+        player_frame_durations[idx] = 100;
+        idx++;
+      }
+    } else {
+      player_frame_images[idx] = player_sheet.get(0, 0, 64, 64);
+      player_frame_durations[idx] = 100;
+      idx++;
+    }
+    player_walk_end = idx - 1;
+
+    /* 3. Climb: linha 21 (subida de costas), 6 quadros de 120 ms (cols 0..5) */
+    if (can_climb){
+      player_climb_start = idx;
+      for (int col = 0; col < 6; col++){
+        player_frame_images[idx] = player_sheet.get(col * 64, 21 * 64, 64, 64);
+        player_frame_durations[idx] = 120;
+        idx++;
+      }
+      player_climb_end = idx - 1;
+      player_has_climb = true;
+    }
+
+    /* 4. Jump: linha 49 (pulo perfil direito), 13 quadros de 70 ms (cols 0..12) */
+    if (can_jump){
+      player_jump_start = idx;
+      for (int col = 0; col < 13; col++){
+        player_frame_images[idx] = player_sheet.get(col * 64, 49 * 64, 64, 64);
+        player_frame_durations[idx] = 70;
+        idx++;
+      }
+      player_jump_end = idx - 1;
+      player_has_jump = true;
     }
   }
 
@@ -685,21 +781,50 @@ boolean playerIsMoving(){
 }
 
 
+int playerCurrentAnimationState(){
+  if (player_has_climb && player_on_ladder){
+    return 2;
+  }
+  if (player_has_jump && !player_grounded && !player_on_ladder){
+    return 3;
+  }
+  if (playerIsMoving()){
+    return 1;
+  }
+  return 0;
+}
+
+
 int playerCurrentFrame(){
   if (!player_assets_loaded){
     return 0;
   }
 
-  boolean moving = playerIsMoving();
-  if (moving != player_animation_moving){
-    player_animation_moving = moving;
+  int state = playerCurrentAnimationState();
+  if (state != player_anim_state){
+    player_anim_state = state;
+    player_animation_moving = (state == 1);
     player_animation_started_at = millis();
   }
 
-  int first = moving ? player_walk_start : player_idle_start;
-  int last = moving ? player_walk_end : player_idle_end;
-  int total_duration = 0;
+  int first = player_idle_start;
+  int last = player_idle_end;
 
+  if (state == 1){
+    first = player_walk_start;
+    last = player_walk_end;
+  } else if (state == 2 && player_has_climb){
+    first = player_climb_start;
+    last = player_climb_end;
+    if (!move_up_held && !move_down_held){
+      return first;
+    }
+  } else if (state == 3 && player_has_jump){
+    first = player_jump_start;
+    last = player_jump_end;
+  }
+
+  int total_duration = 0;
   for (int index = first; index <= last; index++){
     total_duration += max(1, player_frame_durations[index]);
   }
@@ -1133,7 +1258,7 @@ void interactNearby(){
 
 int nearestInteractablePoint(){
   int result = -1;
-  float best_distance = INTERACTION_RANGE + 1;
+  float best_distance = max(INTERACTION_RANGE, NPC_INTERACTION_RANGE) + 1;
 
   for (int i = 0; i < POINT_COUNT; i++){
     if (point_room[i] != screen || !pointIsInteractable(i) || !isPointInRange(i)){
@@ -1152,10 +1277,15 @@ int nearestInteractablePoint(){
 }
 
 
+float pointInteractionRange(int point){
+  return (point_kind[point] == POINT_NPC) ? NPC_INTERACTION_RANGE : INTERACTION_RANGE;
+}
+
+
 boolean isPointInRange(int point){
   float player_center_x = player_x + PLAYER_W / 2.0;
   float player_bottom = player_y + PLAYER_H;
-  return abs(player_center_x - point_x[point]) <= INTERACTION_RANGE
+  return abs(player_center_x - point_x[point]) <= pointInteractionRange(point)
     && abs(player_bottom - point_y[point]) <= 3;
 }
 

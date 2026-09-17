@@ -69,6 +69,8 @@ PImage[] art_portrait;
 PImage[] art_map;
 PImage[] art_screen = new PImage[3];
 PImage[][] art_crew_frames;
+PImage[][] art_crew_frames_left;
+PImage[][] art_crew_frames_right;
 PImage[] art_door_frames = new PImage[2];
 PImage[] art_hull_frames = new PImage[2];
 
@@ -110,16 +112,96 @@ void loadArtFrames(PImage[] frames, String sheet_path, String data_path){
     return;
   }
 
-  JSONObject data = loadJSONObject(data_path);
+  JSONObject data = artExists(data_path) ? loadJSONObject(data_path) : null;
   JSONArray list = data == null ? null : data.getJSONArray("frames");
 
-  if (list == null){
+  if (list != null){
+    /* Formato Aseprite com JSON: recorte por coordenadas do array frames */
+    for (int i = 0; i < frames.length && i < list.size(); i++){
+      JSONObject rect = list.getJSONObject(i).getJSONObject("frame");
+      frames[i] = sheet.get(rect.getInt("x"), rect.getInt("y"), rect.getInt("w"), rect.getInt("h"));
+    }
     return;
   }
 
-  for (int i = 0; i < frames.length && i < list.size(); i++){
-    JSONObject rect = list.getJSONObject(i).getJSONObject("frame");
-    frames[i] = sheet.get(rect.getInt("x"), rect.getInt("y"), rect.getInt("w"), rect.getInt("h"));
+  /* Formato Universal LPC: linha 24 (Sul / frontal), 2 quadros de respiração (D-141) */
+  if (sheet.width >= 128 && sheet.height >= 25 * 64){
+    for (int i = 0; i < frames.length && i < 2; i++){
+      frames[i] = sheet.get(i * 64, 24 * 64, 64, 64);
+    }
+  } else if (frames.length >= 2 && sheet.width >= 128 && sheet.height >= 64){
+    /* Tira horizontal de 2 quadros 64x64 (mesmo sem JSON) */
+    frames[0] = sheet.get(0, 0, 64, 64);
+    frames[1] = sheet.get(64, 0, 64, 64);
+  } else if (frames.length > 0 && sheet.width >= 64 && sheet.height >= 64){
+    frames[0] = sheet.get(0, 0, min(64, sheet.width), min(64, sheet.height));
+  }
+}
+
+PImage flipHorizontal(PImage src){
+  if (src == null){
+    return null;
+  }
+  PImage dest = createImage(src.width, src.height, ARGB);
+  src.loadPixels();
+  dest.loadPixels();
+  for (int y = 0; y < src.height; y++){
+    for (int x = 0; x < src.width; x++){
+      dest.pixels[y * src.width + (src.width - 1 - x)] = src.pixels[y * src.width + x];
+    }
+  }
+  dest.updatePixels();
+  return dest;
+}
+
+
+void loadNpcArtFrames(int crew, String sheet_path, String data_path){
+  PImage sheet = loadArt(sheet_path);
+  if (sheet == null){
+    return;
+  }
+
+  JSONObject data = artExists(data_path) ? loadJSONObject(data_path) : null;
+  JSONArray list = data == null ? null : data.getJSONArray("frames");
+
+  if (list != null){
+    /* Aseprite com JSON: 2 quadros para a direita, e espelhado para a esquerda */
+    for (int i = 0; i < 2 && i < list.size(); i++){
+      JSONObject rect = list.getJSONObject(i).getJSONObject("frame");
+      PImage f = sheet.get(rect.getInt("x"), rect.getInt("y"), rect.getInt("w"), rect.getInt("h"));
+      art_crew_frames[crew][i] = f;
+      art_crew_frames_right[crew][i] = f;
+      art_crew_frames_left[crew][i] = flipHorizontal(f);
+    }
+    return;
+  }
+
+  /* Universal LPC: matriz 64x64 com linhas direcionadas */
+  if (sheet.width >= 128 && sheet.height >= 26 * 64){
+    for (int i = 0; i < 2; i++){
+      /* Linha 23: perfil esquerdo (olhando para a esquerda) */
+      art_crew_frames_left[crew][i] = sheet.get(i * 64, 23 * 64, 64, 64);
+      /* Linha 24: frontal / sul */
+      art_crew_frames[crew][i] = sheet.get(i * 64, 24 * 64, 64, 64);
+      /* Linha 25: perfil direito (olhando para a direita) */
+      art_crew_frames_right[crew][i] = sheet.get(i * 64, 25 * 64, 64, 64);
+    }
+  } else if (sheet.width >= 128 && sheet.height >= 64){
+    /* Tira horizontal simples de 2 quadros */
+    for (int i = 0; i < 2; i++){
+      PImage f = sheet.get(i * 64, 0, 64, 64);
+      art_crew_frames[crew][i] = f;
+      art_crew_frames_right[crew][i] = f;
+      art_crew_frames_left[crew][i] = flipHorizontal(f);
+    }
+  } else if (sheet.width >= 64 && sheet.height >= 64){
+    PImage f = sheet.get(0, 0, min(64, sheet.width), min(64, sheet.height));
+    art_crew_frames[crew][0] = f;
+    art_crew_frames[crew][1] = f;
+    art_crew_frames_right[crew][0] = f;
+    art_crew_frames_right[crew][1] = f;
+    art_crew_frames_left[crew][0] = flipHorizontal(f);
+    art_crew_frames_left[crew][1] = flipHorizontal(f);
   }
 }
 
@@ -132,6 +214,8 @@ void loadArtAssets(){
   art_portrait = new PImage[CREW_COUNT];
   art_map = new PImage[ROOM_COUNT];
   art_crew_frames = new PImage[CREW_COUNT][2];
+  art_crew_frames_left = new PImage[CREW_COUNT][2];
+  art_crew_frames_right = new PImage[CREW_COUNT][2];
 
   for (int i = 0; i < art_icon_file.length; i++){
     art_icon[i] = loadArt(ART_ICON_DIR + art_icon_file[i] + ".png");
@@ -148,7 +232,7 @@ void loadArtAssets(){
   }
 
   for (int crew = 0; crew < CREW_COUNT; crew++){
-    loadArtFrames(art_crew_frames[crew],
+    loadNpcArtFrames(crew,
       ART_NPC_DIR + art_crew_file[crew] + ".png",
       ART_NPC_DIR + art_crew_file[crew] + ".json");
     art_portrait[crew] = loadArt(ART_PORTRAIT_DIR + art_crew_file[crew] + ".png");
@@ -199,18 +283,27 @@ PImage questObjectArt(int q){
 }
 
 
-PImage[] crewArtFrames(String name){
-  if (art_crew_frames == null){
-    return null;
-  }
-
+PImage[] crewArtFramesFacing(String name, int facing){
   for (int crew = 0; crew < CREW_COUNT && crew < crew_name.length; crew++){
-    if (crew_name[crew].equals(name)){
-      return art_crew_frames[crew];
+    if (crew_name[crew].equals(name) || art_crew_file[crew].equalsIgnoreCase(name)){
+      if (facing < 0 && art_crew_frames_left != null && art_crew_frames_left[crew][0] != null){
+        return art_crew_frames_left[crew];
+      }
+      if (facing > 0 && art_crew_frames_right != null && art_crew_frames_right[crew][0] != null){
+        return art_crew_frames_right[crew];
+      }
+      if (art_crew_frames != null && art_crew_frames[crew][0] != null){
+        return art_crew_frames[crew];
+      }
+      return null;
     }
   }
-
   return null;
+}
+
+
+PImage[] crewArtFrames(String name){
+  return crewArtFramesFacing(name, 0);
 }
 
 
