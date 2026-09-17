@@ -522,9 +522,12 @@ Sessão de correção do áudio da escada, integração dos 4 retratos de diálo
   do Universal LPC Generator `0-1-2-3-4-1` (6 quadros a 75 ms), totalizando 450 ms,
   casando perfeitamente com os 462 ms de tempo no ar da física do pulo (28 frames a 60 FPS).
   Em quedas longas, o frame congela no quadro final de descida/aterrissagem sem repetir agachamento no ar.
+- **Evidência:** `--ladder-test` → 6 `OK`, `som: 6 de 6 carregados`, `arte: 8 de 57 imagens carregadas`;
   `--hit-test` → 5 `OK`; `--capture` → `QUEST CHECK: PASS`, 146 asserções `OK`.
+- **Commit na branch `prototype/sketch-architecture` (sem push):**
+  `7cde3f9` — `feat(sketch): integrar retratos dos NPCs, corrigir pulo LPC e ajustar audio`
 - **Wayfinder:** #28 reivindicada e mantida OPEN para validação acústica no ambiente de apresentação;
-  #32 mantida OPEN.
+  #32 atualizada com o relatório da sessão e mantida OPEN.
 ### Sessão anterior — #32
 Sessão da [issue #32](https://github.com/shelldonryan/gtd_example/issues/32) —
 refinamento do fluxo de quests, eliminação de redundâncias e polimento do HUD/mapa.
