@@ -151,7 +151,7 @@ Sincronizada com o grafo nativo depois da sessão do #34:
 | #29 Camada de assets | CLOSED | — | camada de arte com fallback, travessia de porta e drop-in documentado |
 | #30 Desacoplar o harness | CLOSED | — | cópia entregue sem `capture.pde`, testada fora do repositório |
 | #8 Inventário de assets | CLOSED | — | lista, canvas e ordem de produção em `assets/INVENTORY.md`; escadas e estações congeladas |
-| #35 Reestilizar e integrar ícones de recursos do HUD | OPEN | — | seis PNGs integrados; alerta crítico permanece via código; aguardando autorização para encerramento |
+| #35 Reestilizar e integrar ícones de recursos do HUD | CLOSED | — | seis PNGs 32×32 integrados; alerta crítico permanece via código; D-157 concluída |
 | #28 Escolher e integrar os efeitos sonoros | OPEN | — | porta e escada entregues, integradas e validadas (D-136 a D-138); aberto por decisão do usuário para ampliação não decidida (D-139) |
 | #27 Portais, desfechos, transmissões, NPCs e HUD | CLOSED | — | escopo ampliado; concluído e validado |
 | #25 Redesenhar incidentes e ordens como quests físicas | CLOSED | — | catálogo e fluxo físico implementados no sketch |
@@ -975,7 +975,7 @@ e integrados pelo carregador de assets existente.
 - O layout dos cartões, valores, barras, limiares críticos e gameplay não
   foram alterados.
 - **Estado Wayfinder:** `Reestilizar e integrar ícones de recursos do HUD`
-  permanece OPEN até autorização explícita para encerramento.
+  foi encerrada após autorização explícita; commit `21f105d`.
 - **Evidência D-157:** `--asset-pipeline-test` carregou os seis PNGs
   (`arte: 14 de 56 imagens carregadas`, `pipeline: OK`); `--hit-test`
   retornou 5 `OK`; `--capture` concluiu com `QUEST CHECK: PASS`. A inspeção
