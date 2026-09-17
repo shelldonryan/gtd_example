@@ -1,6 +1,12 @@
 int event_index = -1;
 boolean event_open = false;
 int opened_day = 0;
+boolean transmission_open = false;
+String transmission_text = "";
+boolean earth_engine_sent = false;
+boolean earth_hull_sent = false;
+boolean earth_loss_sent = false;
+boolean engine_repaired_at_limit = false;
 
 void startGame(){
   resetRun();
@@ -10,7 +16,6 @@ void startGame(){
 
 void resetRun(){
   player_name = player_name.trim();
-  if (player_name.length() == 0) player_name = "Técnico";
   day = 1;
   opened_day = 0;
   trip_days = TRIP_DAYS;
@@ -26,6 +31,12 @@ void resetRun(){
   system_message = last_system_message = "";
   event_index = PROBLEM_NONE;
   event_open = false;
+  transmission_open = false;
+  transmission_text = "";
+  earth_engine_sent = false;
+  earth_hull_sent = false;
+  earth_loss_sent = false;
+  engine_repaired_at_limit = false;
   resetCrewState();
   resetRoomState();
   resetProblemState();
@@ -42,9 +53,63 @@ void openDay(){
       placeHullDamage();
       problem_room[PROBLEM_HULL] = point_room[POINT_HULL];
     }
+    queueEarthTransmission(event_index);
   } else {
     selectPreventiveOffers();
   }
+}
+
+/* A transmissão aparece antes do cartão do incidente; fechar revela o evento. */
+void queueEarthTransmission(int problem){
+  if (problem == PROBLEM_ENGINE && !earth_engine_sent){
+    earth_engine_sent = true;
+    openTransmission("TERRA: " + player_name + ", O MOTOR FALHOU. NÃO PAREM.");
+    return;
+  }
+
+  if (problem == PROBLEM_HULL && !earth_hull_sent){
+    earth_hull_sent = true;
+    openTransmission("TERRA: " + player_name + ", CHUVA DE METEOROS DETECTADA. VERIFIQUEM O CASCO.");
+  }
+}
+
+void openTransmission(String value){
+  transmission_text = value;
+  transmission_open = true;
+}
+
+String survivorsSummary(){
+  if (survivors >= CREW_START) return "SOBREVIVENTES: " + survivors + " DE " + CREW_START;
+  return "SOBREVIVENTES: " + survivors + " DE " + CREW_START + " — " + aliveCrewNames();
+}
+
+String aliveCrewNames(){
+  String names = "";
+
+  for (int crew = 0; crew < CREW_COUNT; crew++){
+    if (!crew_alive[crew]) continue;
+    names += names.length() == 0 ? crew_name[crew] : ", " + crew_name[crew];
+  }
+
+  return names;
+}
+
+String marsMessage(){
+  if (survivors < CREW_START && engine_repaired_at_limit)
+    return "MARTE: " + player_name + ", RECEBEMOS A NAVE. O MOTOR CHEGOU NO LIMITE, MAS VOCÊS CONSEGUIRAM.";
+
+  if (survivors < CREW_START)
+    return "MARTE: " + player_name + ", RECEBEMOS OS SOBREVIVENTES QUE RESTARAM. A BASE ESTÁ PRONTA.";
+
+  return "MARTE: " + player_name + ", RECEBEMOS OS QUATRO SOBREVIVENTES. A BASE ESTÁ PRONTA.";
+}
+
+void drawTransmissionCard(PGraphics g){
+  drawModalShade(g);
+  drawPanel(g, 96, 140, 448, 96, COL_CYAN);
+  text(g, "TRANSMISSÃO DA TERRA", 112, 150, 16, COL_CYAN);
+  drawTextWrapped(g, transmission_text, 112, 172, 416, 16, 18, COL_TEXT);
+  drawButton(g, 336, 208, 192, 22, "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true);
 }
 
 int incidentForDay(int value){
@@ -103,6 +168,10 @@ void processSurvivorRisks(){
     crew_alive[crew] = false;
     survivors--;
     system_message = crew_name[crew] + " NÃO RESISTIU.";
+    if (!earth_loss_sent){
+      earth_loss_sent = true;
+      openTransmission("TERRA: " + player_name + ", UMA VIDA FOI PERDIDA. LEVE OS OUTROS ATÉ MARTE.");
+    }
   }
 }
 
@@ -147,7 +216,7 @@ boolean checkEndConditions(){
   else if (engine_state == ENGINE_DESTROYED) game_over_reason = REASON_ENGINE;
   else if (survivors <= 0) game_over_reason = REASON_CREW;
   if (game_over_reason == REASON_NONE) return false;
-  event_open = orders_open = dialog_open = technical_open = end_day_open = map_open = false;
+  event_open = orders_open = dialog_open = technical_open = end_day_open = map_open = help_open = false;
   paused = false;
   screen = SCREEN_GAME_OVER;
   return true;

@@ -221,6 +221,33 @@ void drawEndDayPanel(PGraphics g){
 }
 
 
+final String[] help_lines = {
+  "ANDAR: ← → OU A/D",
+  "ESCADA: ↑ ↓ OU W/S",
+  "PULAR: ESPAÇO",
+  "INTERAGIR E ABRIR PORTAS: E",
+  "CONFIRMAR DIÁLOGO, ORDEM E DORMIR: ENTER",
+  "PAUSA, FECHAR MODAL E VOLTAR: ESC",
+  "MAPA, ORDENS E AJUDA: BOTÕES DO RODAPÉ, COM O MOUSE"
+};
+
+
+void drawHelpPanel(PGraphics g){
+  drawModalShade(g);
+  drawPanel(g, 34, 88, 572, 168, COL_CYAN);
+  text(g, "AJUDA — CONTROLES", 50, 98, 16, COL_CYAN);
+
+  float y = 120;
+
+  for (int i = 0; i < help_lines.length; i++){
+    text(g, help_lines[i], 50, y, 16, COL_TEXT);
+    y += 14;
+  }
+
+  drawButton(g, 486, 220, 104, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+}
+
+
 void drawStars(PGraphics g){
   g.noStroke();
   g.fill(COL_DIM);

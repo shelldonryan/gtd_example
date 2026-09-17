@@ -10,6 +10,18 @@ final String PIPELINE_PROBE_FILE = "pipeline_probe_frame_1.png";
 
 int capture_step = 0;
 int capture_next_frame = 0;
+boolean checks_failed = false;
+boolean rule_checks_started = false;
+boolean rule_checks_finished = false;
+boolean campaign_checks_running = false;
+int campaign_phase = 0;
+int campaign_strategy = 0;
+int[] campaign_sequence = new int[5];
+int[] campaign_next_candidate = new int[5];
+int campaign_depth = 0;
+int campaign_used = 0;
+boolean campaign_permutation_ready = false;
+int capture_campaign_wins = 0;
 final int CAPTURE_FIRST_FRAME = 4;
 final int CAPTURE_FRAME_GAP = 3;
 final int HIT_TEST_FRAME = 5;
@@ -21,7 +33,8 @@ String[] capture_label = {
   "night_forecast", "incident_choices", "incident_confirmation", "urgent_collect",
   "urgent_carrying", "urgent_delivery", "urgent_solved", "preventive_failure",
   "preventive_neglect", "urgent_retry", "survivor_risk", "rescue_confirmation",
-  "survivor_rescued", "pause", "defeat", "victory", "dense_night_forecast"
+  "survivor_rescued", "pause", "defeat", "victory", "dense_night_forecast",
+  "day_3_night_modal", "help_panel", "day_2_free_dormitory", "earth_transmission"
 };
 void readArgs(){
   if (args == null){
@@ -90,8 +103,27 @@ void updateCapture(){
   }
 
   if (capture_step >= capture_label.length){
-    runRuleChecks();
-    exit();
+    if (!rule_checks_started){
+      rule_checks_started = true;
+      runRuleChecks();
+    }
+
+    if (checks_failed){
+      reportQuestCheck();
+      exit();
+      return;
+    }
+
+    if (campaign_checks_running){
+      advanceCampaignChecks();
+      return;
+    }
+
+    if (!rule_checks_finished){
+      rule_checks_finished = true;
+      reportQuestCheck();
+      exit();
+    }
     return;
   }
 
@@ -100,6 +132,24 @@ void updateCapture(){
   capture_step++;
   capture_next_frame = frameCount + CAPTURE_FRAME_GAP;
 }
+void drawCaptureCheckScreen(PGraphics g){
+  drawStars(g);
+  textCentered(g, "VERIFICAÇÃO DO SKETCH", BASE_W / 2.0, 96, 24, COL_CYAN);
+  drawPanel(g, 126, 130, 388, 112, COL_BORDER);
+  textCentered(g, "A JANELA CONTINUA RESPONSIVA", BASE_W / 2.0, 148, 16, COL_TEXT);
+
+  String status = campaign_phase < 2
+    ? "VALIDANDO CAMPANHAS REPRESENTATIVAS"
+    : "VALIDANDO TODAS AS PERMUTAÇÕES";
+  textCentered(g, status, BASE_W / 2.0, 180, 16, COL_MUTED);
+
+  if (campaign_phase >= 2){
+    textCentered(g, capture_campaign_wins + " / 2520 CAMPANHAS", BASE_W / 2.0, 208, 16, COL_GREEN);
+  } else {
+    textCentered(g, "RECURSOS DA PARTIDA NÃO SÃO EXIBIDOS", BASE_W / 2.0, 208, 16, COL_GREEN);
+  }
+}
+
 
 
 void runPipelineProbe(){
@@ -188,6 +238,8 @@ void runCaptureStep(int step){
     incident_sequence[0] = PROBLEM_ENGINE;
     pressEnter();
     verify("dormir aplica consumo e abre incidente", day == 2 && event_open && energy == 73 && morale == 86);
+    verify("transmissão da Terra precede o incidente", transmission_open);
+    closeTopModal();
   } else if (step == 14){ clickAction(ACTION_EVENT_A); }
   else if (step == 15){
     verify("solução exige confirmação", event_open && active_quest < 0);
@@ -234,6 +286,24 @@ void runCaptureStep(int step){
     putSurvivorAtRisk(PROBLEM_FOOD);
     captureInteract(POINT_TECH_BUNK);
   }
+  else if (step == 30){
+    closeTopModal();
+    clickAction(ACTION_OPEN_HELP);
+  } else if (step == 31){
+    verify("ajuda abre pelo botão do rodapé", help_open && !paused);
+    handleEscape();
+  } else if (step == 32){
+    resetRun();
+    day = 2;
+    incident_sequence[0] = PROBLEM_ENGINE;
+    enterRoom(SCREEN_DORMITORY);
+    openDay();
+  } else if (step == 33){
+    verify("dia com falha do motor abre pela transmissão da Terra",
+      transmission_open && event_open && transmission_text.indexOf("O MOTOR FALHOU") >= 0);
+    closeTopModal();
+    verify("fechar a transmissão revela o cartão do incidente", !transmission_open && event_open);
+  }
 }
 
 void captureStartDay(int target){
@@ -242,6 +312,7 @@ void captureStartDay(int target){
   incident_sequence[0] = PROBLEM_ENGINE;
   enterRoom(target == 1 ? SCREEN_COMMAND : SCREEN_DORMITORY);
   openDay();
+  transmission_open = false;
   if (orders_open) closeTopModal();
 }
 
@@ -270,19 +341,117 @@ void captureAcceptPreventive(int choice){
   pressEnter();
 }
 
+void checkNpcDialogue(){
+  captureStartDay(1);
+  int owner = quest_owner[daily_offers[0]];
+  int other = (owner + 1) % CREW_COUNT;
+
+  while (!crew_alive[other]) other = (other + 1) % CREW_COUNT;
+
+  captureInteract(crew_point[owner]);
+  verify("oferta do dia aparece na fala do responsável",
+    dialog_open && !technical_open && dialog_text.indexOf("MINHA OFERTA") >= 0);
+  closeTopModal();
+
+  choosePreventive(0);
+  captureInteract(crew_point[owner]);
+  verify("responsável pede confirmação presencial",
+    dialog_open && pending_quest_action == ACTION_ACCEPT_ORDER && active_quest < 0);
+  pressEnter();
+  verify("confirmação presencial aceita a ordem",
+    active_quest == daily_offers[0] && quest_stage == QUEST_COLLECT);
+
+  captureInteract(crew_point[owner]);
+  verify("responsável com quest ativa orienta a etapa",
+    dialog_open && dialog_text.indexOf("SIGA A ORDEM") >= 0);
+  closeTopModal();
+
+  captureInteract(crew_point[other]);
+  verify("terceiro informa a ordem ativa sem retrato",
+    technical_open && !dialog_open && technical_text.indexOf("ORDEM ATIVA COM") >= 0);
+  closeTopModal();
+
+  captureCompleteQuest();
+  captureInteract(crew_point[owner]);
+  verify("quest concluída encerra a conversa",
+    dialog_open && dialog_text.indexOf("TRABALHO CONCLUÍDO") >= 0);
+  closeTopModal();
+
+  crew_alive[owner] = false;
+  verify("sobrevivente morto não interage", !pointIsAvailable(crew_point[owner]));
+  crew_alive[owner] = true;
+}
+
+
+void checkTransmissionMessages(){
+  resetRun();
+  day = 2;
+  incident_sequence[0] = PROBLEM_ENGINE;
+  enterRoom(SCREEN_DORMITORY);
+  openDay();
+  verify("falha do motor traz transmissão da Terra",
+    transmission_open && event_open && transmission_text.indexOf("O MOTOR FALHOU") >= 0);
+  closeTopModal();
+  day = 4;
+  opened_day = 0;
+  incident_sequence[1] = PROBLEM_ENGINE;
+  openDay();
+  verify("transmissão do motor dispara uma vez por partida", !transmission_open && event_open);
+  closeTopModal();
+
+  resetRun();
+  day = 2;
+  incident_sequence[0] = PROBLEM_HULL;
+  enterRoom(SCREEN_DORMITORY);
+  openDay();
+  verify("chuva de meteoros traz transmissão do casco",
+    transmission_open && transmission_text.indexOf("CHUVA DE METEOROS") >= 0);
+  closeTopModal();
+
+  resetRun();
+  day = 3;
+  enterRoom(SCREEN_DORMITORY);
+  putSurvivorAtRisk(PROBLEM_FOOD);
+  processSurvivorRisks();
+  verify("risco sem socorro ainda não transmite", !transmission_open);
+  processSurvivorRisks();
+  verify("primeira perda transmite e reduz a bordo",
+    transmission_open && survivors == CREW_START - 1 && transmission_text.indexOf("UMA VIDA FOI PERDIDA") >= 0);
+
+  resetRun();
+  verify("vitória com todos vivos usa a variação dos quatro",
+    marsMessage().indexOf("OS QUATRO SOBREVIVENTES") >= 0);
+  survivors = CREW_START - 1;
+  crew_alive[CREW_VERA] = false;
+  verify("vitória com perdas usa a variação dos que restaram",
+    marsMessage().indexOf("OS SOBREVIVENTES QUE RESTARAM") >= 0
+    && survivorsSummary().indexOf("BENTO") >= 0 && survivorsSummary().indexOf("VERA") < 0);
+  engine_repaired_at_limit = true;
+  verify("reparo no limite prevalece quando há perdas",
+    marsMessage().indexOf("NO LIMITE") >= 0);
+  resetRun();
+}
+
+
 void runRuleChecks(){
   checkConnectedDoors();
-  checkPlayerFacing();
-  checkPlayerAnimationLoop();
-  checkOrdersBadge();
-  checkQuestCatalogue();
-  checkQuestBoundaries();
-  checkNightConsequences();
-  checkRetryPriority();
-  checkCrewRules();
-  checkHullDamageLocation();
-  checkCampaigns();
-  println("QUEST CHECK: PASS");
+  if (!checks_failed) checkNpcDialogue();
+  if (!checks_failed) checkPlayerFacing();
+  if (!checks_failed) checkPlayerAnimationLoop();
+  if (!checks_failed) checkOrdersBadge();
+  if (!checks_failed) checkQuestCatalogue();
+  if (!checks_failed) checkQuestBoundaries();
+  if (!checks_failed) checkNightConsequences();
+  if (!checks_failed) checkRetryPriority();
+  if (!checks_failed) checkCrewRules();
+  if (!checks_failed) checkHullDamageLocation();
+  if (!checks_failed) checkTransmissionMessages();
+  if (!checks_failed) startCampaignChecks();
+}
+
+
+void reportQuestCheck(){
+  println(checks_failed ? "QUEST CHECK: FALHOU" : "QUEST CHECK: PASS");
 }
 
 float[] badgeInkBox(PGraphics g, float cx, float cy, float radius){
@@ -508,6 +677,7 @@ void playCaptureCampaign(int[] sequence, int strategy){
   resetRun(); arrayCopy(sequence, incident_sequence);
   enterRoom(SCREEN_COMMAND); openDay();
   while (isRoomScreen()){
+    transmission_open = false;
     if (event_open){
       int q = PREVENTIVE_COUNT + event_index * 2;
       int i = q - PREVENTIVE_COUNT;
@@ -534,32 +704,99 @@ void playCaptureCampaign(int[] sequence, int strategy){
   }
 }
 
-int capture_campaign_wins = 0;
-void permuteCaptureCampaigns(int[] sequence, int depth, int used){
-  if (depth == sequence.length){
-    playCaptureCampaign(sequence, 1);
-    if (screen == SCREEN_VICTORY) capture_campaign_wins++;
-    else throw new RuntimeException("campanha derrotada: " + join(nf(sequence, 1), ","));
-    return;
-  }
-  for (int p = 0; p < PROBLEM_COUNT; p++){
-    if ((used & (1 << p)) != 0) continue;
-    sequence[depth] = p;
-    permuteCaptureCampaigns(sequence, depth + 1, used | (1 << p));
-  }
+void startCampaignChecks(){
+  campaign_checks_running = true;
+  campaign_phase = 0;
+  campaign_strategy = 0;
+  campaign_sequence[0] = PROBLEM_ENGINE;
+  campaign_sequence[1] = PROBLEM_FOOD;
+  campaign_sequence[2] = PROBLEM_CONFLICT;
+  campaign_sequence[3] = PROBLEM_HULL;
+  campaign_sequence[4] = PROBLEM_LIFE_SUPPORT;
+  capture_campaign_wins = 0;
+  campaign_depth = 0;
+  campaign_used = 0;
+  campaign_permutation_ready = false;
+  for (int i = 0; i < campaign_next_candidate.length; i++) campaign_next_candidate[i] = 0;
 }
 
-void checkCampaigns(){
-  int[] sequence = {PROBLEM_ENGINE, PROBLEM_FOOD, PROBLEM_CONFLICT, PROBLEM_HULL, PROBLEM_LIFE_SUPPORT};
-  for (int strategy = 0; strategy < 3; strategy++){
-    playCaptureCampaign(sequence, strategy);
-    verify("estratégia " + strategy + " vence campanha completa", screen == SCREEN_VICTORY && day == 10);
+
+boolean nextCampaignPermutation(){
+  while (campaign_depth >= 0){
+    boolean descended = false;
+    while (campaign_next_candidate[campaign_depth] < PROBLEM_COUNT){
+      int candidate = campaign_next_candidate[campaign_depth]++;
+      if ((campaign_used & (1 << candidate)) != 0) continue;
+
+      campaign_sequence[campaign_depth] = candidate;
+      campaign_used |= 1 << candidate;
+      campaign_depth++;
+      if (campaign_depth == campaign_sequence.length) return true;
+      campaign_next_candidate[campaign_depth] = 0;
+      descended = true;
+      break;
+    }
+
+    if (descended) continue;
+    campaign_depth--;
+    if (campaign_depth >= 0){
+      campaign_used &= ~(1 << campaign_sequence[campaign_depth]);
+    }
   }
-  playCaptureCampaign(sequence, 3);
-  verify("omissão perde por motor destruído", screen == SCREEN_GAME_OVER && game_over_reason == REASON_ENGINE);
-  capture_campaign_wins = 0;
-  permuteCaptureCampaigns(new int[5], 0, 0);
-  verify("reserva de peças vence 2520/2520 no sketch", capture_campaign_wins == 2520);
+
+  return false;
+}
+
+
+void advanceCampaignPermutation(){
+  int last = campaign_sequence.length - 1;
+  campaign_depth = last;
+  campaign_used &= ~(1 << campaign_sequence[last]);
+}
+
+
+void advanceCampaignChecks(){
+  if (campaign_phase == 0){
+    playCaptureCampaign(campaign_sequence, campaign_strategy);
+    verify("estratégia " + campaign_strategy + " vence campanha completa",
+      screen == SCREEN_VICTORY && day == 10);
+    campaign_strategy++;
+    if (campaign_strategy == 3) campaign_phase = 1;
+    return;
+  }
+
+  if (campaign_phase == 1){
+    playCaptureCampaign(campaign_sequence, 3);
+    verify("omissão perde por motor destruído",
+      screen == SCREEN_GAME_OVER && game_over_reason == REASON_ENGINE);
+    campaign_phase = 2;
+    return;
+  }
+
+  if (campaign_phase == 2){
+    if (!campaign_permutation_ready){
+      if (!nextCampaignPermutation()){
+        verify("reserva de peças vence " + capture_campaign_wins + "/2520 no sketch",
+          capture_campaign_wins == 2520);
+        campaign_checks_running = false;
+        campaign_phase = 3;
+        return;
+      }
+      campaign_permutation_ready = true;
+    }
+
+    playCaptureCampaign(campaign_sequence, 1);
+    if (screen != SCREEN_VICTORY){
+      verify("campanha " + join(nf(campaign_sequence, 1), ",") + " chega a Marte",
+        false);
+      campaign_checks_running = false;
+      return;
+    }
+
+    capture_campaign_wins++;
+    campaign_permutation_ready = false;
+    advanceCampaignPermutation();
+  }
 }
 
 void checkPlayerFacing(){
@@ -574,8 +811,8 @@ void checkPlayerFacing(){
   verify("jogador olha para a direita", player_facing == 1);
 
   move_right_held = false;
-  enterRoomAtDeck(SCREEN_MACHINES, roomDoorDeck(SCREEN_MACHINES), -1);
-  player_x = ROOM_LEFT + 20;
+  enterRoom(SCREEN_MACHINES);
+  placePlayerAtDoor(doorInRoomLeadingTo(SCREEN_MACHINES, SCREEN_COMMAND));
   useNearbyDoor();
   verify("retorno ao hub olha para a esquerda",
     screen == SCREEN_COMMAND && player_facing == -1);
@@ -604,19 +841,140 @@ void checkPlayerAnimationLoop(){
 
 
 void checkConnectedDoors(){
-  int[] destinations = {SCREEN_DORMITORY, SCREEN_DEPOT, SCREEN_MACHINES};
-  for (int deck = 0; deck < DECK_COUNT; deck++){
+  for (int door = 0; door < DOOR_COUNT; door++){
     resetRun();
     event_open = false;
-    enterRoomAtDeck(SCREEN_COMMAND, deck, -1);
-    player_x = ROOM_RIGHT - 28 - PLAYER_W;
-    verify("hub abre porta do convés " + deck,
-      useNearbyDoor() && screen == destinations[deck]);
-    player_x = ROOM_LEFT + 20;
-    verify("sala periférica retorna ao mesmo convés",
-      useNearbyDoor() && screen == SCREEN_COMMAND
-      && abs(player_y + PLAYER_H - deck_y[deck]) <= 3);
+    enterRoom(door_room[door]);
+    placePlayerAtDoor(door);
+    int target = door_target[door];
+    verify("porta " + door + " reconhece o limiar configurado",
+      doorInRange(door));
+    verify("porta " + door + " leva a " + roomTitle(target),
+      useNearbyDoor() && screen == target);
+    verify("chegada usa coordenada e direção configuradas",
+      abs(player_x + PLAYER_W / 2.0 - door_arrival_x[door]) <= 0.1
+      && abs(player_y + PLAYER_H - door_arrival_y[door]) <= 0.1
+      && player_facing == door_arrival_facing[door]);
   }
+
+  int outbound = doorInRoomLeadingTo(SCREEN_COMMAND, SCREEN_MACHINES);
+  int inbound = doorInRoomLeadingTo(SCREEN_MACHINES, SCREEN_COMMAND);
+  resetRun();
+  enterRoom(SCREEN_COMMAND);
+  placePlayerAtDoor(outbound);
+  float entered_center_x = player_x + PLAYER_W / 2.0;
+  float entered_feet_y = player_y + PLAYER_H;
+  verify("porta de Máquinas abre a sala correta",
+    useNearbyDoor() && screen == SCREEN_MACHINES);
+  placePlayerAtDoor(inbound);
+  verify("retorno da porta usa a posição de entrada",
+    useNearbyDoor() && screen == SCREEN_COMMAND
+    && abs(player_x + PLAYER_W / 2.0 - entered_center_x) <= 0.1
+    && abs(player_y + PLAYER_H - entered_feet_y) <= 0.1);
+
+  checkDoorAnywhere();
+}
+
+
+
+
+void placePlayerAtDoor(int door){
+  move_left_held = false;
+  move_right_held = false;
+  move_up_held = false;
+  move_down_held = false;
+  player_x = door_x[door] - PLAYER_W / 2.0;
+  player_y = door_y[door] - PLAYER_H;
+  player_velocity_y = 0;
+  player_grounded = isDeckSurface(door_y[door]);
+  player_on_ladder = false;
+}
+
+
+void checkDoorAnywhere(){
+  final int door = 1;
+  float saved_x = door_x[door];
+  float saved_y = door_y[door];
+  int saved_deck = door_deck[door];
+  int saved_target = door_target[door];
+  float saved_arrival_x = door_arrival_x[door];
+  float saved_arrival_y = door_arrival_y[door];
+  int saved_arrival_facing = door_arrival_facing[door];
+  float test_x = 320;
+  float test_y = deck_y[1] - 20;
+  float test_arrival_x = ROOM_RIGHT - 40;
+  float test_arrival_y = deck_y[0];
+
+  door_x[door] = test_x;
+  door_y[door] = test_y;
+  door_deck[door] = DOOR_DECK_NONE;
+  door_target[door] = SCREEN_DORMITORY;
+  door_arrival_x[door] = test_arrival_x;
+  door_arrival_y[door] = test_arrival_y;
+  door_arrival_facing[door] = -1;
+
+  resetRun();
+  event_open = false;
+  enterRoom(door_room[door]);
+  placePlayerAtDoor(door);
+  verify("porta em abertura fora de deck interage no limiar",
+    doorInRange(door) && useNearbyDoor() && screen == door_target[door]);
+  verify("chegada independente coloca no canto configurado",
+    abs(player_x + PLAYER_W / 2.0 - test_arrival_x) <= 0.1
+    && abs(player_y + PLAYER_H - test_arrival_y) <= 0.1
+    && player_facing == -1);
+
+  resetRun();
+  event_open = false;
+  enterRoom(door_room[door]);
+  player_x = test_x - PLAYER_W / 2.0;
+  player_y = test_y - PLAYER_H + DOOR_VERTICAL_RANGE + 1;
+  player_velocity_y = 0;
+  player_grounded = false;
+  verify("distância vertical fora do limiar não abre a porta",
+    !doorInRange(door));
+
+  int saved_hull_room = point_room[POINT_HULL];
+  float saved_hull_x = point_x[POINT_HULL];
+  float saved_hull_y = point_y[POINT_HULL];
+  int saved_active_quest = active_quest;
+  int saved_quest_stage = quest_stage;
+  int saved_held_item = held_item;
+  boolean saved_quest_completed = quest_completed;
+  boolean saved_technical_open = technical_open;
+  int saved_pending_action = pending_quest_action;
+
+  resetRun();
+  point_room[POINT_HULL] = SCREEN_COMMAND;
+  point_x[POINT_HULL] = door_x[2];
+  point_y[POINT_HULL] = door_y[2];
+  active_quest = PREVENTIVE_COUNT + PROBLEM_HULL * 2;
+  quest_stage = QUEST_DELIVER;
+  held_item = active_quest + 1;
+  enterRoom(SCREEN_COMMAND);
+  setCapturePlayerAtPoint(POINT_HULL);
+  interact_queued = true;
+  updateRoom();
+  verify("ponto de quest vence portal coincidente",
+    screen == SCREEN_COMMAND && technical_open
+    && pending_quest_action == ACTION_DELIVER_QUEST);
+
+  point_room[POINT_HULL] = saved_hull_room;
+  point_x[POINT_HULL] = saved_hull_x;
+  point_y[POINT_HULL] = saved_hull_y;
+  active_quest = saved_active_quest;
+  quest_stage = saved_quest_stage;
+  held_item = saved_held_item;
+  quest_completed = saved_quest_completed;
+  technical_open = saved_technical_open;
+  pending_quest_action = saved_pending_action;
+  door_x[door] = saved_x;
+  door_y[door] = saved_y;
+  door_deck[door] = saved_deck;
+  door_target[door] = saved_target;
+  door_arrival_x[door] = saved_arrival_x;
+  door_arrival_y[door] = saved_arrival_y;
+  door_arrival_facing[door] = saved_arrival_facing;
 }
 void runHitTest(){
   resetRun();
@@ -653,7 +1011,7 @@ void runLadderTest(){
   resetRun();
   enterRoom(SCREEN_MACHINES);
   float middle_y = deck_y[1] - PLAYER_H;
-  float ladder_player_x = ladder_x[0] - PLAYER_W / 2.0;
+  float ladder_player_x = ladderX(SCREEN_MACHINES, 0) - PLAYER_W / 2.0;
   testLadderLateralExit(middle_y, ladder_player_x);
   testLadderCrossingExit(middle_y, ladder_player_x);
   testLadderStableExit(middle_y);
@@ -661,7 +1019,34 @@ void runLadderTest(){
   base.save(sketchPath("output/ladder_middle_exit.png"));
   testLadderReleaseRearms();
   testLadderIdleSnap(middle_y, ladder_player_x);
+  checkLadderAnywhere();
   exit();
+}
+
+
+void checkLadderAnywhere(){
+  int index = -1;
+
+  for (int i = 0; i < LADDER_COUNT; i++){
+    if (ladder_room[i] == SCREEN_MACHINES && index < 0) index = i;
+  }
+
+  float saved_x = ladder_x[index];
+  float test_x = 320;
+  ladder_x[index] = test_x;
+  enterRoom(SCREEN_MACHINES);
+  player_x = test_x - PLAYER_W / 2.0;
+  player_y = deck_y[1] - PLAYER_H;
+  player_velocity_y = 0;
+  player_grounded = true;
+  player_on_ladder = false;
+  move_down_held = true;
+  updatePlayerOnDeck();
+  move_down_held = false;
+  verify("escada fora das posições fixas é reconhecida",
+    player_on_ladder && abs(player_x - (test_x - PLAYER_W / 2.0)) < 0.01);
+  ladder_x[index] = saved_x;
+  enterRoom(SCREEN_MACHINES);
 }
 
 
@@ -769,7 +1154,10 @@ void typeText(String value){
 
 void verify(String label, boolean passed){
   println("verify: " + label + " -> " + (passed ? "OK" : "FALHOU"));
-  if (!passed) exit();
+  if (!passed){
+    checks_failed = true;
+    exit();
+  }
 }
 
 String screenName(){

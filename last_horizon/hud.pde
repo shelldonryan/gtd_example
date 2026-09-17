@@ -48,7 +48,8 @@ void drawResourceCard(PGraphics g, float x, int icon, float value, int accent, f
 
   drawPanel(g, x, HUD_Y, HUD_CARD_W, HUD_H, border);
   drawResourceIcon(g, icon, x + 4, HUD_Y + 5, accent);
-  text(g, str(int(value)), x + 24, HUD_Y + 8, 16, accent);
+  text(g, str(int(value)), x + 24, HUD_Y + 6, 16, accent);
+  text(g, resourceIconLabel(icon), x + 5, HUD_Y + 24, 16, COL_MUTED);
 
   if (critical){
     drawWarningIcon(g, x + HUD_CARD_W - 18, HUD_Y + 5);
@@ -115,6 +116,16 @@ void drawResourceIcon(PGraphics g, int icon, float x, float y, int colour){
 }
 
 
+String resourceIconLabel(int icon){
+  if (icon == ICON_ENERGY) return "ENERGIA";
+  if (icon == ICON_OXYGEN) return "OXIGÊNIO";
+  if (icon == ICON_WATER) return "ÁGUA";
+  if (icon == ICON_FOOD) return "COMIDA";
+  if (icon == ICON_PARTS) return "PEÇAS";
+  return "MORAL";
+}
+
+
 void drawWarningIcon(PGraphics g, float x, float y){
   g.fill(COL_RED);
   g.triangle(x + 8, y, x + 16, y + 16, x, y + 16);
@@ -132,23 +143,47 @@ void drawObjectiveStrip(PGraphics g){
     system_message_until = frameCount + 180;
   }
 
-  String line = quest_completed ? "QUEST CONCLUÍDA — RETORNE AO SEU BELICHE" : "COMPARE AS DUAS OFERTAS EM ORDENS";
-  if (selected_order >= 0) line = "CONFIRMAR COM " + crew_name[quest_owner[selected_order]] + " — " + pointLocation(nextQuestPoint());
-  if (active_quest >= 0){
-    int q = active_quest;
-    line = (quest_stage == QUEST_COLLECT ? "COLETAR " : "ENTREGAR ") + quest_object[q] + " — " + pointLocation(nextQuestPoint());
-    text(g, crew_name[quest_owner[q]] + " | " + questEffect(q) + " | " + questFailure(q), 16, OBJECTIVE_Y + 14, 16, COL_MUTED);
-  } else {
-    text(g, quest_completed ? questNightSummary() : "UMA QUEST POR DIA. ACEITA: NÃO PODE SER CANCELADA.", 16, OBJECTIVE_Y + 14, 16, COL_MUTED);
-  }
-  text(g, line, 16, OBJECTIVE_Y + 3, 16, COL_CYAN);
+  int q = active_quest >= 0 ? active_quest : selected_order;
+  text(g, orderStageLine(q), 16, OBJECTIVE_Y + 3, 16, COL_CYAN);
+  text(g, orderRouteLine(q), 16, OBJECTIVE_Y + 14, 16, COL_MUTED);
+  text(g, orderFailureLine(q), 16, OBJECTIVE_Y + 25, 16, COL_ORANGE);
+  text(g, problemWarningLine(), 16, OBJECTIVE_Y + 36, 16, COL_ORANGE);
+}
+
+
+String orderStageLine(int q){
+  if (q < 0) return quest_completed
+    ? "ORDEM CONCLUÍDA — RETORNE AO SEU BELICHE"
+    : "NENHUMA ORDEM ATIVA — COMPARE AS DUAS OFERTAS EM ORDENS";
+  if (active_quest < 0) return "CONFIRMAR COM " + crew_name[quest_owner[q]] + " EM "
+    + pointLocation(crew_point[quest_owner[q]]) + " | OBJETO: " + quest_object[q];
+  return questStageLabel(q) + ": " + quest_object[q] + " | RESPONSÁVEL: " + crew_name[quest_owner[q]];
+}
+
+
+String orderRouteLine(int q){
+  if (q < 0) return quest_completed ? questNightSummary() : "UMA QUEST POR DIA. ACEITA: NÃO PODE SER CANCELADA.";
+  return "COLETA: " + pointLocation(quest_origin[q]) + " | ENTREGA: " + pointLocation(quest_destination[q]);
+}
+
+
+String orderFailureLine(int q){
+  if (q < 0) return "";
+  return questEffect(q) + " | " + questFailure(q);
+}
+
+
+String problemWarningLine(){
+  if (system_message.length() > 0 && frameCount < system_message_until) return system_message;
+
   int urgent = urgentProblem();
-  int risk = urgentRisk();
   String warning = urgent < 0 ? "SEM PROBLEMAS ATIVOS" : problem_short[urgent] + ": " + problem_deadline[urgent] + "D"
     + " | " + roomTitle(problem_room[urgent]) + " | +" + (activeProblemCount() - 1) + " PROBLEMA(S)";
+  int risk = urgentRisk();
+
   if (risk >= 0) warning += " | " + crew_name[risk] + " EM RISCO: " + crew_risk_deadline[risk] + "D";
-  if (system_message.length() > 0 && frameCount < system_message_until) warning = system_message;
-  text(g, warning, 16, OBJECTIVE_Y + 24, 16, COL_ORANGE);
+
+  return warning;
 }
 
 
@@ -165,8 +200,7 @@ void drawFooter(PGraphics g){
   if (controls_on && ordersAvailable()){
     drawOrdersBadge(g, 159, FOOTER_Y + 15, ordersPulse());
   }
-  text(g, "A/D ANDAR  W/S ESCADA  ESPAÇO PULAR  E INTERAGIR  ESC PAUSA",
-    186, FOOTER_Y + 7, 16, controls_on ? COL_MUTED : COL_DIM);
+  drawButton(g, 178, FOOTER_Y + 4, 26, 22, "?", ACTION_OPEN_HELP, controls_on);
 }
 
 

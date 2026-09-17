@@ -46,6 +46,7 @@ final int ACTION_RESUME = 40;
 final int ACTION_RESTART = 41;
 final int ACTION_MAIN_MENU = 42;
 final int ACTION_NEW_GAME = 43;
+final int ACTION_OPEN_HELP = 44;
 
 /* playable room - interface/ROOMS.md */
 final int PLAYER_W = 16;
@@ -62,7 +63,7 @@ final float INTERACTION_RANGE = 12;
 final float ROOM_LEFT = 8;
 final float ROOM_RIGHT = 632;
 final float ROOM_TOP = 56;
-final float ROOM_BOTTOM = 294;
+final float ROOM_BOTTOM = 284;
 final int ITEM_NONE = 0;
 
 /* rules - mechanics/ACTIONS.md */
@@ -113,8 +114,8 @@ final float HUD_GAP = 3;
 final int HUD_CARDS = 8;
 final float HUD_CARD_W = (BASE_W - HUD_X * 2 - HUD_GAP * (HUD_CARDS - 1)) / HUD_CARDS;
 
-final float OBJECTIVE_Y = 294;
-final float OBJECTIVE_H = 36;
+final float OBJECTIVE_Y = 284;
+final float OBJECTIVE_H = 46;
 final float FOOTER_Y = 330;
 final float FOOTER_H = BASE_H - FOOTER_Y;
 
@@ -161,6 +162,7 @@ boolean technical_open = false;
 String technical_title = "";
 String technical_text = "";
 boolean end_day_open = false;
+boolean help_open = false;
 
 /* input */
 boolean move_left_held = false;
@@ -257,6 +259,9 @@ void drawBase(){
   draw_layer = LAYER_SCENE;
   if (pipeline_test_mode){
     drawPipelineProbe(base);
+  } else if (capture_mode && capture_step >= capture_label.length
+    && campaign_checks_running){
+    drawCaptureCheckScreen(base);
   } else {
     drawScreen(base);
 
@@ -350,6 +355,10 @@ void handleEscape(){
 
 void handleEnter(){
   if (paused) return;
+  if (transmission_open){
+    doAction(ACTION_CLOSE_MODAL);
+    return;
+  }
   if (event_open){
     if (quest_review >= 0) doAction(ACTION_ACCEPT_SOLUTION);
     return;

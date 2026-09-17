@@ -13,8 +13,63 @@ int[] room_action = {
 
 final int DECK_COUNT = 3;
 float[] deck_y = {128, 202, 278};
-final int LADDER_COUNT = 2;
-float[] ladder_x = {190, 445};
+final int LADDER_PER_ROOM = 2;
+final int LADDER_COUNT = LADDER_PER_ROOM * ROOM_COUNT;
+int[] ladder_room = {
+  SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_MACHINES, SCREEN_MACHINES,
+  SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DORMITORY, SCREEN_DORMITORY
+};
+float[] ladder_x = {190, 445, 190, 445, 190, 445, 190, 445};
+
+/* Portas são portais de dados; x/y são o centro e o limiar dos pés. */
+final int DOOR_DECK_NONE = -1;
+final int DOOR_COUNT = 6;
+final float DOOR_W = 12;
+final float DOOR_H = 38;
+final float DOOR_RANGE = 18;
+final float DOOR_VERTICAL_RANGE = 18;
+int[] door_room = {
+  SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND,
+  SCREEN_DORMITORY, SCREEN_DEPOT, SCREEN_MACHINES
+};
+int[] door_target = {
+  SCREEN_DORMITORY, SCREEN_DEPOT, SCREEN_MACHINES,
+  SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND
+};
+/* door_deck é apenas a referência opcional do layout; -1 libera o y. */
+int[] door_deck = {0, 1, 2, 0, 1, 2};
+float[] door_x = {
+  ROOM_RIGHT - 11, ROOM_RIGHT - 11, BASE_W / 2.0,
+  ROOM_LEFT + 11, ROOM_LEFT + 11, ROOM_LEFT + 11
+};
+float[] door_y = {
+  deck_y[0], deck_y[1], deck_y[2],
+  deck_y[0], deck_y[1], deck_y[2]
+};
+/*
+  door_arrival_x é o centro do jogador e door_arrival_y são seus pés na
+  sala de destino. A chegada é o padrão da porta; num retorno imediato pela
+  sala anterior, a posição de saída é reaproveitada.
+*/
+float[] door_arrival_x = {
+  ROOM_LEFT + 11 + 28 + PLAYER_W / 2.0,
+  ROOM_LEFT + 11 + 28 + PLAYER_W / 2.0,
+  ROOM_LEFT + 11 + 28 + PLAYER_W / 2.0,
+  ROOM_RIGHT - 11 - 28 - PLAYER_W / 2.0,
+  ROOM_RIGHT - 11 - 28 - PLAYER_W / 2.0,
+  ROOM_RIGHT - 11 - 28 - PLAYER_W / 2.0
+};
+float[] door_arrival_y = {
+  deck_y[0], deck_y[1], deck_y[2],
+  deck_y[0], deck_y[1], deck_y[2]
+};
+int[] door_arrival_facing = {1, 1, 1, -1, -1, -1};
+
+boolean last_portal_valid = false;
+int last_portal_from_room = SCREEN_COMMAND;
+int last_portal_to_room = SCREEN_COMMAND;
+float last_portal_from_x = 0;
+float last_portal_from_y = 0;
 
 final int POINT_READ = 0;
 final int POINT_COLLECT = 1;
@@ -271,6 +326,7 @@ void drawLadders(PGraphics g){
   g.strokeWeight(2);
 
   for (int i = 0; i < LADDER_COUNT; i++){
+    if (ladder_room[i] != screen) continue;
     float x = ladder_x[i];
     g.line(x - 5, deck_y[0], x - 5, deck_y[DECK_COUNT - 1]);
     g.line(x + 5, deck_y[0], x + 5, deck_y[DECK_COUNT - 1]);
@@ -283,33 +339,45 @@ void drawLadders(PGraphics g){
   g.strokeWeight(1);
 }
 void drawDoors(PGraphics g){
-  if (screen == SCREEN_COMMAND){
-    drawHubDoor(g, 0, SCREEN_DORMITORY);
-    drawHubDoor(g, 1, SCREEN_DEPOT);
-    drawHubDoor(g, 2, SCREEN_MACHINES);
-    return;
+  for (int i = 0; i < DOOR_COUNT; i++){
+    if (door_room[i] != screen) continue;
+
+    float x = door_x[i];
+    float y = door_y[i];
+    boolean nearby = doorInRange(i);
+    g.fill(nearby ? COL_CYAN_DARK : COL_PANEL_2);
+    g.stroke(nearby ? COL_CYAN : COL_BORDER);
+    g.rect(x - DOOR_W / 2.0, y - DOOR_H, DOOR_W, DOOR_H);
+    if (!nearby) continue;
+
+    String label = "E - " + roomTitle(door_target[i]);
+    if (door_x[i] < BASE_W / 2.0){
+      text(g, label, x + DOOR_W, y - 58, 16, COL_CYAN);
+    } else {
+      text(g, label, x - 210, y - 58, 16, COL_CYAN);
+    }
   }
-  drawPeripheralDoor(g, roomDoorDeck(screen));
 }
 
-void drawHubDoor(PGraphics g, int deck, int destination){
-  float x = ROOM_RIGHT - 17;
-  float y = deck_y[deck];
-  boolean nearby = doorInRange(1, deck);
-  g.fill(nearby ? COL_CYAN_DARK : COL_PANEL_2);
-  g.stroke(nearby ? COL_CYAN : COL_BORDER);
-  g.rect(x, y - 38, 12, 38);
-  if (nearby) text(g, "E - " + roomTitle(destination), x - 210, y - 58, 16, COL_CYAN);
+
+boolean doorInRange(int index){
+  if (index < 0 || index >= DOOR_COUNT || door_room[index] != screen){
+    return false;
+  }
+
+  float player_center_x = player_x + PLAYER_W / 2.0;
+  float player_feet_y = player_y + PLAYER_H;
+  return abs(player_center_x - door_x[index]) <= DOOR_RANGE
+    && abs(player_feet_y - door_y[index]) <= DOOR_VERTICAL_RANGE;
 }
 
-void drawPeripheralDoor(PGraphics g, int deck){
-  float x = ROOM_LEFT + 5;
-  float y = deck_y[deck];
-  boolean nearby = doorInRange(-1, deck);
-  g.fill(nearby ? COL_CYAN_DARK : COL_PANEL_2);
-  g.stroke(nearby ? COL_CYAN : COL_BORDER);
-  g.rect(x, y - 38, 12, 38);
-  if (nearby) text(g, "E - SALA DE COMANDO", x + 18, y - 58, 16, COL_CYAN);
+
+int nearbyDoor(){
+  for (int i = 0; i < DOOR_COUNT; i++){
+    if (door_room[i] == screen && doorInRange(i)) return i;
+  }
+
+  return -1;
 }
 
 
@@ -563,17 +631,70 @@ void drawHeldItem(PGraphics g){
 
 
 void enterRoom(int next_screen){
-  enterRoomAtDeck(next_screen, roomDoorDeck(next_screen), -1);
+  int door = doorInRoomLeadingTo(SCREEN_COMMAND, next_screen);
+
+  if (door >= 0){
+    enterRoomAtPosition(
+      next_screen,
+      door_arrival_y[door],
+      door_arrival_x[door],
+      door_arrival_facing[door]
+    );
+    return;
+  }
+
+  enterRoomAtPosition(next_screen, deck_y[DECK_COUNT - 1], ROOM_LEFT + 28, 1);
 }
 
-void enterRoomAtDeck(int next_screen, int deck, int entry_side){
+
+
+int doorInRoomLeadingTo(int room_id, int target){
+  for (int i = 0; i < DOOR_COUNT; i++){
+    if (door_room[i] == room_id && door_target[i] == target) return i;
+  }
+
+  return -1;
+}
+
+void enterRoomThroughDoor(int door){
+  int from_screen = screen;
+  int target_screen = door_target[door];
+  boolean returning_to_previous_room =
+    last_portal_valid
+    && last_portal_from_room == target_screen
+    && last_portal_to_room == from_screen;
+  float arrival_x = returning_to_previous_room
+    ? last_portal_from_x
+    : door_arrival_x[door];
+  float arrival_y = returning_to_previous_room
+    ? last_portal_from_y
+    : door_arrival_y[door];
+
+  last_portal_valid = true;
+  last_portal_from_room = from_screen;
+  last_portal_to_room = target_screen;
+  last_portal_from_x = player_x + PLAYER_W / 2.0;
+  last_portal_from_y = player_y + PLAYER_H;
+
+  enterRoomAtPosition(
+    target_screen,
+    arrival_y,
+    arrival_x,
+    door_arrival_facing[door]
+  );
+}
+
+
+void enterRoomAtPosition(int next_screen, float feet_y, float center_x, int facing){
   screen = next_screen;
   current_room = next_screen;
-  player_facing = entry_side > 0 ? -1 : 1;
-  player_x = entry_side > 0 ? ROOM_RIGHT - 28 - PLAYER_W : ROOM_LEFT + 28;
-  player_y = deck_y[deck] - PLAYER_H;
+  player_facing = facing;
+  float clamped_feet_y = constrain(feet_y, ROOM_TOP + PLAYER_H, ROOM_BOTTOM);
+  player_x = constrain(center_x - PLAYER_W / 2.0,
+    ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
+  player_y = clamped_feet_y - PLAYER_H;
   player_velocity_y = 0;
-  player_grounded = true;
+  player_grounded = isDeckSurface(clamped_feet_y);
   player_on_ladder = false;
   ladder_vertical_release_required = false;
   jump_queued = false;
@@ -599,41 +720,20 @@ void resetRoomState(){
   pending_quest_action = ACTION_NONE;
   pending_retry = -1;
   end_day_open = false;
+  help_open = false;
+  last_portal_valid = false;
 }
 
-
-int roomDoorDeck(int room_id){
-  if (room_id == SCREEN_DORMITORY) return 0;
-  if (room_id == SCREEN_DEPOT) return 1;
-  return 2;
-}
-
-boolean doorInRange(int direction, int deck){
-  float center = player_x + PLAYER_W / 2.0;
-  float bottom = player_y + PLAYER_H;
-  boolean on_deck = abs(bottom - deck_y[deck]) <= 3;
-  return on_deck && (direction < 0
-    ? center <= ROOM_LEFT + 38 : center >= ROOM_RIGHT - 38);
-}
 
 boolean useNearbyDoor(){
-  if (screen == SCREEN_COMMAND){
-    for (int deck = 0; deck < DECK_COUNT; deck++){
-      if (!doorInRange(1, deck)) continue;
-      int destination = deck == 0 ? SCREEN_DORMITORY
-        : deck == 1 ? SCREEN_DEPOT : SCREEN_MACHINES;
-      enterRoomAtDeck(destination, deck, -1);
-      return true;
-    }
+  int door = nearbyDoor();
+
+  if (door < 0 || nearestInteractablePoint() >= 0){
     return false;
   }
 
-  int deck = roomDoorDeck(screen);
-  if (doorInRange(-1, deck)){
-    enterRoomAtDeck(SCREEN_COMMAND, deck, 1);
-    return true;
-  }
-  return false;
+  enterRoomThroughDoor(door);
+  return true;
 }
 
 
@@ -828,6 +928,7 @@ int nearestLadder(){
   float best_distance = INTERACTION_RANGE + 1;
 
   for (int i = 0; i < LADDER_COUNT; i++){
+    if (ladder_room[i] != screen) continue;
     float distance = abs(center_x - ladder_x[i]);
 
     if (distance <= INTERACTION_RANGE && distance < best_distance){
@@ -837,6 +938,16 @@ int nearestLadder(){
   }
 
   return result;
+}
+
+
+float ladderX(int room_id, int slot){
+  for (int i = 0; i < LADDER_COUNT; i++){
+    if (ladder_room[i] != room_id) continue;
+    if (slot-- == 0) return ladder_x[i];
+  }
+
+  return 0;
 }
 
 

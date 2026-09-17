@@ -1,9 +1,9 @@
 final int VIGNETTE_PAGES = 3;
 
 String[][] vignette_lines = {
-  {"A TERRA SE ESGOTOU.", "NÃO HÁ VOLTA."},
-  {"QUATRO SOBREVIVENTES A BORDO.", "DEZ DIAS ATÉ MARTE."},
-  {"O MOTOR É O CORAÇÃO DA VIAGEM.", "MANTENHA-O OPERANTE."}
+  {"A TERRA ENTROU EM COLAPSO.", "NÃO HÁ RECURSOS PARA FICAR."},
+  {"QUATRO SOBREVIVENTES A BORDO.", "A PARTIDA COMEÇA AGORA."},
+  {"DEZ DIAS ATÉ MARTE.", "MOTOR OPERANTE. AO MENOS UM SOBREVIVENTE VIVO."}
 };
 
 
@@ -18,7 +18,8 @@ boolean isRoomScreen(){
 
 
 boolean modalOpen(){
-  return event_open || orders_open || map_open || dialog_open || technical_open || end_day_open;
+  return event_open || orders_open || map_open || dialog_open || technical_open || end_day_open || help_open
+    || transmission_open;
 }
 
 
@@ -67,7 +68,9 @@ void drawModalLayer(PGraphics g){
 
   draw_layer = LAYER_MODAL;
 
-  if (event_open){
+  if (transmission_open){
+    drawTransmissionCard(g);
+  } else if (event_open){
     drawEventCard(g);
   } else if (orders_open){
     drawOrdersPanel(g);
@@ -79,6 +82,8 @@ void drawModalLayer(PGraphics g){
     drawTechnicalPanel(g);
   } else if (end_day_open){
     drawEndDayPanel(g);
+  } else if (help_open){
+    drawHelpPanel(g);
   }
 }
 
@@ -86,6 +91,11 @@ void drawModalLayer(PGraphics g){
 boolean closeTopModal(){
   if (paused){
     paused = false;
+    return true;
+  }
+
+  if (transmission_open){
+    transmission_open = false;
     return true;
   }
 
@@ -97,8 +107,8 @@ boolean closeTopModal(){
     return false;
   }
 
-  if (orders_open || map_open || dialog_open || technical_open || end_day_open){
-    orders_open = map_open = dialog_open = technical_open = end_day_open = false;
+  if (orders_open || map_open || dialog_open || technical_open || end_day_open || help_open){
+    orders_open = map_open = dialog_open = technical_open = end_day_open = help_open = false;
     pending_quest_action = ACTION_NONE;
     pending_retry = -1;
     return true;
@@ -148,6 +158,10 @@ void doAction(int action){
   if (action == ACTION_OPEN_ORDERS){
     orders_page = -1;
     orders_open = true;
+    return;
+  }
+  if (action == ACTION_OPEN_HELP){
+    help_open = true;
     return;
   }
   if (action == ACTION_ORDER_A || action == ACTION_ORDER_B){
@@ -258,11 +272,10 @@ void drawVictoryScreen(PGraphics g){
 
   textCentered(g, "A NAVE CHEGOU A MARTE", BASE_W / 2.0, 52, 20, COL_GREEN);
   textCentered(g, "VIAGEM CONCLUÍDA EM " + trip + " DIAS", BASE_W / 2.0, 86, 10, COL_TEXT);
-  textCentered(g, "SOBREVIVENTES: " + survivors + " DE " + CREW_START, BASE_W / 2.0, 104, 10, COL_TEXT);
+  textCentered(g, survivorsSummary(), BASE_W / 2.0, 104, 10, COL_TEXT);
   textCentered(g, "ENERGIA " + str(int(energy)) + "   OXIGÊNIO " + str(int(oxygen)) + "   ÁGUA " + str(int(water)), BASE_W / 2.0, 126, 10, COL_MUTED);
   textCentered(g, "COMIDA " + str(int(food)) + "   PEÇAS " + str(parts) + "   MORAL " + str(int(morale)), BASE_W / 2.0, 144, 10, COL_MUTED);
-  textCentered(g, "A BASE MARCIANA CONFIRMA A CHEGADA. A MISSÃO SEGUE.", BASE_W / 2.0, 176, 10, COL_CYAN);
-  textCentered(g, "TEXTO DA MENSAGEM DE MARTE AINDA PROVISÓRIO.", BASE_W / 2.0, 194, 9, COL_DIM);
+  textCentered(g, marsMessage(), BASE_W / 2.0, 176, 10, COL_CYAN);
 
   drawButton(g, 220, 240, 200, 24, "NOVA PARTIDA", ACTION_NEW_GAME, true);
 }

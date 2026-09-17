@@ -322,6 +322,7 @@ void deliverQuest(){
       return;
     }
     payResource(solution_resource[i], solution_cost[i]);
+    if (questProblem(q) == PROBLEM_ENGINE && problem_deadline[PROBLEM_ENGINE] == 1) engine_repaired_at_limit = true;
     clearProblem(questProblem(q));
     system_message = "SOLUÇÃO CONCLUÍDA: " + quest_title[q] + ".";
   } else {
@@ -393,16 +394,22 @@ String pointDisplayLabel(int point){
   return point_label[point];
 }
 
+int crewAtPoint(int point){
+  for (int crew = 0; crew < CREW_COUNT; crew++){
+    if (crew_point[crew] == point) return crew;
+  }
+
+  return -1;
+}
+
+
 boolean pointIsAvailable(int point){
   if (point == POINT_TECH_BUNK) return true;
   if (point == POINT_RISK_BUNK)
     return urgentRisk() >= 0 && dailyQuestFree() && selected_order < 0 && !event_open;
-  if (point != nextQuestPoint()) return false;
-  if (point_kind[point] == POINT_NPC){
-    for (int crew = 0; crew < CREW_COUNT; crew++)
-      if (crew_point[crew] == point) return crew_alive[crew];
-  }
-  return true;
+  int crew = crewAtPoint(point);
+  if (crew >= 0) return crew_alive[crew];
+  return point == nextQuestPoint();
 }
 
 boolean ordersAvailable(){
@@ -428,17 +435,75 @@ void interactPoint(int point){
   }
 }
 
-void interactNpc(int point){
-  int owner = 0;
-  for (int crew = 0; crew < CREW_COUNT; crew++) if (crew_point[crew] == point) owner = crew;
-  if (selected_order >= 0 && quest_owner[selected_order] == owner && dailyQuestFree()){
-    openDialogue(crew_name[owner], "CONFIRME A ORDEM. ELA NÃO PODE SER CANCELADA. " + questDetails(selected_order));
-    pending_quest_action = ACTION_ACCEPT_ORDER;
-  } else {
-    openDialogue(crew_name[owner], active_quest >= 0 ? "SIGA A ORDEM: " + questDetails(active_quest)
-      : quest_completed ? "TRABALHO CONCLUÍDO. SEU BELICHE ENCERRA O DIA."
-      : "COMPARE AS DUAS OFERTAS NO BOTÃO ORDENS. CONFIRME A ESCOLHIDA COM SEU RESPONSÁVEL.");
+int offerOf(int owner){
+  for (int i = 0; i < 2; i++){
+    if (daily_offers[i] >= 0 && quest_owner[daily_offers[i]] == owner) return daily_offers[i];
   }
+
+  return -1;
+}
+
+
+String questStageLabel(int q){
+  if (q < 0) return "SEM ORDEM";
+  if (active_quest < 0) return "CONFIRMAR";
+  return quest_stage == QUEST_COLLECT ? "COLETAR" : "ENTREGAR";
+}
+
+
+void interactNpc(int point){
+  int owner = crewAtPoint(point);
+
+  if (owner < 0 || !crew_alive[owner]) return;
+
+  String name = crew_name[owner];
+
+  if (selected_order >= 0 && quest_owner[selected_order] == owner && dailyQuestFree()){
+    openDialogue(name, "CONFIRME A ORDEM. ELA NÃO PODE SER CANCELADA. " + questDetails(selected_order));
+    pending_quest_action = ACTION_ACCEPT_ORDER;
+    return;
+  }
+
+  if (selected_order >= 0){
+    openDialogue(name, "DECISÃO EM ANDAMENTO. CONFIRME COM " + crew_name[quest_owner[selected_order]]
+      + " EM " + pointLocation(crew_point[quest_owner[selected_order]]) + ".");
+    return;
+  }
+
+  if (active_quest >= 0 && quest_owner[active_quest] == owner){
+    openDialogue(name, "SIGA A ORDEM: " + questStageLabel(active_quest) + " " + quest_object[active_quest]
+      + " — " + pointLocation(nextQuestPoint()) + ". " + questEffect(active_quest) + ".");
+    return;
+  }
+
+  if (active_quest >= 0){
+    openTechnical(name, "ORDEM ATIVA COM " + crew_name[quest_owner[active_quest]] + ": " + quest_object[active_quest]
+      + " — " + pointLocation(nextQuestPoint()) + ". FALE COM " + crew_name[quest_owner[active_quest]] + ".");
+    return;
+  }
+
+  if (quest_completed){
+    openDialogue(name, "TRABALHO CONCLUÍDO. SEU BELICHE ENCERRA O DIA.");
+    return;
+  }
+
+  int offer = offerOf(owner);
+  if (offer >= 0){
+    openDialogue(name, "MINHA OFERTA: " + quest_title[offer] + ". OBJETO: " + quest_object[offer]
+      + ". COLETA: " + pointLocation(quest_origin[offer]) + ". ENTREGA: " + pointLocation(quest_destination[offer])
+      + ". COMPARE COM A OUTRA EM ORDENS.");
+    return;
+  }
+
+  int urgent = urgentProblem();
+  if (urgent >= 0){
+    openTechnical(name, "PROBLEMA ATIVO: " + problem_title[urgent] + ". " + problemLossLabel(urgent)
+      + "; PRAZO " + problem_deadline[urgent] + ". " + (event_open
+      ? "ESCOLHA UMA SOLUÇÃO NO CARTÃO." : "ESCOLHA OU RETOME UMA SOLUÇÃO EM ORDENS."));
+    return;
+  }
+
+  openDialogue(name, "NADA PENDENTE COMIGO HOJE.");
 }
 
 void openQuestStepPanel(){
