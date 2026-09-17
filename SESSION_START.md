@@ -408,8 +408,10 @@ inventário de assets e congelamento do layout para a pintura.
   #1 atualizados com a fronteira.
 
 - Pendência: o som foi para a #28; nenhuma decisão de áudio foi tomada nesta
-  sessão. A #27 não está ligada como sub-issue da #1 — só o corpo dela diz
-  "Part of #1"; registrado sem alteração.
+  sessão.
+- Grafo: a #27 foi ligada como sub-issue da #1, fechando a única lacuna — todas
+  as issues marcadas "Part of #1" estão agora no grafo nativo. Continuam abertas
+  #7 e #28; as demais estão CLOSED.
 - Resultado: documentação de arte fechada e layout congelado no protótipo
   executável — não é a arte final, que segue a ordem de produção.
 
