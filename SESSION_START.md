@@ -4,9 +4,9 @@
 > e sincronize-o com o Wayfinder antes de encerrar a sessão.
 
 Atualizado após a sessão da
-[issue #8](https://github.com/shelldonryan/gtd_example/issues/8), que fechou a
-lista de imagens em `assets/INVENTORY.md` e congelou o layout de escadas e
-estações para a pintura dos fundos.
+[issue #7](https://github.com/shelldonryan/gtd_example/issues/7), que separou a
+documentação de design do material de verificação, montou o pacote de entrega e
+preparou o sketch para receber a arte.
 
 Destino Wayfinder: [issue #1](issue://1)
 
@@ -78,10 +78,14 @@ reporte e não escolha silenciosamente.
   pontos de quest quando coincidem com um portal.
 
 - A migração foi solicitada explicitamente antes do inventário #8. O jogo já
-  executa o novo ciclo; estações e objetos ainda usam a arte geométrica.
-- #8 foi concluída nesta sessão: a lista de imagens, os canvas e a ordem de
-  produção estão em `assets/INVENTORY.md`, e o layout de escadas e estações
-  ficou congelado para a pintura dos fundos.
+  executa o novo ciclo; a arte entra por arquivo, com fallback geométrico.
+- #8 foi concluída: a lista de imagens, os canvas e a ordem de produção estão em
+  `assets/INVENTORY.md`, e o layout de escadas e estações ficou congelado para a
+  pintura dos fundos.
+- #29 foi concluída nesta sessão: o sketch tem a camada de arte (`assets.pde`)
+  com fallback geométrico, desenho 1:1 e travessia de porta em dois quadros.
+- #30 foi concluída nesta sessão: a aba principal não cita mais o harness, então
+  a cópia entregue sai sem `capture.pde` e compila fora do repositório.
 - #28 está OPEN e disponível:
   [Escolher e integrar os dois efeitos sonoros](https://github.com/shelldonryan/gtd_example/issues/28);
   o jogo segue mudo até a escolha.
@@ -89,20 +93,28 @@ reporte e não escolha silenciosamente.
   escadas em 127/532 (Comando), 114/526 (Máquinas), 120/489 (Depósito) e 127/482
   (Dormitório), com as estações realocadas e folga mínima de 40 px do eixo de
   uma escada. As portas continuam sendo sprites e mudam sem repintura.
-- #7 está OPEN, disponível e independente:
-  [Documento de entrega e como o jogo roda na apresentação](https://github.com/shelldonryan/gtd_example/issues/7).
-- O próximo caminho crítico é produzir a arte na ordem de `assets/INVENTORY.md`,
-  começando pelos ícones do HUD.
+- A entrega vai pelo GitHub: o repositório é privado e o professor tem acesso;
+  a branch local `entrega` é o snapshot curado (notas de design, concept arts e
+  o sketch de 8 abas), e o push é ação do usuário. Uma cópia equivalente está em
+  `../entrega_last_horizon/`. A apresentação roda na máquina dele abrindo
+  `last_horizon/last_horizon.pde` no Processing.
+- #7 foi concluída:
+  [Documento de entrega e como o jogo roda na apresentação](https://github.com/shelldonryan/gtd_example/issues/7);
+  o plano B é uma gravação curta de partida, a ser feita pelo usuário até 23/09.
+- O próximo caminho crítico é a arte: o usuário seleciona os assets CC0/CC-BY e
+  o sketch já os recebe por arquivo, na ordem de `assets/INVENTORY.md`.
 
 ### Fronteira Wayfinder
 
-Sincronizada com o grafo nativo depois da sessão do #8:
+Sincronizada com o grafo nativo depois da sessão do #7:
 
 | Issue | Estado | Bloqueadores abertos | Relação |
 |---|---|---|---|
-| #7 Documento de entrega | OPEN | — | independente e disponível |
+| #7 Documento de entrega | CLOSED | — | entrega pelo GitHub (repo privado, acesso do professor) e plano B por gravação curta |
+| #29 Camada de assets | CLOSED | — | camada de arte com fallback, travessia de porta e drop-in documentado |
+| #30 Desacoplar o harness | CLOSED | — | cópia entregue sem `capture.pde`, testada fora do repositório |
 | #8 Inventário de assets | CLOSED | — | lista, canvas e ordem de produção em `assets/INVENTORY.md`; escadas e estações congeladas |
-| #28 Escolher e integrar os dois efeitos sonoros | OPEN | — | dependente da #3; único item que saiu da #8 |
+| #28 Escolher e integrar os dois efeitos sonoros | OPEN | — | dependente da #3; o jogo segue mudo |
 | #27 Portais, desfechos, transmissões, NPCs e HUD | CLOSED | — | escopo ampliado; concluído e validado |
 | #25 Redesenhar incidentes e ordens como quests físicas | CLOSED | — | catálogo e fluxo físico implementados no sketch |
 | #26 Simplificar mecânicas legadas e balancear o ciclo de quests | CLOSED | — | números, pool e consequências implementados no sketch |
@@ -190,8 +202,9 @@ por solicitação explícita do usuário; arte final continua fora desta mudanç
 - A arte final está especificada em `assets/INVENTORY.md`: fundo em imagem por
   sala, com o piso e as escadas **pintados** no fundo e a colisão mantida no
   código; estações, objetos, NPCs, portas, ícones, retratos, telas e miniaturas
-  do mapa são sprites; painéis, cartões, barras, faixas, botões, o selo `!` e
-  todo o texto continuam em código.
+  do mapa são sprites carregados por arquivo, com a geometria do protótipo como
+  fallback enquanto o asset não existe; painéis, cartões, barras, faixas,
+  botões, o selo `!` e todo o texto continuam em código.
 
 O catálogo concreto, seus IDs, objetos, origens, destinos, resultados e textos
 estão em `mechanics/ACTIONS.md` e `events/`. Os valores numéricos e a seleção
@@ -230,6 +243,12 @@ Topologia e ordens: `interface/ROOMS.md`.
   mouse nos botões `MAPA` e `ORDENS`.
 - HUD: seis ícones 16×16; cartões de recurso com ícone, número, rótulo e barra.
 - Áudio offline: `javax.sound.sampled`, WAV PCM 16 bits em `data/`.
+- A arte entra por arquivo em `data/` (`icons/`, `stations/`, `objects/`,
+  `npc/`, `doors/`, `rooms/`, `portraits/`, `screens/`, `map/`), com fallback
+  geométrico quando o arquivo não existe, desenho 1:1 no render 1280×720 e
+  travessia de porta em dois quadros.
+- A cópia entregue é o sketch sem a aba do harness (`capture.pde`): a aba
+  principal declara pontos de extensão inertes e o harness se instala neles.
 
 Concept arts definem linguagem visual e composição, nunca nomes, números,
 dimensões ou layout final:
@@ -299,6 +318,23 @@ Não replique aqui o histórico completo:
   vazio (D-123); o som fica pendente e o jogo segue mudo (D-124); a lista e a
   ordem de produção vivem em `assets/INVENTORY.md`, começando pelos ícones do
   HUD (D-125).
+- **D-126 a D-131 (sessão #7, entrega e camada de arte):** a entrega é a
+  documentação de design do vault mais o jogo em Processing, rodando na máquina
+  do professor a partir da pasta do sketch (D-126); o material de verificação sai
+  dos documentos entregues e passa a viver em `code/VERIFICATION.md`, só do
+  repositório, com a cópia entregue sem a aba do harness (D-127); o `README.md`
+  é o hub do grafo, as notas se linkam por wikilink e as issues ficam só em
+  `Referências` no fim, com `assets/INVENTORY.md` e as concept arts na entrega
+  (D-128); a camada de arte carrega por arquivo com fallback geométrico e 1:1 e
+  a porta ganha travessia em dois quadros, com **arte de IA proibida** e
+  CC0/CC-BY permitida, selecionada pelo usuário (D-129); prazo de entrega em
+  23/09 (D-130); o harness fixa a sequência de incidentes para não repetir o
+  motor no dia 4, corrigindo falha intermitente (D-131). A opção de "esperar a
+  arte final toda" fica **superseded** por D-126/D-129.
+- **D-132 e D-133 (fechamento da sessão #7):** a entrega vai pelo GitHub — o
+  repositório é privado e o professor tem acesso —, com uma branch `entrega`
+  curada como snapshot (D-132); o plano B da apresentação é uma gravação curta
+  de partida feita pelo usuário (D-133).
 
 ## Fontes por tarefa
 
@@ -332,6 +368,8 @@ Código:
 
 - `code/SKETCH_ARCHITECTURE.md`;
 - todos os `.pde` de `last_horizon/`;
+- `code/VERIFICATION.md` (só do repositório) para comandos, harness, costura e
+  fixtures;
 - comandos e evidências de captura da issue afetada.
 
 `interface/MENU_CONFIGURATION.md` foi removido; o menu de configuração segue fora
@@ -342,8 +380,10 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
 
 - a escolha do som: o inventário reserva `data/audio/click.wav` e
   `data/audio/alerta.wav` e o jogo segue mudo;
-- a produção da arte, na ordem de `assets/INVENTORY.md` — ícones, porta, casco,
-  objetos, NPCs, estações, retratos, fundos, telas e miniaturas do mapa;
+- a seleção da arte, na ordem de `assets/INVENTORY.md` — ícones, porta, casco,
+  objetos, NPCs, estações, retratos, fundos, telas e miniaturas do mapa; quem
+  seleciona é o usuário, e arte gerada por IA é proibida pelo professor;
+- a gravação curta do plano B, a ser feita pelo usuário até 23/09;
 - a definição visual das **portas**, que são sprite e mudam sem repintura; as
   escadas, que são pintadas, estão fechadas;
 - o texto e a estética dos modais e cartões, deferidos por decisão da #27;
@@ -370,6 +410,54 @@ do escopo. Arquivos `research/*.md` podem existir apenas nas branches
       funcionalidade pronta.
 
 ## Última sessão registrada
+
+Sessão da [issue #7](https://github.com/shelldonryan/gtd_example/issues/7) —
+entrega montada, documentação separada da verificação e sketch pronto para
+receber arte.
+
+- Fronteira recalculada no grafo nativo antes desta sessão: apenas #1, #7 e #28
+  estavam OPEN; #8 CLOSED com todos os bloqueadores fechados.
+- Grilling do #7 com decisões confirmadas uma a uma: entrega = documentação do
+  vault (menos os operacionais) + o jogo; `assets/INVENTORY.md` e as concept
+  arts entram; material de verificação sai dos docs entregues e vira
+  `code/VERIFICATION.md`, só do repositório; `README.md` é o hub do grafo, com
+  wikilinks entre as notas e issues apenas em `Referências`; o pacote roda na
+  máquina do professor abrindo o `.pde` no Processing; prazo 23/09; arte de IA
+  proibida, CC0/CC-BY permitidas e selecionadas pelo usuário.
+- Tickets abertos e concluídos na sessão: #29 (camada de arte) e #30 (desacoplar
+  o harness), ambos ligados como sub-issues da #1 e fechados com evidência.
+- Código: `last_horizon/assets.pde` carrega a arte por arquivo com fallback
+  geométrico e desenho 1:1; `ship.pde` ganhou a travessia de porta em dois
+  quadros; `last_horizon.pde` declara os pontos de extensão do harness
+  (`harness_setup`, `harness_update`, `harness_scene`); `capture.pde` se instala
+  neles e passou a fixar a sequência de incidentes.
+- Evidência: `--hit-test` → 5 `OK`; `--ladder-test` → 6 `OK`; `--capture` →
+  **145 asserções `OK`** e `QUEST CHECK: PASS` em três execuções seguidas; cópia
+  com as 57 fixtures de arte em pasta temporária → 57/57 carregadas, 145 `OK`,
+  `PASS`; híbrido sem os fundos de sala → 53/57, 145 `OK`, `PASS`; inspeção
+  visual confirmou ícones nos cartões, estações com a base no convés, porta no
+  limiar e retratos/telas desenhados.
+- Defeito de verificação corrigido: o sorteio da sequência de incidentes podia
+  repetir o motor no dia 4 e quebrar a asserção de prioridade — reproduzido no
+  código original (três execuções: `PASS`, `FALHOU`, `PASS`) e corrigido com
+  sequência determinística; três execuções seguintes passaram.
+- Pacote montado fora do repositório: `../entrega_last_horizon/` com 23 notas,
+  8 concept arts, o sketch de 8 abas e `data/player/`; zero wikilink quebrado e
+  zero token de verificação nos documentos entregues; a pasta compila e roda
+  fora do repositório.
+- Fontes sincronizadas: `README.md`, `interface/`, `mechanics/ACTIONS.md`,
+  `events/`, `characters/`, `docs/adr/`, `history/CONTEXT.md`,
+  `assets/INVENTORY.md`, `code/SKETCH_ARCHITECTURE.md`, `code/VERIFICATION.md`
+  (novo) e este arquivo.
+- Wayfinder: #29 e #30 CLOSED com evidência; #7 desbloqueada no grafo (as duas
+  dependências concluídas) e fechada no fim da sessão com entrega pelo GitHub e
+  plano B por gravação curta.
+- Pendências: som (#28) e a seleção da arte seguem abertos; nada foi commitado
+  nesta sessão — o delta está no working tree.
+- Resultado: protótipo executável pronto para receber arte e pacote de entrega
+  montado e verificado.
+
+### Sessão anterior — #8
 
 Sessão da [issue #8](https://github.com/shelldonryan/gtd_example/issues/8) —
 inventário de assets e congelamento do layout para a pintura.
