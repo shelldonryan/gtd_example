@@ -627,10 +627,13 @@ void loadPlayerAssets(){
 
   player_has_climb = false;
   player_has_jump = false;
+  player_has_run = false;
   player_climb_start = -1;
   player_climb_end = -1;
   player_jump_start = -1;
   player_jump_end = -1;
+  player_run_start = -1;
+  player_run_end = -1;
 
   if (player_sheet_data.hasKey("frames")){
     /* Formato Aseprite: tira horizontal + metadados de frames */
@@ -681,6 +684,10 @@ void loadPlayerAssets(){
           player_jump_start = tag.getInt("from");
           player_jump_end = tag.getInt("to");
           player_has_jump = true;
+        } else if (name.equals("run")){
+          player_run_start = tag.getInt("from");
+          player_run_end = tag.getInt("to");
+          player_has_run = true;
         }
       }
     }
@@ -690,12 +697,14 @@ void loadPlayerAssets(){
     boolean can_walk = player_sheet.height >= 12 * 64;
     boolean can_climb = player_sheet.height >= 22 * 64;
     boolean can_jump = player_sheet.height >= 30 * 64;
+    boolean can_run = player_sheet.height >= 42 * 64;
 
     int idle_count = can_idle ? 2 : 1;
     int walk_count = can_walk ? 8 : 1;
     int climb_count = can_climb ? 6 : 0;
     int jump_count = can_jump ? 6 : 0;
-    int total_frames = idle_count + walk_count + climb_count + jump_count;
+    int run_count = can_run ? 8 : 0;
+    int total_frames = idle_count + walk_count + climb_count + jump_count + run_count;
 
     player_frame_images = new PImage[total_frames];
     player_frame_durations = new int[total_frames];
@@ -756,6 +765,18 @@ void loadPlayerAssets(){
       player_jump_end = idx - 1;
       player_has_jump = true;
     }
+
+    /* 5. Run: linha 41 (Leste / perfil direito), 8 quadros de 75 ms (cols 0..7) */
+    if (can_run){
+      player_run_start = idx;
+      for (int col = 0; col < 8; col++){
+        player_frame_images[idx] = player_sheet.get(col * 64, 41 * 64, 64, 64);
+        player_frame_durations[idx] = 75;
+        idx++;
+      }
+      player_run_end = idx - 1;
+      player_has_run = true;
+    }
   }
 
   player_frame_layer = createGraphics(
@@ -782,17 +803,36 @@ boolean playerIsMoving(){
 }
 
 
+/* Animation states: run falls back to walk when the sheet has no run frames
+   (Aseprite without the tag), so the technician never freezes mid-sprint. */
+final int PLAYER_ANIM_IDLE = 0;
+final int PLAYER_ANIM_WALK = 1;
+final int PLAYER_ANIM_CLIMB = 2;
+final int PLAYER_ANIM_JUMP = 3;
+final int PLAYER_ANIM_RUN = 4;
+
+
+/* Shift only sprints on a deck, and only with one direction held: left+right
+   cancels out, so running in place would be noise. */
+boolean playerIsRunning(){
+  return run_held && (move_left_held != move_right_held) && player_grounded && !player_on_ladder;
+}
+
+
 int playerCurrentAnimationState(){
   if (player_has_climb && player_on_ladder){
-    return 2;
+    return PLAYER_ANIM_CLIMB;
   }
   if (player_has_jump && !player_grounded && !player_on_ladder){
-    return 3;
+    return PLAYER_ANIM_JUMP;
+  }
+  if (playerIsRunning()){
+    return player_has_run ? PLAYER_ANIM_RUN : PLAYER_ANIM_WALK;
   }
   if (playerIsMoving()){
-    return 1;
+    return PLAYER_ANIM_WALK;
   }
-  return 0;
+  return PLAYER_ANIM_IDLE;
 }
 
 
@@ -802,26 +842,29 @@ int playerCurrentFrame(){
   }
 
   int state = playerCurrentAnimationState();
-  boolean climb_moving = (state == 2 && (move_up_held || move_down_held));
-  if (state != player_anim_state || (state == 2 && climb_moving != player_animation_moving)){
+  boolean climb_moving = (state == PLAYER_ANIM_CLIMB && (move_up_held || move_down_held));
+  if (state != player_anim_state || (state == PLAYER_ANIM_CLIMB && climb_moving != player_animation_moving)){
     player_anim_state = state;
-    player_animation_moving = (state == 1 || climb_moving);
+    player_animation_moving = (state == PLAYER_ANIM_WALK || climb_moving);
     player_animation_started_at = millis();
   }
 
   int first = player_idle_start;
   int last = player_idle_end;
 
-  if (state == 1){
+  if (state == PLAYER_ANIM_WALK){
     first = player_walk_start;
     last = player_walk_end;
-  } else if (state == 2 && player_has_climb){
+  } else if (state == PLAYER_ANIM_RUN){
+    first = player_run_start;
+    last = player_run_end;
+  } else if (state == PLAYER_ANIM_CLIMB && player_has_climb){
     first = player_climb_start;
     last = player_climb_end;
     if (!move_up_held && !move_down_held){
       return first;
     }
-  } else if (state == 3 && player_has_jump){
+  } else if (state == PLAYER_ANIM_JUMP && player_has_jump){
     first = player_jump_start;
     last = player_jump_end;
   }
@@ -833,7 +876,7 @@ int playerCurrentFrame(){
 
   int frame = first;
   int raw_elapsed = max(0, millis() - player_animation_started_at);
-  int elapsed = (state == 3)
+  int elapsed = (state == PLAYER_ANIM_JUMP)
     ? min(raw_elapsed, total_duration - 1)
     : (total_duration > 0 ? raw_elapsed % total_duration : 0);
 
@@ -980,6 +1023,7 @@ void resetRoomState(){
   player_on_ladder = false;
   ladder_vertical_release_required = false;
   jump_queued = false;
+  run_held = false;
   ladder_climbing_active = false;
   ladder_steps_taken = 0;
   ladder_step_accum = 0;
@@ -1048,18 +1092,6 @@ void updateRoom(){
 
 
 void updatePlayerOnDeck(){
-  float horizontal = 0;
-
-  if (move_left_held){
-    horizontal -= PLAYER_SPEED;
-  }
-
-  if (move_right_held){
-    horizontal += PLAYER_SPEED;
-  }
-
-  player_x = constrain(player_x + horizontal, ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
-
   if (jump_queued && player_grounded){
     player_velocity_y = -sqrt(2 * GRAVITY * JUMP_HEIGHT);
     player_grounded = false;
@@ -1087,6 +1119,22 @@ void updatePlayerOnDeck(){
   }
 
   player_y = min(next_y, deck_y[DECK_COUNT - 1] - PLAYER_H);
+
+  /* O passo sai do mesmo predicado da animação, e depois do convés resolver a
+     gravidade: no quadro da decolagem a velocidade já é a do ar, como o quadro
+     desenhado (D-153). */
+  float horizontal = 0;
+  float speed = playerIsRunning() ? PLAYER_RUN_SPEED : PLAYER_SPEED;
+
+  if (move_left_held){
+    horizontal -= speed;
+  }
+
+  if (move_right_held){
+    horizontal += speed;
+  }
+
+  player_x = constrain(player_x + horizontal, ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
 
   boolean vertical_input = move_up_held || move_down_held;
   boolean horizontal_input = move_left_held || move_right_held;

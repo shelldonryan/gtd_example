@@ -56,6 +56,7 @@ final String PLAYER_SHEET_DATA_FILE = "player/player_sheet.json";
 final int PLAYER_DRAW_W = 32;
 final int PLAYER_DRAW_H = 32;
 final float PLAYER_SPEED = 1.5;
+final float PLAYER_RUN_SPEED = 2.4;
 final float JUMP_HEIGHT = 48;
 final float GRAVITY = 0.5;
 final float LADDER_SPEED = 1.0;
@@ -170,6 +171,7 @@ boolean move_left_held = false;
 boolean move_right_held = false;
 boolean move_up_held = false;
 boolean move_down_held = false;
+boolean run_held = false;
 PGraphics base;
 PFont ui_font;
 PImage player_sheet;
@@ -194,6 +196,9 @@ int player_jump_start = -1;
 int player_jump_end = -1;
 boolean player_has_climb = false;
 boolean player_has_jump = false;
+int player_run_start = -1;
+int player_run_end = -1;
+boolean player_has_run = false;
 int player_anim_state = 0;
 int view_scale = 1;
 float view_offset_x = 0;
@@ -483,6 +488,8 @@ void setMovementKey(int code, boolean value){
     move_up_held = value;
   } else if (code == DOWN){
     move_down_held = value;
+  } else if (code == SHIFT){
+    run_held = value;
   }
 }
 

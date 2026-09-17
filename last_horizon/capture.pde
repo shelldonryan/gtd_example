@@ -504,6 +504,7 @@ void runRuleChecks(){
   if (!checks_failed) checkNpcDialogue();
   if (!checks_failed) checkPlayerFacing();
   if (!checks_failed) checkPlayerAnimationLoop();
+  if (!checks_failed) checkPlayerRun();
   if (!checks_failed) checkOrdersBadge();
   if (!checks_failed) checkQuestCatalogue();
   if (!checks_failed) checkQuestBoundaries();
@@ -916,6 +917,123 @@ void checkPlayerAnimationLoop(){
   player_animation_started_at = millis() - 800;
   verify("walk entra em loop", playerCurrentFrame() == player_walk_start);
   move_right_held = false;
+}
+
+
+/* Compara dois quadros pixel a pixel: prova que a faixa carregada não é a de
+   outro movimento da mesma spritesheet. */
+boolean samePixels(PImage a, PImage b){
+  if (a == null || b == null || a.width != b.width || a.height != b.height){
+    return false;
+  }
+
+  a.loadPixels();
+  b.loadPixels();
+
+  for (int i = 0; i < a.pixels.length; i++){
+    if (a.pixels[i] != b.pixels[i]){
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+/* A corrida é decisão de convés: acelera o passo, anima a faixa de run do LPC
+   e não invade escada nem ar (D-153). A spritesheet sem a faixa é uma
+   configuração válida: nesse caso o teste cobra o passo acelerado com a
+   caminhada, e não a faixa que não existe. */
+void checkPlayerRun(){
+  if (!player_assets_loaded){
+    verify("spritesheet do jogador carregada", false);
+    return;
+  }
+
+  resetRun();
+  event_open = false;
+  enterRoom(SCREEN_COMMAND);
+  move_right_held = true;
+
+  float start_x = player_x;
+  updatePlayerOnDeck();
+  float walk_step = player_x - start_x;
+
+  player_x = start_x;
+  run_held = true;
+  updatePlayerOnDeck();
+  float run_step = player_x - start_x;
+
+  verify("shift acelera o passo no convés",
+    abs(walk_step - PLAYER_SPEED) <= 0.001 && abs(run_step - PLAYER_RUN_SPEED) <= 0.001);
+
+  player_x = start_x;
+  player_has_run = false;
+  updatePlayerOnDeck();
+  verify("sem faixa de corrida o passo acelera do mesmo jeito",
+    abs((player_x - start_x) - PLAYER_RUN_SPEED) <= 0.001
+      && playerCurrentAnimationState() == PLAYER_ANIM_WALK);
+  player_has_run = true;
+
+  player_x = start_x;
+  player_anim_state = -1;
+  int start_frame = playerCurrentFrame();
+  verify("corrida anima a faixa carregada",
+    playerCurrentAnimationState() == PLAYER_ANIM_RUN
+      && start_frame == player_run_start
+      && player_run_end - player_run_start == 7);
+
+  player_animation_started_at = millis() - 76;
+  verify("a corrida avança um quadro a cada 75 ms",
+    playerCurrentFrame() == player_run_start + 1);
+
+  player_animation_started_at = millis() - 600;
+  verify("a corrida fecha o ciclo de 8 quadros",
+    playerCurrentFrame() == player_run_start);
+
+  if (player_sheet != null && player_sheet.height >= 42 * 64){
+    verify("a faixa de corrida sai dos 8 quadros da linha 41",
+      samePixels(player_frame_images[player_run_start], player_sheet.get(0, 41 * 64, 64, 64))
+        && !samePixels(player_frame_images[player_run_start], player_sheet.get(0, 11 * 64, 64, 64)));
+  }
+
+  run_held = false;
+  player_anim_state = -1;
+  player_animation_started_at = millis() - 1000;
+  int walk_frame = playerCurrentFrame();
+  verify("soltar o shift volta para a caminhada",
+    playerCurrentAnimationState() == PLAYER_ANIM_WALK
+      && walk_frame >= player_walk_start && walk_frame <= player_walk_end);
+
+  run_held = true;
+  move_right_held = false;
+  player_anim_state = -1;
+  verify("shift parado não corre no lugar", playerCurrentAnimationState() == PLAYER_ANIM_IDLE);
+
+  move_right_held = true;
+  player_on_ladder = true;
+  player_grounded = false;
+  player_anim_state = -1;
+  verify("shift não interfere na escada",
+    playerCurrentAnimationState() == (player_has_climb ? PLAYER_ANIM_CLIMB : PLAYER_ANIM_WALK));
+  player_on_ladder = false;
+
+  player_anim_state = -1;
+  verify("shift não troca a animação do pulo",
+    playerCurrentAnimationState() == (player_has_jump ? PLAYER_ANIM_JUMP : PLAYER_ANIM_WALK));
+
+  player_grounded = true;
+  player_x = start_x;
+  jump_queued = true;
+  updatePlayerOnDeck();
+  verify("no quadro da decolagem o passo já é o do ar",
+    abs((player_x - start_x) - PLAYER_SPEED) <= 0.001
+      && playerCurrentAnimationState() == (player_has_jump ? PLAYER_ANIM_JUMP : PLAYER_ANIM_WALK));
+
+  jump_queued = false;
+  move_right_held = false;
+  resetRun();
+  event_open = false;
 }
 
 

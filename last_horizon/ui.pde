@@ -231,6 +231,7 @@ void drawEndDayPanel(PGraphics g){
 
 final String[] help_lines = {
   "ANDAR: ← → OU A/D",
+  "CORRER: SHIFT COM ← → OU A/D",
   "ESCADA: ↑ ↓ OU W/S",
   "PULAR: ESPAÇO",
   "INTERAGIR E ABRIR PORTAS: E",
@@ -241,8 +242,11 @@ final String[] help_lines = {
 
 
 void drawHelpPanel(PGraphics g){
+  /* O painel dimensiona pelo número de linhas: acrescentar uma tecla não
+     exige recortar a altura nem mover o botão. */
+  float panel_h = 84 + 14 * (help_lines.length - 1);
   drawModalShade(g);
-  drawPanel(g, 34, 88, 572, 168, COL_CYAN);
+  drawPanel(g, 34, 88, 572, panel_h, COL_CYAN);
   text(g, "AJUDA — CONTROLES", 50, 98, 16, COL_CYAN);
 
   float y = 120;
@@ -252,7 +256,7 @@ void drawHelpPanel(PGraphics g){
     y += 14;
   }
 
-  drawButton(g, 486, 220, 104, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 486, y + 2, 104, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
 }
 
 
