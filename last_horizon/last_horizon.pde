@@ -231,6 +231,7 @@ void setup(){
   cursor(ARROW);
   loadPlayerAssets();
   loadArtAssets();
+  loadGameAudio();
   harness_setup.run();
 }
 

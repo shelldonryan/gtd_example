@@ -790,6 +790,8 @@ int doorInRoomLeadingTo(int room_id, int target){
 }
 
 void enterRoomThroughDoor(int door){
+  playSound(sound_door);
+
   if (doorFrame(door) != null){
     startDoorTransition(door);
     return;
@@ -971,6 +973,7 @@ void updatePlayerOnDeck(){
       player_grounded = false;
       player_x = ladder_x[ladder] - PLAYER_W / 2.0;
       player_velocity_y = 0;
+      ladder_step_y = player_y;
       updatePlayerOnLadder();
     }
   }
@@ -1003,6 +1006,11 @@ void updatePlayerOnLadder(){
   float top = deck_y[0] - PLAYER_H;
   float bottom = deck_y[DECK_COUNT - 1] - PLAYER_H;
   player_y = constrain(player_y, top, bottom);
+
+  if (abs(player_y - ladder_step_y) >= LADDER_STEP_SPACING){
+    ladder_step_y = player_y;
+    playStepSound();
+  }
 
   boolean wants_deck = horizontal != 0 || vertical == 0;
   int deck = ladderDeckAt(old_y, player_y, wants_deck);
@@ -1045,7 +1053,14 @@ int ladderDeckAt(float old_y, float new_y, boolean allow_nearby){
 }
 
 
+/* The grab sound plays when the technician leaves the ladder, never on mount:
+   the climb itself is covered by the steps (#28). */
+final float LADDER_STEP_SPACING = 18;
+float ladder_step_y = 0;
+
+
 void leaveLadderAtDeck(int deck, int horizontal){
+  playSound(sound_ladder);
   player_y = deck_y[deck] - PLAYER_H;
   player_x = constrain(player_x + horizontal * PLAYER_SPEED,
     ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
