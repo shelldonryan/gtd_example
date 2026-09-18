@@ -417,11 +417,8 @@ Não replique aqui o histórico completo:
   `LICENSE.txt`. A porta foi suavizada por medição: pico em −10 dBFS e RMS em
   −25,8 dBFS; a escada foi atenuada posteriormente em D-150 para −18,6 dBFS de
   pico e −34,1 dBFS de RMS, portanto os níveis finais não são iguais.
-- **D-139 (sessão #28, som):** o escopo do #28 — porta e escada — está entregue,
-  integrado e aprovado na escuta. O ticket permanece **aberto por decisão do
-  usuário**, que cogitou acrescentar outros sons se sobrar tempo; essa ampliação
-  é **PROVISÓRIA** — hipótese registrada, nunca requisito, e nada além de porta e
-  escada deve ser tratado como escopo.
+- **D-139 (sessão #28, som; estado histórico SUPERSEDED pela autorização de encerramento de 2026-09-18):** o escopo do #28 — porta e escada — foi entregue, integrado e aprovado na escuta. A hipótese de acrescentar outros sons se sobrasse tempo era **PROVISÓRIA**, nunca requisito, e não integra a fronteira atual; o ticket #28 está **CLOSED**.
+  A fronteira vigente não amplia o recorte sem nova decisão explícita.
 - **D-140 (sessão #31, spritesheet do jogador):** o sketch suporta
   transparentemente os formatos Aseprite e Universal LPC; no LPC, o player ativa
   `climb` (6 quadros, linha 21) na escada e `jump` (13 quadros, linha 49) no ar,
