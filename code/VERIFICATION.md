@@ -81,11 +81,11 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
   prioridade da escada e do pulo sobre a corrida e passo do ar já no quadro da
   decolagem. As duas últimas foram conferidas por mutação: ler a linha 39, mover
   o passo para antes da gravidade e remover o passo acelerado reprovam o harness.
-- **Contagem atual:** `--capture` fecha em **159 asserções `OK`** com
-  `QUEST CHECK: PASS`, medidas em 2026-09-17 com a corrida integrada (148 antes
-  dela; a recontagem no commit `fd62b7a` mostra que a referência de 146 estava
-  defasada). Medido no repositório com os sons integrados, na cópia sem arte, na
-  cópia com as 57 fixtures e no híbrido sem os fundos de sala.
+- **Contagem atual:** `--capture` fecha em **169 asserções `OK`** com
+  `QUEST CHECK: PASS`, medidas em 2026-09-18 após D-158: 159 antes dos testes de
+  orientação do NPC no pulo e dos bancos independentes de passos. Medido no
+  repositório com os sons integrados, na cópia sem arte, na cópia com as 57
+  fixtures e no híbrido sem os fundos de sala.
 - **Feedback visual de NPC (D-155):** os retângulos geométricos foram removidos
   da cena. O contorno/halo cyan é derivado dos frames carregados em runtime e
   só aparece no raio de interação, sem alterar o hit-test nem o sprite original.

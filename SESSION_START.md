@@ -86,11 +86,11 @@ reporte e não escolha silenciosamente.
   com fallback geométrico, desenho 1:1 e travessia de porta em dois quadros.
 - #30 foi concluída nesta sessão: a aba principal não cita mais o harness, então
   a cópia entregue sai sem `capture.pde` e compila fora do repositório.
-- #28 está OPEN por decisão do usuário:
+- #28 foi concluída em D-158:
   [Escolher e integrar os efeitos sonoros](https://github.com/shelldonryan/gtd_example/issues/28);
-  porta e escada estão escolhidas, integradas, verificadas e aprovadas na escuta
-  (D-136 a D-139), em `data/audio/<evento>/`. O ticket fica aberto para uma
-  possível ampliação de sons — hipótese registrada, nunca requisito (D-139).
+  porta, caminhada, corrida e escada estão em bancos independentes sob
+  `data/audio/<evento>/`, com licenças, sincronização e carregamento resiliente.
+  Encerramento autorizado pelo usuário; commit `713473e`.
 - As posições de escada e estação estão **fechadas** para a pintura dos fundos:
   escadas em 127/532 (Comando), 114/526 (Máquinas), 120/489 (Depósito) e 127/482
   (Dormitório), com as estações realocadas e folga mínima de 40 px do eixo de
@@ -130,13 +130,12 @@ reporte e não escolha silenciosamente.
 - D-157 integrou os seis ícones de recursos em `data/icons/` como PNGs
   estáticos de 32×32 (`energia`, `oxigenio`, `agua`, `comida`, `pecas` e
   `moral`); o alerta crítico continua desenhado exclusivamente pelo código.
-- D-158 implementou localmente passos do técnico com três bancos separados:
-  caminhada usa botas sem impacto em `audio/walk/`, sincronizadas aos contatos
-  de 0 e 400 ms do ciclo visual de 800 ms; corrida usa a combinação aprovada
-  `var_02` — botas `footsteps/boots/1,3,5,7` com `impactMetal_000.ogg` de Kenney
-  e atraso de 30 ms em `audio/run/`; a escada mantém os quatro takes metálicos
-  originais da issue #28 em `audio/ladder/`. A issue #28 continua aberta; nenhum
-  registro foi publicado nela nesta etapa.
+- D-158 concluiu os passos do técnico com três bancos separados: caminhada usa
+  botas sem impacto em `audio/walk/`, sincronizadas aos contatos de 0 e 400 ms
+  do ciclo visual de 800 ms; corrida usa a combinação `var_02` — botas
+  `footsteps/boots/1,3,5,7` com `impactMetal_000.ogg` de Kenney e atraso de
+  30 ms em `audio/run/`; a escada mantém os quatro takes metálicos originais em
+  `audio/ladder/`. A issue #28 foi encerrada após autorização explícita.
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -146,7 +145,7 @@ reporte e não escolha silenciosamente.
 
 ### Fronteira Wayfinder
 
-Sincronizada com o grafo nativo depois da sessão do #34:
+Sincronizada com o grafo nativo após o encerramento das issues #28 e #36:
 
 | Issue | Estado | Bloqueadores abertos | Relação |
 |---|---|---|---|
@@ -159,7 +158,8 @@ Sincronizada com o grafo nativo depois da sessão do #34:
 | #30 Desacoplar o harness | CLOSED | — | cópia entregue sem `capture.pde`, testada fora do repositório |
 | #8 Inventário de assets | CLOSED | — | lista, canvas e ordem de produção em `assets/INVENTORY.md`; escadas e estações congeladas |
 | #35 Reestilizar e integrar ícones de recursos do HUD | CLOSED | — | seis PNGs 32×32 integrados; alerta crítico permanece via código; D-157 concluída |
-| #28 Escolher e integrar os efeitos sonoros | OPEN | — | porta e escada entregues, integradas e validadas (D-136 a D-138); aberto por decisão do usuário para ampliação não decidida (D-139) |
+| #36 Refinamento e correções visuais pós-D-157 | CLOSED | — | glow e prompt preservados; orientação dos NPCs corrigida durante o pulo; HUD e gameplay intactos |
+| #28 Escolher e integrar os efeitos sonoros | CLOSED | — | porta, caminhada, corrida e escada concluídas em bancos independentes; D-158 |
 | #27 Portais, desfechos, transmissões, NPCs e HUD | CLOSED | — | escopo ampliado; concluído e validado |
 | #25 Redesenhar incidentes e ordens como quests físicas | CLOSED | — | catálogo e fluxo físico implementados no sketch |
 | #26 Simplificar mecânicas legadas e balancear o ciclo de quests | CLOSED | — | números, pool e consequências implementados no sketch |
@@ -511,6 +511,12 @@ Não replique aqui o histórico completo:
 - **D-157 (sessão complementar, ícones de recursos do HUD):** os seis recursos
   usam PNGs estáticos de 32×32 em `data/icons/`; o alerta crítico continua
   desenhado exclusivamente em código, sem `aviso.png`.
+- **D-158 (sessão #28, bancos de passos e sincronização):** caminhada, corrida
+  e escada usam bancos independentes. A caminhada toca nos contatos de 0 e
+  400 ms do ciclo visual de 800 ms; a corrida preserva a combinação `var_02` e
+  a cadência aprovada; a escada mantém seus takes e gatilhos. O carregador
+  reporta 14 de 14 clipes e degrada para mudo sem quebrar o jogo. As issues #28
+  e #36 foram encerradas após autorização explícita; commit `713473e`.
 
 
 ## Fontes por tarefa
@@ -989,3 +995,16 @@ e integrados pelo carregador de assets existente.
   (`arte: 14 de 56 imagens carregadas`, `pipeline: OK`); `--hit-test`
   retornou 5 `OK`; `--capture` concluiu com `QUEST CHECK: PASS`. A inspeção
   visual do HUD confirmou os seis ícones nos cartões sem alteração do layout.
+
+### Encerramento — issues #28 e #36
+
+- [#28](https://github.com/shelldonryan/gtd_example/issues/28) foi encerrada com
+  os quatro bancos de áudio documentados e verificados em D-158.
+- [#36](https://github.com/shelldonryan/gtd_example/issues/36) foi encerrada com
+  glow, prompt e ícones preservados e a orientação do NPC corrigida durante o
+  pulo.
+- **Evidência final:** `--capture` → 169 `OK`, `QUEST CHECK: PASS`;
+  `--ladder-test` → 6 `OK`; `--hit-test` → 5 `OK`;
+  `--asset-pipeline-test` → `pipeline: OK`.
+- **Commit técnico:** `713473e`. A issue-mapa #1 permanece aberta; as duas
+  sub-issues aparecem como `CLOSED` no grafo nativo.
