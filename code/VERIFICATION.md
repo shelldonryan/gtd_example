@@ -61,13 +61,17 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
   próprio (`checkDoorTraversalArt()`), que instala um par de quadros e confere
   abrir, trocar de sala e fechar.
 - **Áudio na verificação:** a camada de áudio (`last_horizon/audio.pde`) usa
-  `javax.sound.sampled` da JVM e carrega 6 de 6 clipes (`som: 6 de 6 carregados`).
-  Durante o `setup()`, cada clip é iniciado no frame 0 por 50 ms em modo silencioso
-  (`MUTE`, `MASTER_GAIN` ou `VOLUME` mínimo), depois é parado, reposicionado e
-  aquece o mixer antes do primeiro passo real. Se a pasta `data/audio/` ou
-  qualquer arquivo estiver ausente, o carregador emite aviso no console e o
-  sketch continua executando mudo, sem exceção; os testes de `--capture` e
-  `--ladder-test` passam identicamente.
+  `javax.sound.sampled` da JVM e carrega 14 de 14 clipes (`som: 14 de 14 carregados`):
+  porta, quatro passos de ataque único e cauda de 12 ms para caminhada, quatro
+  passos com impacto para corrida e quatro passos originais da escada. Durante o
+  `setup()`, cada clip é iniciado no frame 0 por 50 ms em modo silencioso
+  (`MUTE`,
+  `MASTER_GAIN` ou `VOLUME` mínimo), depois é parado, reposicionado e aquece o
+  mixer antes do primeiro passo real. `checkPlayerFootsteps()` verifica que a
+  caminhada dispara no início e em 400 ms do ciclo visual, sem antecipar o
+  segundo contato; corrida, decolagem e aterrissagem mantêm seus gatilhos. Se
+  `data/audio/` ou algum arquivo estiver ausente, o sketch continua mudo;
+  `--capture` e `--ladder-test` passam identicamente.
 - **Animação do jogador na verificação:** `checkPlayerAnimationLoop()` confere
   que idle e walk entram em loop, e `checkPlayerRun()` cobre a corrida com
   `Shift`: passo acelerado no convés (1,0 → 2,4 px por quadro, com e sem a faixa
@@ -85,6 +89,9 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
 - **Feedback visual de NPC (D-155):** os retângulos geométricos foram removidos
   da cena. O contorno/halo cyan é derivado dos frames carregados em runtime e
   só aparece no raio de interação, sem alterar o hit-test nem o sprite original.
+- O harness também verifica que o NPC mantém a orientação horizontal para o
+  jogador durante o pulo e acompanha a mudança de lado no ar, sem aplicar essa
+  orientação quando o jogador está em uma escada ou fora do mesmo convés.
 - **Ícones de recursos (D-157):** os seis PNGs estáticos de 32×32 em
   `data/icons/` substituem os vetores dos cartões por uma camada `PGraphics`
   sem interpolação; o alerta crítico permanece geométrico e não carrega

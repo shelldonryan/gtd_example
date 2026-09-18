@@ -130,6 +130,13 @@ reporte e não escolha silenciosamente.
 - D-157 integrou os seis ícones de recursos em `data/icons/` como PNGs
   estáticos de 32×32 (`energia`, `oxigenio`, `agua`, `comida`, `pecas` e
   `moral`); o alerta crítico continua desenhado exclusivamente pelo código.
+- D-158 implementou localmente passos do técnico com três bancos separados:
+  caminhada usa botas sem impacto em `audio/walk/`, sincronizadas aos contatos
+  de 0 e 400 ms do ciclo visual de 800 ms; corrida usa a combinação aprovada
+  `var_02` — botas `footsteps/boots/1,3,5,7` com `impactMetal_000.ogg` de Kenney
+  e atraso de 30 ms em `audio/run/`; a escada mantém os quatro takes metálicos
+  originais da issue #28 em `audio/ladder/`. A issue #28 continua aberta; nenhum
+  registro foi publicado nela nesta etapa.
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -281,7 +288,9 @@ Topologia e ordens: `interface/ROOMS.md`.
 - Controles: setas/WASD, `Shift` para correr, espaço, E, ENTER em diálogos/modais,
   ESC para pausa e mouse nos botões `MAPA` e `ORDENS`.
 - HUD: seis ícones 16×16; cartões de recurso com ícone, número, rótulo e barra.
-- Áudio offline: `javax.sound.sampled`, WAV PCM 16 bits em `data/audio/<evento>/` (porta e escada integradas; alerta e clique sem som).
+- Áudio offline: `javax.sound.sampled`, WAV PCM 16 bits em
+  `data/audio/<evento>/`; porta, escada e passos do técnico (caminhada, corrida,
+  decolagem e aterrissagem) estão integrados; alerta e clique seguem sem som.
 - A arte entra por arquivo em `data/` (`icons/`, `stations/`, `objects/`,
   `npc/`, `doors/`, `rooms/`, `portraits/`, `screens/`, `map/`), com fallback
   geométrico quando o arquivo não existe, desenho 1:1 no render 1280×720 e

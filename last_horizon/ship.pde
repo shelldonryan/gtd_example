@@ -571,12 +571,19 @@ char pointMarker(int kind){
 }
 
 
-void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
-  boolean same_deck = player_grounded && abs((player_y + PLAYER_H) - y) < 8;
-  int facing = 0;
-  if (same_deck){
-    facing = (player_x + PLAYER_W / 2.0 < x) ? -1 : 1;
+int npcFacingForPlayer(float npc_x, float npc_y){
+  boolean same_deck = player_grounded
+    && abs((player_y + PLAYER_H) - npc_y) < 8;
+  boolean player_jumping = !player_grounded && !player_on_ladder;
+  if (!same_deck && !player_jumping){
+    return 0;
   }
+  return (player_x + PLAYER_W / 2.0 < npc_x) ? -1 : 1;
+}
+
+
+void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
+  int facing = npcFacingForPlayer(x, y);
 
   PImage[] frames = crewArtFramesFacing(name, facing);
   PImage[] glow_frames = crewArtGlowFramesFacing(name, facing);
@@ -1025,6 +1032,9 @@ void enterRoomAtPosition(int next_screen, float feet_y, float center_x, int faci
   player_on_ladder = false;
   ladder_vertical_release_required = false;
   jump_queued = false;
+  player_step_accum = 0;
+  walk_step_active = false;
+  walk_step_phase = 0;
   interact_queued = false;
 }
 
@@ -1043,6 +1053,9 @@ void resetRoomState(){
   ladder_climbing_active = false;
   ladder_steps_taken = 0;
   ladder_step_accum = 0;
+  player_step_accum = 0;
+  walk_step_active = false;
+  walk_step_phase = 0;
   interact_queued = false;
   held_item = ITEM_NONE;
   map_open = false;
@@ -1108,9 +1121,13 @@ void updateRoom(){
 
 
 void updatePlayerOnDeck(){
+  boolean was_airborne = !player_grounded;
   if (jump_queued && player_grounded){
     player_velocity_y = -sqrt(2 * GRAVITY * JUMP_HEIGHT);
     player_grounded = false;
+    player_step_accum = 0;
+    walk_step_active = false;
+    playDeckStepSound(false);
   }
 
   float old_bottom = player_y + PLAYER_H;
@@ -1136,6 +1153,13 @@ void updatePlayerOnDeck(){
 
   player_y = min(next_y, deck_y[DECK_COUNT - 1] - PLAYER_H);
 
+  boolean landed = was_airborne && player_grounded;
+  if (landed){
+    playDeckStepSound(false);
+    player_step_accum = 0;
+    walk_step_active = false;
+  }
+
   /* O passo sai do mesmo predicado da animação, e depois do convés resolver a
      gravidade: no quadro da decolagem a velocidade já é a do ar, como o quadro
      desenhado (D-153). */
@@ -1151,6 +1175,37 @@ void updatePlayerOnDeck(){
   }
 
   player_x = constrain(player_x + horizontal, ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
+
+  if (player_grounded && horizontal != 0){
+    boolean running = playerIsRunning();
+    if (running){
+      walk_step_active = false;
+      if (player_step_accum <= 0 && !landed){
+        playDeckStepSound(true);
+      }
+      player_step_accum += abs(horizontal);
+      if (player_step_accum >= RUN_STEP_SPACING){
+        player_step_accum -= RUN_STEP_SPACING;
+        playDeckStepSound(true);
+      }
+    } else {
+      player_step_accum = 0;
+      int phase = (max(0, millis() - player_animation_started_at)
+        / WALK_STEP_HALF_CYCLE_MS) % 2;
+      if (!walk_step_active){
+        player_animation_started_at = millis();
+        walk_step_phase = 0;
+        walk_step_active = true;
+        if (!landed) playDeckStepSound(false);
+      } else if (phase != walk_step_phase){
+        walk_step_phase = phase;
+        playDeckStepSound(false);
+      }
+    }
+  } else {
+    player_step_accum = 0;
+    walk_step_active = false;
+  }
 
   boolean vertical_input = move_up_held || move_down_held;
   boolean horizontal_input = move_left_held || move_right_held;
@@ -1216,7 +1271,7 @@ void updatePlayerOnLadder(){
     if (ladder_step_accum >= threshold){
       ladder_step_accum = 0;
       ladder_steps_taken++;
-      playStepSound();
+      playLadderStepSound();
     }
   } else {
     ladder_climbing_active = false;
@@ -1270,10 +1325,17 @@ int ladderDeckAt(float old_y, float new_y, boolean allow_nearby){
    Cadence: 27 px gives a small pause between takes while staying close to the
    420 ms half-cycle (3 frames @ 140 ms) of LPC climb;
    initial step at 1 px ensures instant audio feedback upon starting to climb. */
+/* Walk follows the 800 ms LPC animation: one contact every 400 ms. Run keeps
+   the approved distance cadence; ladder remains independent (#28). */
+final int WALK_STEP_HALF_CYCLE_MS = 400;
+final float RUN_STEP_SPACING = 27;
 final float LADDER_STEP_SPACING = 27;
 final float LADDER_FIRST_STEP = 1;
 float ladder_step_accum = 0;
 int ladder_steps_taken = 0;
+float player_step_accum = 0;
+boolean walk_step_active = false;
+int walk_step_phase = 0;
 boolean ladder_climbing_active = false;
 
 
@@ -1289,6 +1351,9 @@ void leaveLadderAtDeck(int deck, int horizontal){
   ladder_climbing_active = false;
   ladder_steps_taken = 0;
   ladder_step_accum = 0;
+  player_step_accum = 0;
+  walk_step_active = false;
+  walk_step_phase = 0;
 }
 
 

@@ -175,17 +175,23 @@ Os sons vivem em `data/audio/<evento>/`, cada pasta com o seu `LICENSE.txt`:
 | Pasta | Arquivos | Quando toca |
 | --- | --- | --- |
 | `audio/door/` | `door.wav` | uma vez no início da travessia de porta |
-| `audio/ladder/` | `ladder.wav`, `step_01..04.wav` | saída da escada; passos durante a subida/descida |
+| `audio/walk/` | `step_01..04.wav` | passos na caminhada, decolagem e aterrissagem |
+| `audio/run/` | `step_01..04.wav` | passos durante a corrida |
+| `audio/ladder/` | `ladder.wav`, `step_01..04.wav` | saída e passos durante a subida/descida |
 
-Formato de todos: WAV PCM 16 bits, 44,1 kHz, mono. O engate da escada não tem
-som próprio — o primeiro passo avisa que o técnico pegou a escada após 1 px
-lógico; os passos seguintes tocam a cada 27 px lógicos (~450 ms), sincronizados
-à animação.
+Formato de todos: WAV PCM 16 bits, 44,1 kHz, mono. A caminhada dispara no
+início e no meio do ciclo visual de 800 ms — um contato a cada 400 ms — usando
+apenas o primeiro ataque de cada take de botas, com cauda até 12 ms e sem
+impacto adicional. A corrida mantém a combinação `var_02`, com impacto curto
+de metal, pico próximo de −22 dBFS e cadência de 27 px lógicos. Na escada, os
+takes metálicos originais da issue #28 permanecem separados; o primeiro passo
+avisa o início após 1 px lógico e os seguintes tocam a cada 27 px,
+sincronizados à animação.
 
-Créditos e receita ficam no `LICENSE.txt` de cada pasta: a escada usa passo de
-alumínio do congusbongus (CC-BY 3.0, derivado de *"fboots on aluminum ladder 01"*
-de Eelke — crédito obrigatório) com impacto da Kenney (CC0); a porta usa chiado
-de ar do rubberduck (CC0) com batente da Kenney (CC0), sem crédito obrigatório.
+Créditos e receitas ficam no `LICENSE.txt` de cada pasta. Caminhada usa
+`footsteps/boots/` derivados de swuing (CC-BY 3.0); corrida usa os mesmos takes
+com `impactMetal_000.ogg` de Kenney (CC0). A escada mantém os takes metálicos
+de congusbongus/Eelke (CC-BY 3.0) e `ladder.wav` com impacto da Kenney (CC0).
 
 Clique de UI, alerta de recurso crítico e os demais eventos ficaram fora — o
 alerta continua apenas visual ([[HUD]]).
@@ -208,8 +214,8 @@ mais rápido e o que depende de posição já congelada.
    escadas, conveses e estações já definitivos.
 8. **Telas (3) e miniaturas do mapa (4)** — desfechos e mapa; não bloqueiam
    nada.
-9. **Áudio** — escada e porta decididas e integradas, em `data/audio/ladder/`
-   e `data/audio/door/`.
+9. **Áudio** — porta, caminhada, corrida e escada decididos e integrados em
+   `data/audio/door/`, `data/audio/walk/`, `data/audio/run/` e `data/audio/ladder/`.
 
 ## O que continua em código
 

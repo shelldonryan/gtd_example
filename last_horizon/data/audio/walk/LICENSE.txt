@@ -1,0 +1,17 @@
+Passos de caminhada — Last Horizon
+=================================
+
+Arquivos:
+  step_01..04.wav — passos na caminhada, decolagem e aterrissagem
+
+Os quatro takes usam o primeiro ataque de footsteps/boots/1, /3, /5 e /7 do
+pacote Footsteps on Different Surfaces, de congusbongus. Os ataques secundários
+de calcanhar/ponta foram removidos: cada WAV preserva 4 ms e fecha uma cauda
+quadrática até 12 ms, evitando a percepção de passo duplicado. Pico próximo de
+-22 dBFS.
+
+Os arquivos de botas são derivados de footstep-concrete.wav, de swuing.
+Licença: CC-BY 3.0 — https://creativecommons.org/licenses/by/3.0/
+Fonte: https://opengameart.org/content/footsteps-on-different-surfaces
+
+Formato: WAV PCM 16 bits, 44,1 kHz, mono. Este banco não contém impacto adicional.

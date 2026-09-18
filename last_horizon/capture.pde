@@ -447,6 +447,30 @@ void checkNpcDialogue(){
   crew_alive[owner] = true;
 }
 
+void checkNpcFacingDuringJump(){
+  resetRun();
+  float npc_x = 200;
+  float npc_y = deck_y[DECK_COUNT - 1];
+
+  player_x = npc_x - PLAYER_W - 4;
+  player_y = npc_y - PLAYER_H;
+  player_grounded = true;
+  player_on_ladder = false;
+  verify("NPC olha para o jogador no convés",
+    npcFacingForPlayer(npc_x, npc_y) == -1);
+
+  player_grounded = false;
+  player_y -= JUMP_HEIGHT / 2.0;
+  verify("NPC mantém a direção durante o pulo",
+    npcFacingForPlayer(npc_x, npc_y) == -1);
+
+  player_x = npc_x + 4;
+  verify("NPC acompanha o jogador no ar",
+    npcFacingForPlayer(npc_x, npc_y) == 1);
+
+  resetRun();
+}
+
 
 void checkTransmissionMessages(){
   resetRun();
@@ -502,9 +526,11 @@ void runRuleChecks(){
   checkConnectedDoors();
   if (!checks_failed) checkDoorTraversalArt();
   if (!checks_failed) checkNpcDialogue();
+  if (!checks_failed) checkNpcFacingDuringJump();
   if (!checks_failed) checkPlayerFacing();
   if (!checks_failed) checkPlayerAnimationLoop();
   if (!checks_failed) checkPlayerRun();
+  if (!checks_failed) checkPlayerFootsteps();
   if (!checks_failed) checkOrdersBadge();
   if (!checks_failed) checkQuestCatalogue();
   if (!checks_failed) checkQuestBoundaries();
@@ -1037,6 +1063,59 @@ void checkPlayerRun(){
 }
 
 
+
+void checkPlayerFootsteps(){
+  resetRun();
+  enterRoom(SCREEN_COMMAND);
+  move_right_held = true;
+  verify("caminhada usa take de ataque único",
+    sound_walk_step[0] != null && sound_run_step[0] != null
+      && sound_walk_step[0].getMicrosecondLength() <= 15000
+      && sound_run_step[0].getMicrosecondLength() > sound_walk_step[0].getMicrosecondLength());
+
+  int before_walk = sound_step_play_count;
+  updatePlayerOnDeck();
+  verify("caminhada toca o primeiro passo",
+    sound_step_play_count == before_walk + 1);
+  player_animation_started_at = millis() - (WALK_STEP_HALF_CYCLE_MS - 50);
+  updatePlayerOnDeck();
+  verify("caminhada não antecipa o contato do pé",
+    sound_step_play_count == before_walk + 1);
+  player_animation_started_at = millis() - (WALK_STEP_HALF_CYCLE_MS + 50);
+  updatePlayerOnDeck();
+  verify("caminhada toca no meio do ciclo visual",
+    sound_step_play_count == before_walk + 2);
+
+  resetRun();
+  enterRoom(SCREEN_COMMAND);
+  move_right_held = true;
+  run_held = true;
+  int before_run = sound_step_play_count;
+  updatePlayerOnDeck();
+  for (int frame = 0; frame < 11; frame++){
+    updatePlayerOnDeck();
+  }
+  verify("corrida acelera a cadência dos passos",
+    sound_step_play_count == before_run + 2);
+
+  resetRun();
+  enterRoom(SCREEN_COMMAND);
+  move_right_held = false;
+  int before_jump = sound_step_play_count;
+  jump_queued = true;
+  updatePlayerOnDeck();
+  jump_queued = false;
+  verify("pulo toca a decolagem",
+    sound_step_play_count == before_jump + 1);
+
+  for (int frame = 0; frame < 64 && !player_grounded; frame++){
+    updatePlayerOnDeck();
+  }
+  verify("pulo toca a aterrissagem",
+    player_grounded && sound_step_play_count == before_jump + 2);
+
+  resetRun();
+}
 /* A travessia em dois quadros só existe quando há arte de porta: o teste
    instala um par de quadros e confere abrir -> trocar de sala -> fechar. */
 void checkDoorTraversalArt(){

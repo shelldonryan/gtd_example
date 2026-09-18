@@ -175,6 +175,7 @@ boolean move_right_held = false;
 boolean move_up_held = false;
 boolean move_down_held = false;
 boolean run_held = false;
+int sound_step_play_count = 0;
 PGraphics base;
 PFont ui_font;
 PImage player_sheet;
