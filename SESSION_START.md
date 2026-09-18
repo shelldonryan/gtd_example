@@ -150,6 +150,16 @@ reporte e não escolha silenciosamente.
   `nearestLadder()`, a restrição de altura em `updatePlayerOnLadder()` e o
   desenho em `drawLadders(g)` foram parametrizados por `ladder_top_deck` e
   `ladder_bottom_deck`.
+- D-161 reposicionou as portas da Sala de Comando recuadas das paredes físicas,
+  preservando proporções arquiteturais e colunas laterais.
+- D-162 integrou a camada de paredes de fundo modulares para os 3 conveses da
+  nave em `data/environment/wall_deck_0.png` a `wall_deck_2.png`, montadas com
+  base em `Wall 3.png`, `Wall 5.png`, `Separation*` e `Semi-wall*`, renderizadas
+  por `drawWalls(g)` em `ship.pde` sob o piso metálico `Floor 1.png`.
+- D-163 removeu os pontos de interação inativos `POINT_STATUS` ("SITUAÇÃO") e
+  `POINT_REACTOR` ("REATOR") do código e da documentação (`INVENTORY.md` e
+  `ROOMS.md`), reduzindo `POINT_COUNT` de 18 para 16 e o catálogo de estações a
+  produzir de 13 para 11, sem afetar nenhuma quest ou incidente.
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -528,6 +538,25 @@ Não replique aqui o histórico completo:
   a cadência aprovada; a escada mantém seus takes e gatilhos. O carregador
   reporta 14 de 14 clipes e degrada para mudo sem quebrar o jogo. As issues #28
   e #36 foram encerradas após autorização explícita; commit `713473e`.
+- **D-159 (sessão conveses modulares):** conveses utilizam `floor_1.png` a `floor_6.png`
+  em `last_horizon/data/environment/`, com todos os conveses usando `floor_1.png`
+  pré-renderizado em `art_deck_strip` em `assets.pde`, substituindo os traços
+  geométricos em `drawDecks(g)`.
+- **D-160 (sessão escadas por convés):** escadas divididas por vão vertical mantendo
+  eixos horizontais inalterados (esquerda deck 2 a 1, direita deck 1 a 0), com
+  transição física e visual sem atravessar decks inexistentes.
+- **D-161 (sessão layout das portas no Comando):** portas da Sala de Comando recuadas
+  das paredes laterais (`door_x = 50, 590, 50`), reproduzindo as proporções dos
+  concept arts e mantendo passadiços seguros.
+- **D-162 (sessão paredes modulares dos conveses):** tiras pré-renderizadas de paredes
+  modulares para os 3 conveses da nave em `data/environment/wall_deck_0.png` a
+  `wall_deck_2.png` montadas sem distorção com base em `Wall 3`, `Wall 5`, `Separation*`
+  e `Semi-wall*`, desenhadas por `drawWalls(g)` em `ship.pde` sob o piso metálico e
+  preservando o fallback geométrico.
+- **D-163 (sessão saneamento de estações inativas):** remoção de `POINT_STATUS` ("SITUAÇÃO")
+  e `POINT_REACTOR` ("REATOR") do código e da documentação (`assets/INVENTORY.md` e
+  `interface/ROOMS.md`), reduzindo `POINT_COUNT` de 18 para 16 e o catálogo de estações a
+  produzir de 13 para 11, sem impacto em quests ou incidentes.
 
 
 ## Fontes por tarefa
@@ -1041,5 +1070,22 @@ e integrados pelo carregador de assets existente.
   - **Convés Inferior (Deck 2):** porta movida do centro (`x = 320`) para o lado esquerdo com recuo (`door_x[2] = 50`), alinhada verticalmente com o convés superior e com espaçamento seguro de 35 px até a estação de Situação (`x = 85`). Retorno da Sala de Máquinas ao Comando configurado em `x = 72` com orientação para a direita (`facing = 1`).
 - `placePlayerAtDoor()` no harness (`capture.pde`) passa a aplicar `constrain(..., ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W)` para respeitar a física dos limites da sala, espelhando `enterRoomAtPosition()` e `updatePlayerWalk()`.
 - **Evidência D-161:** `--ladder-test` → 6 `OK`; `--hit-test` → 5 `OK`; `--asset-pipeline-test` → `pipeline: OK`; `--capture` → 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas vencidas.
+
+### Sessão atual — paredes modulares dos conveses (D-162)
+
+- **Decisão D-162:** compor tiras contínuas de parede modular para os 3 conveses de `last_horizon` a partir dos assets nativos de `assets/PNG/` (`Wall 3`, `Wall 5`, `Separation*`, `Semi-wall*`):
+  - **Deck 0 (Comando Superior, 1232×144 px):** `Wall 3` (x=0) + `Semi-wall 2` (x=160) + `Separation 3` (x=240) + `Wall 3` (x=272) + `Separation 2` (x=432) + `Wall 3` (x=464) + `Semi-wall 2 copie` (x=624) + `Separation 3` (x=704) + `Wall 3` (x=736) + `Semi-wall 1` (x=896) + `Separation 2` (x=976) + `Wall 3` (x=1008) + `Wall pipes` (x=1168).
+  - **Deck 1 (Operações Médio, 1232×148 px):** baias operacionais com `Seperation wall 2`, `Semi-wall 1/2`, `Wall 3` e `Separation 3`.
+  - **Deck 2 (Engenharia Inferior, 1232×152 px):** visual industrial pesado com pilares de sustentação hidráulicos `Separation 1`, colunas de alerta âmbar `Wall 5`, faixas hazard `Wall 7` / `Wall 6`, `Seperation wall 2` e `Wall 3`.
+- As tiras são salvas em `last_horizon/data/environment/wall_deck_0.png` a `wall_deck_2.png` e carregadas em `art_wall_strip` em `assets.pde`.
+- Em `ship.pde`, `drawWalls(g)` desenha a tira de cada deck antes de `drawDecks(g)`, posicionando o rodapé da parede perfeitamente alinhado com o topo do piso metálico.
+- **Evidência D-162:** `--asset-pipeline-test` carregou 23 de 63 imagens (`pipeline: OK`); `--ladder-test` → 6 `OK`; `--hit-test` → 5 `OK`; `--capture` → 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS`.
+
+### Sessão atual — saneamento das estações inativas SITUAÇÃO e REATOR (D-163)
+
+- **Decisão D-163:** remover os pontos inativos `POINT_STATUS` (Comando inferior, x=85) e `POINT_REACTOR` (Máquinas superior, x=485) do código e documentação. Ambos eram estações inertes de leitura técnica (`point_kind = POINT_STATION_STATUS`), sem vínculo a quests, incidentes ou reparos e com `pointIsAvailable()` retornando `false`.
+- **Código alterado:** `last_horizon/ship.pde` (`POINT_COUNT = 16`, reindexação de `POINT_ANTENNA = 2` até `POINT_HULL = 15`, remoção das entradas nos arrays `point_room`, `point_x`, `point_y`, `point_label`, `point_kind`); `last_horizon/assets.pde` (`art_station_file` ajustado de 18 para 16 posições).
+- **Documentação sincronizada:** `assets/INVENTORY.md` (tabela de estações reduzida de 13 para 11 imagens + 1 sheet; tabela de posições e lista canônica atualizadas) e `interface/ROOMS.md` (removidas as linhas de leitura técnica nas tabelas de Comando e Máquinas).
+- **Evidência D-163:** `--asset-pipeline-test` → 23 de 63 imagens carregadas (`pipeline: OK`); `--ladder-test` → 6 `OK`; `--hit-test` → 5 `OK`; `--capture` → 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas vencidas no harness.
 
 

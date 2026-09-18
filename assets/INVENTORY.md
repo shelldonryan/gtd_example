@@ -36,8 +36,8 @@ colisão. Escadas e conveses abaixo são definitivos:
 
 | Sala | Escadas (x) | Estações por convés (x) |
 | --- | --- | --- |
-| Comando | 127 e 532 | Vera 575 e antena 400 (superior); console da rota 260 (médio); situação 85 (inferior) |
-| Sala de máquinas | 114 e 526 | suporte 70 e reator 485 (superior); Sílvia 570 e distribuição 215 (médio); bancada do motor 155 (inferior) |
+| Comando | 127 e 532 | Vera 575 e antena 400 (superior); console da rota 260 (médio) |
+| Sala de máquinas | 114 e 526 | suporte 70 (superior); Sílvia 570 e distribuição 215 (médio); bancada do motor 155 (inferior) |
 | Depósito | 120 e 489 | reserva 530 (superior); Bento 310 e estoque de comida 420 (médio) |
 | Dormitório | 127 e 482 | seu beliche 170 e mesa comum 525 (superior); Neusa 330 e mesa do grupo 440 (médio); socorro 85 (inferior) |
 
@@ -60,7 +60,7 @@ objetos nem NPCs: tudo isso é sprite desenhado por cima.
 | `rooms/depot.png` | Depósito | x = 120 e 489 |
 | `rooms/dormitory.png` | Dormitório | x = 127 e 482 |
 
-## 2. Estações — 13 imagens + 1 spritesheet, canvas 64×64
+## 2. Estações — 11 imagens + 1 spritesheet, canvas 64×64
 
 Ancoragem: base no convés (`point_y`) e centro no `x` do ponto; o desenho ocupa
 a parte de baixo do canvas. Substituem o retângulo genérico de 24×18 que existe
@@ -70,8 +70,6 @@ hoje; o rótulo de texto acima do ponto continua.
 | --- | --- | --- |
 | `stations/antena.png` | antena | Comando, superior |
 | `stations/console_rota.png` | console da rota | Comando, médio |
-| `stations/painel_situacao.png` | painel de situação | Comando, inferior |
-| `stations/reator.png` | reator | Máquinas, superior |
 | `stations/painel_suporte.png` | painel de suporte de vida | Máquinas, superior |
 | `stations/painel_distribuicao.png` | painel de distribuição | Máquinas, médio |
 | `stations/bancada_motor.png` | bancada do motor | Máquinas, inferior |

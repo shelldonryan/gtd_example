@@ -76,7 +76,6 @@ ao Comando para aceitar uma ordem.
 | médio | porta do Depósito | porta |
 | médio | console da rota — origem de objetos, jornada e previsão | leitura, coleta e entrega |
 | inferior | porta da Sala de máquinas | porta |
-| inferior | painel de situação — visão geral dos problemas e ordens | leitura técnica |
 
 No primeiro dia, o técnico começa no Comando. Nos demais, chega ao hub pela
 porta superior vinda do Dormitório.
@@ -91,7 +90,6 @@ O cômodo concentra motor, energia e suporte de vida.
 | inferior | bancada do motor — destino de ordens do motor | entrega |
 | médio | Sílvia — ordens e confirmação técnica | conversa, confirmação e coleta/entrega condicionadas à ordem |
 | médio | painel de distribuição — destino de ordens de energia | entrega |
-| superior | reator — leitura da potência do sistema | leitura técnica |
 | superior | painel de suporte de vida — destino de ordens de oxigênio | entrega |
 | acesso | porta única para o convés inferior do Comando | porta |
 ## Depósito
