@@ -37,9 +37,9 @@ colisão. Escadas e conveses abaixo são definitivos:
 | Sala | Escadas (x) | Estações por convés (x) |
 | --- | --- | --- |
 | Comando | 127 e 532 | Vera 575 e antena 400 (superior); console da rota 260 (médio) |
-| Sala de máquinas | 114 e 526 | suporte 70 (superior); Sílvia 570 e distribuição 215 (médio); bancada do motor 155 (inferior) |
+| Sala de máquinas | 468 e 136 | suporte 70 (superior); Sílvia 570 e distribuição 215 (médio); bancada do motor 155 (inferior) |
 | Depósito | 120 e 489 | reserva 530 (superior); Bento 310 e estoque de comida 420 (médio) |
-| Dormitório | 127 e 482 | seu beliche 170 e mesa comum 525 (superior); Neusa 330 e mesa do grupo 440 (médio); socorro 85 (inferior) |
+| Dormitório | 542 e 243 | seu beliche 170 e mesa comum 525 (superior); Neusa 330 e mesa do grupo 440 (médio); socorro 85 (inferior) |
 
 Conveses em `y = 128`, `202` e `278`; a faixa útil da sala é `x` de 8 a 632 e
 `y` de 56 a 284. As portas continuam sendo sprites e podem mudar de lugar sem
@@ -56,9 +56,9 @@ objetos nem NPCs: tudo isso é sprite desenhado por cima.
 | Arquivo | Sala | Escadas pintadas em |
 | --- | --- | --- |
 | `rooms/command.png` | Sala de comando | x = 127 e 532 |
-| `rooms/machines.png` | Sala de máquinas | x = 114 e 526 |
+| `rooms/machines.png` | Sala de máquinas | x = 468 (inferior) e 136 (superior) |
 | `rooms/depot.png` | Depósito | x = 120 e 489 |
-| `rooms/dormitory.png` | Dormitório | x = 127 e 482 |
+| `rooms/dormitory.png` | Dormitório | x = 542 (inferior) e 243 (superior) |
 
 ## 2. Estações — 11 imagens + 1 spritesheet, canvas 64×64
 
@@ -122,15 +122,12 @@ Quando o técnico entra no raio de interação, o destaque é um contorno/halo c
 gerado em runtime a partir da transparência do frame; ele não é gravado no PNG.
 
 Integrados: `npc/vera.png`, `npc/bento.png`, `npc/neusa.png` e `npc/silvia.png`.
-## 5. Porta — 1 spritesheet, 128×128 (2 quadros de 64×128)
+## 5. Porta — 1 spritesheet, 210×97 (2 quadros de 105×97, integrada)
 
-`doors/door_sheet.png` + `doors/door_sheet.json`. Quadros `fechada` e `aberta`.
-A base fica no limiar (`door_y`) e o centro em `door_x`; a porta continua sendo
-dado de tabela, uma única arte serve as seis portas. O destaque de alcance
-(inclusive a linha `E - [sala]`) continua por código, não no desenho.
-
-Como hoje a travessia é instantânea, o sketch ganha um **estado de travessia**:
-abrir o quadro `aberta`, trocar de sala e voltar a `fechada`.
+`doors/door_sheet.png` + `doors/door_sheet.json`. Quadros `fechada` (`Doors 1.png`) e `aberta` (`Doors 2.png`), renderizados em 52.5×48.5 lógicos (105×97 reais em 720p, proporção 1:1 pixel-perfect).
+A base fica no limiar (`door_y`) e o centro em `door_x`; uma única arte serve as seis portas.
+Quando o técnico entra no alcance da porta, um contorno/halo cyan gerado em runtime a partir da transparência do frame é desenhado ao redor do asset (efeito idêntico aos NPCs em D-155), e o texto `E - [sala]` é exibido centralizado acima do topo da porta (`y - ART_DOOR_H - 6`), com ajuste proporcional (`fitTextSize`) para nunca sobrepor escadas ou bordas da tela.
+A travessia executa a animação em 2 quadros: abrir o quadro `aberta`, trocar de sala e fechar no destino.
 
 ## 6. Ícones do HUD — 6 imagens, 32×32, estáticas
 

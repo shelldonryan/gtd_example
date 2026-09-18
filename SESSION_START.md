@@ -160,6 +160,11 @@ reporte e não escolha silenciosamente.
   `POINT_REACTOR` ("REATOR") do código e da documentação (`INVENTORY.md` e
   `ROOMS.md`), reduzindo `POINT_COUNT` de 18 para 16 e o catálogo de estações a
   produzir de 13 para 11, sem afetar nenhuma quest ou incidente.
+- D-164 integrou os assets de portas com animação de 2 quadros, efeito glow cyan
+  de proximidade em runtime e reposicionamento adaptativo dos rótulos de interação.
+- D-165 alinhou as portas da Sala de Comando com as paredes modulares dos conveses
+  (Deck 0: x=40; Deck 1: x=598; Deck 2: x=88) e recalibrou as chegadas padrão
+  (Deck 0: x=68; Deck 1: x=570; Deck 2: x=110) conforme gabarito visual.
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -557,6 +562,14 @@ Não replique aqui o histórico completo:
   e `POINT_REACTOR` ("REATOR") do código e da documentação (`assets/INVENTORY.md` e
   `interface/ROOMS.md`), reduzindo `POINT_COUNT` de 18 para 16 e o catálogo de estações a
   produzir de 13 para 11, sem impacto em quests ou incidentes.
+- **D-164 (sessão integração dos assets de portas):** spritesheet de 2 quadros em
+  `last_horizon/data/doors/door_sheet.png` (210×97 px), animação de travessia, contorno
+  glow cyan em runtime na aproximação do técnico e rótulos `E - [SALA]` adaptativos.
+- **D-165 (sessão alinhamento das portas no Comando):** portas da Sala de Comando
+  alinhadas visual e arquiteturalmente com as paredes modulares dos conveses (D-162):
+  Deck 0 em `x = 40` no vão de `Wall 3`; Deck 1 em `x = 598` na baía direita sob a luminária;
+  Deck 2 em `x = 88` na baía liberada por `POINT_STATUS`. Chegadas padrão recalibradas
+  para `x = 68` (Deck 0), `x = 570` (Deck 1) e `x = 110` (Deck 2).
 
 
 ## Fontes por tarefa
@@ -1087,5 +1100,33 @@ e integrados pelo carregador de assets existente.
 - **Código alterado:** `last_horizon/ship.pde` (`POINT_COUNT = 16`, reindexação de `POINT_ANTENNA = 2` até `POINT_HULL = 15`, remoção das entradas nos arrays `point_room`, `point_x`, `point_y`, `point_label`, `point_kind`); `last_horizon/assets.pde` (`art_station_file` ajustado de 18 para 16 posições).
 - **Documentação sincronizada:** `assets/INVENTORY.md` (tabela de estações reduzida de 13 para 11 imagens + 1 sheet; tabela de posições e lista canônica atualizadas) e `interface/ROOMS.md` (removidas as linhas de leitura técnica nas tabelas de Comando e Máquinas).
 - **Evidência D-163:** `--asset-pipeline-test` → 23 de 63 imagens carregadas (`pipeline: OK`); `--ladder-test` → 6 `OK`; `--hit-test` → 5 `OK`; `--capture` → 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas vencidas no harness.
+
+### Sessão atual — assets de portas com animação, contorno/glow e textos de interação (D-164)
+
+- **Decisão D-164:** integrar os assets `Doors 1.png` (porta fechada) e `Doors 2.png` (porta aberta) ao sistema de portas de `last_horizon`, com spritesheet de 2 quadros em `last_horizon/data/doors/door_sheet.png` (210×97 px) e `door_sheet.json`.
+- A renderização usa `ART_DOOR_W = 52.5` e `ART_DOOR_H = 48.5`, resultando em exatamente 105×97 pixels reais no render 720p (escala 1:1 pixel-perfect sem distorção).
+- Na aproximação do jogador ao raio de interação (`doorInRange`), o contorno/halo cyan gerado em runtime a partir da transparência do frame com `prepareDoorGlow()` e `doorGlowFrame()` (mesmo algoritmo `buildNpcGlow` dos NPCs em D-155) é desenhado ao redor da porta, substituindo o antigo retângulo geométrico.
+- Os textos de interação `E - [SALA]` foram reposicionados acima do topo da porta (`y - ART_DOOR_H - 6`) com restrições horizontais (`ROOM_LEFT + 6` e afastamento de segurança das escadas) e ajuste automático de largura (`fitTextSize`). Isso elimina a sobreposição de "E - SALA DE MÁQUINAS" com a escada esquerda no Convés 2 e o afastamento arbitrário de 210 px de "E - DEPÓSITO" no Convés 1.
+- **Evidência D-164:** `--asset-pipeline-test` carregou 24 de 63 imagens (`pipeline: OK`); `--ladder-test` retornou 6 `OK`; `--hit-test` retornou 5 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas vencidas no harness.
+
+### Sessão atual — alinhamento das portas da Sala de Comando com paredes modulares (D-165)
+
+- **Decisão D-165:** alinhar visual e arquiteturalmente as três portas da Sala de Comando (`SCREEN_COMMAND`) com as paredes modulares dos conveses (D-162), eliminando sobreposições com colunas estruturais e ocupando as baías naturais do cenário conforme gabarito visual fornecido pelo usuário:
+  - **Convés Superior (Deck 0):** `door_x[0]` ajustado de `50` para `40`, centralizado perfeitamente no painel rebaixado de `Wall 3` entre a parede esquerda e a coluna estrutural com luzes (`strip_x = 112` / `game_x = 68`), com folga simétrica de 1,75 px de cada lado. Chegada do Dormitório ao Comando (`door_arrival_x[3]`) recalibrada de `78` para `68` com `facing = 1`.
+  - **Convés Médio (Deck 1):** `door_x[1]` ajustado de `590` para `598`, alinhando a porta na baía direita sob o cone da luminária de teto (`strip_x = 1169` / `game_x = 596.5`), entre a coluna (`strip_x = 1119` / `game_x = 571.5`) e a borda direita, eliminando a sobreposição de 8 px sobre a coluna esquerda. Chegada do Depósito ao Comando (`door_arrival_x[4]`) recalibrada de `562` para `570` com `facing = -1`.
+  - **Convés Inferior (Deck 2):** `door_x[2]` reposicionado de `50` para `88`, deslocando a porta de cima do pilar hidráulico/hazard para a baía modular de `Wall 3` que ficou livre com a remoção de `POINT_STATUS` (D-163), preservando folga segura de 13 px até a escada (`x = 127`). Chegada da Sala de Máquinas ao Comando (`door_arrival_x[5]`) recalibrada de `72` para `110` com `facing = 1`.
+- **Código alterado:** `last_horizon/ship.pde` (`door_x` atualizado para `{40, 598, 88, ...}`; `door_arrival_x` atualizado para `{..., 68, 570, 110}`).
+- **Evidência D-165:** `--asset-pipeline-test` carregou 24 de 63 imagens (`pipeline: OK`); `--ladder-test` retornou 6 `OK`; `--hit-test` retornou 5 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — alinhamento de portas e escadas nas salas operacionais (D-166)
+
+- **Decisão D-166:** ajustar e alinhar a posição de portas e escadas nas demais salas da nave (Sala de Máquinas, Dormitório e Depósito) e adicionar fundo preto no vão da porta aberta:
+  - **Fundo opaco da porta aberta:** preenchimento do vão interno de `Doors 2.png` e `door_sheet.png` (frame 1) com preto sólido (`#000000`), evitando que a textura da parede apareça através do vão aberto.
+  - **Sala de Máquinas (`SCREEN_MACHINES`):** porta deslocada para a baía modular esquerda do Deck 2 (`door_x[5] = 88`) com chegada `door_arrival_x[2] = 110`. Escada inferior (Deck 2→1) reposicionada para `ladder_x[2] = 468` (marcação verde) e escada superior (Deck 1→0) para `ladder_x[3] = 136` (marcação azul).
+  - **Dormitório (`SCREEN_DORMITORY`):** porta alinhada à baía esquerda do Deck 0 (`door_x[3] = 40`) com chegada `door_arrival_x[0] = 68`. Escada central (Deck 1→0) reposicionada para a junção modular `ladder_x[7] = 243` (marcação azul) e escada inferior (Deck 2→1) para `ladder_x[6] = 542` (marcação verde), liberando a estação `SOCORRO` no convés inferior.
+  - **Depósito (`SCREEN_DEPOT`):** porta do Deck 1 centralizada com folgas simétricas no vão da parede (`door_x[4] = 45`), desencostando a borda esquerda da faixa de perigo da parede, com chegada calibrada para `door_arrival_x[1] = 73`.
+- **Código alterado:** `last_horizon/ship.pde` (`door_x`, `door_arrival_x`, `ladder_x`), `assets/PNG/Doors 2.png`, `last_horizon/data/doors/door_sheet.png`.
+- **Documentação sincronizada:** `assets/INVENTORY.md` (coordenadas de escadas atualizadas para Máquinas e Dormitório).
+
 
 
