@@ -21,6 +21,14 @@ int[] ladder_room = {
 };
 /* Cada registro pode ocupar qualquer x; o par abaixo é o definitivo por sala. */
 float[] ladder_x = {127, 532, 114, 526, 120, 489, 127, 482};
+/* Escadas divididas por sala: esquerda vai do inferior ao meio; direita vai do meio ao superior */
+int[] ladder_top_deck = {
+  1, 0, 1, 0, 1, 0, 1, 0
+};
+int[] ladder_bottom_deck = {
+  2, 1, 2, 1, 2, 1, 2, 1
+};
+int current_ladder = -1;
 
 /* Portas são portais de dados; x/y são o centro e o limiar dos pés. */
 final int DOOR_DECK_NONE = -1;
@@ -40,7 +48,7 @@ int[] door_target = {
 /* door_deck é apenas a referência opcional do layout; -1 libera o y. */
 int[] door_deck = {0, 1, 2, 0, 1, 2};
 float[] door_x = {
-  ROOM_RIGHT - 11, ROOM_RIGHT - 11, BASE_W / 2.0,
+  50, 590, 50,
   ROOM_LEFT + 11, ROOM_LEFT + 11, ROOM_LEFT + 11
 };
 float[] door_y = {
@@ -56,15 +64,15 @@ float[] door_arrival_x = {
   ROOM_LEFT + 11 + 28 + PLAYER_W / 2.0,
   ROOM_LEFT + 11 + 28 + PLAYER_W / 2.0,
   ROOM_LEFT + 11 + 28 + PLAYER_W / 2.0,
-  ROOM_RIGHT - 11 - 28 - PLAYER_W / 2.0,
-  ROOM_RIGHT - 11 - 28 - PLAYER_W / 2.0,
-  ROOM_RIGHT - 11 - 28 - PLAYER_W / 2.0
+  78,
+  562,
+  72
 };
 float[] door_arrival_y = {
   deck_y[0], deck_y[1], deck_y[2],
   deck_y[0], deck_y[1], deck_y[2]
 };
-int[] door_arrival_facing = {1, 1, 1, -1, -1, -1};
+int[] door_arrival_facing = {1, 1, 1, 1, -1, 1};
 
 boolean last_portal_valid = false;
 int last_portal_from_room = SCREEN_COMMAND;
@@ -321,16 +329,40 @@ String roomTitle(int room_screen){
 
 
 void drawDecks(PGraphics g){
-  g.stroke(COL_BORDER);
-  g.strokeWeight(2);
+  if (!hasFloorArt()){
+    g.stroke(COL_BORDER);
+    g.strokeWeight(2);
 
-  for (int i = 0; i < DECK_COUNT; i++){
-    g.fill(i == DECK_COUNT - 1 ? COL_PANEL_2 : COL_PANEL);
-    g.line(ROOM_LEFT + 4, deck_y[i], ROOM_RIGHT - 4, deck_y[i]);
-    g.rect(ROOM_LEFT + 4, deck_y[i], ROOM_RIGHT - ROOM_LEFT - 8, 4);
+    for (int i = 0; i < DECK_COUNT; i++){
+      g.fill(i == DECK_COUNT - 1 ? COL_PANEL_2 : COL_PANEL);
+      g.line(ROOM_LEFT + 4, deck_y[i], ROOM_RIGHT - 4, deck_y[i]);
+      g.rect(ROOM_LEFT + 4, deck_y[i], ROOM_RIGHT - ROOM_LEFT - 8, 4);
+    }
+
+    g.strokeWeight(1);
+    return;
   }
 
-  g.strokeWeight(1);
+  g.imageMode(CORNER);
+  float start_x = ROOM_LEFT + 4;
+  float total_w = ROOM_RIGHT - ROOM_LEFT - 8;
+
+  for (int i = 0; i < DECK_COUNT; i++){
+    PImage strip = art_deck_strip != null ? art_deck_strip[i] : null;
+    if (strip != null){
+      float strip_h = strip.height / (float) RENDER_SCALE;
+      g.image(strip, round(start_x), round(deck_y[i]), total_w, strip_h);
+    } else {
+      g.stroke(COL_BORDER);
+      g.strokeWeight(2);
+      g.fill(i == DECK_COUNT - 1 ? COL_PANEL_2 : COL_PANEL);
+      g.line(start_x, deck_y[i], start_x + total_w, deck_y[i]);
+      g.rect(start_x, deck_y[i], total_w, 4);
+      g.strokeWeight(1);
+    }
+  }
+
+  g.imageMode(CENTER);
 }
 
 
@@ -341,10 +373,13 @@ void drawLadders(PGraphics g){
   for (int i = 0; i < LADDER_COUNT; i++){
     if (ladder_room[i] != screen) continue;
     float x = ladder_x[i];
-    g.line(x - 5, deck_y[0], x - 5, deck_y[DECK_COUNT - 1]);
-    g.line(x + 5, deck_y[0], x + 5, deck_y[DECK_COUNT - 1]);
+    float y_top = deck_y[ladder_top_deck[i]];
+    float y_bottom = deck_y[ladder_bottom_deck[i]];
 
-    for (float y = deck_y[0] + 8; y < deck_y[DECK_COUNT - 1]; y += 8){
+    g.line(x - 5, y_top, x - 5, y_bottom);
+    g.line(x + 5, y_top, x + 5, y_bottom);
+
+    for (float y = y_top + 8; y < y_bottom; y += 8){
       g.line(x - 5, y, x + 5, y);
     }
   }
@@ -1219,6 +1254,7 @@ void updatePlayerOnDeck(){
     int ladder = nearestLadder();
 
     if (ladder >= 0){
+      current_ladder = ladder;
       player_on_ladder = true;
       player_grounded = false;
       player_x = ladder_x[ladder] - PLAYER_W / 2.0;
@@ -1253,10 +1289,17 @@ void updatePlayerOnLadder(){
     horizontal += 1;
   }
 
+  if (current_ladder < 0){
+    current_ladder = activeLadderIndex();
+  }
+
+  int top_deck = current_ladder >= 0 ? ladder_top_deck[current_ladder] : 0;
+  int bot_deck = current_ladder >= 0 ? ladder_bottom_deck[current_ladder] : DECK_COUNT - 1;
+
   float old_y = player_y;
   player_y += vertical * LADDER_SPEED;
-  float top = deck_y[0] - PLAYER_H;
-  float bottom = deck_y[DECK_COUNT - 1] - PLAYER_H;
+  float top = deck_y[top_deck] - PLAYER_H;
+  float bottom = deck_y[bot_deck] - PLAYER_H;
   player_y = constrain(player_y, top, bottom);
 
   float dy = abs(player_y - old_y);
@@ -1288,7 +1331,7 @@ void updatePlayerOnLadder(){
   }
 
   if (player_y <= top || player_y >= bottom){
-    int end_deck = player_y <= top ? 0 : DECK_COUNT - 1;
+    int end_deck = player_y <= top ? top_deck : bot_deck;
     leaveLadderAtDeck(end_deck, horizontal);
   }
 }
@@ -1344,6 +1387,7 @@ void leaveLadderAtDeck(int deck, int horizontal){
   player_y = deck_y[deck] - PLAYER_H;
   player_x = constrain(player_x + horizontal * PLAYER_SPEED,
     ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
+  current_ladder = -1;
   player_on_ladder = false;
   player_grounded = true;
   player_velocity_y = 0;
@@ -1357,6 +1401,26 @@ void leaveLadderAtDeck(int deck, int horizontal){
 }
 
 
+int activeLadderIndex(){
+  float center_x = player_x + PLAYER_W / 2.0;
+  int best = -1;
+  float best_dist = 1000;
+
+  for (int i = 0; i < LADDER_COUNT; i++){
+    if (ladder_room[i] != screen) continue;
+    float top_y = deck_y[ladder_top_deck[i]] - PLAYER_H - 2;
+    float bot_y = deck_y[ladder_bottom_deck[i]] + 2;
+    if (player_y < top_y || player_y > bot_y) continue;
+    float dist = abs(center_x - ladder_x[i]);
+    if (dist < best_dist){
+      best_dist = dist;
+      best = i;
+    }
+  }
+
+  return best;
+}
+
 
 int nearestLadder(){
   if (!player_grounded){
@@ -1366,7 +1430,15 @@ int nearestLadder(){
   float center_x = player_x + PLAYER_W / 2.0;
   float bottom = player_y + PLAYER_H;
 
-  if (!isDeckSurface(bottom)){
+  int current_deck = -1;
+  for (int i = 0; i < DECK_COUNT; i++){
+    if (abs(bottom - deck_y[i]) < 1.1){
+      current_deck = i;
+      break;
+    }
+  }
+
+  if (current_deck < 0){
     return -1;
   }
 
@@ -1375,6 +1447,18 @@ int nearestLadder(){
 
   for (int i = 0; i < LADDER_COUNT; i++){
     if (ladder_room[i] != screen) continue;
+
+    if (current_deck < ladder_top_deck[i] || current_deck > ladder_bottom_deck[i]){
+      continue;
+    }
+
+    if (current_deck == ladder_top_deck[i] && !move_down_held){
+      continue;
+    }
+    if (current_deck == ladder_bottom_deck[i] && !move_up_held){
+      continue;
+    }
+
     float distance = abs(center_x - ladder_x[i]);
 
     if (distance <= INTERACTION_RANGE && distance < best_distance){

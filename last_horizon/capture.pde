@@ -916,8 +916,8 @@ void checkPlayerFacing(){
 
   move_right_held = false;
   clearDoorArt();
-  enterRoom(SCREEN_MACHINES);
-  placePlayerAtDoor(doorInRoomLeadingTo(SCREEN_MACHINES, SCREEN_COMMAND));
+  enterRoom(SCREEN_DEPOT);
+  placePlayerAtDoor(doorInRoomLeadingTo(SCREEN_DEPOT, SCREEN_COMMAND));
   useNearbyDoor();
   verify("retorno ao hub olha para a esquerda",
     screen == SCREEN_COMMAND && player_facing == -1);
@@ -1192,7 +1192,8 @@ void placePlayerAtDoor(int door){
   move_right_held = false;
   move_up_held = false;
   move_down_held = false;
-  player_x = door_x[door] - PLAYER_W / 2.0;
+  player_x = constrain(door_x[door] - PLAYER_W / 2.0,
+    ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
   player_y = door_y[door] - PLAYER_H;
   player_velocity_y = 0;
   player_grounded = isDeckSurface(door_y[door]);

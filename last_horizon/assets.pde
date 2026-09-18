@@ -25,6 +25,8 @@ final String ART_HULL_DATA = "stations/casco_sheet.json";
 final String ART_SCREEN_MENU = "screens/menu_space.png";
 final String ART_SCREEN_VICTORY = "screens/victory_mars.png";
 final String ART_SCREEN_DEFEAT = "screens/defeat_space.png";
+final String ART_FLOOR_DIR = "environment/";
+final int FLOOR_COUNT = 6;
 
 /* canvas -> drawn size, in logical units */
 final float ART_ICON_DRAW = 16;
@@ -76,6 +78,12 @@ PImage[][] art_crew_glow_right;
 
 PImage[] art_door_frames = new PImage[2];
 PImage[] art_hull_frames = new PImage[2];
+
+String[] art_floor_file = {
+  "floor_1", "floor_2", "floor_3", "floor_4", "floor_5", "floor_6"
+};
+PImage[] art_floor = new PImage[FLOOR_COUNT];
+PImage[] art_deck_strip;
 
 HashMap<String, PImage> art_cache = new HashMap<String, PImage>();
 int art_loaded = 0;
@@ -323,8 +331,61 @@ void loadArtAssets(){
   art_screen[1] = loadArt(ART_SCREEN_VICTORY);
   art_screen[2] = loadArt(ART_SCREEN_DEFEAT);
 
+  art_deck_strip = new PImage[DECK_COUNT];
+  for (int f = 0; f < FLOOR_COUNT; f++){
+    art_floor[f] = loadArt(ART_FLOOR_DIR + art_floor_file[f] + ".png");
+  }
+  prepareDeckStrips();
+
   println("arte: " + art_loaded + " de " + art_expected
     + " imagens carregadas; ausentes usam a geometria do protótipo");
+}
+
+
+boolean hasFloorArt(){
+  if (art_floor == null) return false;
+  for (int i = 0; i < art_floor.length; i++){
+    if (art_floor[i] != null) return true;
+  }
+  return false;
+}
+
+
+PImage floorArtForDeck(int deck_index){
+  if (art_floor == null) return null;
+  /* Todos os conveses (superior, médio e inferior) usam o asset do inferior (floor_1) */
+  if (art_floor[0] != null) return art_floor[0];
+  if (art_floor[3] != null) return art_floor[3];
+  if (art_floor[2] != null) return art_floor[2];
+  if (art_floor[1] != null) return art_floor[1];
+  return null;
+}
+
+
+void prepareDeckStrips(){
+  if (!hasFloorArt()){
+    return;
+  }
+  int render_w = round((ROOM_RIGHT - ROOM_LEFT - 8) * RENDER_SCALE);
+  for (int i = 0; i < DECK_COUNT; i++){
+    PImage tile = floorArtForDeck(i);
+    if (tile == null){
+      art_deck_strip[i] = null;
+      continue;
+    }
+    PGraphics strip = createGraphics(render_w, tile.height);
+    strip.beginDraw();
+    strip.clear();
+    strip.noSmooth();
+    int x = 0;
+    while (x < render_w){
+      int w_to_draw = min(tile.width, render_w - x);
+      strip.image(tile.get(0, 0, w_to_draw, tile.height), x, 0);
+      x += tile.width;
+    }
+    strip.endDraw();
+    art_deck_strip[i] = strip.get();
+  }
 }
 
 
