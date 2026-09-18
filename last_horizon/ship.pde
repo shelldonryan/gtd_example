@@ -88,48 +88,52 @@ final int POINT_END_DAY = 5;
 
 final int POINT_VERA = 0;
 final int POINT_ROUTE = 1;
-final int POINT_STATUS = 2;
-final int POINT_ANTENNA = 3;
-final int POINT_ENGINE_BENCH = 4;
-final int POINT_SILVIA = 5;
-final int POINT_DISTRIBUTION = 6;
-final int POINT_REACTOR = 7;
-final int POINT_LIFE_SUPPORT = 8;
-final int POINT_BENTO = 9;
-final int POINT_RESERVE = 10;
-final int POINT_STOCK = 11;
-final int POINT_RISK_BUNK = 12;
-final int POINT_NEUSA = 13;
-final int POINT_CONFLICT = 14;
-final int POINT_COMMON_TABLE = 15;
-final int POINT_TECH_BUNK = 16;
-final int POINT_HULL = 17;
-final int POINT_COUNT = 18;
+final int POINT_ANTENNA = 2;
+final int POINT_ENGINE_BENCH = 3;
+final int POINT_SILVIA = 4;
+final int POINT_DISTRIBUTION = 5;
+final int POINT_LIFE_SUPPORT = 6;
+final int POINT_BENTO = 7;
+final int POINT_RESERVE = 8;
+final int POINT_STOCK = 9;
+final int POINT_RISK_BUNK = 10;
+final int POINT_NEUSA = 11;
+final int POINT_CONFLICT = 12;
+final int POINT_COMMON_TABLE = 13;
+final int POINT_TECH_BUNK = 14;
+final int POINT_HULL = 15;
+final int POINT_COUNT = 16;
 
 int[] point_room = {
-  SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND,
-  SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_MACHINES,
+  SCREEN_COMMAND, SCREEN_COMMAND, SCREEN_COMMAND,
+  SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_MACHINES, SCREEN_MACHINES,
   SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DEPOT,
   SCREEN_DORMITORY, SCREEN_DORMITORY, SCREEN_DORMITORY, SCREEN_DORMITORY,
   SCREEN_DORMITORY, SCREEN_NONE
 };
 float[] point_x = {
-  575, 260, 85, 400, 155, 570, 215, 485, 70, 310, 530, 420,
-  85, 330, 440, 525, 170, 530
+  575, 260, 400,
+  155, 570, 215, 70,
+  310, 530, 420,
+  85, 330, 440, 525, 170,
+  530
 };
 float[] point_y = {
-  128, 202, 278, 128, 278, 202, 202, 128, 128, 202, 128, 202,
-  278, 202, 202, 128, 128, 278
+  128, 202, 128,
+  278, 202, 202, 128,
+  202, 128, 202,
+  278, 202, 202, 128, 128,
+  278
 };
 String[] point_label = {
-  "VERA", "CONSOLE DA ROTA", "SITUAÇÃO", "ANTENA",
-  "BANCADA DO MOTOR", "SÍLVIA", "DISTRIBUIÇÃO", "REATOR", "SUPORTE",
+  "VERA", "CONSOLE DA ROTA", "ANTENA",
+  "BANCADA DO MOTOR", "SÍLVIA", "DISTRIBUIÇÃO", "SUPORTE",
   "BENTO", "RESERVA", "ESTOQUE DE COMIDA",
   "SOCORRO", "NEUSA", "MESA DO GRUPO", "MESA COMUM", "SEU BELICHE", "CASCO"
 };
 int[] point_kind = {
-  POINT_NPC, POINT_READ, POINT_READ, POINT_COMPLETE,
-  POINT_COMPLETE, POINT_NPC, POINT_COMPLETE, POINT_READ, POINT_COMPLETE,
+  POINT_NPC, POINT_READ, POINT_COMPLETE,
+  POINT_COMPLETE, POINT_NPC, POINT_COMPLETE, POINT_COMPLETE,
   POINT_NPC, POINT_READ, POINT_COMPLETE,
   POINT_COMPLETE, POINT_NPC, POINT_COMPLETE, POINT_COMPLETE, POINT_END_DAY, POINT_COMPLETE
 };
@@ -295,6 +299,7 @@ void drawRoom(PGraphics g){
     drawArtCorner(g, backdrop, 0, ART_BACKDROP_TOP, BASE_W, ART_BACKDROP_H);
   } else {
     drawBackdrop(g, ROOM_LEFT, ROOM_TOP, ROOM_RIGHT - ROOM_LEFT, ROOM_BOTTOM - ROOM_TOP);
+    drawWalls(g);
     drawDecks(g);
     drawLadders(g);
   }
@@ -310,6 +315,26 @@ void drawRoom(PGraphics g){
 
   drawPlayer(g);
   drawHeldItem(g);
+}
+
+
+void drawWalls(PGraphics g){
+  if (!hasWallArt()) return;
+
+  g.imageMode(CORNER);
+  float start_x = ROOM_LEFT + 4;
+  float total_w = ROOM_RIGHT - ROOM_LEFT - 8;
+
+  for (int i = 0; i < DECK_COUNT; i++){
+    PImage strip = art_wall_strip != null ? art_wall_strip[i] : null;
+    if (strip != null){
+      float strip_y = i == 0 ? ROOM_TOP : deck_y[i - 1];
+      float strip_h = strip.height / (float) RENDER_SCALE;
+      g.image(strip, round(start_x), round(strip_y), total_w, strip_h);
+    }
+  }
+
+  g.imageMode(CENTER);
 }
 
 

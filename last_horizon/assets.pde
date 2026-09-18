@@ -48,10 +48,10 @@ String[] art_icon_file = {
   "energia", "oxigenio", "agua", "comida", "pecas", "moral"
 };
 
-/* 13 stations, in data/stations/; null on NPC and hull points */
+/* 11 stations, in data/stations/; null on NPC and hull points */
 String[] art_station_file = {
-  null, "console_rota", "painel_situacao", "antena", "bancada_motor",
-  null, "painel_distribuicao", "reator", "painel_suporte",
+  null, "console_rota", "antena", "bancada_motor",
+  null, "painel_distribuicao", "painel_suporte",
   null, "prateleira_reserva", "estoque_comida", "beliche_socorro",
   null, "mesa_grupo", "mesa_comum", "beliche_tecnico", null
 };
@@ -84,6 +84,7 @@ String[] art_floor_file = {
 };
 PImage[] art_floor = new PImage[FLOOR_COUNT];
 PImage[] art_deck_strip;
+PImage[] art_wall_strip;
 
 HashMap<String, PImage> art_cache = new HashMap<String, PImage>();
 int art_loaded = 0;
@@ -337,8 +338,22 @@ void loadArtAssets(){
   }
   prepareDeckStrips();
 
+  art_wall_strip = new PImage[DECK_COUNT];
+  for (int w = 0; w < DECK_COUNT; w++){
+    art_wall_strip[w] = loadArt(ART_FLOOR_DIR + "wall_deck_" + w + ".png");
+  }
+
   println("arte: " + art_loaded + " de " + art_expected
     + " imagens carregadas; ausentes usam a geometria do protótipo");
+}
+
+
+boolean hasWallArt(){
+  if (art_wall_strip == null) return false;
+  for (int i = 0; i < art_wall_strip.length; i++){
+    if (art_wall_strip[i] != null) return true;
+  }
+  return false;
 }
 
 
