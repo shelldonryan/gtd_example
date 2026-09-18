@@ -136,6 +136,20 @@ reporte e não escolha silenciosamente.
   `footsteps/boots/1,3,5,7` com `impactMetal_000.ogg` de Kenney e atraso de
   30 ms em `audio/run/`; a escada mantém os quatro takes metálicos originais em
   `audio/ladder/`. A issue #28 foi encerrada após autorização explícita.
+- D-159 integrou os assets de piso de `assets/PNG/Floor*.png` aos conveses
+  das salas: os 6 arquivos foram copiados para `data/environment/floor_1.png` a
+  `floor_6.png`, integrados via `art_floor` e pré-renderizados em `art_deck_strip`
+  em `assets.pde`, substituindo os traços geométricos em `drawDecks(g)` em
+  `ship.pde`. Todos os conveses (superior, médio e inferior) usam `floor_1.png`
+  (passadiço metálico reforçado com sinalizadores cyan), preservando a física
+  dos pés e o fallback geométrico se a arte não for encontrada.
+- D-160 dividiu o vão das escadas por sala mantendo os eixos x inalterados
+  (127/532, 114/526, 120/489, 127/482): a escada esquerda liga o convés
+  inferior ao médio (deck 2 ao 1, y = 278 a 202) e a escada direita liga o convés
+  médio ao superior (deck 1 ao 0, y = 202 a 128). O acoplamento físico em
+  `nearestLadder()`, a restrição de altura em `updatePlayerOnLadder()` e o
+  desenho em `drawLadders(g)` foram parametrizados por `ladder_top_deck` e
+  `ladder_bottom_deck`.
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -1005,3 +1019,27 @@ e integrados pelo carregador de assets existente.
   `--asset-pipeline-test` → `pipeline: OK`.
 - **Commit técnico:** `713473e`. A issue-mapa #1 permanece aberta; as duas
   sub-issues aparecem como `CLOSED` no grafo nativo.
+
+### Sessão atual — conveses com assets modulares Floor*.png (D-159)
+
+- **Decisão D-159:** usar `floor_1.png` a `floor_6.png` em `last_horizon/data/environment/` para a composição visual dos conveses. Por decisão do usuário, todos os conveses (superior, médio e inferior) usam `floor_1.png`.
+- As tiras de piso são pré-renderizadas em `art_deck_strip` durante o carregamento de arte, eliminando alocações no loop de 60 FPS e garantindo pixel-art 1:1 exato com recorte nas bordas da sala (`ROOM_LEFT + 4` a `ROOM_RIGHT - 4`).
+- O fallback geométrico permanece totalmente funcional se a arte estiver ausente.
+- **Evidência D-159:** `--asset-pipeline-test` carregou 20 de 62 imagens (`pipeline: OK`); `--ladder-test` retornou 6 `OK`; `--hit-test` retornou 5 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU` e `QUEST CHECK: PASS`.
+
+### Sessão atual — escadas divididas por convés (D-160)
+
+- **Decisão D-160:** dividir o vão das escadas por sala mantendo os eixos horizontais inalterados. A escada esquerda liga o convés inferior ao médio (`top_deck = 1`, `bottom_deck = 2`) e a escada direita liga o convés médio ao superior (`top_deck = 0`, `bottom_deck = 1`), eliminando a continuidade vertical que atravessava todos os 3 conveses.
+- A física de subida/descida em `ship.pde` foi atualizada com `current_ladder`, `ladder_top_deck` e `ladder_bottom_deck`: o jogador só agarra a escada na direção do vão correspondente, transita sem atravessar decks inexistentes e salta com saída lateral limpa.
+- **Evidência D-160:** `--ladder-test` → 6 `OK`; `--hit-test` → 5 `OK`; `--capture` → 169 `OK`, zero `FALHOU`, `QUEST CHECK: PASS`.
+
+### Sessão atual — layout das portas na Sala de Comando (D-161)
+
+- **Decisão D-161:** reposicionar as portas da Sala de Comando (`SCREEN_COMMAND`) recuadas das paredes físicas, reproduzindo a proporção da arte do conceito:
+  - **Convés Superior (Deck 0):** porta no lado esquerdo com recuo (`door_x[0] = 50`), preservando a coluna/guarda-corpo à esquerda. Retorno do Dormitório ao Comando configurado em `x = 78` com orientação para a direita (`facing = 1`).
+  - **Convés Médio (Deck 1):** porta no lado direito com recuo (`door_x[1] = 590`), preservando a coluna de parede à direita e 58 px de vão até a escada direita (`x = 532`). Retorno do Depósito ao Comando configurado em `x = 562` com orientação para a esquerda (`facing = -1`).
+  - **Convés Inferior (Deck 2):** porta movida do centro (`x = 320`) para o lado esquerdo com recuo (`door_x[2] = 50`), alinhada verticalmente com o convés superior e com espaçamento seguro de 35 px até a estação de Situação (`x = 85`). Retorno da Sala de Máquinas ao Comando configurado em `x = 72` com orientação para a direita (`facing = 1`).
+- `placePlayerAtDoor()` no harness (`capture.pde`) passa a aplicar `constrain(..., ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W)` para respeitar a física dos limites da sala, espelhando `enterRoomAtPosition()` e `updatePlayerWalk()`.
+- **Evidência D-161:** `--ladder-test` → 6 `OK`; `--hit-test` → 5 `OK`; `--asset-pipeline-test` → `pipeline: OK`; `--capture` → 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas vencidas.
+
+
