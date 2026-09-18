@@ -192,7 +192,7 @@ String orderStageLine(int q){
 
 
 String orderRouteLine(int q){
-  if (q < 0) return quest_completed ? questNightSummary() : "UMA QUEST POR DIA. ACEITA: NÃO PODE SER CANCELADA.";
+  if (q < 0) return quest_completed ? questNightSummary() : "Voce pode aceitar uma por dia e após aceitar, não pode ser cancelada.";
   if (held_item != ITEM_NONE)
     return "NA MÃO: " + quest_object[q] + " | ENTREGA: " + pointLocation(quest_destination[q]);
   return "COLETA: " + pointLocation(quest_origin[q]) + " | ENTREGA: " + pointLocation(quest_destination[q]);

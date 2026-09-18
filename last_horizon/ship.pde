@@ -20,7 +20,7 @@ int[] ladder_room = {
   SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DORMITORY, SCREEN_DORMITORY
 };
 /* Cada registro pode ocupar qualquer x; o par abaixo é o definitivo por sala. */
-float[] ladder_x = {127, 532, 114, 526, 120, 489, 127, 482};
+float[] ladder_x = {127, 532, 468, 136, 120, 489, 542, 243};
 /* Escadas divididas por sala: esquerda vai do inferior ao meio; direita vai do meio ao superior */
 int[] ladder_top_deck = {
   1, 0, 1, 0, 1, 0, 1, 0
@@ -48,8 +48,8 @@ int[] door_target = {
 /* door_deck é apenas a referência opcional do layout; -1 libera o y. */
 int[] door_deck = {0, 1, 2, 0, 1, 2};
 float[] door_x = {
-  50, 590, 50,
-  ROOM_LEFT + 11, ROOM_LEFT + 11, ROOM_LEFT + 11
+  40, 598, 88,
+  40, 45, 88
 };
 float[] door_y = {
   deck_y[0], deck_y[1], deck_y[2],
@@ -61,12 +61,12 @@ float[] door_y = {
   sala anterior, a posição de saída é reaproveitada.
 */
 float[] door_arrival_x = {
-  ROOM_LEFT + 11 + 28 + PLAYER_W / 2.0,
-  ROOM_LEFT + 11 + 28 + PLAYER_W / 2.0,
-  ROOM_LEFT + 11 + 28 + PLAYER_W / 2.0,
-  78,
-  562,
-  72
+  68,
+  73,
+  110,
+  68,
+  570,
+  110
 };
 float[] door_arrival_y = {
   deck_y[0], deck_y[1], deck_y[2],
@@ -421,12 +421,13 @@ void drawDoors(PGraphics g){
     PImage art = doorFrame(i);
 
     if (art != null){
-      drawArt(g, art, x, y - ART_DOOR_H / 2, ART_DOOR_W, ART_DOOR_H);
       if (nearby){
-        g.noFill();
-        g.stroke(COL_CYAN);
-        g.rect(x - DOOR_W / 2.0, y - DOOR_H, DOOR_W, DOOR_H);
+        PImage glow = doorGlowFrame(i);
+        if (glow != null){
+          drawArt(g, glow, x, y - ART_DOOR_H / 2.0, ART_DOOR_W, ART_DOOR_H);
+        }
       }
+      drawArt(g, art, x, y - ART_DOOR_H / 2.0, ART_DOOR_W, ART_DOOR_H);
     } else {
       g.fill(nearby ? COL_CYAN_DARK : COL_PANEL_2);
       g.stroke(nearby ? COL_CYAN : COL_BORDER);
@@ -436,11 +437,24 @@ void drawDoors(PGraphics g){
     if (!nearby) continue;
 
     String label = "E - " + roomTitle(door_target[i]);
-    if (door_x[i] < BASE_W / 2.0){
-      text(g, label, x + DOOR_W, y - 58, 16, COL_CYAN);
-    } else {
-      text(g, label, x - 210, y - 58, 16, COL_CYAN);
+    float door_h = (art != null) ? ART_DOOR_H : DOOR_H;
+    float label_y = y - door_h - 6;
+
+    float min_left = ROOM_LEFT + 6;
+    float max_right = ROOM_RIGHT - 6;
+    if (screen == SCREEN_COMMAND){
+      if (door_deck[i] == 2){
+        max_right = 118;
+      } else if (door_deck[i] == 1){
+        min_left = 541;
+      }
     }
+
+    float avail_w = max_right - min_left;
+    float actual_size = fitTextSize(g, label, 14, avail_w);
+    float tw = g.textWidth(label);
+    float cx = constrain(x, min_left + tw / 2.0, max_right - tw / 2.0);
+    textCentered(g, label, cx, label_y, actual_size, COL_CYAN);
   }
 }
 
@@ -464,6 +478,17 @@ int door_transition_facing = 1;
 PImage doorFrame(int index){
   PImage closed = artFrame(art_door_frames, 0);
   PImage open = art_door_frames != null && art_door_frames.length > 1 ? art_door_frames[1] : null;
+
+  if (open != null && door_transition_door == index && doorTransitionActive()){
+    return open;
+  }
+
+  return closed;
+}
+
+PImage doorGlowFrame(int index){
+  PImage closed = artFrame(art_door_glow, 0);
+  PImage open = art_door_glow != null && art_door_glow.length > 1 ? art_door_glow[1] : null;
 
   if (open != null && door_transition_door == index && doorTransitionActive()){
     return open;

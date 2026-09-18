@@ -31,8 +31,8 @@ final int FLOOR_COUNT = 6;
 /* canvas -> drawn size, in logical units */
 final float ART_ICON_DRAW = 16;
 final float ART_SPRITE_DRAW = 32;
-final float ART_DOOR_W = 32;
-final float ART_DOOR_H = 64;
+final float ART_DOOR_W = 52.5;
+final float ART_DOOR_H = 48.5;
 final float ART_PORTRAIT_W = 112;
 final float ART_PORTRAIT_H = 138;
 final float ART_BACKDROP_TOP = 56;
@@ -77,6 +77,7 @@ PImage[][] art_crew_glow_left;
 PImage[][] art_crew_glow_right;
 
 PImage[] art_door_frames = new PImage[2];
+PImage[] art_door_glow = new PImage[2];
 PImage[] art_hull_frames = new PImage[2];
 
 String[] art_floor_file = {
@@ -224,6 +225,12 @@ void prepareNpcGlow(int crew){
   }
 }
 
+void prepareDoorGlow(){
+  for (int frame = 0; frame < art_door_frames.length; frame++){
+    art_door_glow[frame] = buildNpcGlow(art_door_frames[frame]);
+  }
+}
+
 
 PImage buildNpcGlow(PImage source){
   if (source == null){
@@ -327,6 +334,7 @@ void loadArtAssets(){
   }
 
   loadArtFrames(art_door_frames, ART_DOOR_SHEET, ART_DOOR_DATA);
+  prepareDoorGlow();
   loadArtFrames(art_hull_frames, ART_HULL_SHEET, ART_HULL_DATA);
   art_screen[0] = loadArt(ART_SCREEN_MENU);
   art_screen[1] = loadArt(ART_SCREEN_VICTORY);
