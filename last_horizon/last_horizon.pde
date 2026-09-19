@@ -293,6 +293,9 @@ void drawBase(){
     }
   }
 
+  // [TEST-MODE] Overlay visual do modo de teste
+  drawTestModeOverlay(base);
+
   base.endDraw();
 }
 
@@ -432,6 +435,9 @@ void mousePressed(){
 
 
 void keyPressed(){
+  // [TEST-MODE] Intercepta atalhos do modo de teste
+  if (testModeKeyPressed()) return;
+
   if (keyCode == ESC){
     key = 0;
     esc_pressed = true;

@@ -65,6 +65,7 @@ String[] art_room_file = {"command", "machines", "depot", "dormitory"};
 PImage[] art_icon;
 PImage[] art_station;
 PImage[] art_station_glow;
+PImage[] art_station_glow_orange;
 PImage[] art_object;
 PImage[] art_backdrop;
 PImage[] art_portrait;
@@ -76,6 +77,9 @@ PImage[][] art_crew_frames_right;
 PImage[][] art_crew_glow;
 PImage[][] art_crew_glow_left;
 PImage[][] art_crew_glow_right;
+PImage[][] art_crew_glow_orange;
+PImage[][] art_crew_glow_orange_left;
+PImage[][] art_crew_glow_orange_right;
 
 PImage[] art_door_frames = new PImage[2];
 PImage[] art_door_glow = new PImage[2];
@@ -223,6 +227,9 @@ void prepareNpcGlow(int crew){
     art_crew_glow[crew][frame] = buildNpcGlow(art_crew_frames[crew][frame]);
     art_crew_glow_left[crew][frame] = buildNpcGlow(art_crew_frames_left[crew][frame]);
     art_crew_glow_right[crew][frame] = buildNpcGlow(art_crew_frames_right[crew][frame]);
+    art_crew_glow_orange[crew][frame] = buildColoredGlow(art_crew_frames[crew][frame], COL_ORANGE);
+    art_crew_glow_orange_left[crew][frame] = buildColoredGlow(art_crew_frames_left[crew][frame], COL_ORANGE);
+    art_crew_glow_orange_right[crew][frame] = buildColoredGlow(art_crew_frames_right[crew][frame], COL_ORANGE);
   }
 }
 
@@ -236,18 +243,21 @@ void prepareStationGlow(){
   if (art_station == null) return;
   if (art_station_glow == null || art_station_glow.length != art_station.length){
     art_station_glow = new PImage[art_station.length];
+    art_station_glow_orange = new PImage[art_station.length];
   }
   for (int point = 0; point < art_station.length; point++){
     if (art_station[point] != null){
       art_station_glow[point] = buildNpcGlow(art_station[point]);
+      art_station_glow_orange[point] = buildColoredGlow(art_station[point], COL_ORANGE);
     } else {
       art_station_glow[point] = null;
+      art_station_glow_orange[point] = null;
     }
   }
 }
 
 
-PImage buildNpcGlow(PImage source){
+PImage buildColoredGlow(PImage source, int glow_color){
   if (source == null){
     return null;
   }
@@ -255,7 +265,7 @@ PImage buildNpcGlow(PImage source){
   PImage glow = createImage(source.width, source.height, ARGB);
   source.loadPixels();
   glow.loadPixels();
-  int cyan_rgb = COL_CYAN & 0x00FFFFFF;
+  int rgb = glow_color & 0x00FFFFFF;
 
   for (int y = 0; y < source.height; y++){
     for (int x = 0; x < source.width; x++){
@@ -292,7 +302,7 @@ PImage buildNpcGlow(PImage source){
       }
 
       if (strongest_alpha > 0){
-        glow.pixels[index] = (strongest_alpha << 24) | cyan_rgb;
+        glow.pixels[index] = (strongest_alpha << 24) | rgb;
       }
     }
   }
@@ -302,11 +312,17 @@ PImage buildNpcGlow(PImage source){
 }
 
 
+PImage buildNpcGlow(PImage source){
+  return buildColoredGlow(source, COL_CYAN);
+}
+
+
 
 void loadArtAssets(){
   art_icon = new PImage[art_icon_file.length];
   art_station = new PImage[art_station_file.length];
   art_station_glow = new PImage[art_station_file.length];
+  art_station_glow_orange = new PImage[art_station_file.length];
   art_object = new PImage[quest_id.length];
   art_backdrop = new PImage[ROOM_COUNT];
   art_portrait = new PImage[CREW_COUNT];
@@ -317,6 +333,9 @@ void loadArtAssets(){
   art_crew_glow = new PImage[CREW_COUNT][2];
   art_crew_glow_left = new PImage[CREW_COUNT][2];
   art_crew_glow_right = new PImage[CREW_COUNT][2];
+  art_crew_glow_orange = new PImage[CREW_COUNT][2];
+  art_crew_glow_orange_left = new PImage[CREW_COUNT][2];
+  art_crew_glow_orange_right = new PImage[CREW_COUNT][2];
 
 
   for (int i = 0; i < art_icon_file.length; i++){
@@ -487,6 +506,25 @@ PImage[] crewArtGlowFramesFacing(String name, int facing){
       }
       if (art_crew_glow != null && art_crew_glow[crew][0] != null){
         return art_crew_glow[crew];
+      }
+      return null;
+    }
+  }
+  return null;
+}
+
+
+PImage[] crewArtOrangeGlowFramesFacing(String name, int facing){
+  for (int crew = 0; crew < CREW_COUNT && crew < crew_name.length; crew++){
+    if (crew_name[crew].equals(name) || art_crew_file[crew].equalsIgnoreCase(name)){
+      if (facing < 0 && art_crew_glow_orange_left != null && art_crew_glow_orange_left[crew][0] != null){
+        return art_crew_glow_orange_left[crew];
+      }
+      if (facing > 0 && art_crew_glow_orange_right != null && art_crew_glow_orange_right[crew][0] != null){
+        return art_crew_glow_orange_right[crew];
+      }
+      if (art_crew_glow_orange != null && art_crew_glow_orange[crew][0] != null){
+        return art_crew_glow_orange[crew];
       }
       return null;
     }

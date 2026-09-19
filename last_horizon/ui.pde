@@ -313,6 +313,58 @@ void textCentered(PGraphics g, String value, float cx, float y, float size, int 
 }
 
 
+void textShadow(PGraphics g, String value, float x, float y, float size, int colour){
+  float actual_size = readableTextSize(size);
+  float render_size = renderTextSize(actual_size);
+  g.textSize(render_size);
+
+  g.fill(0xFF000000);
+  g.text(value, x + 1, y);
+  g.text(value, x - 1, y);
+  g.text(value, x, y + 1);
+  g.text(value, x, y - 1);
+  g.text(value, x + 1, y + 1);
+
+  g.fill(colour);
+  g.text(value, x, y);
+}
+
+
+void textCenteredShadow(PGraphics g, String value, float cx, float y, float size, int colour){
+  float actual_size = readableTextSize(size);
+  float render_size = renderTextSize(actual_size);
+  g.textSize(render_size);
+  float tx = cx - g.textWidth(value) / 2.0;
+
+  g.fill(0xFF000000);
+  g.text(value, tx + 1, y);
+  g.text(value, tx - 1, y);
+  g.text(value, tx, y + 1);
+  g.text(value, tx, y - 1);
+  g.text(value, tx + 1, y + 1);
+
+  g.fill(colour);
+  g.text(value, tx, y);
+}
+
+
+void textPromptShadow(PGraphics g, String value, float cx, float y, float size, int colour){
+  float render_size = renderTextSize(size);
+  g.textSize(render_size);
+  float tx = cx - g.textWidth(value) / 2.0;
+
+  g.fill(0xFF000000);
+  g.text(value, tx + 1, y);
+  g.text(value, tx - 1, y);
+  g.text(value, tx, y + 1);
+  g.text(value, tx, y - 1);
+  g.text(value, tx + 1, y + 1);
+
+  g.fill(colour);
+  g.text(value, tx, y);
+}
+
+
 float drawTextWrapped(PGraphics g, String value, float x, float y, float w, float size, float line_h, int colour){
   String[] words = split(value, ' ');
   String line = "";

@@ -421,6 +421,9 @@ int crewAtPoint(int point){
 
 
 boolean pointIsAvailable(int point){
+  // [TEST-MODE] Força visibilidade e prompt de interação de todas as estações/objetos
+  if (test_mode_active && test_mode_force_visual) return true;
+
   if (point == POINT_TECH_BUNK) return true;
   if (point == POINT_RISK_BUNK)
     return urgentRisk() >= 0 && dailyQuestFree() && selected_order < 0 && !event_open;

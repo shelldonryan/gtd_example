@@ -112,8 +112,8 @@ int[] point_room = {
   SCREEN_DORMITORY, SCREEN_NONE
 };
 float[] point_x = {
-  575, 260, 400,
-  155, 570, 215, 70,
+  575, 260, 407,
+  271, 570, 215, 454,
   310, 530, 420,
   85, 330, 440, 525, 170,
   530
@@ -582,7 +582,8 @@ void drawRoomPoint(PGraphics g, int point){
   float x = point_x[point];
   float y = point_y[point];
 
-  boolean has_art = drawPointArt(g, point, x, y, nearby);
+  boolean is_quest = (point == nextQuestPoint()) || (test_mode_active && test_mode_force_visual);
+  boolean has_art = drawPointArt(g, point, x, y, nearby, is_quest);
   if (!has_art){
     if (!npc){
       g.stroke(nearby ? COL_CYAN : COL_BORDER);
@@ -591,27 +592,27 @@ void drawRoomPoint(PGraphics g, int point){
       if (available) text(g, str(pointMarker(point_kind[point])), x - 3, y - 22, 16, colour);
     }
   }
-  textCentered(g, pointDisplayLabel(point), x, y - 44, 16, colour);
+  boolean show_label = npc || available;
+  if (show_label){
+    textCenteredShadow(g, pointDisplayLabel(point), x, y - 44, 16, colour);
+  }
   if (point == nextQuestPoint()){
     String step = active_quest < 0 ? "CONFIRMAR" : quest_stage == QUEST_COLLECT ? "COLETAR" : "ENTREGAR";
-    textCentered(g, step, x, y - 55, 16, COL_CYAN);
+    textCenteredShadow(g, step, x, y - 55, 16, COL_CYAN);
     if (active_quest >= 0 && quest_stage == QUEST_COLLECT) drawQuestObject(g, x + 18, y - 12);
   }
 
-  if (nearby && !npc){
-    if (!has_art){
+  if (nearby){
+    if (!npc && !has_art){
       g.noFill();
       g.stroke(COL_CYAN);
       g.rect(x - 16, y - 26, 32, 26, 2);
     }
-    text(g, "E", x - 3, y + 6, 16, COL_CYAN);
-  }
-  if (nearby && npc){
-    text(g, "E", x + 6, y - 24, 16, COL_CYAN);
+    textPromptShadow(g, "Pressione E", x, y - 31, 11, COL_CYAN);
   }
 
   if (point_kind[point] == POINT_NPC){
-    drawNpc(g, x, y, point_label[point], nearby);
+    drawNpc(g, x, y, point_label[point], nearby, is_quest);
   }
 }
 
@@ -620,7 +621,7 @@ void drawRoomPoint(PGraphics g, int point){
 
 /* Art of a station or of the hull replaces the generic rectangle; NPC sprites
    are drawn by drawNpc. Returns false when the point keeps the geometry. */
-boolean drawPointArt(PGraphics g, int point, float x, float y, boolean nearby){
+boolean drawPointArt(PGraphics g, int point, float x, float y, boolean nearby, boolean quest_target){
   if (point_kind[point] == POINT_NPC){
     return false;
   }
@@ -643,14 +644,29 @@ boolean drawPointArt(PGraphics g, int point, float x, float y, boolean nearby){
     if (glow != null){
       drawArt(g, glow, x, y - h / 2.0, w, h);
     }
+  } else if (quest_target){
+    PImage glow = (art_station_glow_orange != null && point < art_station_glow_orange.length)
+      ? art_station_glow_orange[point]
+      : null;
+    if (glow != null){
+      float pulse = (1.0 - cos(TWO_PI * (millis() % 2200) / 2200.0)) * 0.5;
+      float alpha = lerp(80, 240, pulse);
+      g.tint(255, alpha);
+      drawArt(g, glow, x, y - h / 2.0, w, h);
+      g.noTint();
+    }
   }
 
   drawArt(g, art, x, y - h / 2.0, w, h);
   return true;
 }
 
+boolean drawPointArt(PGraphics g, int point, float x, float y, boolean nearby){
+  return drawPointArt(g, point, x, y, nearby, false);
+}
+
 boolean drawPointArt(PGraphics g, int point, float x, float y){
-  return drawPointArt(g, point, x, y, false);
+  return drawPointArt(g, point, x, y, false, false);
 }
 
 
@@ -686,11 +702,12 @@ int npcFacingForPlayer(float npc_x, float npc_y){
 }
 
 
-void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
+void drawNpc(PGraphics g, float x, float y, String name, boolean nearby, boolean quest_target){
   int facing = npcFacingForPlayer(x, y);
 
   PImage[] frames = crewArtFramesFacing(name, facing);
   PImage[] glow_frames = crewArtGlowFramesFacing(name, facing);
+  PImage[] orange_glow_frames = crewArtOrangeGlowFramesFacing(name, facing);
   int frame_count = frames == null ? 0 : frames.length;
   int frame_index = artFrameIndex(frame_count, ART_NPC_FRAME_MS);
   PImage art = frame_count == 0 ? null : frames[frame_index];
@@ -698,18 +715,28 @@ void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
   if (art != null){
     if (nearby && glow_frames != null && frame_index < glow_frames.length){
       drawArt(g, glow_frames[frame_index], x, y - PLAYER_H / 2.0, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
+    } else if (quest_target && orange_glow_frames != null && frame_index < orange_glow_frames.length){
+      float pulse = (1.0 - cos(TWO_PI * (millis() % 2200) / 2200.0)) * 0.5;
+      float alpha = lerp(80, 240, pulse);
+      g.tint(255, alpha);
+      drawArt(g, orange_glow_frames[frame_index], x, y - PLAYER_H / 2.0, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
+      g.noTint();
     }
     drawArt(g, art, x, y - PLAYER_H / 2.0, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
     return;
   }
 
   g.noStroke();
-  g.fill(nearby ? COL_CYAN : COL_ORANGE);
+  g.fill(nearby ? COL_CYAN : (quest_target ? COL_ORANGE : COL_ORANGE));
   g.rect(x - PLAYER_W / 2.0, y - PLAYER_H, PLAYER_W, PLAYER_H);
   g.fill(COL_TEXT);
   int eye_offset = facing < 0 ? -2 : (facing > 0 ? 2 : 0);
   g.rect(x - 4 + eye_offset, y - 19, 2, 2);
   g.rect(x + 2 + eye_offset, y - 19, 2, 2);
+}
+
+void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
+  drawNpc(g, x, y, name, nearby, false);
 }
 
 
