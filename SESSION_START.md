@@ -1139,3 +1139,19 @@ e integrados pelo carregador de assets existente.
 - **Código alterado:** `last_horizon/data/stations/console_rota.png`, `last_horizon/assets.pde` (`art_station_glow`, `prepareStationGlow()`), `last_horizon/ship.pde` (`drawPointArt`, `drawRoomPoint`, `pointInteractionRange`, `nearestInteractablePoint`).
 - **Documentação sincronizada:** `assets/INVENTORY.md` (registro da integração do `console_rota.png` com dimensões e margem de contorno).
 - **Evidência D-167:** `--asset-pipeline-test` carregou 25 de 63 imagens (`pipeline: OK`); `--ladder-test` retornou 6 `OK`; `--hit-test` retornou 5 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — test-mode, pulso de quest, prompt refinado e estações da Sala de Máquinas e Comando (D-168)
+
+- **Decisão D-168:** aprimorar a experiência de interação e compor as estações de trabalho de Comando e Máquinas com assets nativos modulares:
+  - **Test-Mode (`test_mode.pde`):** módulo de depuração e inspeção acionado via `Ctrl + K`. Permite teleporte direto para o centro de cada sala (`1: Comando`, `2: Dormitório`, `3: Máquinas`, `4: Depósito`) e chaveamento do estado visual de quests/glow (`5: VISUAL: ON/OFF`), com ganchos em `last_horizon.pde` e `tasks.pde`.
+  - **Feedback e Tipografia de Interação:** rótulo de interação ajustado para `"Pressione E"` em tamanho 11 com sombra projetada (`textPromptShadow`), preservando intocado o `MIN_TEXT_SIZE = 16` global da UI. Nomes de estações passam a ser exibidos apenas quando ativas/disponíveis (`available`), com sombra preta (`textCenteredShadow`).
+  - **Glow de Quest Ativa (Pulso Âmbar/Laranja):** introdução de halo âmbar pulsante (`COL_ORANGE`, pulso senoidal suave) no alvo ativo de quest à distância, que transiciona para o halo ciano (`COL_CYAN`) quando o jogador entra no raio de interação (`nearby`). Aplicado a NPCs e estações via `art_station_glow_orange` (`buildColoredGlow`).
+  - **Estações Integradas:**
+    - **Antena (`POINT_ANTENNA`):** substituída pelo asset `assets/PNG/Pillars.png` e centralizada com a parede em `x = 407` (`y = 128`, Comando superior).
+    - **Distribuição (`POINT_DISTRIBUTION`):** composta por `CryoBox.png` + `Electric wall.png` + `CryoBox.png` (165×111 px) em `data/stations/painel_distribuicao.png`, ancorada em `x = 215` (`y = 202`, Máquinas médio).
+    - **Bancada do Motor (`POINT_ENGINE_BENCH`):** reposicionada para `x = 271` (`y = 278`, Máquinas inferior, baía modular entre as faixas de perigo) e composta por `Desk 1.png` + `Screen device.png` + `Small Machine 1.png` (121×75 px) em `data/stations/bancada_motor.png`.
+    - **Suporte (`POINT_LIFE_SUPPORT`):** reposicionado para `x = 454` (`y = 128`, Máquinas superior, centralizado no vão do painel duplo) e composto por `Board 1.png` + `Health Pack 1.png` + `Props 4.png` (93×74 px) em `data/stations/painel_suporte.png`.
+- **Código alterado:** `last_horizon/test_mode.pde`, `last_horizon/last_horizon.pde`, `last_horizon/ship.pde`, `last_horizon/tasks.pde`, `last_horizon/ui.pde`, `last_horizon/assets.pde`, `last_horizon/data/stations/antena.png`, `last_horizon/data/stations/painel_distribuicao.png`, `last_horizon/data/stations/bancada_motor.png`, `last_horizon/data/stations/painel_suporte.png`.
+- **Documentação sincronizada:** `assets/INVENTORY.md` (coordenadas definitivas de antena, suporte e bancada do motor; registros dos novos assets integrados).
+- **Evidência D-168:** `--hit-test` retornou 5 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+

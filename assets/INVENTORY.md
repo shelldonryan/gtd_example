@@ -36,8 +36,8 @@ colisão. Escadas e conveses abaixo são definitivos:
 
 | Sala | Escadas (x) | Estações por convés (x) |
 | --- | --- | --- |
-| Comando | 127 e 532 | Vera 575 e antena 400 (superior); console da rota 260 (médio) |
-| Sala de máquinas | 468 e 136 | suporte 70 (superior); Sílvia 570 e distribuição 215 (médio); bancada do motor 155 (inferior) |
+| Comando | 127 e 532 | Vera 575 e antena 407 (superior); console da rota 260 (médio) |
+| Sala de máquinas | 468 e 136 | suporte 454 (superior); Sílvia 570 e distribuição 215 (médio); bancada do motor 271 (inferior) |
 | Depósito | 120 e 489 | reserva 530 (superior); Bento 310 e estoque de comida 420 (médio) |
 | Dormitório | 542 e 243 | seu beliche 170 e mesa comum 525 (superior); Neusa 330 e mesa do grupo 440 (médio); socorro 85 (inferior) |
 
@@ -68,11 +68,11 @@ hoje; o rótulo de texto acima do ponto continua.
 
 | Arquivo | Estação | Sala e convés |
 | --- | --- | --- |
-| `stations/antena.png` | antena | Comando, superior |
+| `stations/antena.png` | antena | Comando, superior (integrado com `Pillars.png`, 33×109 px) |
 | `stations/console_rota.png` | console da rota | Comando, médio (integrado com `BioComputer.png`, 181×117 px) |
-| `stations/painel_suporte.png` | painel de suporte de vida | Máquinas, superior |
-| `stations/painel_distribuicao.png` | painel de distribuição | Máquinas, médio |
-| `stations/bancada_motor.png` | bancada do motor | Máquinas, inferior |
+| `stations/painel_suporte.png` | painel de suporte de vida | Máquinas, superior (integrado com `Board 1.png` + `Health Pack 1.png` + `Props 4.png`, 93×74 px) |
+| `stations/painel_distribuicao.png` | painel de distribuição | Máquinas, médio (integrado com `CryoBox.png` + `Electric wall.png` + `CryoBox.png`, 165×111 px) |
+| `stations/bancada_motor.png` | bancada do motor | Máquinas, inferior (integrado com `Desk 1.png` + `Screen device.png` + `Small Machine 1.png`, 121×75 px) |
 | `stations/prateleira_reserva.png` | prateleira de reserva | Depósito, superior |
 | `stations/estoque_comida.png` | estoque de comida | Depósito, médio |
 | `stations/mesa_comum.png` | mesa comum | Dormitório, superior |
