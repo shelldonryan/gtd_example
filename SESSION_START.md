@@ -178,6 +178,7 @@ reporte e não escolha silenciosamente.
 - D-178 reposicionou a Antena para o convés inferior da Sala de Comando (Deck 2, x=598).
 - D-179 substituiu o texto solto de sala por um card centralizado com sombra e paleta de recursos.
 - D-180 padronizou os nomes das portas fixos acima do vão com glow no destino e "Pressione E" empilhado na colisão.
+- D-181 reposicionou o beliche do jogador para o módulo da direita (Deck 0, x=185).
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -1344,4 +1345,17 @@ e integrados pelo carregador de assets existente.
   - **Código alterado:** `last_horizon/ship.pde` (`drawDoors`), `last_horizon/ui.pde` (`textCenteredShadow`).
   - **Documentação sincronizada:** `SESSION_START.md`, `interface/ROOMS.md`.
   - **Evidência D-180:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — reposicionamento do beliche do jogador para o módulo da direita (D-181)
+
+- **Decisão D-181:** alterar a localização do objetivo "SEU BELICHE" (`POINT_TECH_BUNK`) e do asset de cama do jogador (`Bed-1.png` / `beliche_tecnico.png`) do leito da esquerda (`x = 113`) para o leito da direita (`x = 185`) no Deck 0 do Dormitório:
+  - **Motivação:** inverter a ocupação dos beliches do técnico e da tripulação no convés superior do Dormitório, posicionando a cama pessoal do técnico na baía da direita (`x = 185`) e deixando a baía da esquerda (`x = 113`, próxima à porta) com os lençóis verdes comuns da tripulação.
+  - **Mapeamento e Renderização:**
+    - A coordenada `point_x[POINT_TECH_BUNK]` em `ship.pde` foi atualizada de `113` para `185`.
+    - A estação interativa `art_station[POINT_TECH_BUNK]` (`beliche_tecnico.png`) agora é renderizada centrada em `x = 185`, sobrepondo com precisão o asset `Bed-1.png` (colcha roxa e travesseiro individual) na cama inferior do beliche da direita, com o glow ciano de aproximação e o pulso de quest acompanhando a nova posição.
+    - O módulo da esquerda (`x = 113`), renderizado por `drawRoomDecor`, exibe os lençóis verdes padrão (`dorm_bunk.png`) em ambos os leitos sem sobreposição da estação do jogador.
+    - O rótulo textual `"SEU BELICHE"` e o prompt `"Pressione E"` acompanham a nova ancoragem em `x = 185`.
+  - **Código alterado:** `last_horizon/ship.pde` (`point_x[POINT_TECH_BUNK] = 185`).
+  - **Documentação sincronizada:** `assets/INVENTORY.md`, `SESSION_START.md`.
+  - **Evidência D-181:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
 

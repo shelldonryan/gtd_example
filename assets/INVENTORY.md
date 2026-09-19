@@ -39,7 +39,7 @@ colisão. Escadas e conveses abaixo são definitivos:
 | Comando | 127 e 532 | Vera 575 (superior); console da rota 260 (médio); antena 598 (inferior) |
 | Sala de máquinas | 468 e 136 | suporte 454 (superior); Sílvia 570 e distribuição 215 (médio); bancada do motor 271 (inferior) |
 | Depósito | 520 (inferior) e 130 (superior) | reserva 530 (superior); Bento 310 (médio); estoque de comida 85 (inferior) |
-| Dormitório | 542 e 243 | seu beliche 113 e mesa comum 525 (superior); Neusa 330 e mesa do grupo 440 (médio); socorro 85 (inferior) |
+| Dormitório | 542 e 243 | seu beliche 185 e mesa comum 525 (superior); Neusa 330 e mesa do grupo 440 (médio); socorro 85 (inferior) |
 
 Conveses em `y = 128`, `202` e `278`; a faixa útil da sala é `x` de 8 a 632 e
 `y` de 56 a 284. As portas continuam sendo sprites e podem mudar de lugar sem
