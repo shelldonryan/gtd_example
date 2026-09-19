@@ -176,6 +176,7 @@ reporte e não escolha silenciosamente.
 - D-177 reposicionou o Estoque de Comida (Deck 2, x=85) e inverteu as escadas do Depósito
   (inferior x=520, superior x=130).
 - D-178 reposicionou a Antena para o convés inferior da Sala de Comando (Deck 2, x=598).
+- D-179 substituiu o texto solto de sala por um card centralizado com sombra e paleta de recursos.
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -1316,4 +1317,19 @@ e integrados pelo carregador de assets existente.
   - **Código alterado:** `last_horizon/ship.pde` (`point_x`, `point_y`, `drawRoomPoint`, `pointInteractionRange`).
   - **Documentação sincronizada:** `assets/INVENTORY.md`, `SESSION_START.md`, `interface/ROOMS.md`.
   - **Evidência D-178:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — card centralizado com sombra para identificação da sala (D-179)
+
+- **Decisão D-179:** substituir o texto solto do título da sala no canto superior esquerdo por um card centralizado com sombra e a paleta dos cards de recursos:
+  - **Motivação:** o texto anterior ("SALA DE COMANDO", etc.) ficava em `ROOM_LEFT + 10, ROOM_TOP + 6`, logo acima da porta esquerda do Deck 0, gerando confusão de que indicava o destino daquela porta em vez do nome da sala atual.
+  - **Composição do Card (`drawRoomTitle` em `ship.pde`):**
+    - Centralizado horizontalmente no cômodo em `x = 320` (`(ROOM_LEFT + ROOM_RIGHT) / 2`), no topo do Deck 0 (`y = 60, h = 22`).
+    - Largura adaptativa com base no texto (`card_w = max(136, tw + 28)`), acomodando títulos curtos e longos com folga simétrica de respiro.
+    - Paleta idêntica aos cards de recursos do HUD: preenchimento `COL_PANEL` (`0xFF0D1B2B`), contorno `COL_BORDER` (`0xFF24516B`), cantos arredondados de raio 3 e linha interna superior de realce em `COL_CYAN_DARK`.
+    - Efeito de profundidade/elevação em multicamadas de sombra translúcida projetada para baixo (`0x28000000`, `0x55000000`, `0x99000000`).
+    - Tipografia em `COL_CYAN` perfeitamente alinhada e centrada em `x` e `y`.
+  - **Código alterado:** `last_horizon/ship.pde` (`drawRoomTitle`).
+  - **Documentação sincronizada:** `SESSION_START.md`.
+  - **Evidência D-179:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
 

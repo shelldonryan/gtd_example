@@ -357,7 +357,38 @@ void drawWalls(PGraphics g){
 
 void drawRoomTitle(PGraphics g){
   String title = roomTitle(screen);
-  text(g, title, ROOM_LEFT + 10, ROOM_TOP + 6, 16, COL_CYAN);
+  float actual_size = readableTextSize(16);
+  float render_size = renderTextSize(actual_size);
+  g.textSize(render_size);
+  float tw = g.textWidth(title);
+
+  float card_w = max(136, tw + 28);
+  float card_h = 22;
+  float card_x = (ROOM_LEFT + ROOM_RIGHT) / 2.0 - card_w / 2.0;
+  float card_y = 60;
+
+  // Sombra projetada em camadas para destacar o card do cenário
+  g.noStroke();
+  g.fill(0x28000000);
+  g.rect(card_x - 2, card_y + 1, card_w + 4, card_h + 3, 5);
+  g.fill(0x55000000);
+  g.rect(card_x - 1, card_y + 2, card_w + 2, card_h + 2, 4);
+  g.fill(0x99000000);
+  g.rect(card_x, card_y + 2, card_w, card_h, 3);
+
+  // Card com a paleta dos cards de recursos
+  g.fill(COL_PANEL);
+  g.stroke(COL_BORDER);
+  g.strokeWeight(1);
+  g.rect(card_x, card_y, card_w, card_h, 3);
+
+  // Linha sutil de realce no topo interno
+  g.stroke(COL_CYAN_DARK);
+  g.line(card_x + 3, card_y + 1, card_x + card_w - 3, card_y + 1);
+
+  // Texto do nome da sala centralizado
+  float text_y = card_y + (card_h - render_size) / 2.0;
+  textCentered(g, title, (ROOM_LEFT + ROOM_RIGHT) / 2.0, text_y, 16, COL_CYAN);
 }
 
 
