@@ -331,7 +331,7 @@ void textShadow(PGraphics g, String value, float x, float y, float size, int col
 
 
 void textCenteredShadow(PGraphics g, String value, float cx, float y, float size, int colour){
-  float actual_size = readableTextSize(size);
+  float actual_size = size;
   float render_size = renderTextSize(actual_size);
   g.textSize(render_size);
   float tx = cx - g.textWidth(value) / 2.0;

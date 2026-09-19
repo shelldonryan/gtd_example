@@ -482,9 +482,11 @@ void drawDoors(PGraphics g){
 
     if (!nearby) continue;
 
-    String label = "E - " + roomTitle(door_target[i]);
+    String room_name = roomTitle(door_target[i]);
+    String prompt = "Pressione E";
     float door_h = (art != null) ? ART_DOOR_H : DOOR_H;
-    float label_y = y - door_h - 6;
+    float prompt_y = y - door_h - 5;
+    float name_y = y - door_h - 18;
 
     float min_left = ROOM_LEFT + 6;
     float max_right = ROOM_RIGHT - 6;
@@ -497,10 +499,16 @@ void drawDoors(PGraphics g){
     }
 
     float avail_w = max_right - min_left;
-    float actual_size = fitTextSize(g, label, 14, avail_w);
-    float tw = g.textWidth(label);
-    float cx = constrain(x, min_left + tw / 2.0, max_right - tw / 2.0);
-    textCentered(g, label, cx, label_y, actual_size, COL_CYAN);
+    float name_size = fitTextSize(g, room_name, 16, avail_w);
+    g.textSize(renderTextSize(name_size));
+    float name_tw = g.textWidth(room_name);
+    g.textSize(renderTextSize(11));
+    float prompt_tw = g.textWidth(prompt);
+    float max_tw = max(name_tw, prompt_tw);
+    float cx = constrain(x, min_left + max_tw / 2.0, max_right - max_tw / 2.0);
+
+    textCenteredShadow(g, room_name, cx, name_y, name_size, COL_CYAN);
+    textPromptShadow(g, prompt, cx, prompt_y, 11, COL_CYAN);
   }
 }
 

@@ -177,6 +177,7 @@ reporte e não escolha silenciosamente.
   (inferior x=520, superior x=130).
 - D-178 reposicionou a Antena para o convés inferior da Sala de Comando (Deck 2, x=598).
 - D-179 substituiu o texto solto de sala por um card centralizado com sombra e paleta de recursos.
+- D-180 padronizou o prompt de colisão das portas com glow no nome do destino e "Pressione E" empilhado.
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -1331,5 +1332,16 @@ e integrados pelo carregador de assets existente.
   - **Código alterado:** `last_horizon/ship.pde` (`drawRoomTitle`).
   - **Documentação sincronizada:** `SESSION_START.md`.
   - **Evidência D-179:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+### Sessão atual — prompt de colisão das portas com glow e "Pressione E" (D-180)
 
+- **Decisão D-180:** padronizar o prompt de colisão e proximidade das portas (`drawDoors` em `ship.pde`) com o estilo visual consagrado nos NPCs (`"VERA"`):
+  - **Motivação:** o texto anterior em linha única monolítica (`"E - [SALA]"`) em ciano plano não tinha contraste nem contorno de sombra, além de poluir visualmente o nome do cômodo e divergir do padrão de interação das demais entidades da nave.
+  - **Identidade visual de duas linhas empilhadas:**
+    - Linha superior (`name_y = y - door_h - 18`): exibe exclusivamente o nome da sala de destino (obtido via `roomTitle(door_target[i])`) com contorno e sombra preta de alta visibilidade (`textCenteredShadow`) em `COL_CYAN`.
+    - Linha inferior (`prompt_y = y - door_h - 5`): exibe o subtítulo de ação `"Pressione E"` com sombra (`textPromptShadow`) em `COL_CYAN`, tamanho 11, posicionado rente ao topo da porta.
+    - Centralização e contenção: `cx` é restringido entre `min_left` e `max_right` com base na maior largura entre o nome e o prompt, respeitando as escadas de conveses estreitos (ex: Deck 1 e Deck 2 do Comando).
+    - Ajuste no utilitário de tipografia (`textCenteredShadow` em `ui.pde`): remoção da trava arbitrária de tamanho mínimo fixo em 16 px (`readableTextSize`), permitindo que a função respeite tamanhos dinâmicos calculados por `fitTextSize`.
+  - **Código alterado:** `last_horizon/ship.pde` (`drawDoors`), `last_horizon/ui.pde` (`textCenteredShadow`).
+  - **Documentação sincronizada:** `SESSION_START.md`, `interface/ROOMS.md`.
+  - **Evidência D-180:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
 
