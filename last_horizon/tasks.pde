@@ -630,7 +630,7 @@ void drawOrdersPanel(PGraphics g){
   }
   if (dailyQuestFree() && incidentForDay(day) == PROBLEM_NONE && activeProblemCount() > 0)
     drawButton(g, 34, 297, 218, 20, "OFERTAS / PRÓXIMA RETOMADA", ACTION_NEXT_RETRY, true);
-  drawButton(g, 470, 297, 136, 20, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 518, 297, 84, 20, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
 }
 
 void cycleRetry(){

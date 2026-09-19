@@ -109,7 +109,7 @@ void drawTransmissionCard(PGraphics g){
   drawPanel(g, 96, 140, 448, 96, COL_CYAN);
   text(g, "TRANSMISSÃO DA TERRA", 112, 150, 16, COL_CYAN);
   drawTextWrapped(g, transmission_text, 112, 172, 416, 16, 18, COL_TEXT);
-  drawButton(g, 336, 208, 192, 22, "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 424, 208, 104, 20, "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true);
 }
 
 int incidentForDay(int value){
@@ -247,8 +247,8 @@ void drawEventCard(PGraphics g){
   if (quest_review >= 0){
     drawQuestCard(g, quest_review, 34, 83, 572, ACTION_NONE, false);
     text(g, "CONFIRME A SOLUÇÃO. ELA NÃO PODE SER CANCELADA.", 46, 261, 16, COL_ORANGE);
-    drawButton(g, 34, 297, 176, 20, "VOLTAR (ESC)", ACTION_BACK_SOLUTION, true);
-    drawButton(g, 416, 297, 190, 20, "CONFIRMAR (ENTER)", ACTION_ACCEPT_SOLUTION, true);
+    drawButton(g, 398, 297, 92, 20, "CANCELAR (ESC)", ACTION_BACK_SOLUTION, true);
+    drawButton(g, 498, 297, 104, 20, "CONFIRMAR (ENTER)", ACTION_ACCEPT_SOLUTION, true);
   } else {
     for (int i = 0; i < 2; i++){
       drawQuestCard(g, PREVENTIVE_COUNT + event_index * 2 + i, 34 + i * 290, 83, 282,

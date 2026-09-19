@@ -213,7 +213,7 @@ void drawMapOverlay(PGraphics g){
   }
 
   drawMapRoomDetails(g);
-  drawButton(g, 478, 296, 124, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 506, 296, 84, 20, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
 }
 
 
@@ -482,7 +482,8 @@ void drawDoors(PGraphics g){
     String room_name = roomTitle(door_target[i]);
     String prompt = "Pressione E";
     float door_h = (art != null) ? ART_DOOR_H : DOOR_H;
-    float prompt_y = y - door_h + 2;
+    float prompt_x = (art != null) ? x - 1.5 : x;
+    float prompt_y = (art != null) ? y - 35.0 : y - DOOR_H / 2.0 - 2.75;
     float name_y = y - door_h - 9;
     int colour = nearby ? COL_CYAN : COL_TEXT;
 
@@ -500,15 +501,12 @@ void drawDoors(PGraphics g){
     float name_size = fitTextSize(g, room_name, 16, avail_w);
     g.textSize(renderTextSize(name_size));
     float name_tw = g.textWidth(room_name);
-    g.textSize(renderTextSize(11));
-    float prompt_tw = g.textWidth(prompt);
-    float max_tw = max(name_tw, prompt_tw);
-    float cx = constrain(x, min_left + max_tw / 2.0, max_right - max_tw / 2.0);
+    float cx = constrain(x, min_left + name_tw / 2.0, max_right - name_tw / 2.0);
 
     textCenteredShadow(g, room_name, cx, name_y, name_size, colour);
 
     if (nearby){
-      textPromptShadow(g, prompt, cx, prompt_y, 11, COL_CYAN);
+      textPromptShadow(g, prompt, prompt_x, prompt_y, 11, COL_CYAN);
     }
   }
 }
@@ -1133,7 +1131,6 @@ void updatePlayerFrameLayer(int frame){
   player_rendered_frame = frame;
   player_rendered_facing = player_facing;
 }
-
 
 
 

@@ -105,7 +105,8 @@ void drawButton(PGraphics g, float x, float y, float w, float h, String label, i
   drawPanel(g, x, y, w, h, border);
   g.fill(colour);
   g.textSize(render_size);
-  g.text(label, x + 8, y + (h - render_size) / 2.0);
+  float tx = max(x + 4, x + (w - g.textWidth(label)) / 2.0);
+  g.text(label, tx, y + (h - render_size) / 2.0);
 
   addButton(x, y, w, h, action, on);
 }
@@ -145,10 +146,10 @@ void drawDialogue(PGraphics g){
   text(g, dialog_name, 40, 202, 16, COL_CYAN);
   drawTextWrapped(g, dialog_text, 40, 222, 552, 16, 18, COL_TEXT);
   if (pending_quest_action == ACTION_ACCEPT_ORDER){
-    drawButton(g, 40, 304, 128, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
-    drawButton(g, 410, 304, 188, 22, "ACEITAR ORDEM (ENTER)", ACTION_CONFIRM_QUEST, true);
+    drawButton(g, 376, 305, 92, 20, "CANCELAR (ESC)", ACTION_CLOSE_MODAL, true);
+    drawButton(g, 476, 305, 124, 20, "ACEITAR ORDEM (ENTER)", ACTION_CONFIRM_QUEST, true);
   } else {
-    drawButton(g, 450, 304, 148, 22, "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true);
+    drawButton(g, 496, 305, 104, 20, "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true);
   }
 }
 
@@ -194,12 +195,17 @@ void drawTechnicalPanel(PGraphics g){
   text(g, technical_title, 50, 120, 16, COL_CYAN);
   drawTextWrapped(g, technical_text, 50, 148, 540, 16, 18, COL_TEXT);
   if (pending_quest_action != ACTION_NONE){
-    drawButton(g, 50, 284, 128, 22, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
-    String label = pending_quest_action == ACTION_DELIVER_QUEST ? "ENTREGAR (ENTER)" : "CONFIRMAR (ENTER)";
-    drawButton(g, 422, 284, 168, 22, label, ACTION_CONFIRM_QUEST, pendingQuestEnabled());
+    boolean deliver = pending_quest_action == ACTION_DELIVER_QUEST;
+    String label = deliver ? "ENTREGAR (ENTER)" : "CONFIRMAR (ENTER)";
+    float action_w = deliver ? 98 : 104;
+    float cancel_w = 92;
+    float action_x = 590 - action_w;
+    float cancel_x = action_x - 8 - cancel_w;
+    drawButton(g, cancel_x, 284, cancel_w, 20, "CANCELAR (ESC)", ACTION_CLOSE_MODAL, true);
+    drawButton(g, action_x, 284, action_w, 20, label, ACTION_CONFIRM_QUEST, pendingQuestEnabled());
     if (!pendingQuestEnabled()) text(g, "RECURSOS INSUFICIENTES OU QUEST DO DIA JÁ ESCOLHIDA.", 50, 257, 16, COL_ORANGE);
   } else {
-    drawButton(g, 450, 284, 140, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+    drawButton(g, 506, 284, 84, 20, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
   }
 }
 
@@ -224,8 +230,8 @@ void drawEndDayPanel(PGraphics g){
     y = drawTextWrapped(g, problemMapLine(p) + (problem_deadline[p] == 1 ? " — CRISE NESTA NOITE!" : ""),
       42, y + 3, 556, 16, 18, problem_deadline[p] == 1 ? COL_RED : COL_TEXT);
   }
-  drawButton(g, 42, 291, 208, 24, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true);
-  drawButton(g, 296, 291, 302, 24, "ENCERRAR DIA (ENTER)", ACTION_END_DAY, true);
+  drawButton(g, 378, 293, 92, 20, "CANCELAR (ESC)", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 478, 293, 118, 20, "ENCERRAR DIA (ENTER)", ACTION_END_DAY, true);
 }
 
 
@@ -256,7 +262,7 @@ void drawHelpPanel(PGraphics g){
     y += 14;
   }
 
-  drawButton(g, 486, y + 2, 104, 22, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 506, y + 2, 84, 20, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
 }
 
 

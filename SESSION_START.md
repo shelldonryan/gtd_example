@@ -181,6 +181,7 @@ reporte e não escolha silenciosamente.
 - D-181 reposicionou o beliche do jogador para o módulo da direita (Deck 0, x=185).
 - D-182 centralizou o prompt "Pressione E" nos vidros da porta.
 - D-183 removeu a exibição flutuante de item em mãos no cenário e funções legadas.
+- D-184 padronizou os botões dos modais lado a lado no canto inferior direito ("Cancelar (ESC)" à esquerda, ação confirmatória à direita) com dimensões compactas e texto centrado.
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -1385,4 +1386,18 @@ e integrados pelo carregador de assets existente.
   - **Código alterado:** `last_horizon/ship.pde` (`drawRoom`, `drawHeldItem`), `last_horizon/tasks.pde` (`heldItemLabel`).
   - **Documentação sincronizada:** `SESSION_START.md`.
   - **Evidência D-183:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — padronização e agrupamento dos botões dos modais (D-184)
+
+- **Decisão D-184:** padronizar os botões dos modais de confirmação e diálogo (`ui.pde`, `game.pde`, `tasks.pde`, `ship.pde`), agrupando-os lado a lado no canto inferior direito com "Cancelar (ESC)" à esquerda e a ação confirmatória à direita, ajustando dimensões e centralizando o texto:
+  - **Motivação:** anteriormente, os botões ficavam dispersos nos cantos opostos da tela ("VOLTAR (ESC)" colado na margem esquerda e "ENTREGAR/ACEITAR" na margem direita, deixando um vão de ~300 px), com larguras desproporcionais e vazias (128 a 302 px) e texto alinhado à esquerda no botão (`x + 8`).
+  - **Composição e Layout:**
+    - Botões agrupados lado a lado no canto inferior direito do modal, separados por um espaçamento harmônico de 8 px.
+    - Ordem padronizada: `"CANCELAR (ESC)"` à esquerda e o botão de ação afirmativa (`"ENTREGAR (ENTER)"`, `"ACEITAR ORDEM (ENTER)"`, `"CONFIRMAR (ENTER)"`, `"ENCERRAR DIA (ENTER)"`) à direita.
+    - Dimensões calibradas proporcionalmente ao comprimento do texto (altura reduzida de 22–24 para 20 px, larguras de 84 a 124 px).
+    - Tipografia: `drawButton()` agora centraliza o texto horizontalmente dentro do retângulo do botão (`float tx = max(x + 4, x + (w - g.textWidth(label)) / 2.0)`), eliminando o desbalanceamento estético anterior.
+    - Modais de botão único (`"CONTINUAR (ENTER)"`, `"FECHAR (ESC)"`) em diálogos, ajuda, ordens, mapa e transmissão alinhados com o mesmo padrão compacto.
+  - **Código alterado:** `last_horizon/ui.pde`, `last_horizon/game.pde`, `last_horizon/tasks.pde`, `last_horizon/ship.pde`.
+  - **Documentação sincronizada:** `SESSION_START.md`.
+  - **Evidência D-184:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
 
