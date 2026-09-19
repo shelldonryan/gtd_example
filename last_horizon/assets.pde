@@ -91,6 +91,8 @@ String[] art_floor_file = {
 PImage[] art_floor = new PImage[FLOOR_COUNT];
 PImage[] art_deck_strip;
 PImage[] art_wall_strip;
+PImage[] art_wall_strip_dorm;
+PImage art_dorm_bunk;
 
 HashMap<String, PImage> art_cache = new HashMap<String, PImage>();
 int art_loaded = 0;
@@ -383,9 +385,12 @@ void loadArtAssets(){
   prepareDeckStrips();
 
   art_wall_strip = new PImage[DECK_COUNT];
+  art_wall_strip_dorm = new PImage[DECK_COUNT];
   for (int w = 0; w < DECK_COUNT; w++){
     art_wall_strip[w] = loadArt(ART_FLOOR_DIR + "wall_deck_" + w + ".png");
+    art_wall_strip_dorm[w] = loadArt(ART_FLOOR_DIR + "wall_dorm_deck_" + w + ".png");
   }
+  art_dorm_bunk = loadArt(ART_FLOOR_DIR + "dorm_bunk.png");
 
   println("arte: " + art_loaded + " de " + art_expected
     + " imagens carregadas; ausentes usam a geometria do protótipo");

@@ -20,7 +20,7 @@ int[] ladder_room = {
   SCREEN_DEPOT, SCREEN_DEPOT, SCREEN_DORMITORY, SCREEN_DORMITORY
 };
 /* Cada registro pode ocupar qualquer x; o par abaixo é o definitivo por sala. */
-float[] ladder_x = {127, 532, 468, 136, 120, 489, 542, 243};
+float[] ladder_x = {127, 532, 468, 136, 520, 130, 542, 243};
 /* Escadas divididas por sala: esquerda vai do inferior ao meio; direita vai do meio ao superior */
 int[] ladder_top_deck = {
   1, 0, 1, 0, 1, 0, 1, 0
@@ -112,16 +112,16 @@ int[] point_room = {
   SCREEN_DORMITORY, SCREEN_NONE
 };
 float[] point_x = {
-  575, 260, 407,
+  575, 260, 598,
   271, 570, 215, 454,
-  310, 530, 420,
-  85, 330, 440, 525, 170,
+  310, 530, 85,
+  85, 330, 440, 525, 113,
   530
 };
 float[] point_y = {
-  128, 202, 128,
+  128, 202, 278,
   278, 202, 202, 128,
-  202, 128, 202,
+  202, 128, 278,
   278, 202, 202, 128, 128,
   278
 };
@@ -300,6 +300,7 @@ void drawRoom(PGraphics g){
   } else {
     drawBackdrop(g, ROOM_LEFT, ROOM_TOP, ROOM_RIGHT - ROOM_LEFT, ROOM_BOTTOM - ROOM_TOP);
     drawWalls(g);
+    drawRoomDecor(g);
     drawDecks(g);
     drawLadders(g);
   }
@@ -318,6 +319,20 @@ void drawRoom(PGraphics g){
 }
 
 
+void drawRoomDecor(PGraphics g){
+  if (screen == SCREEN_DORMITORY){
+    if (art_dorm_bunk != null){
+      float w = art_dorm_bunk.width / (float) RENDER_SCALE;
+      float h = art_dorm_bunk.height / (float) RENDER_SCALE;
+      float[] d0_x = {113, 185};
+      for (int i = 0; i < d0_x.length; i++){
+        drawArt(g, art_dorm_bunk, d0_x[i], deck_y[0] - h / 2.0, w, h);
+      }
+    }
+  }
+}
+
+
 void drawWalls(PGraphics g){
   if (!hasWallArt()) return;
 
@@ -326,7 +341,9 @@ void drawWalls(PGraphics g){
   float total_w = ROOM_RIGHT - ROOM_LEFT - 8;
 
   for (int i = 0; i < DECK_COUNT; i++){
-    PImage strip = art_wall_strip != null ? art_wall_strip[i] : null;
+    PImage strip = (screen == SCREEN_DORMITORY && art_wall_strip_dorm != null && art_wall_strip_dorm[i] != null)
+      ? art_wall_strip_dorm[i]
+      : (art_wall_strip != null ? art_wall_strip[i] : null);
     if (strip != null){
       float strip_y = i == 0 ? ROOM_TOP : deck_y[i - 1];
       float strip_h = strip.height / (float) RENDER_SCALE;
@@ -594,11 +611,13 @@ void drawRoomPoint(PGraphics g, int point){
   }
   boolean show_label = npc || available;
   if (show_label){
-    textCenteredShadow(g, pointDisplayLabel(point), x, y - 44, 16, colour);
+    float label_y = (has_art && (point == POINT_TECH_BUNK || point == POINT_ANTENNA)) ? y - 62 : y - 44;
+    textCenteredShadow(g, pointDisplayLabel(point), x, label_y, 16, colour);
   }
   if (point == nextQuestPoint()){
     String step = active_quest < 0 ? "CONFIRMAR" : quest_stage == QUEST_COLLECT ? "COLETAR" : "ENTREGAR";
-    textCenteredShadow(g, step, x, y - 55, 16, COL_CYAN);
+    float step_y = (has_art && (point == POINT_TECH_BUNK || point == POINT_ANTENNA)) ? y - 73 : y - 55;
+    textCenteredShadow(g, step, x, step_y, 16, COL_CYAN);
     if (active_quest >= 0 && quest_stage == QUEST_COLLECT) drawQuestObject(g, x + 18, y - 12);
   }
 
@@ -1619,11 +1638,11 @@ int nearestInteractablePoint(){
 
 
 float pointInteractionRange(int point){
-  if (point == POINT_ROUTE){
+  if (point == POINT_ROUTE || point == POINT_TECH_BUNK || point == POINT_COMMON_TABLE || point == POINT_CONFLICT || point == POINT_RISK_BUNK || point == POINT_STOCK || point == POINT_RESERVE || point == POINT_ANTENNA){
     if (art_station != null && point < art_station.length && art_station[point] != null){
       return (art_station[point].width / (float) RENDER_SCALE) / 2.0 + 4;
     }
-    return 50;
+    return 40;
   }
   return (point_kind[point] == POINT_NPC) ? NPC_INTERACTION_RANGE : INTERACTION_RANGE;
 }
