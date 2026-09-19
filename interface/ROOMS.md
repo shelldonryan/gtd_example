@@ -72,10 +72,10 @@ ao Comando para aceitar uma ordem.
 | --- | --- | --- |
 | superior | porta do Dormitório | porta |
 | superior | Vera — ordens de navegação e comunicações | conversa, confirmação e coleta/entrega condicionadas à ordem |
-| superior | antena — destino de ordens de comunicação | entrega |
 | médio | porta do Depósito | porta |
 | médio | console da rota — origem de objetos, jornada e previsão | leitura, coleta e entrega |
 | inferior | porta da Sala de máquinas | porta |
+| inferior | antena — destino de ordens de comunicação | entrega |
 
 No primeiro dia, o técnico começa no Comando. Nos demais, chega ao hub pela
 porta superior vinda do Dormitório.
@@ -100,9 +100,9 @@ rota curta.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
+| inferior | estoque de comida — destino de ordens de suprimentos | entrega |
 | inferior | componentes e objetos especiais da ordem ativa | coleta condicionada à ordem |
 | médio | Bento — ordens logísticas e confirmação | conversa, confirmação e coleta/entrega condicionadas à ordem |
-| médio | estoque de comida — destino de ordens de suprimentos | entrega |
 | superior | prateleira de reserva — objetos da ordem ativa | leitura e coleta condicionadas à ordem |
 | acesso | porta única para o convés médio do Comando | porta |
 

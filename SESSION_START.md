@@ -92,7 +92,7 @@ reporte e não escolha silenciosamente.
   `data/audio/<evento>/`, com licenças, sincronização e carregamento resiliente.
   Encerramento autorizado pelo usuário; commit `713473e`.
 - As posições de escada e estação estão **fechadas** para a pintura dos fundos:
-  escadas em 127/532 (Comando), 114/526 (Máquinas), 120/489 (Depósito) e 127/482
+  escadas em 127/532 (Comando), 468/136 (Máquinas), 520/130 (Depósito) e 542/243
   (Dormitório), com as estações realocadas e folga mínima de 40 px do eixo de
   uma escada. As portas continuam sendo sprites e mudam sem repintura.
 - A entrega vai pelo GitHub: o repositório é privado e o professor tem acesso;
@@ -165,6 +165,17 @@ reporte e não escolha silenciosamente.
 - D-165 alinhou as portas da Sala de Comando com as paredes modulares dos conveses
   (Deck 0: x=40; Deck 1: x=598; Deck 2: x=88) e recalibrou as chegadas padrão
   (Deck 0: x=68; Deck 1: x=570; Deck 2: x=110) conforme gabarito visual.
+- D-166 alinhou portas e escadas de Máquinas, Dormitório e Depósito com vão opaco.
+- D-167 integrou BioComputer no console da rota com trigger de quest e halo ciano.
+- D-168 implementou test-mode (Ctrl+K), pulso âmbar de quest e estações de Máquinas.
+- D-169 a D-174 integraram os módulos de beliches (D-169/170/171 com Wall 4 Light),
+  a mesa comum (D-172), mesa do grupo com gerador compacto (D-173) e o leito médico
+  Socorro com Bed.png (D-174) no Dormitório.
+- D-175 e D-176 integraram os armários modulares no Estoque de Comida (4x Locker.png)
+  e Prateleira de Reserva (Lockers 1.png) no Depósito.
+- D-177 reposicionou o Estoque de Comida (Deck 2, x=85) e inverteu as escadas do Depósito
+  (inferior x=520, superior x=130).
+- D-178 reposicionou a Antena para o convés inferior da Sala de Comando (Deck 2, x=598).
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -1154,4 +1165,155 @@ e integrados pelo carregador de assets existente.
 - **Código alterado:** `last_horizon/test_mode.pde`, `last_horizon/last_horizon.pde`, `last_horizon/ship.pde`, `last_horizon/tasks.pde`, `last_horizon/ui.pde`, `last_horizon/assets.pde`, `last_horizon/data/stations/antena.png`, `last_horizon/data/stations/painel_distribuicao.png`, `last_horizon/data/stations/bancada_motor.png`, `last_horizon/data/stations/painel_suporte.png`.
 - **Documentação sincronizada:** `assets/INVENTORY.md` (coordenadas definitivas de antena, suporte e bancada do motor; registros dos novos assets integrados).
 - **Evidência D-168:** `--hit-test` retornou 5 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — módulos de beliche no Dormitório e objetivo Seu Beliche (D-169)
+
+- **Decisão D-169:** integrar os módulos de beliche modulares na tela do Dormitório (`SCREEN_DORMITORY`) a partir dos assets nativos `assets/PNG/Beds and walls.png` e `assets/PNG/Bed-1.png`:
+  - **Convés Superior (Deck 0) — Objetivo "SEU BELICHE" (`POINT_TECH_BUNK`):**
+    - Composição do asset de estação em `last_horizon/data/stations/beliche_tecnico.png` (142×112 px, 71×56 unidades lógicas no render 720p). A base é `Beds and walls.png` com inclusão do asset `Bed-1.png` (117×28 px) na cama inferior em `dest=(10, 73)`, conferindo a característica colcha roxa e travesseiro individual do beliche do jogador/técnico, preservando na frente os montantes e degraus da escada preta.
+    - Reposicionamento da coordenada horizontal `point_x[POINT_TECH_BUNK]` de `170` para `113`, ocupando a primeira baía modular do primeiro deck à esquerda, com folga segura da porta esquerda (`door_x[3] = 40`, chegada `x = 68`), encaixando simetricamente entre as colunas estruturais da parede (`x = 78` e `x = 148`).
+    - Ajuste adaptativo do raio de interação em `pointInteractionRange(POINT_TECH_BUNK)` para cobrir proporcionalmente a largura da estação ($(\text{largura}/2) + 4 \approx 39,5$ unidades lógicas).
+    - Ajuste da ancoragem vertical do rótulo textual `"SEU BELICHE"` para `y - 62` quando possui arte de estação, posicionando o texto limpo na viga superior do teto sem cobrir os travesseiros ou o capacete do beliche superior.
+    - Contorno cyan de aproximação (`art_station_glow`) e pulso âmbar de quest (`art_station_glow_orange`) gerados automaticamente em tempo de carregamento via `prepareStationGlow()`.
+  - **Convés Central (Deck 1) — Beliche Comum no Corredor:**
+    - Asset de ambientação salvo em `last_horizon/data/environment/dorm_bunk.png` (142×112 px, cópia sem distorção de `Beds and walls.png` com lençóis verdes da tripulação).
+    - Renderização realizada por `drawRoomDecor(g)` em `(113, deck_y[1])` na tela de Dormitório, antes de `drawDecks()` e `drawPlayer()`. O módulo fica perfeitamente alinhado na vertical com o beliche do convés superior, compondo a baía esquerda do corredor com os personagens e escadas caminhando à sua frente.
+- **Código alterado:** `last_horizon/assets.pde` (`art_dorm_bunk`), `last_horizon/ship.pde` (`point_x[POINT_TECH_BUNK] = 113`, `drawRoomDecor`, `label_y`, `pointInteractionRange`), `last_horizon/data/stations/beliche_tecnico.png`, `last_horizon/data/environment/dorm_bunk.png`.
+- **Documentação sincronizada:** `assets/INVENTORY.md` (tabela de posições e catálogo de estações).
+- **Evidência D-169:** `--asset-pipeline-test` carregou 31 de 64 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — isolamento de glow na cama Bed-1 e adição de paredes de beliches nos 3 conveses (D-170)
+
+- **Decisão D-170:** separar conceitual e visualmente o cenário estrutural de fundo (`art_dorm_bunk`) do elemento interativo de estação (`art_station[POINT_TECH_BUNK]`), atendendo ao feedback de que o contorno ciano deve envolver estritamente a cama do jogador e povoando os três conveses do Dormitório com as paredes modulares de beliche:
+  - **Isolamento de Glow na Cama (Bed-1.png):**
+    - `last_horizon/data/stations/beliche_tecnico.png` foi reconstruído sobre um canvas transparente de 142×112 px contendo **apenas Bed-1.png** posicionado na coordenada da cama inferior `(10, 73)`.
+    - O algoritmo `buildColoredGlow()` em `assets.pde` gera o halo de aproximação (`art_station_glow`) e o pulso de quest (`art_station_glow_orange`) exclusivamente sobre os pixels opacos da cama inferior, eliminando qualquer contorno nas paredes externas ou no beliche superior.
+    - O fundo com a parede inteira é desenhado por `drawRoomDecor(g)` usando `art_dorm_bunk`, garantindo que toda a estrutura permaneça visível e a cama `Bed-1.png` seja renderizada perfeitamente sobreposta no leito inferior.
+  - **Distribuição de Paredes de Beliches nos 3 Decks:**
+    - `drawRoomDecor(g)` renderiza `art_dorm_bunk` (`Beds and walls.png`, 142×112 px) nos vãos modulares das três plataformas.
+- **Código alterado:** `last_horizon/data/stations/beliche_tecnico.png`, `last_horizon/ship.pde` (`drawRoomDecor`).
+- **Documentação sincronizada:** `assets/INVENTORY.md` (registro atualizado de `beliche_tecnico.png`).
+- **Evidência D-170:** `--asset-pipeline-test` carregou 31 de 64 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — adequação da tripulação no Dormitório (4 leitos) e paredes Wall 4 Light (D-171)
+
+- **Decisão D-171:** adequar o dormitório à tripulação ativa da nave (4 pessoas a bordo: técnico + 3 sobreviventes) e aplicar a parede temática com faixa acobreada/laranja (`Wall 4 Light.png`) em substituição à faixa azul (`Wall 3.png`) exclusivamente no Dormitório:
+  - **4 Leitos Próximos à Porta (`x = 113` e `x = 185`):**
+    - Redução das paredes de beliche de 11 para apenas 2 módulos no Deck 0, alocados na baía esquerda logo após a porta (`x = 40`):
+      - Módulo 1 em `x = 113`: contém o objetivo 'SEU BELICHE' (`POINT_TECH_BUNK`) no leito inferior e um leito superior.
+      - Módulo 2 em `x = 185`: módulo com 2 leitos comuns.
+      - Total de 4 leitos disponíveis, eliminando o excesso visual nos conveses 1 e 2 e mantendo a coerência narrativa da tripulação de 4 pessoas a bordo.
+  - **Paredes Temáticas do Dormitório (`wall_dorm_deck_0..2.png`):**
+    - Geração das tiras modulares do Dormitório substituindo todas as ocorrências de `Wall 3.png` (116×110 px, faixa azul industrial) por `Wall 4 Light.png` (116×110 px, faixa acobreada/laranja quente residencial).
+    - `art_wall_strip_dorm` carregado em `assets.pde` e selecionado dinamicamente em `ship.pde` (`drawWalls`) quando `screen == SCREEN_DORMITORY`, preservando as paredes industriais originais nas salas de Comando, Máquinas e Depósito.
+- **Código alterado:** `last_horizon/data/environment/wall_dorm_deck_0.png`, `last_horizon/data/environment/wall_dorm_deck_1.png`, `last_horizon/data/environment/wall_dorm_deck_2.png`, `last_horizon/assets.pde` (`art_wall_strip_dorm`), `last_horizon/ship.pde` (`drawWalls`, `drawRoomDecor`).
+- **Evidência D-171:** `--asset-pipeline-test` carregou 34 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — integração dos assets de Mesa Comum e Mesa do Grupo (D-172)
+
+- **Decisão D-172:** integrar os assets visuais das estações sociais do Dormitório (`SCREEN_DORMITORY`):
+  - **Mesa Comum (`POINT_COMMON_TABLE` — Deck 0, x = 525, y = 128):**
+    - Composta em `last_horizon/data/stations/mesa_comum.png` (118×48 px) unindo a bancada `Desk 1.png` (89×44 px), a cadeira `Chair.png` (20×37 px) encaixada no vão de apoio e o bebedouro/dispensador `Props 4.png` (37×48 px) com galão térmico de água azul no topo.
+    - Representa a estação de hidratação e refeição rápida da tripulação, destino da ordem preventiva N-01 (filtro de água).
+  - **Mesa do Grupo (`POINT_CONFLICT` — Deck 1, x = 440, y = 202):**
+    - Composta em `last_horizon/data/stations/mesa_grupo.png` (115×46 px) com a mesa `Desk 1.png` ladeada por duas cadeiras `Chair.png` (uma espelhada horizontalmente, viradas de frente uma para a outra) e com o bloco de cartões de mediação / livros (`books.png`) sobre o tampo.
+    - Representa o ponto social de convivência coletiva ao lado da Neusa, destino das ordens N-02 (abrir espaço para conversa), CON-A (mediar conflito) e CON-B (reunir o grupo com refeição quente).
+  - **Raio de Interação Adaptativo:**
+    - `pointInteractionRange()` em `ship.pde` foi estendido para cobrir proporcionalmente a largura física das estações `POINT_COMMON_TABLE` e `POINT_CONFLICT` ($(\text{largura}/2) + 4 \approx 33$ unidades lógicas).
+  - **Código alterado:** `last_horizon/data/stations/mesa_comum.png`, `last_horizon/data/stations/mesa_grupo.png`, `last_horizon/ship.pde` (`pointInteractionRange`).
+  - **Documentação sincronizada:** `assets/INVENTORY.md`.
+  - **Evidência D-172:** `--asset-pipeline-test` carregou 36 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — adição do gerador/bateria Small machine 3-1 à Mesa do Grupo (D-173)
+
+- **Decisão D-173:** adicionar o equipamento `Small machine 3-1.png` (33×34 px) ao lado esquerdo da estação Mesa do Grupo (`POINT_CONFLICT` — Deck 1, x = 440, y = 202) no Dormitório:
+  - **Composição da Estação (`stations/mesa_grupo.png` — 140×46 px):**
+    - Lado esquerdo: gerador compacto de apoio (`Small machine 3-1.png`) no piso em `(0, 12)`, trazendo tubos de energia/fluido com glow ciano coerente com a iluminação da nave.
+    - Cadeira esquerda: `Chair.png` (espelhada horizontalmente) em `(28, 9)`.
+    - Centro: escrivaninha `Desk 1.png` em `(38, 2)` com o livro/cartões `books.png` em `(71, 6)`.
+    - Cadeira direita: `Chair.png` em `(120, 9)`.
+  - **Raio de Interação e Halos Visuais:**
+    - O halo ciano de aproximação (`art_station_glow`) e o pulso de quest (`art_station_glow_orange`) contornam a silhueta composta inteira perfeitamente sem artefatos ou recortes.
+    - O raio de interação em `ship.pde` cobre a nova largura ($140 / 4 + 4 = 39$ unidades lógicas), mantendo folga segura de 75 unidades até a posição da Neusa (`x = 330`) e 67 unidades até a escada (`x = 542`).
+  - **Arte alterada:** `last_horizon/data/stations/mesa_grupo.png`.
+  - **Documentação sincronizada:** `assets/INVENTORY.md`, `SESSION_START.md`.
+  - **Evidência D-173:** `--asset-pipeline-test` carregou 36 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — integração do leito médico Bed na estação Socorro (D-174)
+
+- **Decisão D-174:** integrar o leito médico avançado de enfermaria `Bed.png` (99×47 px) na estação de emergência Socorro (`POINT_RISK_BUNK` — Deck 2, x = 85, y = 278) no Dormitório:
+  - **Asset da Estação (`stations/beliche_socorro.png` — 99×47 px):**
+    - Renderizado com base no convés (`y = 278`) e centrado em `x = 85`, encaixando na baía do Deck 2 entre as colunas hidráulicas laterais.
+    - Apresenta leito cirúrgico/enfermaria com suporte mecânico articulado, monitor superior de sinais vitais cardíacos (ECG), display digital lateral verde e bolsa de infusão/soro.
+    - Alinhamento estético com os demais leitos da nave (cabeceira e monitores orientados para a direita, mesmo sentido dos travesseiros dos belixes do Deck 0).
+  - **Raio de Interação Adaptativo e Halos de Glow:**
+    - `pointInteractionRange()` em `ship.pde` expandido para incluir `POINT_RISK_BUNK`, ajustando o alcance de interação para cobrir a largura física do leito ($99 / 4 + 4 = 28,75$ unidades lógicas).
+    - O halo ciano de aproximação (`art_station_glow`) e o pulso âmbar de emergência/quest (`art_station_glow_orange`) envolvem os monitores, leito e base sem recortes ou artefatos.
+  - **Arte alterada:** `last_horizon/data/stations/beliche_socorro.png`.
+  - **Código alterado:** `last_horizon/ship.pde` (`pointInteractionRange`).
+  - **Documentação sincronizada:** `assets/INVENTORY.md`, `SESSION_START.md`.
+  - **Evidência D-174:** `--asset-pipeline-test` carregou 37 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — integração do banco de 4 armários Locker no Estoque de Comida (D-175)
+
+- **Decisão D-175:** compor e integrar o banco de 4 armários metálicos `Locker.png` (26×74 px cada) para a estação Estoque de Comida (`POINT_STOCK` — Deck 1, x = 420, y = 202) no Depósito (`SCREEN_DEPOT`):
+  - **Asset da Estação (`stations/estoque_comida.png` — 110×77 px):**
+    - Composição de 4 módulos `Locker.png` alinhados lado a lado ($4 \times 26 = 104$ px), com margens de 3 px na esquerda, direita e topo ($110 \times 77$ px) para geração perimetral de halo ciano/laranja contínuo.
+    - Base no convés em `y = 202` e centrado em `x = 420`, com folga generosa de 82,5 unidades até Bento (`x = 310`) e 41,5 unidades até a escada direita (`x = 489`).
+    - Visual industrial com faixas azuis alinhadas horizontalmente, frestas de ventilação superiores e trincas eletrônicas com LEDs indicadores vermelhos.
+  - **Raio de Interação Adaptativo e Halos de Glow:**
+    - `pointInteractionRange()` em `ship.pde` expandido para incluir `POINT_STOCK`, ajustando dinamicamente o raio para cobrir a extensão física dos armários ($110 / 4 + 4 = 31,5$ unidades lógicas).
+    - Halos de proximidade (`art_station_glow`) e quest (`art_station_glow_orange`) envolvem os 4 armários conjuntamente.
+  - **Arte alterada:** `last_horizon/data/stations/estoque_comida.png`.
+  - **Código alterado:** `last_horizon/ship.pde` (`pointInteractionRange`).
+  - **Documentação sincronizada:** `assets/INVENTORY.md`, `SESSION_START.md`.
+  - **Evidência D-175:** `--asset-pipeline-test` carregou 38 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — integração dos armários Lockers 1 na Prateleira de Reserva (D-176)
+
+- **Decisão D-176:** integrar o conjunto de armários industriais `Lockers 1.png` (98×80 px) na estação Prateleira de Reserva (`POINT_RESERVE` — Deck 0, x = 530, y = 128) no Depósito (`SCREEN_DEPOT`):
+  - **Asset da Estação (`stations/prateleira_reserva.png` — 104×83 px):**
+    - Composição a partir de `Lockers 1.png` com margens técnicas de 3 px na esquerda, direita e topo ($104 \times 83$ px) e base assentada no convés em `y = 128`.
+    - Apresenta 3 armários, sendo o esquerdo com porta aberta exibindo prateleiras com ferramentas, suprimentos e iluminação interna ciano/verde, e dois armários fechados com trincas eletrônicas e LEDs indicadores azuis/vermelhos.
+    - Ancorado em `x = 530`, mantendo distância de 41 unidades lógicas até o eixo da escada (`x = 489`), cumprindo o requisito de afastamento.
+  - **Raio de Interação Adaptativo e Halos de Glow:**
+    - `pointInteractionRange()` em `ship.pde` expandido para incluir `POINT_RESERVE`, ajustando o alcance proporcional à largura física do bloco ($104 / 4 + 4 = 30$ unidades lógicas).
+    - Halos luminosos ciano (`art_station_glow`) e âmbar (`art_station_glow_orange`) envolvem os armários abertos e fechados de ponta a ponta.
+  - **Arte alterada:** `last_horizon/data/stations/prateleira_reserva.png`.
+  - **Código alterado:** `last_horizon/ship.pde` (`pointInteractionRange`).
+  - **Documentação sincronizada:** `assets/INVENTORY.md`, `SESSION_START.md`.
+  - **Evidência D-176:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — reposicionamento das escadas e do Estoque de Comida no Depósito (D-177)
+
+- **Decisão D-177:** reposicionar o Estoque de Comida e inverter os eixos das escadas do Depósito (`SCREEN_DEPOT`) conforme marcação visual do usuário:
+  - **Estoque de Comida (`POINT_STOCK` — Deck 2, x = 85, y = 278):**
+    - Movido do Deck 1 (`x = 420, y = 202`) para o Deck 2 (`x = 85, y = 278`), ocupando a baía inferior esquerda (marcada em verde) entre as colunas estruturais.
+    - Mantém o asset modular `stations/estoque_comida.png` (110×77 px) composto pelos 4 `Locker.png`.
+    - Folga lateral de 435 unidades lógicas até a nova escada inferior (`x = 520`), bem acima da margem mínima de 40 px.
+  - **Escada inferior (Deck 1 ↔ Deck 2, índice 4 em `ladder_x`):**
+    - Movida de `x = 120` para `x = 520` (ponto azul marcado à direita).
+    - Conecta o convés central ao inferior na baía da direita, com alinhamento livre de colisões.
+  - **Escada central/superior (Deck 0 ↔ Deck 1, índice 5 em `ladder_x`):**
+    - Movida de `x = 489` para `x = 130` (ponto vermelho marcado à esquerda).
+    - Conecta o convés superior ao central, alinhada à coluna estrutural esquerda.
+    - Folga de 400 unidades até a Reserva (`x = 530`) no Deck 0, e 180 unidades até Bento (`x = 310`) no Deck 1.
+  - **Código alterado:** `last_horizon/ship.pde` (`ladder_x`, `point_x`, `point_y`).
+  - **Documentação sincronizada:** `assets/INVENTORY.md`, `SESSION_START.md`.
+  - **Evidência D-177:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — reposicionamento da Antena na Sala de Comando (D-178)
+
+- **Decisão D-178:** reposicionar a estação Antena (`POINT_ANTENNA`) do Deck 0 para o Deck 2 da Sala de Comando (`SCREEN_COMMAND`), na baía inferior direita marcada em vermelho pelo usuário:
+  - **Antena (`POINT_ANTENNA` — Deck 2, x = 598, y = 278):**
+    - Movida do Deck 0 (`x = 407, y = 128`) para o Deck 2 (`x = 598, y = 278`), centralizada na baía estrutural direita entre `x = 569.5` e `x = 626.0`.
+    - Mantém o asset vertical integrado `stations/antena.png` (33×109 px) derivado de `Pillars.png`.
+    - Distribui as estações de Comando equilibradamente pelos 3 conveses: Vera (`x = 575`) no Deck 0, Console da Rota (`x = 260`) no Deck 1 e Antena (`x = 598`) no Deck 2.
+    - Folga lateral de 471 unidades lógicas até a escada inferior (`x = 127`), respeitando com ampla margem o requisito de $\ge 40$ px.
+  - **Ajustes de Render e Interação:**
+    - Altura do rótulo `ANTENA` e prompt de interação `ENTREGAR` calibrados em `drawRoomPoint` (`label_y = y - 62`, `step_y = y - 73`) para acomodar a altura do pilar sem encavalar na ponta do sprite e respeitando o teto do convés inferior (`y = 202`).
+    - `pointInteractionRange` em `ship.pde` expandido para incluir `POINT_ANTENNA`.
+  - **Código alterado:** `last_horizon/ship.pde` (`point_x`, `point_y`, `drawRoomPoint`, `pointInteractionRange`).
+  - **Documentação sincronizada:** `assets/INVENTORY.md`, `SESSION_START.md`, `interface/ROOMS.md`.
+  - **Evidência D-178:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
 

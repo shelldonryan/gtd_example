@@ -36,10 +36,10 @@ colisão. Escadas e conveses abaixo são definitivos:
 
 | Sala | Escadas (x) | Estações por convés (x) |
 | --- | --- | --- |
-| Comando | 127 e 532 | Vera 575 e antena 407 (superior); console da rota 260 (médio) |
+| Comando | 127 e 532 | Vera 575 (superior); console da rota 260 (médio); antena 598 (inferior) |
 | Sala de máquinas | 468 e 136 | suporte 454 (superior); Sílvia 570 e distribuição 215 (médio); bancada do motor 271 (inferior) |
-| Depósito | 120 e 489 | reserva 530 (superior); Bento 310 e estoque de comida 420 (médio) |
-| Dormitório | 542 e 243 | seu beliche 170 e mesa comum 525 (superior); Neusa 330 e mesa do grupo 440 (médio); socorro 85 (inferior) |
+| Depósito | 520 (inferior) e 130 (superior) | reserva 530 (superior); Bento 310 (médio); estoque de comida 85 (inferior) |
+| Dormitório | 542 e 243 | seu beliche 113 e mesa comum 525 (superior); Neusa 330 e mesa do grupo 440 (médio); socorro 85 (inferior) |
 
 Conveses em `y = 128`, `202` e `278`; a faixa útil da sala é `x` de 8 a 632 e
 `y` de 56 a 284. As portas continuam sendo sprites e podem mudar de lugar sem
@@ -57,7 +57,7 @@ objetos nem NPCs: tudo isso é sprite desenhado por cima.
 | --- | --- | --- |
 | `rooms/command.png` | Sala de comando | x = 127 e 532 |
 | `rooms/machines.png` | Sala de máquinas | x = 468 (inferior) e 136 (superior) |
-| `rooms/depot.png` | Depósito | x = 120 e 489 |
+| `rooms/depot.png` | Depósito | x = 520 (inferior) e 130 (superior) |
 | `rooms/dormitory.png` | Dormitório | x = 542 (inferior) e 243 (superior) |
 
 ## 2. Estações — 11 imagens + 1 spritesheet, canvas 64×64
@@ -68,17 +68,17 @@ hoje; o rótulo de texto acima do ponto continua.
 
 | Arquivo | Estação | Sala e convés |
 | --- | --- | --- |
-| `stations/antena.png` | antena | Comando, superior (integrado com `Pillars.png`, 33×109 px) |
+| `stations/antena.png` | antena | Comando, inferior (integrado com `Pillars.png`, 33×109 px) |
 | `stations/console_rota.png` | console da rota | Comando, médio (integrado com `BioComputer.png`, 181×117 px) |
 | `stations/painel_suporte.png` | painel de suporte de vida | Máquinas, superior (integrado com `Board 1.png` + `Health Pack 1.png` + `Props 4.png`, 93×74 px) |
 | `stations/painel_distribuicao.png` | painel de distribuição | Máquinas, médio (integrado com `CryoBox.png` + `Electric wall.png` + `CryoBox.png`, 165×111 px) |
 | `stations/bancada_motor.png` | bancada do motor | Máquinas, inferior (integrado com `Desk 1.png` + `Screen device.png` + `Small Machine 1.png`, 121×75 px) |
-| `stations/prateleira_reserva.png` | prateleira de reserva | Depósito, superior |
-| `stations/estoque_comida.png` | estoque de comida | Depósito, médio |
-| `stations/mesa_comum.png` | mesa comum | Dormitório, superior |
-| `stations/beliche_tecnico.png` | seu beliche | Dormitório, superior |
-| `stations/mesa_grupo.png` | mesa do grupo | Dormitório, médio |
-| `stations/beliche_socorro.png` | beliche de socorro | Dormitório, inferior |
+| `stations/prateleira_reserva.png` | prateleira de reserva | Depósito, superior (integrado com `Lockers 1.png`, 104×83 px, armários com compartimento aberto e ferramentas) |
+| `stations/estoque_comida.png` | estoque de comida | Depósito, inferior (integrado com 4x `Locker.png`, 110×77 px, armários modulares com indicadores LED) |
+| `stations/mesa_comum.png` | mesa comum | Dormitório, superior (integrado com `Desk 1.png` + `Chair.png` + `Props 4.png`, 118×48 px) |
+| `stations/beliche_tecnico.png` | seu beliche | Dormitório, superior (sprite interativo com `Bed-1.png` isolado sobre canvas 142×112 px, contorno ciano exclusivo no leito) |
+| `stations/mesa_grupo.png` | mesa do grupo | Dormitório, médio (integrado com `Small machine 3-1.png` + `Desk 1.png` + 2x `Chair.png` + `books.png`, 140×46 px) |
+| `stations/beliche_socorro.png` | beliche de socorro | Dormitório, inferior (integrado com `Bed.png`, 99×47 px, leito médico com monitores) |
 | `stations/casco_sheet.png` + `.json` | casco avariado | **animado**, 2 quadros, sheet 128×64 |
 
 O casco é sorteado em qualquer sala, convés e `x` a cada problema, então o
