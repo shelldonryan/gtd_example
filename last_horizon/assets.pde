@@ -64,6 +64,7 @@ String[] art_room_file = {"command", "machines", "depot", "dormitory"};
 
 PImage[] art_icon;
 PImage[] art_station;
+PImage[] art_station_glow;
 PImage[] art_object;
 PImage[] art_backdrop;
 PImage[] art_portrait;
@@ -231,6 +232,20 @@ void prepareDoorGlow(){
   }
 }
 
+void prepareStationGlow(){
+  if (art_station == null) return;
+  if (art_station_glow == null || art_station_glow.length != art_station.length){
+    art_station_glow = new PImage[art_station.length];
+  }
+  for (int point = 0; point < art_station.length; point++){
+    if (art_station[point] != null){
+      art_station_glow[point] = buildNpcGlow(art_station[point]);
+    } else {
+      art_station_glow[point] = null;
+    }
+  }
+}
+
 
 PImage buildNpcGlow(PImage source){
   if (source == null){
@@ -291,6 +306,7 @@ PImage buildNpcGlow(PImage source){
 void loadArtAssets(){
   art_icon = new PImage[art_icon_file.length];
   art_station = new PImage[art_station_file.length];
+  art_station_glow = new PImage[art_station_file.length];
   art_object = new PImage[quest_id.length];
   art_backdrop = new PImage[ROOM_COUNT];
   art_portrait = new PImage[CREW_COUNT];
@@ -312,6 +328,7 @@ void loadArtAssets(){
       art_station[point] = loadArt(ART_STATION_DIR + art_station_file[point] + ".png");
     }
   }
+  prepareStationGlow();
 
   for (int q = 0; q < quest_id.length; q++){
     art_object[q] = loadArt(ART_OBJECT_DIR + quest_object_file[q] + ".png");

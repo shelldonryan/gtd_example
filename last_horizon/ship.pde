@@ -582,7 +582,8 @@ void drawRoomPoint(PGraphics g, int point){
   float x = point_x[point];
   float y = point_y[point];
 
-  if (!drawPointArt(g, point, x, y)){
+  boolean has_art = drawPointArt(g, point, x, y, nearby);
+  if (!has_art){
     if (!npc){
       g.stroke(nearby ? COL_CYAN : COL_BORDER);
       g.fill(nearby ? COL_CYAN_DARK : COL_PANEL);
@@ -598,9 +599,11 @@ void drawRoomPoint(PGraphics g, int point){
   }
 
   if (nearby && !npc){
-    g.noFill();
-    g.stroke(COL_CYAN);
-    g.rect(x - 16, y - 26, 32, 26, 2);
+    if (!has_art){
+      g.noFill();
+      g.stroke(COL_CYAN);
+      g.rect(x - 16, y - 26, 32, 26, 2);
+    }
     text(g, "E", x - 3, y + 6, 16, COL_CYAN);
   }
   if (nearby && npc){
@@ -617,7 +620,7 @@ void drawRoomPoint(PGraphics g, int point){
 
 /* Art of a station or of the hull replaces the generic rectangle; NPC sprites
    are drawn by drawNpc. Returns false when the point keeps the geometry. */
-boolean drawPointArt(PGraphics g, int point, float x, float y){
+boolean drawPointArt(PGraphics g, int point, float x, float y, boolean nearby){
   if (point_kind[point] == POINT_NPC){
     return false;
   }
@@ -630,8 +633,24 @@ boolean drawPointArt(PGraphics g, int point, float x, float y){
     return false;
   }
 
-  drawArt(g, art, x, y - ART_SPRITE_DRAW / 2, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
+  float w = art.width / (float) RENDER_SCALE;
+  float h = art.height / (float) RENDER_SCALE;
+
+  if (nearby){
+    PImage glow = (art_station_glow != null && point < art_station_glow.length)
+      ? art_station_glow[point]
+      : null;
+    if (glow != null){
+      drawArt(g, glow, x, y - h / 2.0, w, h);
+    }
+  }
+
+  drawArt(g, art, x, y - h / 2.0, w, h);
   return true;
+}
+
+boolean drawPointArt(PGraphics g, int point, float x, float y){
+  return drawPointArt(g, point, x, y, false);
 }
 
 
@@ -1553,7 +1572,7 @@ void interactNearby(){
 
 int nearestInteractablePoint(){
   int result = -1;
-  float best_distance = max(INTERACTION_RANGE, NPC_INTERACTION_RANGE) + 1;
+  float best_distance = Float.MAX_VALUE;
 
   for (int i = 0; i < POINT_COUNT; i++){
     if (point_room[i] != screen || !pointIsInteractable(i) || !isPointInRange(i)){
@@ -1573,6 +1592,12 @@ int nearestInteractablePoint(){
 
 
 float pointInteractionRange(int point){
+  if (point == POINT_ROUTE){
+    if (art_station != null && point < art_station.length && art_station[point] != null){
+      return (art_station[point].width / (float) RENDER_SCALE) / 2.0 + 4;
+    }
+    return 50;
+  }
   return (point_kind[point] == POINT_NPC) ? NPC_INTERACTION_RANGE : INTERACTION_RANGE;
 }
 
