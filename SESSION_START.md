@@ -179,6 +179,7 @@ reporte e não escolha silenciosamente.
 - D-179 substituiu o texto solto de sala por um card centralizado com sombra e paleta de recursos.
 - D-180 padronizou os nomes das portas fixos acima do vão com glow no destino e "Pressione E" empilhado na colisão.
 - D-181 reposicionou o beliche do jogador para o módulo da direita (Deck 0, x=185).
+- D-182 centralizou o prompt "Pressione E" nos vidros da porta.
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -1358,4 +1359,16 @@ e integrados pelo carregador de assets existente.
   - **Código alterado:** `last_horizon/ship.pde` (`point_x[POINT_TECH_BUNK] = 185`).
   - **Documentação sincronizada:** `assets/INVENTORY.md`, `SESSION_START.md`.
   - **Evidência D-181:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — centralização de "Pressione E" nos vidros da porta (D-182)
+
+- **Decisão D-182:** centralizar a instrução `"Pressione E"` (`drawDoors` em `ship.pde`) no centro exato dos dois vidros da porta, tanto horizontalmente quanto verticalmente:
+  - **Motivação:** na implementação anterior de D-180, a instrução ficava posicionada no cabeçote/arco metálico superior da porta (`y - door_h + 2`), muito colada ao nome da sala de destino e deixando a área visual dos vidros vazia.
+  - **Alinhamento Geométrico:**
+    - Horizontalmente (`prompt_x`): os dois vidros estendem-se de `x = 18` a `x = 81` no sprite de 105 px de largura, resultando em um ponto médio em `49.5 px` (deslocamento de `-1.5` unidades lógicas em relação ao centro `x` da porta). O prompt é ancorado em `x - 1.5` quando possui arte de porta (`art != null`).
+    - Verticalmente (`prompt_y`): os vidros ocupam de `y = 15` a `y = 48` no sprite de 97 px de altura, com altura de 16,5 unidades lógicas e centro em `y - 32.75`. Com o texto em tamanho 11 (altura útil de 5,5 unidades lógicas), a ancoragem em `prompt_y = y - 35.0` garante margens simétricas exatas de 15 pixels reais no topo e na base dos vidros.
+    - O nome da sala de destino permanece fixo acima da porta com sua contenção individual de margens (`cx = constrain(x, min_left + name_tw / 2.0, max_right - name_tw / 2.0)`).
+  - **Código alterado:** `last_horizon/ship.pde` (`drawDoors`).
+  - **Documentação sincronizada:** `SESSION_START.md`.
+  - **Evidência D-182:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
 
