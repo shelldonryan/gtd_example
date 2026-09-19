@@ -319,6 +319,56 @@ void drawRoom(PGraphics g){
 
 
 void drawRoomDecor(PGraphics g){
+  // Asymmetric groups leave breathing room around the fixed gameplay stations.
+  if (screen == SCREEN_COMMAND){
+    drawRoomWindow(g, 188, 0, 0);
+    drawRoomWindow(g, 242, 0, 1);
+    drawRoomDetail(g, "Computer 1", 405, 0, false);
+    drawRoomDetail(g, "Screen info 1", 425, 0, false);
+    drawRoomDetail(g, "Wall electric pannel 1", 373, 1, false);
+    drawRoomVent(g, 128, 1);
+    drawRoomDetail(g, "Wall cover 3", 455, 0, false);
+    drawRoomDetail(g, "Lockers 1", 373, 2, true);
+    drawRoomDetail(g, "Screen info 2", 429, 2, false);
+    drawRoomVent(g, 331, 2);
+  } else if (screen == SCREEN_MACHINES){
+    drawRoomDetail(g, "Wall electric pannel 1", 215, 0, false);
+    drawRoomDetail(g, "Wall cover 3", 246, 0, false);
+    drawRoomDetail(g, "Baril 1", 318, 0, true);
+    drawRoomDetail(g, "Baril 2", 334, 0, true);
+    drawRoomDetail(g, "Wall electric pannel 1", 373, 1, false);
+    drawRoomDetail(g, "Computer 1", 401, 1, false);
+    drawRoomVent(g, 55.5, 1);
+    drawRoomVent(g, 229.5, 2);
+    drawRoomDetail(g, "Wall cover 2", 436, 2, false);
+    drawRoomDetail(g, "Small Machine 1", 558, 2, true);
+    drawRoomDetail(g, "Electric wall", 110, 0, true);
+    drawRoomDetail(g, "Electric wall", 511, 1, true);
+  } else if (screen == SCREEN_DEPOT){
+    drawRoomDetail(g, "Lockers 1", 205, 0, true);
+    drawRoomDetail(g, "Lockers 1", 248, 0, true);
+    drawRoomDetail(g, "Baril 2", 294, 0, true);
+    drawRoomVent(g, 490.5, 0);
+    drawRoomDetail(g, "Board 1", 429, 1, false);
+    drawRoomDetail(g, "Wallbox 1", 453, 1, false);
+    drawRoomDetail(g, "Baril 1", 180, 1, true);
+    drawRoomDetail(g, "Baril 2", 197, 1, true);
+    drawRoomDetail(g, "Lockers 1", 373, 2, true);
+    drawRoomDetail(g, "Lockers 1", 416, 2, true);
+    drawRoomDetail(g, "Baril 2", 455, 2, true);
+    drawRoomDetail(g, "Wall cover 3", 109, 0, false);
+    drawRoomDetail(g, "Wall cover 2", 555, 2, false);
+  } else if (screen == SCREEN_DORMITORY){
+    drawRoomDetail(g, "Board 1", 373, 0, false);
+    drawRoomWindow(g, 418, 0, 2);
+    drawRoomDetail(g, "Lockers 1", 149, 1, true);
+    drawRoomWindow(g, 43, 1, 3);
+    drawRoomWindow(g, 97, 1, 4);
+    drawRoomDetail(g, "post it", 385, 1, false);
+    drawRoomDetail(g, "Lockers 1", 405, 2, true);
+    drawRoomDetail(g, "Board 1", 438, 2, false);
+    drawRoomVent(g, 215, 2);
+  }
   if (screen == SCREEN_DORMITORY){
     if (art_dorm_bunk != null){
       float w = art_dorm_bunk.width / (float) RENDER_SCALE;
@@ -332,24 +382,194 @@ void drawRoomDecor(PGraphics g){
 }
 
 
-void drawWalls(PGraphics g){
-  if (!hasWallArt()) return;
+/* Existing fittings plus the authorized window_space.png sky, composed at runtime. */
+HashMap<String, PImage> room_detail_cache = new HashMap<String, PImage>();
+PImage[] room_wall_surfaces = new PImage[ROOM_COUNT];
 
-  g.imageMode(CORNER);
-  float start_x = ROOM_LEFT + 4;
-  float total_w = ROOM_RIGHT - ROOM_LEFT - 8;
+PImage roomDetail(String name){
+  if (!room_detail_cache.containsKey(name)){
+    String path = sketchPath("../assets/PNG/" + name + ".png");
+    room_detail_cache.put(name, new File(path).isFile() ? loadImage(path) : null);
+  }
+  return room_detail_cache.get(name);
+}
 
-  for (int i = 0; i < DECK_COUNT; i++){
-    PImage strip = (screen == SCREEN_DORMITORY && art_wall_strip_dorm != null && art_wall_strip_dorm[i] != null)
-      ? art_wall_strip_dorm[i]
-      : (art_wall_strip != null ? art_wall_strip[i] : null);
-    if (strip != null){
-      float strip_y = i == 0 ? ROOM_TOP : deck_y[i - 1];
-      float strip_h = strip.height / (float) RENDER_SCALE;
-      g.image(strip, round(start_x), round(strip_y), total_w, strip_h);
+void drawRoomDetail(PGraphics g, String name, float x, int deck, boolean on_floor){
+  PImage art = roomDetail(name);
+  if (art == null) return;
+  float w = art.width / (float) RENDER_SCALE;
+  float h = art.height / (float) RENDER_SCALE;
+  float top = deck == 0 ? ROOM_TOP : deck_y[deck - 1];
+  float y = on_floor ? deck_y[deck] - h : top + 17;
+  drawArt(g, art, x, y + h / 2, w, h);
+}
+
+/* Two existing pieces form a closed duct: paired housings with a continuous grille. */
+PImage room_vent_strip;
+
+void drawRoomVent(PGraphics g, float x, int deck){
+  if (room_vent_strip == null){
+    PImage housing = roomDetail("Wall pipes");
+    PImage grille = roomDetail("Pipe2");
+    if (housing == null || grille == null) return;
+    int module_w = housing.width;
+    int duct_h = housing.height * 2 - 4;
+    PGraphics duct = createGraphics(module_w * 2, duct_h);
+    duct.beginDraw();
+    duct.noSmooth();
+    duct.clear();
+    for (int module = 0; module < 2; module++){
+      int left = module * module_w;
+      duct.image(housing, left, 0);
+      duct.pushMatrix();
+      duct.translate(left, duct_h);
+      duct.scale(1, -1);
+      duct.image(housing, 0, 0);
+      duct.popMatrix();
+      // Inset grille bridges the two halves while retaining the housing's end caps.
+      for (int gx = 5; gx < module_w - 5; gx += grille.width){
+        int span = min(grille.width, module_w - 5 - gx);
+        duct.image(grille, left + gx, housing.height - 7, span, grille.height,
+          0, 0, span, grille.height);
+      }
+    }
+    duct.endDraw();
+    room_vent_strip = duct.get();
+  }
+  float top = deck == 0 ? ROOM_TOP : deck_y[deck - 1];
+  float w = room_vent_strip.width / (float) RENDER_SCALE;
+  float h = room_vent_strip.height / (float) RENDER_SCALE;
+  drawArt(g, room_vent_strip, x, top + 8 + h / 2, w, h);
+}
+
+PImage[] room_window_views = new PImage[5];
+
+void drawRoomWindow(PGraphics g, float x, int deck, int view){
+  PImage frame = roomDetail("Window 2");
+  if (frame == null) return;
+  if (room_window_views[view] == null){
+    PImage sky = loadArt(ART_FLOOR_DIR + "window_space.png");
+    PGraphics pane = createGraphics(frame.width, frame.height);
+    pane.beginDraw();
+    pane.noSmooth();
+    pane.background(3, 7, 18);
+    if (sky != null){
+      int crop_w = min(480, sky.width);
+      int crop_h = min(240, sky.height);
+      int sx = (view * 211) % max(1, sky.width - crop_w + 1);
+      int sy = (200 + view * 97) % max(1, sky.height - crop_h + 1);
+      pane.image(sky, 0, 0, frame.width, frame.height, sx, sy, sx + crop_w, sy + crop_h);
+    }
+    pane.endDraw();
+    PImage aperture = pane.get();
+    aperture.loadPixels();
+    // Chamfered opening sits under the original frame; exterior stays transparent.
+    for (int py = 0; py < aperture.height; py++){
+      for (int px = 0; px < aperture.width; px++){
+        boolean inside = px >= 6 && px <= 91 && py >= 4 && py <= 42
+          && px + py >= 14 && px - py <= 83
+          && px + py <= 125 && py - px <= 34;
+        if (!inside) aperture.pixels[py * aperture.width + px] = 0;
+      }
+    }
+    aperture.updatePixels();
+    pane.beginDraw();
+    pane.clear();
+    pane.image(aperture, 0, 0);
+    pane.image(frame, 0, 0);
+    pane.endDraw();
+    room_window_views[view] = pane.get();
+  }
+  float top = deck == 0 ? ROOM_TOP : deck_y[deck - 1];
+  float w = frame.width / (float) RENDER_SCALE;
+  float h = frame.height / (float) RENDER_SCALE;
+  drawArt(g, room_window_views[view], x, top + 28 + h / 2, w, h);
+}
+
+/* Lighting is continuous across panel boundaries, not baked into alternating tiles.
+   Cache the static composition once per room, at the game's render resolution. */
+PImage composeRoomWalls(int room){
+  int w = round((ROOM_RIGHT - ROOM_LEFT - 8) * RENDER_SCALE);
+  int h = round((deck_y[2] - ROOM_TOP) * RENDER_SCALE);
+  PGraphics wall = createGraphics(w, h);
+  wall.beginDraw();
+  wall.noSmooth();
+  wall.background(42, 45, 46);
+  PImage panel = roomDetail(room == 3 ? "Wall 4 Light" : "Wall 3");
+  PImage lamp = roomDetail(room == 3 ? "Lamp 1" : "Neon");
+  float[][] lights = {
+    {180, 408, 148, 368, 308, 523},
+    {219, 449, 204, 391, 282, 544},
+    {226, 516, 190, 433, 116, 414},
+    {146, 432, 259, 491, 173, 425}
+  };
+  int[][] panel_spans = {
+    {174, 116, 232, 174, 116, 232},
+    {116, 174, 116, 232, 174, 116},
+    {232, 116, 174, 232, 116, 174},
+    {174, 232, 116, 174, 232, 116}
+  };
+  for (int deck = 0; deck < DECK_COUNT; deck++){
+    int top = round(((deck == 0 ? ROOM_TOP : deck_y[deck - 1]) - ROOM_TOP) * RENDER_SCALE);
+    int bottom = round((deck_y[deck] - ROOM_TOP) * RENDER_SCALE);
+    int height = bottom - top;
+    if (panel != null){
+      int x = 0;
+      int bay = deck;
+      while (x < w){
+        int module_w = panel_spans[room][bay % panel_spans[room].length];
+        int span = min(module_w, w - x);
+        int source_w = round(panel.width * span / (float) module_w);
+        wall.image(panel, x, top, span, height, 0, 0, source_w, panel.height);
+        x += span;
+        bay++;
+      }
+    }
+    // Soft ambient falloff is shared by the whole deck.
+    wall.noStroke();
+    for (int y = 0; y < height; y++){
+      float edge = abs((y / (float) height) * 2 - 1);
+      wall.fill(5, 12, 18, 22 + 55 * edge * edge);
+      wall.rect(0, top + y, w, 1);
+    }
+    // Broad pools extend over several panels; every pixel has a smooth falloff.
+    for (int y = 4; y < height - 4; y += 2){
+      for (int x = 0; x < w; x += 2){
+        float strength = 0;
+        for (int light = 0; light < 2; light++){
+          float cx = (lights[room][deck * 2 + light] - ROOM_LEFT - 4) * RENDER_SCALE;
+          float dx = (x - cx) / 155.0;
+          float dy = (y - 16) / 110.0;
+          strength += exp(-(dx * dx + dy * dy) * 1.8);
+        }
+        if (room == 3) wall.fill(248, 203, 128, 36 * strength);
+        else wall.fill(118, 216, 224, 32 * strength);
+        wall.rect(x, top + y, 2, 2);
+      }
+    }
+    // One continuous ceiling rail, rather than a frame around every panel.
+    wall.fill(22, 27, 29);
+    wall.rect(0, top, w, 7);
+    wall.fill(77, 81, 79);
+    wall.rect(0, top + 2, w, 1);
+    wall.fill(18, 24, 27);
+    wall.rect(0, bottom - 5, w, 5);
+    if (lamp != null){
+      for (int light = 0; light < 2; light++){
+        float cx = (lights[room][deck * 2 + light] - ROOM_LEFT - 4) * RENDER_SCALE;
+        wall.image(lamp, round(cx - lamp.width / 2.0), top + 18);
+      }
     }
   }
+  wall.endDraw();
+  return wall.get();
+}
 
+void drawWalls(PGraphics g){
+  int room = roomIndex(screen);
+  if (room_wall_surfaces[room] == null) room_wall_surfaces[room] = composeRoomWalls(room);
+  drawArtCorner(g, room_wall_surfaces[room], ROOM_LEFT + 4, ROOM_TOP,
+    ROOM_RIGHT - ROOM_LEFT - 8, deck_y[2] - ROOM_TOP);
   g.imageMode(CENTER);
 }
 
@@ -456,6 +676,46 @@ void drawLadders(PGraphics g){
 
   g.strokeWeight(1);
 }
+/* A structural mounting bay interrupts the wall stripe and joins the deck rails.
+   Door sprite, threshold and interaction coordinates remain unchanged. */
+void drawDoorSurround(PGraphics g, int door){
+  float x = door_x[door];
+  float feet = door_y[door];
+  float head = feet - ART_DOOR_H;
+  float ceiling = head - 12;
+  int deck = door_deck[door];
+  if (deck >= 0 && deck < DECK_COUNT){
+    ceiling = (deck == 0 ? ROOM_TOP : deck_y[deck - 1]) + 6;
+  }
+  ceiling = min(ceiling, head - 5);
+  float half_w = ART_DOOR_W / 2;
+  g.pushStyle();
+  g.noStroke();
+  // Translucent lintel retains the wall's lighting instead of forming a dark column.
+  g.fill(53, 58, 58, 175);
+  g.rect(x - half_w + 3, ceiling, ART_DOOR_W - 6, head - ceiling);
+  g.fill(75, 80, 78, 130);
+  g.rect(x - half_w + 3, head - 2, ART_DOOR_W - 6, 0.5);
+  // A narrow chamfered seat follows the sprite; the wall stays visible at its sides.
+  g.fill(45, 50, 51);
+  g.stroke(72, 77, 75);
+  g.strokeWeight(0.5);
+  g.beginShape();
+  g.vertex(x - half_w + 1, feet);
+  g.vertex(x - half_w + 1, head + 5);
+  g.vertex(x - half_w + 7, head - 1);
+  g.vertex(x + half_w - 7, head - 1);
+  g.vertex(x + half_w - 1, head + 5);
+  g.vertex(x + half_w - 1, feet);
+  g.endShape(CLOSE);
+  g.noStroke();
+  g.fill(37, 43, 45);
+  g.rect(x - half_w, feet - 0.5, ART_DOOR_W, 1.5);
+  g.fill(92, 99, 96);
+  g.rect(x - half_w + 2, feet, ART_DOOR_W - 4, 0.5);
+  g.popStyle();
+}
+
 void drawDoors(PGraphics g){
   for (int i = 0; i < DOOR_COUNT; i++){
     if (door_room[i] != screen) continue;
@@ -466,6 +726,7 @@ void drawDoors(PGraphics g){
     PImage art = doorFrame(i);
 
     if (art != null){
+      drawDoorSurround(g, i);
       if (nearby){
         PImage glow = doorGlowFrame(i);
         if (glow != null){

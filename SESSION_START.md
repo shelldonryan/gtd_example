@@ -10,6 +10,29 @@ animação de `walk`, com a corrida da [issue #33](https://github.com/shelldonry
 intacta (D-153, D-154).
 Destino Wayfinder: [issue #1](issue://1)
 
+## Proposta em revisão — 19/09/2026
+
+- Elaborada [[SPEC_ENXUGAMENTO_E_IMERSAO]] a pedido do usuário: dez achados de
+  simplificação, catálogo editorial das 22 quests, vozes dos quatro NPCs e UI
+  com informação progressiva, preservando o balanceamento e as quests físicas.
+- Status: **PROPOSTA, NÃO IMPLEMENTADA**. As decisões novas do documento não
+  substituem as fontes vigentes nem recebem números D de decisão confirmada.
+- Complemento solicitado: tornar o mapa útil para orientação. A seção 5.6 da
+  spec propõe conexões reais, alvo por etapa, próxima porta/escada e detalhe de
+  conveses, com testes de navegação. O mapa continua consultivo, sem teleporte;
+  o redesenho está especificado, não implementado.
+- O usuário confirmou a cobertura de validação: harness existente, modelo
+  numérico independente e playtest de clareza/diversão. Não houve execução de
+  testes gráficos nesta elaboração nem alteração de código do jogo.
+- A skill to-spec prevê publicar no tracker com `ready-for-agent`. A consulta
+  via CLI retornou 401; o conector GitHub retornou 404 na issue #1 e 422 na
+  busca do repositório. Publicação, inventário/bloqueadores nativos e
+  sincronização do corpo do Wayfinder estão **PENDENTES POR ACESSO**; nenhuma
+  issue, label ou fronteira remota foi alterada ou declarada verificada.
+- Próxima ação para esta proposta: revisar a spec e, com acesso ao tracker,
+  verificar duplicidade, publicar e sincronizar o Wayfinder antes de iniciar
+  sua implementação. Este registro não redefine a prioridade de outros tickets.
+
 ## Regras inegociáveis
 
 1. Antes de qualquer avanço, leia este arquivo, `issue://1`, o inventário de
@@ -182,6 +205,7 @@ reporte e não escolha silenciosamente.
 - D-182 centralizou o prompt "Pressione E" nos vidros da porta.
 - D-183 removeu a exibição flutuante de item em mãos no cenário e funções legadas.
 - D-184 padronizou os botões dos modais lado a lado no canto inferior direito ("Cancelar (ESC)" à esquerda, ação confirmatória à direita) com dimensões compactas e texto centrado.
+- D-185 enriqueceu a apresentação visual das salas com iluminação contínua, decorações cenográficas assimétricas, janelas estelares, dutos procedurais e emolduramento estrutural das portas.
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -1401,3 +1425,16 @@ e integrados pelo carregador de assets existente.
   - **Documentação sincronizada:** `SESSION_START.md`.
   - **Evidência D-184:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
 
+### Sessão atual — enriquecimento visual dos cenários e iluminação contínua (D-185)
+
+- **Decisão D-185:** enriquecer a apresentação visual interna da nave (`ship.pde`) compondo paredes contínuas com iluminação ambiente e focos suaves por sala, decorações cenográficas assimétricas, dutos de ventilação procedurais, janelas com visão estelar (`window_space.png`) e molduras estruturais para os vãos das portas:
+  - **Motivação:** anteriormente, as paredes utilizavam faixas repetitivas estáticas (`art_wall_strip`) com emolduramento genérico por painel, ausência de iluminação volumétrica e cenários desprovidos de elementos ambientais distintivos entre as quatro salas.
+  - **Composição e Layout:**
+    - Composição procedural de paredes (`composeRoomWalls`) com painéis modulares variáveis (`Wall 3` e `Wall 4 Light`), gradiente vertical suave de oclusão e focos amplos de iluminação suave projetados a partir de luminárias (`Neon` e `Lamp 1`), com tons quentes no Dormitório e ciano nas demais salas, unificados por trilhos contínuos no teto e rodapé.
+    - Decoração cenográfica assimétrica por sala (`drawRoomDecor`), posicionando detalhes estruturais sem interferir nos pontos fixos de interação: computadores, painéis elétricos, armários, barris e quadros de aviso.
+    - Janelas procedurais voltadas para o espaço (`drawRoomWindow`) em corte chanfrado sobre o visual estelar (`window_space.png`), com enquadramentos variáveis por sala/convés.
+    - Dutos de ventilação modulares (`drawRoomVent`) integrados a partir de tubulações e grelhas de ventilação.
+    - Emolduramento estrutural para portas (`drawDoorSurround`), integrando os vãos aos trilhos dos conveses com verga translúcida e base chanfrada sem alterar as coordenadas de colisão e travessia.
+  - **Código e assets alterados:** `last_horizon/ship.pde`, `last_horizon/data/environment/window_space.png`.
+  - **Documentação sincronizada:** `SESSION_START.md`.
+  - **Evidência D-185:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
