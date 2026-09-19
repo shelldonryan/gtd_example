@@ -127,11 +127,11 @@ identificam um convés e `-1` permite uma abertura sem deck, inclusive acima do
 piso.
 
 O portal responde a `E` quando o técnico fica até 18 px do centro e até 18 px
-verticalmente do limiar. Ao entrar no raio de alcance, a porta exibe seu prompt
-em duas linhas empilhadas verticalmente acima da folha: na linha superior, o nome
-da sala de destino com contorno/glow de sombra preta (`textCenteredShadow`) em ciano;
-na linha inferior, a instrução `"Pressione E"` (`textPromptShadow`) em ciano (tam. 11).
-Na primeira travessia, `door_arrival_x` (centro),
+verticalmente do limiar. Assim como ocorre com os NPCs da tripulação, o nome da sala
+de destino permanece fixo acima da porta com contorno/glow de sombra preta
+(`textCenteredShadow`) em ciano; ao entrar no raio de alcance e colisão, a instrução
+`"Pressione E"` (`textPromptShadow`, tam. 11) surge empilhada entre a folha da porta
+e o nome do destino. Na primeira travessia, `door_arrival_x` (centro),
 `door_arrival_y` (pés) e `door_arrival_facing` definem a chegada padrão na sala
 de destino, inclusive em outro canto ou convés válido. Ao retornar imediatamente
 pela porta que leva à sala anterior, o jogo reaproveita o `x/y` exato em que o
