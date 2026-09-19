@@ -69,7 +69,7 @@ hoje; o rótulo de texto acima do ponto continua.
 | Arquivo | Estação | Sala e convés |
 | --- | --- | --- |
 | `stations/antena.png` | antena | Comando, superior |
-| `stations/console_rota.png` | console da rota | Comando, médio |
+| `stations/console_rota.png` | console da rota | Comando, médio (integrado com `BioComputer.png`, 181×117 px) |
 | `stations/painel_suporte.png` | painel de suporte de vida | Máquinas, superior |
 | `stations/painel_distribuicao.png` | painel de distribuição | Máquinas, médio |
 | `stations/bancada_motor.png` | bancada do motor | Máquinas, inferior |

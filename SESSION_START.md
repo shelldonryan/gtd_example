@@ -1128,5 +1128,14 @@ e integrados pelo carregador de assets existente.
 - **Código alterado:** `last_horizon/ship.pde` (`door_x`, `door_arrival_x`, `ladder_x`), `assets/PNG/Doors 2.png`, `last_horizon/data/doors/door_sheet.png`.
 - **Documentação sincronizada:** `assets/INVENTORY.md` (coordenadas de escadas atualizadas para Máquinas e Dormitório).
 
+### Sessão atual — integração do BioComputer no console da rota com efeito de trigger (D-167)
 
-
+- **Decisão D-167:** integrar o asset `assets/PNG/BioComputer.png` ao console da rota (`POINT_ROUTE` em `SCREEN_COMMAND`, Deck 1) e ao pipeline de estações (`last_horizon/data/stations/console_rota.png`):
+  - **Dimensões, respiro de contorno e escala 1:1:** o asset nativo possui 181×117 px físicos e foi gerado em `last_horizon/data/stations/console_rota.png` com margem transparente de 4 px em todas as bordas (189×125 px), eliminando o corte do contorno cyan no bloco inferior esquerdo e no topo. No render 720p (`RENDER_SCALE = 2`), é desenhado em 94,5×62,5 unidades lógicas (conteúdo em 90,5×58,5) com pixel art 1:1 sem distorção. A ancoragem repousa a base sobre o piso (`y = 202`) e o centro em `x = 260`.
+  - **Efeito de trigger (halo/contorno azul):** geração em tempo de carregamento de `art_station_glow` através de `prepareStationGlow()` e do algoritmo canônico `buildNpcGlow()` (idêntico ao contorno azul presente nas portas e nos NPCs).
+  - **Largura dinâmica do trigger:** `pointInteractionRange(POINT_ROUTE)` recalibrado para cobrir a largura total do console ($(\text{largura}/2) + 4 \approx 51$ unidades lógicas em vez dos 12 px fixos) e `nearestInteractablePoint()` desvinculado do antigo teto fixo de 23 px (`Float.MAX_VALUE`), permitindo acionar o comando `E` tanto no reator à esquerda quanto na mesa do terminal à direita.
+  - **Ativação estrita durante a quest:** seguindo o comportamento atual do jogo, o console da rota só se torna disponível quando selecionado como próximo objetivo de quest (`pointIsAvailable(POINT_ROUTE)`). O contorno azul e o prompt `E` só são desenhados quando o jogador está no raio de interação durante a etapa ativa da quest (`nearby == true`), permanecendo desligado em repouso.
+  - **Saneamento visual:** quando a estação possui sprite próprio (`has_art`), a caixa retangular geométrica de fallback (`g.rect(x - 16, y - 26, 32, 26, 2)`) é omitida.
+- **Código alterado:** `last_horizon/data/stations/console_rota.png`, `last_horizon/assets.pde` (`art_station_glow`, `prepareStationGlow()`), `last_horizon/ship.pde` (`drawPointArt`, `drawRoomPoint`, `pointInteractionRange`, `nearestInteractablePoint`).
+- **Documentação sincronizada:** `assets/INVENTORY.md` (registro da integração do `console_rota.png` com dimensões e margem de contorno).
+- **Evidência D-167:** `--asset-pipeline-test` carregou 25 de 63 imagens (`pipeline: OK`); `--ladder-test` retornou 6 `OK`; `--hit-test` retornou 5 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
