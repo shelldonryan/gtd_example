@@ -362,19 +362,17 @@ void drawRoomTitle(PGraphics g){
   g.textSize(render_size);
   float tw = g.textWidth(title);
 
-  float card_w = max(136, tw + 28);
-  float card_h = 22;
+  float card_w = max(120, tw + 20);
+  float card_h = 16;
   float card_x = (ROOM_LEFT + ROOM_RIGHT) / 2.0 - card_w / 2.0;
-  float card_y = 60;
+  float card_y = 61;
 
-  // Sombra projetada em camadas para destacar o card do cenário
+  // Sombra suave e discreta para profundidade sem peso excessivo
   g.noStroke();
-  g.fill(0x28000000);
-  g.rect(card_x - 2, card_y + 1, card_w + 4, card_h + 3, 5);
-  g.fill(0x55000000);
-  g.rect(card_x - 1, card_y + 2, card_w + 2, card_h + 2, 4);
-  g.fill(0x99000000);
-  g.rect(card_x, card_y + 2, card_w, card_h, 3);
+  g.fill(0x25000000);
+  g.rect(card_x - 1, card_y + 1, card_w + 2, card_h + 1, 4);
+  g.fill(0x45000000);
+  g.rect(card_x, card_y + 1, card_w, card_h, 3);
 
   // Card com a paleta dos cards de recursos
   g.fill(COL_PANEL);

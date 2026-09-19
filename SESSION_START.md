@@ -1323,10 +1323,10 @@ e integrados pelo carregador de assets existente.
 - **Decisão D-179:** substituir o texto solto do título da sala no canto superior esquerdo por um card centralizado com sombra e a paleta dos cards de recursos:
   - **Motivação:** o texto anterior ("SALA DE COMANDO", etc.) ficava em `ROOM_LEFT + 10, ROOM_TOP + 6`, logo acima da porta esquerda do Deck 0, gerando confusão de que indicava o destino daquela porta em vez do nome da sala atual.
   - **Composição do Card (`drawRoomTitle` em `ship.pde`):**
-    - Centralizado horizontalmente no cômodo em `x = 320` (`(ROOM_LEFT + ROOM_RIGHT) / 2`), no topo do Deck 0 (`y = 60, h = 22`).
-    - Largura adaptativa com base no texto (`card_w = max(136, tw + 28)`), acomodando títulos curtos e longos com folga simétrica de respiro.
+    - Centralizado horizontalmente no cômodo em `x = 320` (`(ROOM_LEFT + ROOM_RIGHT) / 2`), no topo do Deck 0 (`y = 61, h = 16`).
+    - Largura adaptativa compacta (`card_w = max(120, tw + 20)`), reduzindo a altura e a massa visual para um encaixe esguio e elegante.
     - Paleta idêntica aos cards de recursos do HUD: preenchimento `COL_PANEL` (`0xFF0D1B2B`), contorno `COL_BORDER` (`0xFF24516B`), cantos arredondados de raio 3 e linha interna superior de realce em `COL_CYAN_DARK`.
-    - Efeito de profundidade/elevação em multicamadas de sombra translúcida projetada para baixo (`0x28000000`, `0x55000000`, `0x99000000`).
+    - Efeito de profundidade e sombra suavizada (`0x25000000`, `0x45000000`), eliminando o peso excessivo e mantendo um destaque discreto.
     - Tipografia em `COL_CYAN` perfeitamente alinhada e centrada em `x` e `y`.
   - **Código alterado:** `last_horizon/ship.pde` (`drawRoomTitle`).
   - **Documentação sincronizada:** `SESSION_START.md`.
