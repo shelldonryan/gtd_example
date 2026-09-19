@@ -180,6 +180,7 @@ reporte e não escolha silenciosamente.
 - D-180 padronizou os nomes das portas fixos acima do vão com glow no destino e "Pressione E" empilhado na colisão.
 - D-181 reposicionou o beliche do jogador para o módulo da direita (Deck 0, x=185).
 - D-182 centralizou o prompt "Pressione E" nos vidros da porta.
+- D-183 removeu a exibição flutuante de item em mãos no cenário e funções legadas.
 
 
 - Os seis ícones de recursos já foram preparados pelo usuário e entram no HUD
@@ -1371,4 +1372,17 @@ e integrados pelo carregador de assets existente.
   - **Código alterado:** `last_horizon/ship.pde` (`drawDoors`).
   - **Documentação sincronizada:** `SESSION_START.md`.
   - **Evidência D-182:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sessão atual — remoção da exibição flutuante do item na mão e limpeza de código (D-183)
+
+- **Decisão D-183:** remover do cenário a renderização legada do item em mãos (`drawHeldItem` em `ship.pde`) e realizar a limpeza completa das funções associadas:
+  - **Motivação:** a rotina legada de protótipo `drawHeldItem` desenhava um texto solto em laranja no topo da parede (`"NA MÃO: [OBJETO]"`) em `ROOM_TOP + 6` e um sprite flutuante do item ao lado do jogador (`drawQuestObject`), o que poluia a cena visualmente (especialmente após a introdução do card centralizado da sala em D-179) e duplicava a informação já exibida com clareza na barra de ordens do HUD inferior.
+  - **Limpeza Realizada:**
+    - Removida a chamada `drawHeldItem(g)` em `drawRoom()` ([ship.pde](file:///c:/Users/jeffe/Documents/Faculdade/jogos/gtd_example/last_horizon/ship.pde)).
+    - Removida a declaração da função `drawHeldItem(PGraphics g)` ([ship.pde](file:///c:/Users/jeffe/Documents/Faculdade/jogos/gtd_example/last_horizon/ship.pde)).
+    - Removida a função auxiliar sem outros usos `heldItemLabel()` ([tasks.pde](file:///c:/Users/jeffe/Documents/Faculdade/jogos/gtd_example/last_horizon/tasks.pde)).
+    - A lógica de inventário de quests (`held_item`, coleta e entrega) e o status canônico no HUD inferior permanecem íntegros.
+  - **Código alterado:** `last_horizon/ship.pde` (`drawRoom`, `drawHeldItem`), `last_horizon/tasks.pde` (`heldItemLabel`).
+  - **Documentação sincronizada:** `SESSION_START.md`.
+  - **Evidência D-183:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
 

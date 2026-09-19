@@ -567,7 +567,6 @@ void applyQuestAction(){
   else if (action == ACTION_RETRY_QUEST) acceptSolution(pending_retry);
 }
 
-String heldItemLabel(){ return held_item == ITEM_NONE ? "NENHUM" : quest_object[held_item - 1]; }
 String pointLocation(int point){ return point_label[point] + " (" + room_label[roomIndex(point_room[point])] + ")"; }
 
 String questEffect(int q){

@@ -315,7 +315,6 @@ void drawRoom(PGraphics g){
   }
 
   drawPlayer(g);
-  drawHeldItem(g);
 }
 
 
@@ -1136,14 +1135,6 @@ void updatePlayerFrameLayer(int frame){
 }
 
 
-void drawHeldItem(PGraphics g){
-  if (held_item == ITEM_NONE){
-    return;
-  }
-
-  text(g, "NA MÃO: " + heldItemLabel(), ROOM_LEFT + 170, ROOM_TOP + 6, 16, COL_ORANGE);
-  drawQuestObject(g, player_x + PLAYER_W + 5, player_y + 15);
-}
 
 
 void enterRoom(int next_screen){
