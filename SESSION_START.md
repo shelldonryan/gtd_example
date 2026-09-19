@@ -1332,13 +1332,13 @@ e integrados pelo carregador de assets existente.
   - **Código alterado:** `last_horizon/ship.pde` (`drawRoomTitle`).
   - **Documentação sincronizada:** `SESSION_START.md`.
   - **Evidência D-179:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
-### Sessão atual — nomes de destino das portas fixos com glow e "Pressione E" na colisão (D-180)
+### Sessão atual — nomes de destino das portas fixos, próximos, brancos e azuis na colisão (D-180)
 
 - **Decisão D-180:** padronizar os nomes das portas e o prompt de interação (`drawDoors` em `ship.pde`) com o estilo visual consagrado nos NPCs (`"VERA"`):
-  - **Motivação:** o texto anterior em linha única monolítica (`"E - [SALA]"`) em ciano plano só aparecia durante a colisão, não tinha contraste nem contorno de sombra e divergia do padrão dos NPCs, cujos nomes ficam fixos acima do sprite.
-  - **Identidade visual com nome fixo e prompt condicional:**
-    - Linha superior fixa (`name_y = y - door_h - 18`): exibe permanentemente o nome da sala de destino (obtido via `roomTitle(door_target[i])`) com contorno e sombra preta de alta visibilidade (`textCenteredShadow`) em `COL_CYAN`, exatamente como o nome dos NPCs.
-    - Linha inferior condicional (`prompt_y = y - door_h - 5`): exibe o subtítulo de ação `"Pressione E"` com sombra (`textPromptShadow`) em `COL_CYAN`, tamanho 11, posicionado rente ao topo da porta exclusivamente quando o jogador está em alcance (`nearby`).
+  - **Motivação:** o texto anterior em linha única monolítica (`"E - [SALA]"`) em ciano plano só aparecia durante a colisão, não tinha contraste nem contorno de sombra e divergia do padrão dos NPCs, cujos nomes ficam fixos em branco acima do sprite e só ficam cianos na proximidade. Além disso, a posição anterior (`-18 px`) ficava distante demais do batente da porta e colada no teto.
+  - **Identidade visual com nome fixo próximo e prompt condicional:**
+    - Linha superior fixa e rente (`name_y = y - door_h - 9`): exibe permanentemente o nome da sala de destino (obtido via `roomTitle(door_target[i])`) com contorno e sombra preta de alta visibilidade (`textCenteredShadow`) em branco (`COL_TEXT`) no estado ocioso e em ciano (`COL_CYAN`) exclusivamente quando o jogador colide com a porta (`nearby`), idêntico aos NPCs.
+    - Linha inferior condicional (`prompt_y = y - door_h + 2`): exibe o subtítulo de ação `"Pressione E"` com sombra (`textPromptShadow`) em `COL_CYAN`, tamanho 11, posicionado sobre o cabeçote metálico da porta exclusivamente durante o alcance (`nearby`).
     - Centralização e contenção: `cx` é restringido entre `min_left` e `max_right` com base na maior largura entre o nome e o prompt, respeitando as escadas de conveses estreitos (ex: Deck 1 e Deck 2 do Comando).
     - Ajuste no utilitário de tipografia (`textCenteredShadow` em `ui.pde`): remoção da trava arbitrária de tamanho mínimo fixo em 16 px (`readableTextSize`), permitindo que a função respeite tamanhos dinâmicos calculados por `fitTextSize`.
   - **Código alterado:** `last_horizon/ship.pde` (`drawDoors`), `last_horizon/ui.pde` (`textCenteredShadow`).

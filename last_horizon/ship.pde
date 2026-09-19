@@ -483,8 +483,9 @@ void drawDoors(PGraphics g){
     String room_name = roomTitle(door_target[i]);
     String prompt = "Pressione E";
     float door_h = (art != null) ? ART_DOOR_H : DOOR_H;
-    float prompt_y = y - door_h - 5;
-    float name_y = y - door_h - 18;
+    float prompt_y = y - door_h + 2;
+    float name_y = y - door_h - 9;
+    int colour = nearby ? COL_CYAN : COL_TEXT;
 
     float min_left = ROOM_LEFT + 6;
     float max_right = ROOM_RIGHT - 6;
@@ -505,7 +506,7 @@ void drawDoors(PGraphics g){
     float max_tw = max(name_tw, prompt_tw);
     float cx = constrain(x, min_left + max_tw / 2.0, max_right - max_tw / 2.0);
 
-    textCenteredShadow(g, room_name, cx, name_y, name_size, COL_CYAN);
+    textCenteredShadow(g, room_name, cx, name_y, name_size, colour);
 
     if (nearby){
       textPromptShadow(g, prompt, cx, prompt_y, 11, COL_CYAN);
