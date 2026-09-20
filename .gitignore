@@ -23,6 +23,7 @@ desktop.ini
 # Editor temporary files
 *.swp
 *~
+.obsidian/
 
 AGENTS.md
 .agents
