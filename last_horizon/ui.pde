@@ -296,29 +296,40 @@ void drawTechnicalPanel(PGraphics g){
 void drawEndDayPanel(PGraphics g){
   NightProjection projection = recalculateEndDayPanel();
   drawModalShade(g);
-  drawPanel(g, 12, 12, 616, 336, COL_ORANGE);
-  text(g, "Encerrar o dia?", 28, 24, 16, COL_ORANGE);
-  text(g, "RECURSO        VARIAÇÃO       VALOR PREVISTO", 28, 48, 16, COL_MUTED);
-  text(g, projection.resource_line_a, 28, 64, 16, COL_TEXT);
-  text(g, projection.resource_line_b, 28, 80, 16, COL_TEXT);
-  float y = drawTextWrapped(g, projection.quest_summary, 28, 104, 584, 16, 18, COL_CYAN);
-  y = drawTextWrapped(g, projection.risk_line, 28, y + 3, 584, 16, 18, COL_ORANGE);
-  y = drawTextWrapped(g, projection.outcome_line, 28, y + 3, 584, 16, 18,
+
+  int fatal_count = projection.fatal_conditions.length;
+  float panel_h = 194 + fatal_count * 17;
+  float panel_y = round(205 - panel_h / 2.0);
+  float panel_x = 16;
+  float panel_w = 608;
+  float tx = 28;
+  float wrap_w = 582;
+
+  drawPanel(g, panel_x, panel_y, panel_w, panel_h, COL_ORANGE);
+  text(g, "Encerrar o dia?", tx, panel_y + 12, 16, COL_ORANGE);
+  text(g, "RECURSO        VARIAÇÃO       VALOR PREVISTO", tx, panel_y + 32, 16, COL_MUTED);
+  text(g, projection.resource_line_a, tx, panel_y + 48, 16, COL_TEXT);
+  text(g, projection.resource_line_b, tx, panel_y + 64, 16, COL_TEXT);
+
+  float y = panel_y + 84;
+  y = drawTextWrapped(g, projection.quest_summary, tx, y, wrap_w, 16, 17, COL_CYAN);
+  y = drawTextWrapped(g, projection.risk_line, tx, y + 1, wrap_w, 16, 17, COL_ORANGE);
+  y = drawTextWrapped(g, projection.outcome_line, tx, y + 1, wrap_w, 16, 17,
     projection.game_outcome == NIGHT_OUTCOME_DEFEAT ? COL_RED : COL_GREEN);
-  if (projection.fatal_conditions.length > 0){
-    text(g, "CONDIÇÕES FATAIS", 28, y + 3, 16, COL_RED);
-    y += 21;
-    for (int i = 0; i < projection.fatal_conditions.length; i++){
-      y = drawTextWrapped(g, "• " + projection.fatal_conditions[i], 28, y, 584, 16, 18, COL_RED);
+
+  if (fatal_count > 0){
+    text(g, "CONDIÇÕES FATAIS", tx, y + 1, 16, COL_RED);
+    y += 18;
+    for (int i = 0; i < fatal_count; i++){
+      y = drawTextWrapped(g, "• " + projection.fatal_conditions[i], tx, y, wrap_w, 16, 17, COL_RED);
     }
   } else {
-    y = drawTextWrapped(g, "Nenhuma condição fatal prevista.", 28, y + 3, 584, 16, 18, COL_GREEN);
+    y = drawTextWrapped(g, "Nenhuma condição fatal prevista.", tx, y + 1, wrap_w, 16, 17, COL_GREEN);
   }
-  /* Effects are already reflected in the table and the fatality list. Keeping
-     the reserved lower band empty guarantees that every condition stays above
-     the confirmation controls, including the multi-fatality defeat preview. */
-  drawModalFooter(g, 320, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true,
-    "DORMIR (ENTER)", ACTION_END_DAY, true);
+
+  float footer_y = panel_y + panel_h - 30;
+  drawModalFooter(g, footer_y, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true,
+    "DORMIR (ENTER)", ACTION_END_DAY, true, tx, panel_x + panel_w - 14);
 }
 
 
