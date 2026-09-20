@@ -511,8 +511,15 @@ PImage[] room_wall_surfaces = new PImage[ROOM_COUNT];
 
 PImage roomDetail(String name){
   if (!room_detail_cache.containsKey(name)){
-    String path = sketchPath("../assets/PNG/" + name + ".png");
-    room_detail_cache.put(name, new File(path).isFile() ? loadImage(path) : null);
+    String data_path = ART_DECORATION_DIR + name + ".png";
+    PImage art = loadArt(data_path);
+    if (art == null){
+      String legacy_path = sketchPath("../assets/PNG/" + name + ".png");
+      if (new File(legacy_path).isFile()){
+        art = loadImage(legacy_path);
+      }
+    }
+    room_detail_cache.put(name, art);
   }
   return room_detail_cache.get(name);
 }

@@ -26,7 +26,8 @@ final String ART_SCREEN_MENU = "screens/menu_space.png";
 final String ART_SCREEN_VICTORY = "screens/victory_mars.png";
 final String ART_SCREEN_DEFEAT = "screens/defeat_space.png";
 final String ART_FLOOR_DIR = "environment/";
-final int FLOOR_COUNT = 6;
+final String ART_DECORATION_DIR = "decorations/";
+final int FLOOR_COUNT = 1;
 
 /* canvas -> drawn size, in logical units */
 final float ART_ICON_DRAW = 16;
@@ -86,7 +87,7 @@ PImage[] art_door_glow = new PImage[2];
 PImage[] art_hull_frames = new PImage[2];
 
 String[] art_floor_file = {
-  "floor_1", "floor_2", "floor_3", "floor_4", "floor_5", "floor_6"
+  "floor_1"
 };
 PImage[] art_floor = new PImage[FLOOR_COUNT];
 PImage[] art_deck_strip;
@@ -97,8 +98,6 @@ int[] deck_strip_widths;
 int[] deck_strip_generations;
 int[] deck_strip_builds_by_deck = new int[DECK_COUNT];
 int deck_strip_builds = 0;
-PImage[] art_wall_strip;
-PImage[] art_wall_strip_dorm;
 PImage art_dorm_bunk;
 
 HashMap<String, PImage> art_cache = new HashMap<String, PImage>();
@@ -412,12 +411,6 @@ void loadArtAssets(){
   }
   prepareDeckStrips();
 
-  art_wall_strip = new PImage[DECK_COUNT];
-  art_wall_strip_dorm = new PImage[DECK_COUNT];
-  for (int w = 0; w < DECK_COUNT; w++){
-    art_wall_strip[w] = loadArt(ART_FLOOR_DIR + "wall_deck_" + w + ".png");
-    art_wall_strip_dorm[w] = loadArt(ART_FLOOR_DIR + "wall_dorm_deck_" + w + ".png");
-  }
   art_dorm_bunk = loadArt(ART_FLOOR_DIR + "dorm_bunk.png");
 
   prepareResourceIconCache();
@@ -426,15 +419,6 @@ void loadArtAssets(){
 
   println("arte: " + art_loaded + " de " + art_expected
     + " imagens carregadas; ausentes usam a geometria do protótipo");
-}
-
-
-boolean hasWallArt(){
-  if (art_wall_strip == null) return false;
-  for (int i = 0; i < art_wall_strip.length; i++){
-    if (art_wall_strip[i] != null) return true;
-  }
-  return false;
 }
 
 
@@ -448,13 +432,8 @@ boolean hasFloorArt(){
 
 
 PImage floorArtForDeck(int deck_index){
-  if (art_floor == null) return null;
-  /* Todos os conveses (superior, médio e inferior) usam o asset do inferior (floor_1) */
-  if (art_floor[0] != null) return art_floor[0];
-  if (art_floor[3] != null) return art_floor[3];
-  if (art_floor[2] != null) return art_floor[2];
-  if (art_floor[1] != null) return art_floor[1];
-  return null;
+  if (art_floor == null || art_floor.length == 0) return null;
+  return art_floor[0];
 }
 
 
