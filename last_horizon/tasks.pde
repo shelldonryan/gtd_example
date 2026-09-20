@@ -776,7 +776,7 @@ void interactNpc(int point){
 
   if (selected_preventive_id >= 0 && quest_owner[selected_preventive_id] == owner && dailyQuestFree()){
     beginNpcConversation(owner);
-    dialog_result = editorialQuestResult(selected_preventive_id) + " A ordem não pode ser cancelada.";
+    dialog_result = editorialQuestResult(selected_preventive_id) + " Depois de aceita, a ordem não pode ser cancelada.";
     pending_quest_action = ACTION_ACCEPT_ORDER;
     return;
   }
@@ -816,12 +816,22 @@ void openQuestStepPanel(){
   int q = active_quest;
   boolean collecting = quest_stage == QUEST_COLLECT;
   String verb = collecting ? "Pegar" : "Levar";
-  String result = collecting ? "Resultado: o objeto fica com você até a entrega. Custo: "
-    + questCostLabel(q) + "."
-    : "Resultado: " + questBenefitLabel(q) + ". Custo: " + questCostLabel(q) + ".";
-  openTechnical(verb + " " + quest_object[q] + "?",
-    verb + ": " + quest_object[q] + ". Destino: " + pointLocation(quest_destination[q])
-      + ". " + result + " Se falhar: " + questFailure(q) + ". " + questMotivation(q));
+  String cost_str = questCostLabel(q).equals("nenhum") ? "" : " · Custo: " + questCostLabel(q);
+  String result = collecting
+    ? "Resultado: o objeto fica com você até a entrega." + cost_str
+    : questBenefitLabel(q) + cost_str + ".";
+  String failure_str = questFailure(q);
+  if (failure_str.startsWith("SE FALHAR: ")){
+    failure_str = "Se falhar: " + failure_str.substring(11);
+  }
+  if (!failure_str.endsWith(".")) failure_str += ".";
+
+  String content = "Destino: " + pointLocation(quest_destination[q]) + "\n"
+    + result + "\n"
+    + failure_str + "\n\n"
+    + "\"" + questMotivation(q) + "\"";
+
+  openTechnical(verb + " " + quest_object[q] + "?", content);
   pending_quest_action = collecting ? ACTION_COLLECT_QUEST : ACTION_DELIVER_QUEST;
 }
 
@@ -829,9 +839,10 @@ void openRescuePanel(){
   if (urgentRisk() < 0) return;
   int crew = urgentRisk();
   openTechnical("SOCORRER " + crew_name[crew] + " — " + crew_risk_deadline[crew] + " NOITE(S)",
-    "SOCORRO: -8 ÁGUA E -2 COMIDA. ESTABILIZA " + crew_name[crew]
-    + " E USA A ÚNICA CONCLUSÃO DO DIA. SEM SOCORRO, A PESSOA MORRE QUANDO O PRAZO ZERAR. "
-    + "EM DIA PREVENTIVO, AS PERDAS POR NEGLIGÊNCIA CONTINUAM.");
+    "Custo do socorro: -8 ÁGUA e -2 COMIDA.\n"
+    + "Efeito: estabiliza " + crewDisplayName(crew) + " e consome a conclusão do dia.\n"
+    + "Sem socorro: a pessoa morre quando o prazo zerar.\n"
+    + "Nota: em dia preventivo, as perdas por negligência continuam.");
   pending_quest_action = ACTION_RESCUE;
 }
 
@@ -992,10 +1003,12 @@ void drawQuestCard(PGraphics g, int q, float x, float y, float w, int action, bo
   drawPanel(g, x, y, w, card_height, q == selected_preventive_id ? COL_CYAN : COL_BORDER);
   text(g, questVisibleTitle(q), x + 10, y + 10, 16, COL_CYAN);
   if (expanded){
-    float row = drawTextWrapped(g, questDetails(q), x + 10, y + 26, w - 20, 15, 16, COL_TEXT);
-    row = drawTextWrapped(g, "Objeto: " + quest_object[q], x + 10, row + 2, w - 20, 15, 16, COL_TEXT);
-    row = drawTextWrapped(g, questBenefitLabel(q), x + 10, row + 2, w - 20, 15, 16, COL_GREEN);
-    text(g, "Custo: " + questCostLabel(q), x + 10, row + 2, 15, COL_TEXT);
+    text(g, "Responsável: " + crewDisplayName(quest_owner[q]), x + 10, y + 28, 16, COL_TEXT);
+    text(g, "Objeto: " + quest_object[q], x + 10, y + 48, 16, COL_TEXT);
+    text(g, "Coleta: " + pointLocation(quest_origin[q]), x + 10, y + 68, 16, COL_CYAN);
+    text(g, "Entrega: " + pointLocation(quest_destination[q]), x + 10, y + 88, 16, COL_CYAN);
+    text(g, questBenefitLabel(q), x + 10, y + 108, 16, COL_GREEN);
+    drawTextWrapped(g, questCardConsequence(q), x + 10, y + 128, w - 20, 16, 17, COL_ORANGE);
     if (action != ACTION_NONE){
       String action_label = q < PREVENTIVE_COUNT
         ? "ESCOLHER · FALAR COM " + crewDisplayName(quest_owner[q])
@@ -1005,13 +1018,9 @@ void drawQuestCard(PGraphics g, int q, float x, float y, float w, int action, bo
     return;
   }
   drawTextWrapped(g, crewDisplayName(quest_owner[q]) + " · " + questMotivation(q),
-    x + 10, y + 28, w - 20, 16, 18, COL_MUTED);
-  text(g, "Objeto: " + quest_object[q], x + 10, y + 64, 16, COL_TEXT);
-  drawTextWrapped(g, "Rota: " + pointLocation(quest_origin[q]) + " → "
-    + pointLocation(quest_destination[q]), x + 10, y + 82, w - 20, 16, 18, COL_TEXT);
-  text(g, questBenefitLabel(q), x + 10, y + 100, 16, COL_GREEN);
-  text(g, "Custo: " + questCostLabel(q), x + 10, y + 118, 16, COL_TEXT);
-  drawTextWrapped(g, questCardConsequence(q), x + 10, y + 136, w - 20, 16, 18, COL_ORANGE);
+    x + 10, y + 28, w - 20, 16, 17, COL_MUTED);
+  text(g, questBenefitLabel(q), x + 10, y + 84, 16, COL_GREEN);
+  drawTextWrapped(g, questCardConsequence(q), x + 10, y + 116, w - 20, 16, 17, COL_ORANGE);
   if (action != ACTION_NONE){
     String action_label = q < PREVENTIVE_COUNT
       ? "ESCOLHER · FALAR COM " + crewDisplayName(quest_owner[q])

@@ -229,7 +229,7 @@ String questBaseLine(int q){
 String editorialQuestResult(int q){
   if (q < 0 || q >= quest_id.length) return "Resultado mecânico pendente.";
   if (q < PREVENTIVE_COUNT){
-    return "Recompensa: +" + preventiveReward(q) + " "
+    return "+" + preventiveReward(q) + " "
       + editorialSentenceCase(resourceName(preventive_resource[q])) + ".";
   }
   int solution = q - PREVENTIVE_COUNT;
@@ -353,7 +353,7 @@ String editorialPhaseLine(int crew){
 String editorialContextLine(int crew){
   if (crew < 0 || crew >= CREW_COUNT || !crew_alive[crew]) return "";
   if (selected_preventive_id >= 0 && quest_owner[selected_preventive_id] == crew){
-    return "Minha oferta está pronta. Fale comigo para assumir “"
+    return "Minha oferta está pronta. Aceite para assumir “"
       + questVisibleTitle(selected_preventive_id) + "”.";
   }
   if (selected_preventive_id >= 0){

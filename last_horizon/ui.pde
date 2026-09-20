@@ -217,7 +217,7 @@ void drawDialogue(PGraphics g){
 
   drawPortrait(g, dialog_name, 470, portrait_y);
   drawPanel(g, 24, panel_y, 592, panel_h, COL_CYAN);
-  text(g, dialog_name + " — FALA", 40, panel_y + 12, 16, COL_CYAN);
+  text(g, dialog_name, 40, panel_y + 12, 16, COL_CYAN);
   drawTextWrapped(g, dialog_text, 40, panel_y + 31, 552, 16, 17, COL_TEXT);
   if (has_result){
     text(g, "Resultado", 40, panel_y + 51, 16, COL_GREEN);
@@ -274,7 +274,32 @@ void drawTechnicalPanel(PGraphics g){
   drawModalShade(g);
   drawPanel(g, 34, 108, 572, 210, COL_CYAN);
   text(g, technical_title, 50, 120, 16, COL_CYAN);
-  drawTextWrapped(g, technical_text, 50, 148, 540, 16, 18, COL_TEXT);
+
+  String[] lines = split(technical_text, '\n');
+  float y = 146;
+
+  for (int i = 0; i < lines.length; i++){
+    String line = lines[i].trim();
+    if (line.length() == 0){
+      y += 6;
+      continue;
+    }
+
+    int col = COL_TEXT;
+    if (line.startsWith("Destino:") || line.startsWith("Coleta:") || line.startsWith("Entrega:")){
+      col = COL_CYAN;
+    } else if (line.startsWith("Benefício:") || line.startsWith("Resultado:") || line.startsWith("Efeito:")){
+      col = COL_GREEN;
+    } else if (line.startsWith("Se falhar:") || line.startsWith("Consequência:") || line.startsWith("Custo") || line.startsWith("Sem socorro:")){
+      col = COL_ORANGE;
+    } else if (line.startsWith("\"") || line.startsWith("Nota:")){
+      col = COL_MUTED;
+    }
+
+    y = drawTextWrapped(g, line, 50, y, 540, 16, 18, col);
+    y += 8;
+  }
+
   if (pending_quest_action != ACTION_NONE){
     boolean deliver = pending_quest_action == ACTION_DELIVER_QUEST;
     String dismiss_label = pending_quest_action == ACTION_RETRY_QUEST
@@ -285,7 +310,7 @@ void drawTechnicalPanel(PGraphics g){
     boolean enabled = pendingQuestEnabled();
     drawModalFooter(g, 284, dismiss_label, ACTION_CLOSE_MODAL, true,
       label, ACTION_CONFIRM_QUEST, enabled);
-    if (!enabled) text(g, questReasonText(pendingQuestReason()), 50, 257, 16, COL_ORANGE);
+    if (!enabled) text(g, questReasonText(pendingQuestReason()), 50, 286, 16, COL_ORANGE);
   } else {
     drawModalFooter(g, 284, "", ACTION_NONE, false,
       "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
@@ -442,8 +467,7 @@ void textPromptShadow(PGraphics g, String value, float cx, float y, float size, 
 
 
 float drawTextWrapped(PGraphics g, String value, float x, float y, float w, float size, float line_h, int colour){
-  String[] words = split(value, ' ');
-  String line = "";
+  String[] paragraphs = split(value, '\n');
   float actual_size = readableWrapSize(size);
   float actual_line_h = max(line_h, actual_size + 2);
   float render_size = renderTextSize(actual_size);
@@ -454,21 +478,33 @@ float drawTextWrapped(PGraphics g, String value, float x, float y, float w, floa
 
   float line_y = y;
 
-  for (int i = 0; i < words.length; i++){
-    String candidate = (line.length() == 0) ? words[i] : line + " " + words[i];
+  for (int p = 0; p < paragraphs.length; p++){
+    String paragraph = paragraphs[p];
+    if (paragraph.length() == 0){
+      line_y += render_line_h * 0.5;
+      continue;
+    }
+    String[] words = split(paragraph, ' ');
+    String line = "";
 
-    if (line.length() > 0 && g.textWidth(candidate) > w){
+    for (int i = 0; i < words.length; i++){
+      if (words[i].length() == 0) continue;
+      String candidate = (line.length() == 0) ? words[i] : line + " " + words[i];
+
+      if (line.length() > 0 && g.textWidth(candidate) > w){
+        g.text(line, x, line_y);
+        line = words[i];
+        line_y += render_line_h;
+      } else {
+        line = candidate;
+      }
+    }
+
+    if (line.length() > 0){
       g.text(line, x, line_y);
-      line = words[i];
       line_y += render_line_h;
-    } else {
-      line = candidate;
     }
   }
 
-  if (line.length() > 0){
-    g.text(line, x, line_y);
-  }
-
-  return line_y + render_line_h;
+  return line_y;
 }
