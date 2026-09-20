@@ -9,24 +9,30 @@
      5 - Alternar forçamento visual de interação das estações/objetos
    ========================================================================== */
 
-boolean test_mode_active = false;
-boolean test_mode_force_visual = false;
+boolean optional_test_mode_installed = installOptionalTestMode();
 
 
-boolean testModeKeyPressed(){
+boolean installOptionalTestMode(){
+  optional_test_key_hook = () -> handleOptionalModeKey();
+  optional_test_overlay_hook = (target) -> drawOptionalModeOverlay(target);
+  return true;
+}
+
+
+boolean handleOptionalModeKey(){
   // Detecção de Ctrl + K (código ASCII 11 ou flag de tecla do keyEvent)
   boolean ctrl_down = (keyEvent != null && keyEvent.isControlDown());
   boolean is_ctrl_k = (ctrl_down && (key == 'k' || key == 'K')) || (key == 11);
 
   if (is_ctrl_k){
-    test_mode_active = !test_mode_active;
-    if (!test_mode_active){
-      test_mode_force_visual = false;
+    optional_mode_enabled = !optional_mode_enabled;
+    if (!optional_mode_enabled){
+      optional_mode_force_visual = false;
     }
     return true;
   }
 
-  if (!test_mode_active){
+  if (!optional_mode_enabled){
     return false;
   }
 
@@ -51,7 +57,7 @@ boolean testModeKeyPressed(){
   }
 
   if (key == '5'){
-    test_mode_force_visual = !test_mode_force_visual;
+    optional_mode_force_visual = !optional_mode_force_visual;
     return true;
   }
 
@@ -77,19 +83,19 @@ void testModeTeleport(int target_screen){
 }
 
 
-void drawTestModeOverlay(PGraphics g){
-  if (!test_mode_active){
+void drawOptionalModeOverlay(PGraphics g){
+  if (!optional_mode_enabled){
     return;
   }
 
   g.pushStyle();
-  int badge_border = test_mode_force_visual ? COL_GREEN : COL_CYAN;
+  int badge_border = optional_mode_force_visual ? COL_GREEN : COL_CYAN;
   g.stroke(badge_border);
   g.fill(COL_PANEL, 235);
   g.rect(212, FOOTER_Y + 3, BASE_W - 218, 24, 3);
 
-  String visual_label = test_mode_force_visual ? "VISUAL: ON" : "VISUAL: OFF";
-  int visual_col = test_mode_force_visual ? COL_GREEN : COL_MUTED;
+  String visual_label = optional_mode_force_visual ? "VISUAL: ON" : "VISUAL: OFF";
+  int visual_col = optional_mode_force_visual ? COL_GREEN : COL_MUTED;
 
   text(g, "TEST-MODE", 218, FOOTER_Y + 7, 14, COL_CYAN);
   text(g, "| 1:Cmd 2:Dorm 3:Máq 4:Dep |", 282, FOOTER_Y + 7, 14, COL_TEXT);

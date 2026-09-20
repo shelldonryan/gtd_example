@@ -11,7 +11,6 @@ int[] room_action = {
   ACTION_INSPECT_DEPOT, ACTION_INSPECT_DORMITORY
 };
 
-final int DECK_COUNT = 3;
 float[] deck_y = {128, 202, 278};
 final int LADDER_PER_ROOM = 2;
 final int LADDER_COUNT = LADDER_PER_ROOM * ROOM_COUNT;
@@ -79,6 +78,21 @@ int last_portal_from_room = SCREEN_COMMAND;
 int last_portal_to_room = SCREEN_COMMAND;
 float last_portal_from_x = 0;
 float last_portal_from_y = 0;
+
+/* Portal data is resolved once, before either the animated or instant path
+   changes the active room. The prepared record is also the seam used by the
+   optional verification module. */
+boolean portal_transition_prepared = false;
+int portal_prepared_door = -1;
+int portal_prepared_from_room = SCREEN_NONE;
+int portal_prepared_target_room = SCREEN_NONE;
+int portal_prepared_return_door = -1;
+float portal_prepared_departure_x = 0;
+float portal_prepared_departure_y = 0;
+float portal_prepared_arrival_x = 0;
+float portal_prepared_arrival_y = 0;
+int portal_prepared_arrival_facing = 1;
+boolean portal_prepared_returning = false;
 
 final int POINT_READ = 0;
 final int POINT_COLLECT = 1;
@@ -203,27 +217,69 @@ void drawShipArea(PGraphics g){
 
 
 void drawMapOverlay(PGraphics g){
+  calculateMapRoute();
   drawModalShade(g);
-  drawPanel(g, 34, 44, 572, 282, COL_CYAN);
+  drawPanel(g, 12, 30, 616, 298, COL_CYAN);
   text(g, "MAPA DA NAVE", 50, 54, 16, COL_CYAN);
-  text(g, "CLIQUE PARA CONSULTAR. O MAPA NÃO MOVE O TÉCNICO.", 50, 74, 16, COL_MUTED);
+  text(g, mapTargetKind() + " · " + mapTargetText(), 50, 72, 16, COL_TEXT);
+
+  g.stroke(COL_BORDER);
+  g.strokeWeight(2);
+  for (int from = 0; from < ROOM_COUNT; from++){
+    for (int to = from + 1; to < ROOM_COUNT; to++){
+      drawMapConnection(g, from, to);
+    }
+  }
+  g.strokeWeight(1);
 
   for (int i = 0; i < ROOM_COUNT; i++){
     drawMapRoomCard(g, i);
   }
 
   drawMapRoomDetails(g);
-  drawButton(g, 506, 296, 84, 20, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+  drawButton(g, 22, 296, 86, 20, "SALA", ACTION_MAP_MY_ROOM, true);
+  drawButton(g, 114, 296, 98, 20, "BELICHE", ACTION_MAP_BUNK_QUERY, true);
+  drawButton(g, 218, 296, 104, 20, "SOCORRO", ACTION_MAP_RESCUE_QUERY, urgentRisk() >= 0);
+  drawButton(g, 328, 296, 132, 20, "VOLTAR À ROTA", ACTION_MAP_ROUTE,
+    map_target_room != SCREEN_NONE);
+  drawModalFooter(g, 296, "", ACTION_NONE, false,
+    "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+}
+
+
+void drawMapConnection(PGraphics g, int from, int to){
+  int from_screen = room_screen[from];
+  int to_screen = room_screen[to];
+  boolean connected = false;
+  for (int door = 0; door < DOOR_COUNT; door++){
+    if ((door_room[door] == from_screen && door_target[door] == to_screen)
+      || (door_room[door] == to_screen && door_target[door] == from_screen)){
+      connected = true;
+      break;
+    }
+  }
+  if (!connected) return;
+  boolean route = false;
+  for (int i = 0; i < map_route_length - 1; i++){
+    int a = map_route_rooms[i];
+    int b = map_route_rooms[i + 1];
+    if ((a == from && b == to) || (a == to && b == from)) route = true;
+  }
+  g.stroke(route ? COL_CYAN : COL_DIM);
+  g.line(room_x[from] + MAP_ROOM_W / 2.0, MAP_ROOM_Y + MAP_ROOM_H / 2.0,
+    room_x[to] + MAP_ROOM_W / 2.0, MAP_ROOM_Y + MAP_ROOM_H / 2.0);
 }
 
 
 
 
 void drawMapRoomCard(PGraphics g, int index){
-  boolean hover = uiLayer() == LAYER_MODAL
+  boolean hover = uiLayer() == LAYER_MAP
     && isHovering(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H);
   boolean selected = map_selected_room == index;
-  int border = selected ? COL_CYAN : (hover ? COL_CYAN : COL_BORDER);
+  boolean route = false;
+  for (int i = 0; i < map_route_length; i++) if (map_route_rooms[i] == index) route = true;
+  int border = selected || route ? COL_CYAN : (hover ? COL_CYAN : COL_BORDER);
 
   drawPanel(g, room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H, border);
   drawArtCorner(g, art_map == null ? null : art_map[index], room_x[index], MAP_ROOM_Y, ART_MAP_W, ART_MAP_H);
@@ -232,12 +288,17 @@ void drawMapRoomCard(PGraphics g, int index){
   g.rect(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H, 3);
   textCentered(g, room_label[index], room_x[index] + MAP_ROOM_W / 2.0,
     MAP_ROOM_Y + 8, 16, selected ? COL_CYAN : COL_TEXT);
-  textCentered(g, roomProblemCount(room_screen[index]) + " PROBLEMA(S)",
+  textCentered(g, roomProblemCount(room_screen[index]) + " alerta(s)",
     room_x[index] + MAP_ROOM_W / 2.0, MAP_ROOM_Y + 28, 16, COL_MUTED);
 
   if (room_screen[index] == screen){
     textCentered(g, "VOCÊ ESTÁ AQUI", room_x[index] + MAP_ROOM_W / 2.0,
       MAP_ROOM_Y + 48, 16, COL_ORANGE);
+  }
+
+  if (room_screen[index] == map_target_room){
+    textCentered(g, "OBJETIVO", room_x[index] + MAP_ROOM_W / 2.0,
+      MAP_ROOM_Y + 61, 16, COL_GREEN);
   }
 
   addButton(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H,
@@ -257,24 +318,86 @@ int roomIndex(int room_id){
 void drawMapRoomDetails(PGraphics g){
   int index = constrain(map_selected_room, 0, ROOM_COUNT - 1);
   int selected_room = room_screen[index];
-  text(g, roomOccupant(index) + " | " + roomSystems(index), 50, 168, 16, COL_TEXT);
-  float y = 183;
+  text(g, mapRouteText(), 50, 168, 16, COL_CYAN);
+  float y = drawTextWrapped(g, mapNextInstruction(), 50, 186, 540, 16, 18, COL_TEXT);
+  drawMapDeckPlan(g, selected_room, 50, y + 4, 238, 76);
+  text(g, roomOccupant(index) + " · " + roomSystems(index), 304, 204, 16, COL_TEXT);
+  y = 224;
   if (active_quest >= 0){
     int q = active_quest;
     if (quest_stage == QUEST_COLLECT && point_room[quest_origin[q]] == selected_room)
-      y = drawTextWrapped(g, "COLETA: " + quest_object[q] + " — " + point_label[quest_origin[q]], 50, y, 540, 16, 18, COL_CYAN);
-    if (point_room[quest_destination[q]] == selected_room)
-      y = drawTextWrapped(g, "ENTREGA: " + point_label[quest_destination[q]] + " | " + questEffect(q), 50, y, 540, 16, 18, COL_GREEN);
-  } else if (selected_order >= 0 && point_room[crew_point[quest_owner[selected_order]]] == selected_room){
-    y = drawTextWrapped(g, "CONFIRMAR ORDEM COM " + crew_name[quest_owner[selected_order]], 50, y, 540, 16, 18, COL_CYAN);
+      y = drawTextWrapped(g, "Pegar: " + quest_object[q] + " · " + point_label[quest_origin[q]], 304, y, 290, 16, 18, COL_CYAN);
+    if (quest_stage == QUEST_DELIVER && point_room[quest_destination[q]] == selected_room)
+      y = drawTextWrapped(g, "Levar: " + point_label[quest_destination[q]] + " · " + questEffect(q), 304, y, 290, 16, 18, COL_GREEN);
+  } else if (selected_preventive_id >= 0 && point_room[crew_point[quest_owner[selected_preventive_id]]] == selected_room){
+    y = drawTextWrapped(g, "Falar com " + crewDisplayName(quest_owner[selected_preventive_id]), 304, y, 290, 16, 18, COL_CYAN);
   }
   for (int p = 0; p < PROBLEM_COUNT; p++){
     if (!problem_active[p] || problem_room[p] != selected_room) continue;
-    y = drawTextWrapped(g, problemMapLine(p), 50, y + 6, 540, 16, 18, COL_ORANGE);
+    y = drawTextWrapped(g, problemMapLine(p), 304, y + 6, 290, 16, 18, COL_ORANGE);
   }
   int risk = urgentRisk();
-  if (selected_room == SCREEN_DORMITORY && risk >= 0)
-    drawTextWrapped(g, crew_name[risk] + " EM RISCO: " + crew_risk_deadline[risk] + " NOITE(S). SOCORRO: -8 ÁGUA, -2 COMIDA.", 50, y + 6, 540, 16, 18, COL_ORANGE);
+  if (selected_room == SCREEN_DORMITORY && risk >= 0){
+    drawTextWrapped(g, crewDisplayName(risk) + " em risco: " + crew_risk_deadline[risk] + " noite(s). Socorro: -8 água, -2 comida.", 304, y + 6, 290, 16, 18, COL_ORANGE);
+    drawButton(g, 470, 272, 124, 20, "VER SOCORRO", ACTION_OPEN_RESCUE,
+      uiLayer() == LAYER_MAP);
+  }
+}
+
+void drawMapDeckPlan(PGraphics g, int selected_room, float x, float y, float w, float h){
+  g.noFill();
+  g.stroke(COL_BORDER);
+  for (int deck = 0; deck < DECK_COUNT; deck++){
+    float line_y = y + 12 + deck * 24;
+    g.line(x, line_y, x + w, line_y);
+    text(g, deckLabel(deck), x + 4, line_y - 12, 16, COL_MUTED);
+  }
+  for (int ladder = 0; ladder < LADDER_COUNT; ladder++){
+    if (ladder_room[ladder] != selected_room) continue;
+    float lx = x + constrain(ladder_x[ladder] / BASE_W, 0, 1) * w;
+    float top = y + 12 + ladder_top_deck[ladder] * 24;
+    float bottom = y + 12 + ladder_bottom_deck[ladder] * 24;
+    g.stroke(COL_ORANGE);
+    g.line(lx, top, lx, bottom);
+  }
+  for (int door = 0; door < DOOR_COUNT; door++){
+    if (door_room[door] != selected_room) continue;
+    float dx = x + constrain(door_x[door] / BASE_W, 0, 1) * w;
+    boolean has_deck = door_deck[door] >= 0 && door_deck[door] < DECK_COUNT;
+    float dy = mapDeckPlanY(door_y[door], door_deck[door], y, h);
+    g.stroke(door == map_next_door ? COL_CYAN : COL_DIM);
+    if (has_deck){
+      g.line(dx - 3, dy - 4, dx + 3, dy + 4);
+    } else {
+      g.line(dx - 4, dy, dx + 4, dy);
+      text(g, "Abertura fora do convés", dx + 6, dy - 8, 16,
+        door == map_next_door ? COL_CYAN : COL_MUTED);
+    }
+  }
+  if (selected_room == screen){
+    float px = x + constrain((player_x + PLAYER_W / 2.0) / BASE_W, 0, 1) * w;
+    int deck = playerDeckForMap();
+    float py = mapDeckPlanY(player_y + PLAYER_H, deck, y, h);
+    g.noStroke();
+    g.fill(COL_ORANGE);
+    g.ellipse(px, py, 7, 7);
+    text(g, deck >= 0 ? "Você" : "Você · altura livre", px + 5, py - 8, 16, COL_ORANGE);
+  }
+  if (map_target_room == selected_room && map_target_point >= 0){
+    float tx = x + constrain(point_x[map_target_point] / BASE_W, 0, 1) * w;
+    int deck = pointDeck(map_target_point);
+    float ty = mapDeckPlanY(point_y[map_target_point], deck, y, h);
+    g.noStroke();
+    g.fill(COL_GREEN);
+    g.rect(tx - 4, ty - 4, 8, 8);
+    text(g, deck >= 0 ? "Objetivo" : "Objetivo · altura livre", tx + 6, ty - 8, 16, COL_GREEN);
+  }
+}
+
+
+float mapDeckPlanY(float height, int deck, float y, float h){
+  if (deck >= 0 && deck < DECK_COUNT) return y + 12 + deck * 24;
+  return y + constrain((height - ROOM_TOP) / (ROOM_BOTTOM - ROOM_TOP), 0, 1) * h;
 }
 
 
@@ -812,57 +935,6 @@ PImage doorGlowFrame(int index){
 }
 
 
-boolean doorTransitionActive(){
-  return door_transition_phase != DOOR_PHASE_CLOSED;
-}
-
-
-void startDoorTransition(int door){
-  int from_screen = screen;
-  int target_screen = door_target[door];
-  boolean returning = last_portal_valid
-    && last_portal_from_room == target_screen
-    && last_portal_to_room == from_screen;
-
-  door_transition_door = door;
-  door_transition_phase = DOOR_PHASE_OPENING;
-  door_transition_started = millis();
-  door_transition_target = target_screen;
-  door_transition_return_door = doorInRoomLeadingTo(target_screen, from_screen);
-  door_transition_arrival_x = returning ? last_portal_from_x : door_arrival_x[door];
-  door_transition_arrival_y = returning ? last_portal_from_y : door_arrival_y[door];
-  door_transition_facing = door_arrival_facing[door];
-
-  last_portal_valid = true;
-  last_portal_from_room = from_screen;
-  last_portal_to_room = target_screen;
-  last_portal_from_x = player_x + PLAYER_W / 2.0;
-  last_portal_from_y = player_y + PLAYER_H;
-}
-
-
-/* The player stays put while the door art opens; the room changes at the end of
-   the opening phase and the arrival door closes right after. */
-void updateDoorTransition(){
-  if (millis() - door_transition_started < ART_DOOR_PHASE_MS){
-    return;
-  }
-
-  door_transition_started = millis();
-
-  if (door_transition_phase == DOOR_PHASE_OPENING){
-    enterRoomAtPosition(door_transition_target, door_transition_arrival_y,
-      door_transition_arrival_x, door_transition_facing);
-    door_transition_door = door_transition_return_door;
-    door_transition_phase = DOOR_PHASE_CLOSING;
-    return;
-  }
-
-  door_transition_door = -1;
-  door_transition_phase = DOOR_PHASE_CLOSED;
-}
-
-
 boolean doorInRange(int index){
   if (index < 0 || index >= DOOR_COUNT || door_room[index] != screen){
     return false;
@@ -895,8 +967,10 @@ void drawRoomPoint(PGraphics g, int point){
   int colour = nearby || nextQuestPoint() == point ? COL_CYAN : (available ? COL_TEXT : COL_DIM);
   float x = point_x[point];
   float y = point_y[point];
+  int npc_crew = npc ? crewIndexForName(point_label[point]) : -1;
+  int npc_facing = npc ? npcFacingForPlayer(x, y) : 0;
 
-  boolean is_quest = (point == nextQuestPoint()) || (test_mode_active && test_mode_force_visual);
+  boolean is_quest = (point == nextQuestPoint()) || optionalVisualOverrideActive();
   boolean has_art = drawPointArt(g, point, x, y, nearby, is_quest);
   if (!has_art){
     if (!npc){
@@ -928,7 +1002,7 @@ void drawRoomPoint(PGraphics g, int point){
   }
 
   if (point_kind[point] == POINT_NPC){
-    drawNpc(g, x, y, point_label[point], nearby, is_quest);
+    drawNpc(g, x, y, npc_crew, npc_facing, nearby, is_quest);
   }
 }
 
@@ -1018,12 +1092,10 @@ int npcFacingForPlayer(float npc_x, float npc_y){
 }
 
 
-void drawNpc(PGraphics g, float x, float y, String name, boolean nearby, boolean quest_target){
-  int facing = npcFacingForPlayer(x, y);
-
-  PImage[] frames = crewArtFramesFacing(name, facing);
-  PImage[] glow_frames = crewArtGlowFramesFacing(name, facing);
-  PImage[] orange_glow_frames = crewArtOrangeGlowFramesFacing(name, facing);
+void drawNpc(PGraphics g, float x, float y, int crew, int facing, boolean nearby, boolean quest_target){
+  PImage[] frames = crewArtFramesFacing(crew, facing);
+  PImage[] glow_frames = crewArtGlowFramesFacing(crew, facing);
+  PImage[] orange_glow_frames = crewArtOrangeGlowFramesFacing(crew, facing);
   int frame_count = frames == null ? 0 : frames.length;
   int frame_index = artFrameIndex(frame_count, ART_NPC_FRAME_MS);
   PImage art = frame_count == 0 ? null : frames[frame_index];
@@ -1051,39 +1123,18 @@ void drawNpc(PGraphics g, float x, float y, String name, boolean nearby, boolean
   g.rect(x + 2 + eye_offset, y - 19, 2, 2);
 }
 
+
+void drawNpc(PGraphics g, float x, float y, String name, boolean nearby, boolean quest_target){
+  int crew = crewIndexForName(name);
+  int facing = npcFacingForPlayer(x, y);
+  drawNpc(g, x, y, crew, facing, nearby, quest_target);
+}
+
+
 void drawNpc(PGraphics g, float x, float y, String name, boolean nearby){
   drawNpc(g, x, y, name, nearby, false);
 }
 
-
-
-void drawPlayer(PGraphics g){
-  if (!player_assets_loaded){
-    drawPlayerFallback(g);
-    return;
-  }
-
-  int frame = playerCurrentFrame();
-  updatePlayerFrameLayer(frame);
-  g.imageMode(CENTER);
-  g.image(player_frame_layer,
-    player_x + PLAYER_W / 2.0,
-    player_y + PLAYER_H / 2.0,
-    PLAYER_DRAW_W,
-    PLAYER_DRAW_H
-  );
-}
-
-
-void drawPlayerFallback(PGraphics g){
-  g.noStroke();
-  g.fill(player_on_ladder ? COL_CYAN : COL_ORANGE);
-  g.rect(player_x, player_y, PLAYER_W, PLAYER_H);
-  g.fill(COL_BG);
-  g.rect(player_x + 4, player_y + 5, 2, 2);
-  g.rect(player_x + 10, player_y + 5, 2, 2);
-  g.rect(player_x + 4, player_y + 17, 8, 2);
-}
 
 
 void loadPlayerAssets(){
@@ -1422,38 +1473,23 @@ int doorInRoomLeadingTo(int room_id, int target){
 }
 
 void enterRoomThroughDoor(int door){
-  playSound(sound_door);
+  if (!preparePortalTransition(door)){
+    return;
+  }
 
+  playSound(sound_door);
   if (doorFrame(door) != null){
     startDoorTransition(door);
     return;
   }
 
-  int from_screen = screen;
-  int target_screen = door_target[door];
-  boolean returning_to_previous_room =
-    last_portal_valid
-    && last_portal_from_room == target_screen
-    && last_portal_to_room == from_screen;
-  float arrival_x = returning_to_previous_room
-    ? last_portal_from_x
-    : door_arrival_x[door];
-  float arrival_y = returning_to_previous_room
-    ? last_portal_from_y
-    : door_arrival_y[door];
-
-  last_portal_valid = true;
-  last_portal_from_room = from_screen;
-  last_portal_to_room = target_screen;
-  last_portal_from_x = player_x + PLAYER_W / 2.0;
-  last_portal_from_y = player_y + PLAYER_H;
-
   enterRoomAtPosition(
-    target_screen,
-    arrival_y,
-    arrival_x,
-    door_arrival_facing[door]
+    portal_prepared_target_room,
+    portal_prepared_arrival_y,
+    portal_prepared_arrival_x,
+    portal_prepared_arrival_facing
   );
+  portal_transition_prepared = false;
 }
 
 
@@ -1468,6 +1504,7 @@ void enterRoomAtPosition(int next_screen, float feet_y, float center_x, int faci
   player_velocity_y = 0;
   player_grounded = isDeckSurface(clamped_feet_y);
   player_on_ladder = false;
+  current_ladder = -1;
   ladder_vertical_release_required = false;
   jump_queued = false;
   player_step_accum = 0;
@@ -1498,63 +1535,24 @@ void resetRoomState(){
   held_item = ITEM_NONE;
   map_open = false;
   dialog_open = false;
+  dialog_result = "";
+  dialog_crew = -1;
   technical_open = false;
   pending_quest_action = ACTION_NONE;
   pending_retry = -1;
   end_day_open = false;
   help_open = false;
   last_portal_valid = false;
-}
-
-
-boolean useNearbyDoor(){
-  int door = nearbyDoor();
-
-  if (door < 0 || nearestInteractablePoint() >= 0){
-    return false;
-  }
-
-  enterRoomThroughDoor(door);
-  return true;
-}
-
-
-void updateRoom(){
-  if (doorTransitionActive()){
-    updateDoorTransition();
-    jump_queued = false;
-    interact_queued = false;
-    return;
-  }
-
-  if (paused || modalOpen()){
-    jump_queued = false;
-    interact_queued = false;
-    return;
-  }
-
-
-
-  if (interact_queued){
-    interact_queued = false;
-
-    if (!useNearbyDoor()){
-      interactNearby();
-    }
-  }
-  if (modalOpen()){
-    jump_queued = false;
-    return;
-  }
-
-  updatePlayerFacing();
-  if (player_on_ladder){
-    updatePlayerOnLadder();
-  } else {
-    updatePlayerOnDeck();
-  }
-
-  jump_queued = false;
+  portal_transition_prepared = false;
+  portal_prepared_door = -1;
+  portal_prepared_from_room = SCREEN_NONE;
+  portal_prepared_target_room = SCREEN_NONE;
+  portal_prepared_return_door = -1;
+  portal_prepared_returning = false;
+  door_transition_door = -1;
+  door_transition_phase = DOOR_PHASE_CLOSED;
+  door_transition_target = SCREEN_NONE;
+  door_transition_return_door = -1;
 }
 
 
@@ -1964,5 +1962,5 @@ int questObjectShown(){
     return held_item - 1;
   }
 
-  return active_quest >= 0 ? active_quest : selected_order;
+  return active_quest >= 0 ? active_quest : selected_preventive_id;
 }

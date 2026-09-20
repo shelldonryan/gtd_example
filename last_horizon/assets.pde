@@ -90,6 +90,13 @@ String[] art_floor_file = {
 };
 PImage[] art_floor = new PImage[FLOOR_COUNT];
 PImage[] art_deck_strip;
+PImage[] art_floor_generation_sources = new PImage[FLOOR_COUNT];
+int[] art_floor_generations = new int[FLOOR_COUNT];
+PImage[] deck_strip_sources;
+int[] deck_strip_widths;
+int[] deck_strip_generations;
+int[] deck_strip_builds_by_deck = new int[DECK_COUNT];
+int deck_strip_builds = 0;
 PImage[] art_wall_strip;
 PImage[] art_wall_strip_dorm;
 PImage art_dorm_bunk;
@@ -97,6 +104,26 @@ PImage art_dorm_bunk;
 HashMap<String, PImage> art_cache = new HashMap<String, PImage>();
 int art_loaded = 0;
 int art_expected = 0;
+int cache_invalidations = 0;
+int art_load_ms = 0;
+
+class DeckStripCacheEntry {
+  PImage source;
+  int render_width;
+  int source_generation;
+  PImage bitmap;
+
+  DeckStripCacheEntry(PImage source_value, int width_value, int generation_value,
+    PImage bitmap_value){
+    source = source_value;
+    render_width = width_value;
+    source_generation = generation_value;
+    bitmap = bitmap_value;
+  }
+}
+
+ArrayList<DeckStripCacheEntry> deck_strip_cache_entries =
+  new ArrayList<DeckStripCacheEntry>();
 
 
 boolean artExists(String path){
@@ -321,6 +348,7 @@ PImage buildNpcGlow(PImage source){
 
 
 void loadArtAssets(){
+  long art_load_started_nanos = System.nanoTime();
   art_icon = new PImage[art_icon_file.length];
   art_station = new PImage[art_station_file.length];
   art_station_glow = new PImage[art_station_file.length];
@@ -392,6 +420,10 @@ void loadArtAssets(){
   }
   art_dorm_bunk = loadArt(ART_FLOOR_DIR + "dorm_bunk.png");
 
+  prepareResourceIconCache();
+
+  art_load_ms = int((System.nanoTime() - art_load_started_nanos) / 1000000L);
+
   println("arte: " + art_loaded + " de " + art_expected
     + " imagens carregadas; ausentes usam a geometria do protótipo");
 }
@@ -427,16 +459,40 @@ PImage floorArtForDeck(int deck_index){
 
 
 void prepareDeckStrips(){
-  if (!hasFloorArt()){
-    return;
+  if (art_deck_strip == null || art_deck_strip.length != DECK_COUNT){
+    art_deck_strip = new PImage[DECK_COUNT];
   }
+
+  if (deck_strip_sources == null || deck_strip_sources.length != DECK_COUNT){
+    deck_strip_sources = new PImage[DECK_COUNT];
+    deck_strip_widths = new int[DECK_COUNT];
+    deck_strip_generations = new int[DECK_COUNT];
+  }
+
+  syncFloorSourceGenerations();
   int render_w = round((ROOM_RIGHT - ROOM_LEFT - 8) * RENDER_SCALE);
   for (int i = 0; i < DECK_COUNT; i++){
     PImage tile = floorArtForDeck(i);
+    int generation = floorSourceGeneration(tile);
+
+    if (deckStripKeyChanged(i, tile, render_w, generation)){
+      invalidateDeckStripCache(i);
+    }
+
     if (tile == null){
       art_deck_strip[i] = null;
       continue;
     }
+
+    DeckStripCacheEntry entry = findDeckStripCacheEntry(tile, render_w, generation);
+    if (entry != null){
+      art_deck_strip[i] = entry.bitmap;
+      deck_strip_sources[i] = tile;
+      deck_strip_widths[i] = render_w;
+      deck_strip_generations[i] = generation;
+      continue;
+    }
+
     PGraphics strip = createGraphics(render_w, tile.height);
     strip.beginDraw();
     strip.clear();
@@ -448,7 +504,99 @@ void prepareDeckStrips(){
       x += tile.width;
     }
     strip.endDraw();
-    art_deck_strip[i] = strip.get();
+    PImage bitmap = strip.get();
+    deck_strip_cache_entries.add(new DeckStripCacheEntry(tile, render_w, generation, bitmap));
+    art_deck_strip[i] = bitmap;
+    deck_strip_sources[i] = tile;
+    deck_strip_widths[i] = render_w;
+    deck_strip_generations[i] = generation;
+    deck_strip_builds_by_deck[i]++;
+    deck_strip_builds++;
+  }
+}
+
+
+void syncFloorSourceGenerations(){
+  if (art_floor == null){
+    return;
+  }
+
+  for (int i = 0; i < art_floor.length && i < art_floor_generations.length; i++){
+    if (art_floor_generation_sources[i] != art_floor[i]){
+      art_floor_generation_sources[i] = art_floor[i];
+      art_floor_generations[i]++;
+    }
+  }
+}
+
+
+int floorSourceGeneration(PImage source){
+  if (source == null || art_floor == null){
+    return 0;
+  }
+
+  int generation = 0;
+  for (int i = 0; i < art_floor.length && i < art_floor_generations.length; i++){
+    if (art_floor[i] == source){
+      generation = max(generation, art_floor_generations[i]);
+    }
+  }
+  return generation;
+}
+
+
+boolean deckStripKeyChanged(int deck, PImage source, int render_w, int generation){
+  return deck_strip_sources[deck] != source
+    || deck_strip_widths[deck] != render_w
+    || deck_strip_generations[deck] != generation;
+}
+
+
+DeckStripCacheEntry findDeckStripCacheEntry(PImage source, int render_w, int generation){
+  for (int i = 0; i < deck_strip_cache_entries.size(); i++){
+    DeckStripCacheEntry entry = deck_strip_cache_entries.get(i);
+    if (entry.source == source && entry.render_width == render_w
+      && entry.source_generation == generation){
+      return entry;
+    }
+  }
+
+  return null;
+}
+
+
+void invalidateDeckStripCache(int deck){
+  PImage old_source = deck_strip_sources[deck];
+  int old_width = deck_strip_widths[deck];
+  int old_generation = deck_strip_generations[deck];
+  art_deck_strip[deck] = null;
+  deck_strip_sources[deck] = null;
+  deck_strip_widths[deck] = 0;
+  deck_strip_generations[deck] = 0;
+
+  if (old_source == null){
+    return;
+  }
+
+  boolean used_elsewhere = false;
+  for (int other = 0; other < DECK_COUNT; other++){
+    if (other != deck && deck_strip_sources[other] == old_source
+      && deck_strip_widths[other] == old_width
+      && deck_strip_generations[other] == old_generation){
+      used_elsewhere = true;
+      break;
+    }
+  }
+
+  if (!used_elsewhere){
+    for (int i = deck_strip_cache_entries.size() - 1; i >= 0; i--){
+      DeckStripCacheEntry entry = deck_strip_cache_entries.get(i);
+      if (entry.source == old_source && entry.render_width == old_width
+        && entry.source_generation == old_generation){
+        deck_strip_cache_entries.remove(i);
+      }
+    }
+    cache_invalidations++;
   }
 }
 
@@ -482,59 +630,92 @@ PImage questObjectArt(int q){
 }
 
 
-PImage[] crewArtFramesFacing(String name, int facing){
+int crewIndexForName(String name){
+  if (name == null){
+    return -1;
+  }
+
   for (int crew = 0; crew < CREW_COUNT && crew < crew_name.length; crew++){
-    if (crew_name[crew].equals(name) || art_crew_file[crew].equalsIgnoreCase(name)){
-      if (facing < 0 && art_crew_frames_left != null && art_crew_frames_left[crew][0] != null){
-        return art_crew_frames_left[crew];
-      }
-      if (facing > 0 && art_crew_frames_right != null && art_crew_frames_right[crew][0] != null){
-        return art_crew_frames_right[crew];
-      }
-      if (art_crew_frames != null && art_crew_frames[crew][0] != null){
-        return art_crew_frames[crew];
-      }
-      return null;
+    if (crew_name[crew].equals(name)
+      || (art_crew_file != null && crew < art_crew_file.length
+        && art_crew_file[crew].equalsIgnoreCase(name))){
+      return crew;
     }
   }
+
+  return -1;
+}
+
+
+PImage[] crewArtFramesFacing(int crew, int facing){
+  if (crew < 0 || crew >= CREW_COUNT){
+    return null;
+  }
+
+  if (facing < 0 && art_crew_frames_left != null && art_crew_frames_left[crew][0] != null){
+    return art_crew_frames_left[crew];
+  }
+  if (facing > 0 && art_crew_frames_right != null && art_crew_frames_right[crew][0] != null){
+    return art_crew_frames_right[crew];
+  }
+  if (art_crew_frames != null && art_crew_frames[crew][0] != null){
+    return art_crew_frames[crew];
+  }
+
   return null;
 }
 
-PImage[] crewArtGlowFramesFacing(String name, int facing){
-  for (int crew = 0; crew < CREW_COUNT && crew < crew_name.length; crew++){
-    if (crew_name[crew].equals(name) || art_crew_file[crew].equalsIgnoreCase(name)){
-      if (facing < 0 && art_crew_glow_left != null && art_crew_glow_left[crew][0] != null){
-        return art_crew_glow_left[crew];
-      }
-      if (facing > 0 && art_crew_glow_right != null && art_crew_glow_right[crew][0] != null){
-        return art_crew_glow_right[crew];
-      }
-      if (art_crew_glow != null && art_crew_glow[crew][0] != null){
-        return art_crew_glow[crew];
-      }
-      return null;
-    }
+
+PImage[] crewArtGlowFramesFacing(int crew, int facing){
+  if (crew < 0 || crew >= CREW_COUNT){
+    return null;
   }
+
+  if (facing < 0 && art_crew_glow_left != null && art_crew_glow_left[crew][0] != null){
+    return art_crew_glow_left[crew];
+  }
+  if (facing > 0 && art_crew_glow_right != null && art_crew_glow_right[crew][0] != null){
+    return art_crew_glow_right[crew];
+  }
+  if (art_crew_glow != null && art_crew_glow[crew][0] != null){
+    return art_crew_glow[crew];
+  }
+
   return null;
+}
+
+
+PImage[] crewArtOrangeGlowFramesFacing(int crew, int facing){
+  if (crew < 0 || crew >= CREW_COUNT){
+    return null;
+  }
+
+  if (facing < 0 && art_crew_glow_orange_left != null && art_crew_glow_orange_left[crew][0] != null){
+    return art_crew_glow_orange_left[crew];
+  }
+  if (facing > 0 && art_crew_glow_orange_right != null && art_crew_glow_orange_right[crew][0] != null){
+    return art_crew_glow_orange_right[crew];
+  }
+  if (art_crew_glow_orange != null && art_crew_glow_orange[crew][0] != null){
+    return art_crew_glow_orange[crew];
+  }
+
+  return null;
+}
+
+
+PImage[] crewArtFramesFacing(String name, int facing){
+  return crewArtFramesFacing(crewIndexForName(name), facing);
+}
+
+
+PImage[] crewArtGlowFramesFacing(String name, int facing){
+  return crewArtGlowFramesFacing(crewIndexForName(name), facing);
 }
 
 
 PImage[] crewArtOrangeGlowFramesFacing(String name, int facing){
-  for (int crew = 0; crew < CREW_COUNT && crew < crew_name.length; crew++){
-    if (crew_name[crew].equals(name) || art_crew_file[crew].equalsIgnoreCase(name)){
-      if (facing < 0 && art_crew_glow_orange_left != null && art_crew_glow_orange_left[crew][0] != null){
-        return art_crew_glow_orange_left[crew];
-      }
-      if (facing > 0 && art_crew_glow_orange_right != null && art_crew_glow_orange_right[crew][0] != null){
-        return art_crew_glow_orange_right[crew];
-      }
-      if (art_crew_glow_orange != null && art_crew_glow_orange[crew][0] != null){
-        return art_crew_glow_orange[crew];
-      }
-      return null;
-    }
-  }
-  return null;
+  return crewArtOrangeGlowFramesFacing(crewIndexForName(name), facing);
 }
 
 

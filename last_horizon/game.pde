@@ -109,7 +109,8 @@ void drawTransmissionCard(PGraphics g){
   drawPanel(g, 96, 140, 448, 96, COL_CYAN);
   text(g, "TRANSMISSÃO DA TERRA", 112, 150, 16, COL_CYAN);
   drawTextWrapped(g, transmission_text, 112, 172, 416, 16, 18, COL_TEXT);
-  drawButton(g, 424, 208, 104, 20, "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true);
+  drawModalFooter(g, 208, "", ACTION_NONE, false,
+    "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true, 112, 528);
 }
 
 int incidentForDay(int value){
@@ -122,37 +123,25 @@ void applyEventChoice(int choice){
   quest_review = PREVENTIVE_COUNT + event_index * 2 + choice;
 }
 
-void applyQuestConsequences(){
-  system_message = questNightSummary();
-  for (int resource = RESOURCE_ENERGY; resource <= RESOURCE_PARTS; resource++){
-    payResource(resource, preventiveNightLoss(resource));
-  }
-  active_quest = selected_order = -1;
-  held_item = ITEM_NONE;
-  quest_stage = 0;
-}
-
-void processNight(){
-  energy -= ENERGY_PER_DAY;
-  oxygen -= OXYGEN_PER_DAY;
-  water -= WATER_PER_DAY;
-  food -= FOOD_PER_DAY;
-  morale -= MORALE_PER_DAY;
-  for (int p = 0; p < PROBLEM_COUNT; p++){
-    if (problem_active[p]) payResource(problem_loss_resource[p], problem_loss_value[p]);
-  }
-  processSurvivorRisks();
-  processProblemDeadlines();
-  clampResources();
+NightProjection processNight(){
+  /* processNight and projectNight intentionally start at the same pure seam;
+     the real path applies this single projection and never reruns an effect. */
+  NightProjection night_projection = simulateNightTransition();
+  applyNightProjection(night_projection);
+  return night_projection;
 }
 
 void endDay(){
   if (event_open || paused || !isRoomScreen() || !atQuestPoint(POINT_TECH_BUNK)) return;
-  applyQuestConsequences();
-  processNight();
+  NightProjection night_projection = processNight();
   end_day_open = orders_open = dialog_open = technical_open = map_open = false;
-  if (checkEndConditions()) return;
-  if (day == TRIP_DAYS){
+  if (night_projection.game_outcome == NIGHT_OUTCOME_DEFEAT){
+    paused = false;
+    screen = SCREEN_GAME_OVER;
+    return;
+  }
+  if (night_projection.game_outcome == NIGHT_OUTCOME_VICTORY){
+    paused = false;
     screen = SCREEN_VICTORY;
     return;
   }
@@ -197,6 +186,43 @@ int resourceColour(float value){
   if (value < RESOURCE_RED) return COL_RED;
   if (value < RESOURCE_GREEN) return COL_YELLOW;
   return COL_GREEN;
+}
+
+String nightFatalWarning(){
+  for (int p = 0; p < PROBLEM_COUNT; p++){
+    if (problem_active[p] && p == PROBLEM_ENGINE && problem_deadline[p] <= 1)
+      return "Crise fatal: o motor será destruído esta noite";
+  }
+  if (energy - ENERGY_PER_DAY - dailyProblemLoss(RESOURCE_ENERGY)
+    - preventiveNightLoss(RESOURCE_ENERGY) - nightCrisisLoss(RESOURCE_ENERGY) <= 0)
+    return "Risco fatal: a energia pode chegar a zero esta noite";
+  if (oxygen - OXYGEN_PER_DAY - dailyProblemLoss(RESOURCE_OXYGEN)
+    - preventiveNightLoss(RESOURCE_OXYGEN) - nightCrisisLoss(RESOURCE_OXYGEN) <= 0)
+    return "Risco fatal: o oxigênio pode chegar a zero esta noite";
+  if (morale - MORALE_PER_DAY - dailyProblemLoss(RESOURCE_MORALE)
+    - preventiveNightLoss(RESOURCE_MORALE) - nightCrisisLoss(RESOURCE_MORALE) <= 0)
+    return "Risco fatal: a moral pode chegar a zero esta noite";
+  int risk = urgentRisk();
+  if (risk >= 0 && crew_risk_deadline[risk] == 1)
+    return "Risco fatal: " + crewDisplayName(risk) + " pode não resistir esta noite";
+  return "";
+}
+
+/* A deadline of one is consumed after the daily and active-problem losses.
+   Keep these values aligned with applyNightCrisis so the HUD can warn before
+   a crisis removes the last units of a fatal resource. */
+int nightCrisisLoss(int resource){
+  int loss = 0;
+  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
+    if (!problem_active[problem] || problem_deadline[problem] > 1) continue;
+    if (problem == PROBLEM_HULL && resource == RESOURCE_OXYGEN) loss += 12;
+    else if (problem == PROBLEM_FOOD && resource == RESOURCE_FOOD) loss += 8;
+    else if ((problem == PROBLEM_CONFLICT || problem == PROBLEM_COMMS)
+      && resource == RESOURCE_MORALE) loss += 8;
+    else if (problem == PROBLEM_LIFE_SUPPORT && resource == RESOURCE_OXYGEN) loss += 10;
+    else if (problem == PROBLEM_POWER && resource == RESOURCE_ENERGY) loss += 10;
+  }
+  return loss;
 }
 
 void clampResources(){
@@ -247,8 +273,8 @@ void drawEventCard(PGraphics g){
   if (quest_review >= 0){
     drawQuestCard(g, quest_review, 34, 83, 572, ACTION_NONE, false);
     text(g, "CONFIRME A SOLUÇÃO. ELA NÃO PODE SER CANCELADA.", 46, 261, 16, COL_ORANGE);
-    drawButton(g, 398, 297, 92, 20, "CANCELAR (ESC)", ACTION_BACK_SOLUTION, true);
-    drawButton(g, 498, 297, 104, 20, "CONFIRMAR (ENTER)", ACTION_ACCEPT_SOLUTION, true);
+    drawModalFooter(g, 297, "VOLTAR (ESC)", ACTION_BACK_SOLUTION, true,
+      "CONFIRMAR (ENTER)", ACTION_ACCEPT_SOLUTION, true);
   } else {
     for (int i = 0; i < 2; i++){
       drawQuestCard(g, PREVENTIVE_COUNT + event_index * 2 + i, 34 + i * 290, 83, 282,

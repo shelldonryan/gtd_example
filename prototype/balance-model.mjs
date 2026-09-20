@@ -681,7 +681,7 @@ function clearDailyQuest(state) {
   state.loadedItem = null;
 }
 
-function processNight(state) {
+function applyNightEffects(state) {
   for (const [resource, amount] of Object.entries(DAILY_CONSUMPTION)) {
     state.resources[resource] -= amount;
   }
@@ -694,26 +694,119 @@ function processNight(state) {
   clampResources(state);
 }
 
-function sleep(state) {
-  const next = copyState(state);
-  if (next.pendingIncident) {
-    next.lastMessage = "Escolha uma solução antes de dormir.";
-    return next;
+function fatalConditions(state) {
+  const conditions = [];
+  if (state.resources.energy <= 0) conditions.push("energia chegou a zero");
+  if (state.resources.oxygen <= 0) conditions.push("oxigênio chegou a zero");
+  if (state.resources.morale <= 0) conditions.push("moral chegou a zero");
+  if (!state.motorOperational) conditions.push("motor destruído");
+  if (Object.values(state.alive).every((alive) => !alive)) {
+    conditions.push("nenhum sobrevivente vivo");
   }
-  if (next.outcome !== "ongoing") return next;
+  return conditions;
+}
 
-  applyQuestConsequences(next);
-  clearDailyQuest(next);
-  processNight(next);
-  checkOutcome(next);
-  if (next.outcome !== "ongoing") {
-    next.lastMessage = `Derrota no dia ${next.day}: ${next.reason}.`;
-    return next;
+function buildNightProjection(before, projected, effects = []) {
+  const conditions = fatalConditions(projected);
+  const outcome = conditions.length > 0
+    ? "defeat"
+    : projected.day >= 10 ? "victory" : "ongoing";
+  const finalState = copyState(projected);
+  finalState.outcome = outcome;
+  if (outcome === "defeat") {
+    checkOutcome(finalState);
+    finalState.lastMessage = `Derrota no dia ${finalState.day}: ${finalState.reason}.`;
+  } else if (outcome === "victory") {
+    finalState.reason = "chegada a Marte";
+    finalState.lastMessage = "Vitória: a nave chegou a Marte.";
   }
-  if (next.day >= 10) {
-    next.outcome = "victory";
-    next.reason = "chegada a Marte";
-    next.lastMessage = "Vitória: a nave chegou a Marte.";
+
+  const resourceDelta = Object.fromEntries(
+    Object.keys(finalState.resources).map((resource) => [
+      resource, finalState.resources[resource] - before.resources[resource],
+    ]),
+  );
+  const survivorsBefore = Object.values(before.alive).filter(Boolean).length;
+  const survivorsAfter = Object.values(finalState.alive).filter(Boolean).length;
+  return {
+    projectedState: finalState,
+    deltas: {
+      resources: resourceDelta,
+      survivors: survivorsAfter - survivorsBefore,
+      motorOperational: finalState.motorOperational,
+    },
+    effects: [...effects],
+    fatalConditions: [...conditions],
+    gameOutcome: outcome,
+  };
+}
+
+/**
+ * Simulates the end of the current day without mutating the input state.
+ *
+ * @param {object} state Current game state.
+ * @returns {object} A projection with the copied state, deltas and outcome.
+ * @example
+ * const projection = simulateNightTransition(state);
+ * console.log(projection.projectedState.resources.energy);
+ */
+export function simulateNightTransition(state) {
+  const before = copyState(state);
+  const projected = copyState(state);
+  const effects = [];
+
+  if (projected.pendingIncident) {
+    projected.lastMessage = "Escolha uma solução antes de dormir.";
+    return buildNightProjection(before, projected, [
+      "Escolha uma solução antes de dormir.",
+    ]);
+  }
+  if (projected.outcome !== "ongoing") {
+    return buildNightProjection(before, projected);
+  }
+
+  applyQuestConsequences(projected);
+  clearDailyQuest(projected);
+  applyNightEffects(projected);
+  checkOutcome(projected);
+  if (projected.outcome === "defeat") {
+    effects.push(`Derrota no dia ${projected.day}: ${projected.reason}.`);
+  }
+  return buildNightProjection(before, projected, effects);
+}
+
+/**
+ * Adapts the pure night simulation for preview consumers.
+ *
+ * @param {object} state Current game state.
+ * @returns {object} Projection plus display-ready lines.
+ */
+export function projectNight(state) {
+  const projection = simulateNightTransition(state);
+  const { resources } = projection.projectedState;
+  projection.display = {
+    resources: Object.entries(resources)
+      .map(([resource, value]) => `${resource} ${value} (${projection.deltas.resources[resource]})`)
+      .join(" | "),
+    outcome: projection.gameOutcome,
+  };
+  return projection;
+}
+
+/**
+ * Runs exactly one pure transition and returns its applied result.
+ *
+ * @param {object} state Current game state.
+ * @returns {object} The night projection; its projectedState is the new state.
+ */
+export function processNight(state) {
+  return simulateNightTransition(state);
+}
+
+function sleep(state) {
+  const projection = processNight(state);
+  const next = projection.projectedState;
+  if (projection.gameOutcome !== "ongoing") {
     return next;
   }
   next.questCompleted = false;

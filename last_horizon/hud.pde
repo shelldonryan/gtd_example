@@ -11,27 +11,88 @@ final int ICON_WATER = 2;
 final int ICON_FOOD = 3;
 final int ICON_PARTS = 4;
 final int ICON_MORALE = 5;
-PGraphics resource_icon_layer;
+PImage[] resource_icon_cache = new PImage[6];
+PImage[] resource_icon_sources = new PImage[6];
+int[] resource_icon_scales = new int[6];
+int[] resource_icon_builds_by_icon = new int[6];
+int resource_icon_builds = 0;
+int[] HUD_RESOURCE_ORDER;
+
+class ResourceIconCacheEntry {
+  PImage source;
+  int render_scale;
+  PImage bitmap;
+
+  ResourceIconCacheEntry(PImage source_value, int scale_value, PImage bitmap_value){
+    source = source_value;
+    render_scale = scale_value;
+    bitmap = bitmap_value;
+  }
+}
+
+ArrayList<ResourceIconCacheEntry> resource_icon_entries =
+  new ArrayList<ResourceIconCacheEntry>();
 
 
 void drawHeader(PGraphics g){
+  if (HUD_RESOURCE_ORDER == null){
+    HUD_RESOURCE_ORDER = new int[] {
+      RESOURCE_ENERGY, RESOURCE_OXYGEN, RESOURCE_WATER,
+      RESOURCE_FOOD, RESOURCE_PARTS, RESOURCE_MORALE
+    };
+  }
+
   float x = HUD_X;
 
   drawHeaderCard(g, x, "DIA", day + "/" + trip_days, COL_CYAN);
   x += HUD_CARD_W + HUD_GAP;
   drawHeaderCard(g, x, "A BORDO", str(survivors), COL_TEXT);
   x += HUD_CARD_W + HUD_GAP;
-  drawResourceCard(g, x, ICON_ENERGY, energy, resourceColour(energy), energy / RESOURCE_MAX);
-  x += HUD_CARD_W + HUD_GAP;
-  drawResourceCard(g, x, ICON_OXYGEN, oxygen, resourceColour(oxygen), oxygen / RESOURCE_MAX);
-  x += HUD_CARD_W + HUD_GAP;
-  drawResourceCard(g, x, ICON_WATER, water, resourceColour(water), water / RESOURCE_MAX);
-  x += HUD_CARD_W + HUD_GAP;
-  drawResourceCard(g, x, ICON_FOOD, food, resourceColour(food), food / RESOURCE_MAX);
-  x += HUD_CARD_W + HUD_GAP;
-  drawResourceCard(g, x, ICON_PARTS, parts, COL_TEXT, -1);
-  x += HUD_CARD_W + HUD_GAP;
-  drawResourceCard(g, x, ICON_MORALE, morale, resourceColour(morale), morale / RESOURCE_MAX);
+  for (int i = 0; i < HUD_RESOURCE_ORDER.length; i++){
+    int resource = HUD_RESOURCE_ORDER[i];
+    drawResourceCard(g, x, resource, hudResourceIcon(resource), hudResourceValue(resource),
+      hudResourceLabel(resource), hudResourceAccent(resource), hudResourceFill(resource));
+    x += HUD_CARD_W + HUD_GAP;
+  }
+}
+
+int hudResourceIcon(int resource){
+  if (resource == RESOURCE_ENERGY) return ICON_ENERGY;
+  if (resource == RESOURCE_OXYGEN) return ICON_OXYGEN;
+  if (resource == RESOURCE_WATER) return ICON_WATER;
+  if (resource == RESOURCE_FOOD) return ICON_FOOD;
+  if (resource == RESOURCE_PARTS) return ICON_PARTS;
+  return ICON_MORALE;
+}
+
+
+float hudResourceValue(int resource){
+  if (resource == RESOURCE_ENERGY) return energy;
+  if (resource == RESOURCE_OXYGEN) return oxygen;
+  if (resource == RESOURCE_WATER) return water;
+  if (resource == RESOURCE_FOOD) return food;
+  if (resource == RESOURCE_PARTS) return parts;
+  return morale;
+}
+
+
+String hudResourceLabel(int resource){
+  if (resource == RESOURCE_ENERGY) return "ENERGIA";
+  if (resource == RESOURCE_OXYGEN) return "OXIGÊNIO";
+  if (resource == RESOURCE_WATER) return "ÁGUA";
+  if (resource == RESOURCE_FOOD) return "COMIDA";
+  if (resource == RESOURCE_PARTS) return "PEÇAS";
+  return "MORAL";
+}
+
+
+int hudResourceAccent(int resource){
+  return resource == RESOURCE_PARTS ? COL_TEXT : resourceColour(hudResourceValue(resource));
+}
+
+
+float hudResourceFill(int resource){
+  return resource == RESOURCE_PARTS ? -1 : hudResourceValue(resource) / RESOURCE_MAX;
 }
 
 
@@ -42,15 +103,16 @@ void drawHeaderCard(PGraphics g, float x, String label, String value, int accent
 }
 
 
-void drawResourceCard(PGraphics g, float x, int icon, float value, int accent, float fill){
-  boolean critical = icon != ICON_PARTS && value < RESOURCE_RED;
+void drawResourceCard(PGraphics g, float x, int resource, int icon, float value, String label,
+  int accent, float fill){
+  boolean critical = resource != RESOURCE_PARTS && value < RESOURCE_RED;
   boolean blink_on = (frameCount / 30) % 2 == 0;
   int border = critical && blink_on ? COL_RED : COL_BORDER;
 
   drawPanel(g, x, HUD_Y, HUD_CARD_W, HUD_H, border);
   drawResourceIcon(g, icon, x + 4, HUD_Y + 5, accent);
   text(g, str(int(value)), x + 24, HUD_Y + 6, 16, accent);
-  text(g, resourceIconLabel(icon), x + 5, HUD_Y + 24, 16, COL_MUTED);
+  text(g, label, x + 5, HUD_Y + 24, 16, COL_MUTED);
 
   if (critical){
     drawWarningIcon(g, x + HUD_CARD_W - 18, HUD_Y + 5);
@@ -74,25 +136,10 @@ void drawResourceCard(PGraphics g, float x, int icon, float value, int accent, f
 
 void drawResourceIcon(PGraphics g, int icon, float x, float y, int colour){
   if (art_icon != null && art_icon[icon] != null){
-    if (resource_icon_layer == null){
-      int size = round(ART_ICON_DRAW * RENDER_SCALE);
-      resource_icon_layer = createGraphics(size, size);
-      resource_icon_layer.noSmooth();
-    }
-
-    resource_icon_layer.beginDraw();
-    resource_icon_layer.clear();
-    resource_icon_layer.imageMode(CENTER);
-    resource_icon_layer.image(art_icon[icon],
-      resource_icon_layer.width / 2.0,
-      resource_icon_layer.height / 2.0,
-      resource_icon_layer.width,
-      resource_icon_layer.height
-    );
-    resource_icon_layer.endDraw();
+    ensureResourceIconCache(icon);
 
     g.imageMode(CENTER);
-    g.image(resource_icon_layer,
+    g.image(resource_icon_cache[icon],
       round(x + ART_ICON_DRAW / 2),
       round(y + ART_ICON_DRAW / 2),
       ART_ICON_DRAW,
@@ -144,14 +191,122 @@ void drawResourceIcon(PGraphics g, int icon, float x, float y, int colour){
   g.rect(x + 4, y + 10, 8, 2);
 }
 
+void ensureResourceIconCache(int icon){
+  if (icon < 0 || icon >= resource_icon_cache.length || art_icon == null
+    || icon >= art_icon.length){
+    return;
+  }
+
+  PImage source = art_icon[icon];
+  int render_scale = RENDER_SCALE;
+
+  if (source == null){
+    if (resource_icon_sources[icon] != null){
+      invalidateResourceIconCache(icon);
+    }
+    return;
+  }
+
+  if (resource_icon_cache[icon] != null
+    && resource_icon_sources[icon] == source
+    && resource_icon_scales[icon] == render_scale){
+    return;
+  }
+
+  if (resource_icon_sources[icon] != null
+    && (resource_icon_sources[icon] != source
+      || resource_icon_scales[icon] != render_scale)){
+    invalidateResourceIconCache(icon);
+  }
+
+  ResourceIconCacheEntry entry = findResourceIconCacheEntry(source, render_scale);
+  if (entry != null){
+    resource_icon_cache[icon] = entry.bitmap;
+    resource_icon_sources[icon] = source;
+    resource_icon_scales[icon] = render_scale;
+    return;
+  }
+
+  int size = round(ART_ICON_DRAW * render_scale);
+  PGraphics layer = createGraphics(size, size);
+  layer.noSmooth();
+  layer.beginDraw();
+  layer.clear();
+  layer.imageMode(CENTER);
+  layer.image(source, size / 2.0, size / 2.0, size, size);
+  layer.endDraw();
+  PImage bitmap = layer.get();
+  resource_icon_entries.add(new ResourceIconCacheEntry(source, render_scale, bitmap));
+  resource_icon_cache[icon] = bitmap;
+  resource_icon_sources[icon] = source;
+  resource_icon_scales[icon] = render_scale;
+  resource_icon_builds_by_icon[icon]++;
+  resource_icon_builds++;
+}
+
+void prepareResourceIconCache(){
+  for (int icon = 0; icon < resource_icon_cache.length; icon++){
+    ensureResourceIconCache(icon);
+  }
+}
+
+
+ResourceIconCacheEntry findResourceIconCacheEntry(PImage source, int render_scale){
+  for (int i = 0; i < resource_icon_entries.size(); i++){
+    ResourceIconCacheEntry entry = resource_icon_entries.get(i);
+    if (entry.source == source && entry.render_scale == render_scale){
+      return entry;
+    }
+  }
+
+  return null;
+}
+
+
+void invalidateResourceIconCache(int icon){
+  if (icon < 0 || icon >= resource_icon_cache.length){
+    return;
+  }
+
+  PImage old_source = resource_icon_sources[icon];
+  int old_scale = resource_icon_scales[icon];
+  resource_icon_cache[icon] = null;
+  resource_icon_sources[icon] = null;
+  resource_icon_scales[icon] = 0;
+
+  if (old_source == null){
+    return;
+  }
+
+  boolean used_elsewhere = false;
+  for (int other = 0; other < resource_icon_sources.length; other++){
+    if (other != icon && resource_icon_sources[other] == old_source
+      && resource_icon_scales[other] == old_scale){
+      used_elsewhere = true;
+      break;
+    }
+  }
+
+  if (!used_elsewhere){
+    for (int i = resource_icon_entries.size() - 1; i >= 0; i--){
+      ResourceIconCacheEntry entry = resource_icon_entries.get(i);
+      if (entry.source == old_source && entry.render_scale == old_scale){
+        resource_icon_entries.remove(i);
+      }
+    }
+  }
+
+  cache_invalidations++;
+}
+
 
 String resourceIconLabel(int icon){
-  if (icon == ICON_ENERGY) return "ENERGIA";
-  if (icon == ICON_OXYGEN) return "OXIGÊNIO";
-  if (icon == ICON_WATER) return "ÁGUA";
-  if (icon == ICON_FOOD) return "COMIDA";
-  if (icon == ICON_PARTS) return "PEÇAS";
-  return "MORAL";
+  if (icon == ICON_ENERGY) return hudResourceLabel(RESOURCE_ENERGY);
+  if (icon == ICON_OXYGEN) return hudResourceLabel(RESOURCE_OXYGEN);
+  if (icon == ICON_WATER) return hudResourceLabel(RESOURCE_WATER);
+  if (icon == ICON_FOOD) return hudResourceLabel(RESOURCE_FOOD);
+  if (icon == ICON_PARTS) return hudResourceLabel(RESOURCE_PARTS);
+  return hudResourceLabel(RESOURCE_MORALE);
 }
 
 
@@ -173,11 +328,70 @@ void drawObjectiveStrip(PGraphics g){
     system_message_until = frameCount + 180;
   }
 
-  int q = active_quest >= 0 ? active_quest : selected_order;
-  text(g, orderStageLine(q), 16, OBJECTIVE_Y + 3, 16, COL_CYAN);
-  text(g, orderRouteLine(q), 16, OBJECTIVE_Y + 14, 16, COL_MUTED);
-  text(g, orderFailureLine(q), 16, OBJECTIVE_Y + 25, 16, COL_ORANGE);
-  text(g, problemWarningLine(), 16, OBJECTIVE_Y + 36, 16, COL_ORANGE);
+  text(g, currentObjectiveLine(), 16, OBJECTIVE_Y + 4, 16, COL_CYAN);
+  text(g, currentAlertLine(), 16, OBJECTIVE_Y + 24, 16, alertLineColour());
+}
+
+/* A única fonte do alvo consultivo do HUD e do mapa. */
+int currentObjective(){
+  if (quest_completed) return POINT_TECH_BUNK;
+  if (active_quest >= 0) return nextQuestPoint();
+  if (selected_preventive_id >= 0) return nextQuestPoint();
+  if (urgentRisk() >= 0) return POINT_RISK_BUNK;
+  return MAP_TARGET_NONE;
+}
+
+String currentObjectiveLine(){
+  int objective = currentObjective();
+  if (event_open && objective == MAP_TARGET_NONE) return "Escolha uma solução no incidente";
+  if (active_quest >= 0){
+    if (quest_stage == QUEST_COLLECT)
+      return "Pegue " + quest_object[active_quest] + " — " + pointLocation(objective);
+    return "Leve " + quest_object[active_quest] + " — " + pointLocation(objective);
+  }
+  if (selected_preventive_id >= 0){
+    int owner = quest_owner[selected_preventive_id];
+    return "Fale com " + crewDisplayName(owner) + " — " + pointLocation(objective);
+  }
+  if (quest_completed){
+    return atQuestPoint(POINT_TECH_BUNK)
+      ? "Encerre o dia no seu beliche"
+      : "Volte ao seu beliche — " + pointLocation(POINT_TECH_BUNK);
+  }
+  if (urgentRisk() >= 0) return "Socorra a pessoa em risco — " + pointLocation(POINT_RISK_BUNK);
+  if (ordersAvailable()) return "Escolha uma ordem em Ordens";
+  return "Local indisponível. Consulte o mapa";
+}
+
+String currentAlertLine(){
+  String fatal = nightFatalWarning();
+  if (fatal.length() > 0){
+    int visible_problem = fatal.indexOf("Crise fatal:") == 0 ? 1 : 0;
+    int extra = max(0, activeProblemCount() - visible_problem);
+    if (extra > 0) fatal += " · +" + extra + " problemas";
+    return fatal;
+  }
+  int risk = urgentRisk();
+  if (risk >= 0){
+    String risk_line = "Risco: " + crewDisplayName(risk) + " — " + crew_risk_deadline[risk] + " noite(s)";
+    int active = activeProblemCount();
+    if (active > 0) risk_line += " · +" + active + " problemas";
+    return risk_line;
+  }
+  int urgent = urgentProblem();
+  if (urgent >= 0){
+    String warning = problem_short[urgent] + " · prazo " + problem_deadline[urgent]
+      + " dia(s) · " + roomTitle(problem_room[urgent]);
+    int other = max(0, activeProblemCount() - 1);
+    if (other > 0) warning += " · +" + other + " problemas";
+    return warning;
+  }
+  if (system_message.length() > 0 && frameCount < system_message_until) return system_message;
+  return "Sem problemas ativos";
+}
+
+int alertLineColour(){
+  return nightFatalWarning().length() > 0 ? COL_RED : COL_ORANGE;
 }
 
 
@@ -233,6 +447,9 @@ void drawFooter(PGraphics g){
     drawOrdersBadge(g, 159, FOOTER_Y + 15, ordersPulse());
   }
   drawButton(g, 178, FOOTER_Y + 4, 26, 22, "?", ACTION_OPEN_HELP, controls_on);
+  if (urgentRisk() >= 0){
+    drawButton(g, 210, FOOTER_Y + 4, 96, 22, "SOCORRO", ACTION_OPEN_RESCUE, controls_on);
+  }
 }
 
 

@@ -18,8 +18,7 @@ boolean isRoomScreen(){
 
 
 boolean modalOpen(){
-  return event_open || orders_open || map_open || dialog_open || technical_open || end_day_open || help_open
-    || transmission_open;
+  return uiLayer() != LAYER_SCENE;
 }
 
 
@@ -28,7 +27,15 @@ int uiLayer(){
     return LAYER_PAUSE;
   }
 
-  return modalOpen() ? LAYER_MODAL : LAYER_SCENE;
+  if (transmission_open) return LAYER_TRANSMISSION;
+  if (event_open) return LAYER_EVENT;
+  if (orders_open) return LAYER_ORDERS;
+  if (map_open) return LAYER_MAP;
+  if (dialog_open) return LAYER_DIALOGUE;
+  if (technical_open) return LAYER_TECHNICAL;
+  if (end_day_open) return LAYER_SLEEP;
+  if (help_open) return LAYER_HELP;
+  return LAYER_SCENE;
 }
 
 
@@ -56,61 +63,87 @@ void drawScreen(PGraphics g){
   drawShipArea(g);
 }
 void drawModalLayer(PGraphics g){
-  if (paused){
-    draw_layer = LAYER_PAUSE;
+  int active_layer = uiLayer();
+  draw_layer = active_layer;
+
+  if (active_layer == LAYER_PAUSE){
     drawPauseCard(g);
-    return;
-  }
-
-  if (!modalOpen()){
-    return;
-  }
-
-  draw_layer = LAYER_MODAL;
-
-  if (transmission_open){
+  } else if (active_layer == LAYER_TRANSMISSION){
     drawTransmissionCard(g);
-  } else if (event_open){
+  } else if (active_layer == LAYER_EVENT){
     drawEventCard(g);
-  } else if (orders_open){
+  } else if (active_layer == LAYER_ORDERS){
     drawOrdersPanel(g);
-  } else if (map_open){
+  } else if (active_layer == LAYER_MAP){
     drawMapOverlay(g);
-  } else if (dialog_open){
+  } else if (active_layer == LAYER_DIALOGUE){
     drawDialogue(g);
-  } else if (technical_open){
+  } else if (active_layer == LAYER_TECHNICAL){
     drawTechnicalPanel(g);
-  } else if (end_day_open){
+  } else if (active_layer == LAYER_SLEEP){
     drawEndDayPanel(g);
-  } else if (help_open){
+  } else if (active_layer == LAYER_HELP){
     drawHelpPanel(g);
   }
 }
 
 
 boolean closeTopModal(){
-  if (paused){
+  int active_layer = uiLayer();
+
+  if (active_layer == LAYER_PAUSE){
     paused = false;
     return true;
   }
 
-  if (transmission_open){
+  if (active_layer == LAYER_TRANSMISSION){
     transmission_open = false;
     return true;
   }
 
-  if (event_open){
+  if (active_layer == LAYER_EVENT){
     if (quest_review >= 0){
       quest_review = -1;
       return true;
     }
-    return false;
+    /* A mandatory incident comparison remains available after ESC by moving
+       to pause. This keeps the event intact and avoids falling through to a
+       hidden room or modal control. */
+    paused = true;
+    return true;
   }
 
-  if (orders_open || map_open || dialog_open || technical_open || end_day_open || help_open){
-    orders_open = map_open = dialog_open = technical_open = end_day_open = help_open = false;
+  if (active_layer == LAYER_ORDERS){
+    orders_open = false;
+    orders_details_open = false;
     pending_quest_action = ACTION_NONE;
-    pending_retry = -1;
+    clearRetryState();
+    return true;
+  }
+  if (active_layer == LAYER_MAP){
+    map_open = false;
+    return true;
+  }
+  if (active_layer == LAYER_DIALOGUE){
+    dialog_open = false;
+    dialog_result = "";
+    dialog_crew = -1;
+    pending_quest_action = ACTION_NONE;
+    clearRetryState();
+    return true;
+  }
+  if (active_layer == LAYER_TECHNICAL){
+    technical_open = false;
+    pending_quest_action = ACTION_NONE;
+    clearRetryState();
+    return true;
+  }
+  if (active_layer == LAYER_SLEEP){
+    closeEndDayPanel();
+    return true;
+  }
+  if (active_layer == LAYER_HELP){
+    help_open = false;
     return true;
   }
 
@@ -139,9 +172,39 @@ void doAction(int action){
     return;
   }
 
+  if (action == ACTION_MAP_MY_ROOM){
+    map_selected_room = roomIndex(screen);
+    calculateMapRoute();
+    return;
+  }
+
+  if (action == ACTION_MAP_TARGET_ROOM){
+    if (map_target_room != SCREEN_NONE) map_selected_room = roomIndex(map_target_room);
+    calculateMapRoute();
+    return;
+  }
+  if (action == ACTION_MAP_BUNK_QUERY){
+    map_selected_room = roomIndex(point_room[POINT_TECH_BUNK]);
+    calculateMapRoute();
+    return;
+  }
+  if (action == ACTION_MAP_RESCUE_QUERY){
+    if (urgentRisk() >= 0){
+      map_open = false;
+      openRescuePanel();
+    }
+    return;
+  }
+  if (action == ACTION_MAP_ROUTE){
+    map_selected_room = map_target_room == SCREEN_NONE ? roomIndex(screen) : roomIndex(map_target_room);
+    calculateMapRoute();
+    return;
+  }
+
   if (action == ACTION_OPEN_MAP){
     map_open = true;
     map_selected_room = roomIndex(screen);
+    calculateMapRoute();
     return;
   }
 
@@ -151,12 +214,13 @@ void doAction(int action){
   }
 
   if (action == ACTION_END_DAY){
-    end_day_open = false;
+    closeEndDayPanel();
     endDay();
     return;
   }
   if (action == ACTION_OPEN_ORDERS){
     orders_page = -1;
+    orders_details_open = false;
     orders_open = true;
     return;
   }
@@ -164,8 +228,20 @@ void doAction(int action){
     help_open = true;
     return;
   }
+  if (action == ACTION_OPEN_RESCUE){
+    map_open = false;
+    orders_open = false;
+    openRescuePanel();
+    return;
+  }
   if (action == ACTION_ORDER_A || action == ACTION_ORDER_B){
-    choosePreventive(action == ACTION_ORDER_A ? 0 : 1);
+    int offer_slot = action == ACTION_ORDER_A ? 0 : 1;
+    int selected_id = daily_offers[offer_slot];
+    if (choosePreventive(selected_id)){
+      orders_open = false;
+      system_message = "CONFIRME COM " + crew_name[quest_owner[selected_id]] + " EM "
+        + roomTitle(point_room[crew_point[quest_owner[selected_id]]]) + ".";
+    }
     return;
   }
   if (action == ACTION_CONFIRM_QUEST){
@@ -174,6 +250,10 @@ void doAction(int action){
   }
   if (action == ACTION_NEXT_RETRY){
     cycleRetry();
+    return;
+  }
+  if (action == ACTION_TOGGLE_ORDER_DETAILS){
+    orders_details_open = !orders_details_open;
     return;
   }
   if (action == ACTION_RETRY_QUEST){
@@ -213,6 +293,7 @@ void doAction(int action){
   }
 
   if (action == ACTION_MAIN_MENU || action == ACTION_NEW_GAME){
+    player_name = "";
     resetRun();
     screen = SCREEN_INIT;
     return;

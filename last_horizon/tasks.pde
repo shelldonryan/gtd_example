@@ -23,6 +23,41 @@ final int PREVENTIVE_COUNT = 8;
 final int QUEST_COLLECT = 1;
 final int QUEST_DELIVER = 2;
 
+final String QUEST_REASON_NONE = "";
+final String QUEST_REASON_RESOURCE_INSUFFICIENT = "resource_insufficient";
+final String QUEST_REASON_CONFIRMATION_PENDING = "confirmation_pending";
+final String QUEST_REASON_WRONG_NPC = "wrong_npc";
+final String QUEST_REASON_WRONG_POINT = "wrong_point";
+final String QUEST_REASON_WRONG_DISTANCE = "wrong_distance";
+final String QUEST_REASON_STALE_STATE = "stale_state";
+final String QUEST_REASON_DAILY_LIMIT = "daily_limit";
+final String QUEST_REASON_INCIDENT_BLOCKED = "incident_blocked";
+final String QUEST_REASON_NO_RISK = "no_risk";
+
+/* Structured domain feedback shared by the action query and the mutation.
+   The UI translates this record into Portuguese; gameplay code never relies
+   on a button's visual state to decide whether an action is valid. */
+class QuestActionReason {
+  String kind;
+  int resource_id = RESOURCE_NONE;
+  float available = 0;
+  float required = 0;
+  int expected_npc_id = -1;
+  int expected_room_id = SCREEN_NONE;
+  int expected_point_id = -1;
+  int expected_action = ACTION_NONE;
+  int current_action = ACTION_NONE;
+  int incident_id = PROBLEM_NONE;
+
+  QuestActionReason(String reason_kind){
+    kind = reason_kind;
+  }
+
+  boolean isClear(){
+    return QUEST_REASON_NONE.equals(kind);
+  }
+}
+
 String[] crew_name = {"VERA", "BENTO", "NEUSA", "SÍLVIA"};
 int[] crew_point = {POINT_VERA, POINT_BENTO, POINT_NEUSA, POINT_SILVIA};
 boolean[] crew_alive = new boolean[CREW_COUNT];
@@ -103,16 +138,33 @@ int[] solution_resource = {RESOURCE_PARTS, RESOURCE_ENERGY, RESOURCE_PARTS, RESO
   RESOURCE_PARTS, RESOURCE_ENERGY, RESOURCE_PARTS, RESOURCE_MORALE, RESOURCE_PARTS, RESOURCE_ENERGY};
 int[] solution_cost = {2, 8, 1, 6, 1, 4, 5, 4, 1, 6, 1, 5, 1, 5};
 int[] daily_offers = {-1, -1};
-int selected_order = -1;
+int selected_preventive_id = -1;
 int active_quest = -1;
 int quest_stage = 0;
 boolean quest_completed = false;
 boolean preventive_committed = false;
 boolean orders_open = false;
 int orders_page = -1;
+boolean orders_details_open = false;
 int quest_review = -1;
 int pending_quest_action = ACTION_NONE;
 int pending_retry = -1;
+int pending_retry_problem = PROBLEM_NONE;
+int pending_retry_solution = -1;
+boolean pending_retry_problem_active = false;
+int pending_retry_deadline = -1;
+int pending_retry_consequence_resource = RESOURCE_NONE;
+int pending_retry_consequence_value = -1;
+
+void clearRetryState(){
+  pending_retry = -1;
+  pending_retry_problem = PROBLEM_NONE;
+  pending_retry_solution = -1;
+  pending_retry_problem_active = false;
+  pending_retry_deadline = -1;
+  pending_retry_consequence_resource = RESOURCE_NONE;
+  pending_retry_consequence_value = -1;
+}
 
 void resetProblemState(){
   for (int p = 0; p < PROBLEM_COUNT; p++){
@@ -131,6 +183,7 @@ void resetProblemState(){
 void resetCrewState(){
   survivors = CREW_COUNT;
   risk_history_count = 0;
+  resetEditorialMemory();
   for (int crew = 0; crew < CREW_COUNT; crew++){
     crew_alive[crew] = true;
     crew_risk_deadline[crew] = 0;
@@ -139,11 +192,13 @@ void resetCrewState(){
 
 void resetDailyQuest(){
   daily_offers[0] = daily_offers[1] = -1;
-  selected_order = active_quest = quest_review = pending_retry = -1;
+  selected_preventive_id = active_quest = quest_review = -1;
+  clearRetryState();
   held_item = ITEM_NONE;
   quest_stage = 0;
   quest_completed = preventive_committed = orders_open = false;
   orders_page = -1;
+  orders_details_open = false;
   pending_quest_action = ACTION_NONE;
 }
 
@@ -226,6 +281,7 @@ void putSurvivorAtRisk(int sourceProblem){
     if (slot-- != 0) continue;
     crew_risk_deadline[crew] = 2;
     risk_history_count++;
+    recordEditorialRisk(crew);
     return;
   }
 }
@@ -270,29 +326,127 @@ int preventiveReward(int q){ return preventive_resource[q] == RESOURCE_PARTS ? 2
 int preventiveFailure(int q){ return preventive_resource[q] == RESOURCE_PARTS ? 1 : 3; }
 int preventiveNeglect(int q){ return preventive_resource[q] == RESOURCE_PARTS ? 2 : 4; }
 
-void choosePreventive(int choice){
-  if (!dailyQuestFree() || event_open || choice < 0 || choice > 1) return;
-  int q = daily_offers[choice];
-  if (q < 0 || !crew_alive[quest_owner[q]]) return;
-  selected_order = q;
-  orders_open = false;
-  system_message = "CONFIRME COM " + crew_name[quest_owner[q]] + " EM "
-    + roomTitle(point_room[crew_point[quest_owner[q]]]) + ".";
+boolean validQuestId(int q){
+  return q >= 0 && q < quest_id.length;
+}
+
+boolean isPreventiveOffer(int q){
+  return q >= 0 && (daily_offers[0] == q || daily_offers[1] == q);
+}
+
+boolean hasNewIncident(){
+  return incidentForDay(day) != PROBLEM_NONE;
+}
+
+boolean pointExists(int point){
+  return point >= 0 && point < point_room.length;
+}
+
+QuestActionReason clearQuestReason(){
+  return new QuestActionReason(QUEST_REASON_NONE);
+}
+
+QuestActionReason staleQuestReason(int expected_action){
+  QuestActionReason reason = new QuestActionReason(QUEST_REASON_STALE_STATE);
+  reason.expected_action = expected_action;
+  reason.current_action = currentQuestAction();
+  return reason;
+}
+
+QuestActionReason confirmationPendingReason(int quest_id_value){
+  QuestActionReason reason = new QuestActionReason(QUEST_REASON_CONFIRMATION_PENDING);
+  if (!validQuestId(quest_id_value) || quest_id_value >= PREVENTIVE_COUNT){
+    return staleQuestReason(ACTION_ACCEPT_ORDER);
+  }
+
+  int owner = quest_owner[quest_id_value];
+  reason.expected_npc_id = owner;
+  if (owner >= 0 && owner < CREW_COUNT && pointExists(crew_point[owner])){
+    reason.expected_room_id = point_room[crew_point[owner]];
+  }
+  return reason;
+}
+
+int currentQuestAction(){
+  if (selected_preventive_id >= 0) return ACTION_ACCEPT_ORDER;
+  if (active_quest >= 0){
+    return quest_stage == QUEST_COLLECT ? ACTION_COLLECT_QUEST : ACTION_DELIVER_QUEST;
+  }
+  if (urgentRisk() >= 0) return ACTION_RESCUE;
+  return ACTION_NONE;
+}
+
+boolean choosePreventive(int quest_id_value){
+  /* The public domain operation receives a quest ID, never a card position. */
+  if (!dailyQuestFree() || hasNewIncident() || event_open || !validQuestId(quest_id_value)
+    || quest_id_value >= PREVENTIVE_COUNT || !isPreventiveOffer(quest_id_value)
+    || !crew_alive[quest_owner[quest_id_value]]) return false;
+  selected_preventive_id = quest_id_value;
+  return true;
+}
+
+QuestActionReason preventiveActionReason(){
+  int q = selected_preventive_id;
+  if (!validQuestId(q) || q >= PREVENTIVE_COUNT) return staleQuestReason(ACTION_ACCEPT_ORDER);
+  if (hasNewIncident() || event_open){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_INCIDENT_BLOCKED);
+    reason.incident_id = incidentForDay(day);
+    return reason;
+  }
+  if (!dailyQuestFree()) return new QuestActionReason(QUEST_REASON_DAILY_LIMIT);
+  if (held_item != ITEM_NONE || quest_stage != 0) return staleQuestReason(ACTION_ACCEPT_ORDER);
+  if (!isPreventiveOffer(q)) return staleQuestReason(ACTION_ACCEPT_ORDER);
+
+  int owner = quest_owner[q];
+  int expected_point = owner >= 0 && owner < CREW_COUNT ? crew_point[owner] : -1;
+  QuestActionReason reason;
+  if (owner < 0 || owner >= CREW_COUNT || !crew_alive[owner]){
+    reason = new QuestActionReason(QUEST_REASON_WRONG_NPC);
+    reason.expected_npc_id = owner;
+    reason.expected_room_id = pointExists(expected_point) ? point_room[expected_point] : SCREEN_NONE;
+    return reason;
+  }
+  if (!pointExists(expected_point) || point_room[expected_point] != screen){
+    reason = new QuestActionReason(QUEST_REASON_WRONG_POINT);
+    reason.expected_point_id = expected_point;
+    return reason;
+  }
+  if (dialog_crew >= 0 && dialog_crew != owner){
+    reason = new QuestActionReason(QUEST_REASON_WRONG_NPC);
+    reason.expected_npc_id = owner;
+    reason.expected_room_id = point_room[expected_point];
+    return reason;
+  }
+  if (!isPointInRange(expected_point)){
+    reason = new QuestActionReason(QUEST_REASON_WRONG_DISTANCE);
+    reason.expected_point_id = expected_point;
+    return reason;
+  }
+  if (!pointIsAvailable(expected_point)){
+    reason = new QuestActionReason(QUEST_REASON_WRONG_POINT);
+    reason.expected_point_id = expected_point;
+    return reason;
+  }
+  return clearQuestReason();
 }
 
 void acceptPreventive(){
-  int q = selected_order;
-  if (q < 0 || !dailyQuestFree() || event_open || !crew_alive[quest_owner[q]]) return;
-  if (!atQuestPoint(crew_point[quest_owner[q]])) return;
+  QuestActionReason reason = preventiveActionReason();
+  if (!reason.isClear()){
+    system_message = questReasonText(reason);
+    return;
+  }
+  int q = selected_preventive_id;
+  int owner = quest_owner[q];
   active_quest = q;
-  selected_order = -1;
+  selected_preventive_id = -1;
   preventive_committed = true;
   dialog_open = false;
   pending_quest_action = ACTION_NONE;
-  if (quest_origin[q] == crew_point[quest_owner[q]]){
+  if (quest_origin[q] == crew_point[owner]){
     held_item = active_quest + 1;
     quest_stage = QUEST_DELIVER;
-    system_message = "ORDEM CONFIRMADA. " + crew_name[quest_owner[q]] + " ENTREGOU " + quest_object[q] + ".";
+    system_message = "ORDEM CONFIRMADA. " + crew_name[owner] + " ENTREGOU " + quest_object[q] + ".";
   } else {
     held_item = ITEM_NONE;
     quest_stage = QUEST_COLLECT;
@@ -301,11 +455,24 @@ void acceptPreventive(){
 }
 
 void acceptSolution(int q){
-  if (!dailyQuestFree() || selected_order >= 0 || q < PREVENTIVE_COUNT || q >= quest_id.length) return;
-  int problem = questProblem(q);
+  int problem = validQuestId(q) ? questProblem(q) : PROBLEM_NONE;
+  boolean resuming = pending_retry >= 0
+    || (!event_open && q >= PREVENTIVE_COUNT && problem >= 0 && problem < PROBLEM_COUNT
+      && problem_active[problem] && problem_solution[problem] == q);
+  if (resuming){
+    QuestActionReason retry_reason = pending_retry >= 0 ? retryActionReason() : retryActionReasonFor(q);
+    if (!retry_reason.isClear()){
+      system_message = questReasonText(retry_reason);
+      return;
+    }
+  }
+  if (!dailyQuestFree() || selected_preventive_id >= 0 || held_item != ITEM_NONE
+    || quest_stage != 0 || !validQuestId(q) || q < PREVENTIVE_COUNT) return;
+  problem = questProblem(q);
   if (event_open){
-    if (problem != event_index) return;
-  } else if (incidentForDay(day) != PROBLEM_NONE || !problem_active[problem] || problem_solution[problem] != q){
+    if (problem != event_index || problem_active[problem]) return;
+  } else if (hasNewIncident() || !problem_active[problem] || problem_solution[problem] != q
+    || active_quest >= 0 || held_item != ITEM_NONE || quest_stage != 0){
     return;
   }
   activateProblem(problem, problem_initial_deadline[problem]);
@@ -313,38 +480,112 @@ void acceptSolution(int q){
   active_quest = q;
   quest_stage = QUEST_COLLECT;
   event_open = orders_open = technical_open = false;
-  quest_review = pending_retry = -1;
+  quest_review = -1;
+  clearRetryState();
   pending_quest_action = ACTION_NONE;
   system_message = "SOLUÇÃO CONFIRMADA. COLETE " + quest_object[q] + ".";
 }
 
-boolean atQuestPoint(int point){ return point_room[point] == screen && isPointInRange(point); }
+boolean atQuestPoint(int point){ return pointExists(point) && point_room[point] == screen && isPointInRange(point); }
 
 void collectQuestObject(){
-  if (active_quest < 0 || quest_stage != QUEST_COLLECT || held_item != ITEM_NONE) return;
-  if (!atQuestPoint(quest_origin[active_quest])) return;
+  QuestActionReason reason = collectActionReason();
+  if (!reason.isClear()){
+    system_message = questReasonText(reason);
+    return;
+  }
   held_item = active_quest + 1;
   quest_stage = QUEST_DELIVER;
   system_message = quest_object[active_quest] + " COLETADO. LEVE AO DESTINO.";
 }
 
-void deliverQuest(){
+QuestActionReason collectActionReason(){
   int q = active_quest;
-  if (q < 0 || quest_completed || quest_stage != QUEST_DELIVER || held_item != q + 1) return;
-  if (!atQuestPoint(quest_destination[q])) return;
+  if (!validQuestId(q) || quest_stage != QUEST_COLLECT || held_item != ITEM_NONE)
+    return staleQuestReason(ACTION_COLLECT_QUEST);
+  if (q < PREVENTIVE_COUNT){
+    if (!preventive_committed) return staleQuestReason(ACTION_COLLECT_QUEST);
+  } else {
+    int problem = questProblem(q);
+    if (problem < 0 || problem >= PROBLEM_COUNT || !problem_active[problem]
+      || problem_solution[problem] != q) return staleQuestReason(ACTION_COLLECT_QUEST);
+  }
+  int origin = quest_origin[q];
+  if (!pointExists(origin) || point_room[origin] != screen){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_WRONG_POINT);
+    reason.expected_point_id = origin;
+    return reason;
+  }
+  if (!isPointInRange(origin)){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_WRONG_DISTANCE);
+    reason.expected_point_id = origin;
+    return reason;
+  }
+  if (!pointIsAvailable(origin)){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_WRONG_POINT);
+    reason.expected_point_id = origin;
+    return reason;
+  }
+  return clearQuestReason();
+}
+
+QuestActionReason deliverActionReason(){
+  int q = active_quest;
+  if (!validQuestId(q) || quest_completed || quest_stage != QUEST_DELIVER)
+    return staleQuestReason(ACTION_DELIVER_QUEST);
+  if (q < PREVENTIVE_COUNT && !preventive_committed)
+    return staleQuestReason(ACTION_DELIVER_QUEST);
+  if (held_item != q + 1) return staleQuestReason(ACTION_DELIVER_QUEST);
+  int destination = quest_destination[q];
+  if (!pointExists(destination) || point_room[destination] != screen){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_WRONG_POINT);
+    reason.expected_point_id = destination;
+    return reason;
+  }
+  if (!isPointInRange(destination)){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_WRONG_DISTANCE);
+    reason.expected_point_id = destination;
+    return reason;
+  }
+  if (!pointIsAvailable(destination)){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_WRONG_POINT);
+    reason.expected_point_id = destination;
+    return reason;
+  }
   if (q >= PREVENTIVE_COUNT){
+    int problem = questProblem(q);
+    int solution = problem >= 0 && problem < PROBLEM_COUNT ? problem_solution[problem] : -1;
+    if (!problem_active[problem] || solution != q) return staleQuestReason(ACTION_DELIVER_QUEST);
     int i = q - PREVENTIVE_COUNT;
     if (!canPayResource(solution_resource[i], solution_cost[i])){
-      system_message = "RECURSOS INSUFICIENTES. O OBJETO CONTINUA NA MÃO.";
-      return;
+      QuestActionReason reason = new QuestActionReason(QUEST_REASON_RESOURCE_INSUFFICIENT);
+      reason.resource_id = solution_resource[i];
+      reason.available = resourceValue(solution_resource[i]);
+      reason.required = solution_cost[i];
+      return reason;
     }
+  }
+  return clearQuestReason();
+}
+
+void deliverQuest(){
+  QuestActionReason reason = deliverActionReason();
+  if (!reason.isClear()){
+    system_message = questReasonText(reason);
+    return;
+  }
+  int q = active_quest;
+  if (q >= PREVENTIVE_COUNT){
+    int i = q - PREVENTIVE_COUNT;
     payResource(solution_resource[i], solution_cost[i]);
     if (questProblem(q) == PROBLEM_ENGINE && problem_deadline[PROBLEM_ENGINE] == 1) engine_repaired_at_limit = true;
     clearProblem(questProblem(q));
     system_message = "SOLUÇÃO CONCLUÍDA: " + quest_title[q] + ".";
+    recordEditorialResult(q, EDITORIAL_RESULT_HELP);
   } else {
     payResource(preventive_resource[q], -preventiveReward(q));
     system_message = "ORDEM CONCLUÍDA: +" + preventiveReward(q) + " " + resourceName(preventive_resource[q]) + ".";
+    recordEditorialResult(q, EDITORIAL_RESULT_HELP);
   }
   active_quest = -1;
   quest_stage = 0;
@@ -355,18 +596,62 @@ void deliverQuest(){
 }
 
 boolean rescueUrgentSurvivor(){
-  int crew = urgentRisk();
-  if (crew < 0 || event_open || !dailyQuestFree() || selected_order >= 0 || !atQuestPoint(POINT_RISK_BUNK)) return false;
-  if (water < 8 || food < 2){
-    system_message = "SOCORRO EXIGE 8 ÁGUA E 2 COMIDA.";
+  QuestActionReason reason = rescueActionReason();
+  if (!reason.isClear()){
+    system_message = questReasonText(reason);
     return false;
   }
+  int crew = urgentRisk();
   water -= 8;
   food -= 2;
   crew_risk_deadline[crew] = 0;
   quest_completed = true;
+  clearEditorialRisk(crew);
+  int rescue_quest = editorialQuestForCrew(crew);
+  if (rescue_quest >= 0) recordEditorialResult(rescue_quest, EDITORIAL_RESULT_RESCUE);
+  else recordEditorialCrewResult(crew, EDITORIAL_RESULT_RESCUE);
   system_message = crew_name[crew] + " FOI ESTABILIZADO(A).";
   return true;
+}
+
+QuestActionReason rescueActionReason(){
+  int crew = urgentRisk();
+  if (crew < 0) return new QuestActionReason(QUEST_REASON_NO_RISK);
+  if (event_open || hasNewIncident()){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_INCIDENT_BLOCKED);
+    reason.incident_id = event_open ? event_index : incidentForDay(day);
+    return reason;
+  }
+  if (quest_completed || active_quest >= 0) return new QuestActionReason(QUEST_REASON_DAILY_LIMIT);
+  if (held_item != ITEM_NONE || quest_stage != 0) return staleQuestReason(ACTION_RESCUE);
+  if (selected_preventive_id >= 0){
+    return confirmationPendingReason(selected_preventive_id);
+  }
+  if (point_room[POINT_RISK_BUNK] != screen){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_WRONG_POINT);
+    reason.expected_point_id = POINT_RISK_BUNK;
+    return reason;
+  }
+  if (!isPointInRange(POINT_RISK_BUNK)){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_WRONG_DISTANCE);
+    reason.expected_point_id = POINT_RISK_BUNK;
+    return reason;
+  }
+  if (water < 8){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_RESOURCE_INSUFFICIENT);
+    reason.resource_id = RESOURCE_WATER;
+    reason.available = water;
+    reason.required = 8;
+    return reason;
+  }
+  if (food < 2){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_RESOURCE_INSUFFICIENT);
+    reason.resource_id = RESOURCE_FOOD;
+    reason.available = food;
+    reason.required = 2;
+    return reason;
+  }
+  return clearQuestReason();
 }
 
 int preventiveNightLoss(int resource){
@@ -400,10 +685,11 @@ String questNightSummary(){
 
 int nextQuestPoint(){
   if (active_quest >= 0) return quest_stage == QUEST_COLLECT ? quest_origin[active_quest] : quest_destination[active_quest];
-  return selected_order >= 0 ? crew_point[quest_owner[selected_order]] : -1;
+  return selected_preventive_id >= 0 ? crew_point[quest_owner[selected_preventive_id]] : -1;
 }
 
 String pointDisplayLabel(int point){
+  if (!pointExists(point)) return "ponto esperado";
   if (point == POINT_RISK_BUNK){
     int crew = urgentRisk();
     return crew < 0 ? "SOCORRO" : "SOCORRER " + crew_name[crew] + " (" + crew_risk_deadline[crew] + "D)";
@@ -413,7 +699,7 @@ String pointDisplayLabel(int point){
 
 int crewAtPoint(int point){
   for (int crew = 0; crew < CREW_COUNT; crew++){
-    if (crew_point[crew] == point) return crew;
+    if (crew_point[crew] == point && crew_alive[crew]) return crew;
   }
 
   return -1;
@@ -421,19 +707,19 @@ int crewAtPoint(int point){
 
 
 boolean pointIsAvailable(int point){
-  // [TEST-MODE] Força visibilidade e prompt de interação de todas as estações/objetos
-  if (test_mode_active && test_mode_force_visual) return true;
+  if (optionalVisualOverrideActive()) return true;
 
   if (point == POINT_TECH_BUNK) return true;
   if (point == POINT_RISK_BUNK)
-    return urgentRisk() >= 0 && dailyQuestFree() && selected_order < 0 && !event_open;
+    return urgentRisk() >= 0;
+  if (point_kind[point] == POINT_NPC) return crewAtPoint(point) >= 0;
   int crew = crewAtPoint(point);
   if (crew >= 0) return crew_alive[crew];
   return point == nextQuestPoint();
 }
 
 boolean ordersAvailable(){
-  if (!dailyQuestFree() || selected_order >= 0 || event_open) return false;
+  if (!dailyQuestFree() || selected_preventive_id >= 0 || event_open || hasNewIncident()) return false;
   if (daily_offers[0] >= 0 || daily_offers[1] >= 0) return true;
   for (int p = 0; p < PROBLEM_COUNT; p++)
     if (problem_active[p] && problem_solution[p] >= 0) return true;
@@ -447,12 +733,24 @@ void interactPoint(int point){
   if (active_quest >= 0 && nextQuestPoint() == point){
     openQuestStepPanel();
   } else if (point == POINT_TECH_BUNK){
-    end_day_open = true;
+    openEndDayPanel();
   } else if (point_kind[point] == POINT_NPC){
     interactNpc(point);
   } else if (point == POINT_RISK_BUNK){
     openRescuePanel();
   }
+}
+
+void openEndDayPanel(){
+  end_day_open = true;
+}
+
+void closeEndDayPanel(){
+  end_day_open = false;
+}
+
+NightProjection recalculateEndDayPanel(){
+  return projectNight();
 }
 
 int offerOf(int owner){
@@ -476,98 +774,183 @@ void interactNpc(int point){
 
   if (owner < 0 || !crew_alive[owner]) return;
 
-  String name = crew_name[owner];
-
-  if (selected_order >= 0 && quest_owner[selected_order] == owner && dailyQuestFree()){
-    openDialogue(name, "CONFIRME A ORDEM. ELA NÃO PODE SER CANCELADA. " + questDetails(selected_order));
+  if (selected_preventive_id >= 0 && quest_owner[selected_preventive_id] == owner && dailyQuestFree()){
+    beginNpcConversation(owner);
+    dialog_result = editorialQuestResult(selected_preventive_id) + " A ordem não pode ser cancelada.";
     pending_quest_action = ACTION_ACCEPT_ORDER;
     return;
   }
 
-  if (selected_order >= 0){
-    openDialogue(name, "DECISÃO EM ANDAMENTO. CONFIRME COM " + crew_name[quest_owner[selected_order]]
-      + " EM " + pointLocation(crew_point[quest_owner[selected_order]]) + ".");
+  if (selected_preventive_id >= 0){
+    beginNpcConversation(owner);
     return;
   }
 
   if (active_quest >= 0 && quest_owner[active_quest] == owner){
-    if (quest_stage == QUEST_DELIVER && quest_origin[active_quest] == crew_point[owner]){
-      openDialogue(name, "SIGA A ORDEM: JÁ ENTREGUEI " + quest_object[active_quest] + ". LEVE ATÉ "
-        + pointLocation(nextQuestPoint()) + ". " + questEffect(active_quest) + ".");
-    } else {
-      openDialogue(name, "SIGA A ORDEM: " + questStageLabel(active_quest) + " " + quest_object[active_quest]
-        + " — " + pointLocation(nextQuestPoint()) + ". " + questEffect(active_quest) + ".");
-    }
+    beginNpcConversation(owner);
+    dialog_result = editorialQuestResult(active_quest);
     return;
   }
 
   if (active_quest >= 0){
-    openTechnical(name, "ORDEM ATIVA COM " + crew_name[quest_owner[active_quest]] + ": " + quest_object[active_quest]
-      + " — " + pointLocation(nextQuestPoint()) + ". FALE COM " + crew_name[quest_owner[active_quest]] + ".");
+    beginNpcConversation(owner);
     return;
   }
 
   if (quest_completed){
-    openDialogue(name, "TRABALHO CONCLUÍDO. SEU BELICHE ENCERRA O DIA.");
+    beginNpcConversation(owner);
     return;
   }
 
   int offer = offerOf(owner);
   if (offer >= 0){
-    openDialogue(name, "MINHA OFERTA: " + quest_title[offer] + ". OBJETO: " + quest_object[offer]
-      + ". COLETA: " + pointLocation(quest_origin[offer]) + ". ENTREGA: " + pointLocation(quest_destination[offer])
-      + ". COMPARE COM A OUTRA EM ORDENS.");
+    beginNpcConversation(owner);
+    dialog_result = "Compare as duas opções em Ordens.";
     return;
   }
 
-  int urgent = urgentProblem();
-  if (urgent >= 0){
-    openTechnical(name, "PROBLEMA ATIVO: " + problem_title[urgent] + ". " + problemLossLabel(urgent)
-      + "; PRAZO " + problem_deadline[urgent] + ". " + (event_open
-      ? "ESCOLHA UMA SOLUÇÃO NO CARTÃO." : "ESCOLHA OU RETOME UMA SOLUÇÃO EM ORDENS."));
-    return;
-  }
-
-  openDialogue(name, "NADA PENDENTE COMIGO HOJE.");
+  beginNpcConversation(owner);
 }
 
 void openQuestStepPanel(){
   int q = active_quest;
   boolean collecting = quest_stage == QUEST_COLLECT;
-  openTechnical((collecting ? "COLETAR " : "ENTREGAR ") + quest_object[q] + "?",
-    "SERVE PARA " + quest_title[q] + ". " + questDetails(q));
+  String verb = collecting ? "Pegar" : "Levar";
+  String result = collecting ? "Resultado: o objeto fica com você até a entrega. Custo: "
+    + questCostLabel(q) + "."
+    : "Resultado: " + questBenefitLabel(q) + ". Custo: " + questCostLabel(q) + ".";
+  openTechnical(verb + " " + quest_object[q] + "?",
+    verb + ": " + quest_object[q] + ". Destino: " + pointLocation(quest_destination[q])
+      + ". " + result + " Se falhar: " + questFailure(q) + ". " + questMotivation(q));
   pending_quest_action = collecting ? ACTION_COLLECT_QUEST : ACTION_DELIVER_QUEST;
 }
 
 void openRescuePanel(){
-  openTechnical(pointDisplayLabel(POINT_RISK_BUNK), "SOCORRO: -8 ÁGUA E -2 COMIDA. ESTABILIZA A PESSOA E CONCLUI A QUEST DO DIA. "
-    + ((!dailyQuestFree() || selected_order >= 0) ? "A QUEST DO DIA JÁ FOI ESCOLHIDA. " : "")
-    + "SEM SOCORRO, MORRE QUANDO O PRAZO ZERAR. EM DIA PREVENTIVO, AS DUAS PERDAS POR NEGLIGÊNCIA CONTINUAM.");
+  if (urgentRisk() < 0) return;
+  int crew = urgentRisk();
+  openTechnical("SOCORRER " + crew_name[crew] + " — " + crew_risk_deadline[crew] + " NOITE(S)",
+    "SOCORRO: -8 ÁGUA E -2 COMIDA. ESTABILIZA " + crew_name[crew]
+    + " E USA A ÚNICA CONCLUSÃO DO DIA. SEM SOCORRO, A PESSOA MORRE QUANDO O PRAZO ZERAR. "
+    + "EM DIA PREVENTIVO, AS PERDAS POR NEGLIGÊNCIA CONTINUAM.");
   pending_quest_action = ACTION_RESCUE;
 }
 
 boolean pendingQuestEnabled(){
-  if (pending_quest_action == ACTION_RESCUE) return dailyQuestFree() && selected_order < 0 && urgentRisk() >= 0 && water >= 8 && food >= 2;
-  if (pending_quest_action == ACTION_DELIVER_QUEST && active_quest >= PREVENTIVE_COUNT){
-    int i = active_quest - PREVENTIVE_COUNT;
-    return canPayResource(solution_resource[i], solution_cost[i]);
+  return pendingQuestReason().isClear();
+}
+
+String questCostLabel(int q){
+  if (q < PREVENTIVE_COUNT) return "nenhum";
+  int index = q - PREVENTIVE_COUNT;
+  return "-" + solution_cost[index] + " " + resourceName(solution_resource[index]);
+}
+
+String questBenefitLabel(int q){
+  if (q < PREVENTIVE_COUNT){
+    return "Benefício: +" + preventiveReward(q) + " " + resourceName(preventive_resource[q]);
   }
-  return pending_quest_action != ACTION_NONE;
+  int problem = questProblem(q);
+  return "Benefício: " + problem_title[problem] + " resolvido";
+}
+
+QuestActionReason pendingQuestReason(){
+  if (pending_quest_action == ACTION_ACCEPT_ORDER) return preventiveActionReason();
+  if (pending_quest_action == ACTION_COLLECT_QUEST) return collectActionReason();
+  if (pending_quest_action == ACTION_DELIVER_QUEST) return deliverActionReason();
+  if (pending_quest_action == ACTION_RESCUE) return rescueActionReason();
+  if (pending_quest_action == ACTION_RETRY_QUEST) return retryActionReason();
+  return staleQuestReason(pending_quest_action);
+}
+
+QuestActionReason retryActionReason(){
+  return retryActionReasonFor(pending_retry);
+}
+
+QuestActionReason retryActionReasonFor(int q){
+  if (!validQuestId(q) || q < PREVENTIVE_COUNT) return staleQuestReason(ACTION_RETRY_QUEST);
+  if (event_open || hasNewIncident()){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_INCIDENT_BLOCKED);
+    reason.incident_id = event_open ? event_index : incidentForDay(day);
+    return reason;
+  }
+  if (!dailyQuestFree()) return new QuestActionReason(QUEST_REASON_DAILY_LIMIT);
+  if (selected_preventive_id >= 0) return confirmationPendingReason(selected_preventive_id);
+  int problem = questProblem(q);
+  if (problem < 0 || problem >= PROBLEM_COUNT || !problem_active[problem]
+    || problem_solution[problem] != q){
+    return staleQuestReason(ACTION_RETRY_QUEST);
+  }
+  boolean has_retry_snapshot = pending_retry >= 0 && pending_retry == q && pending_retry_problem != PROBLEM_NONE;
+  if (has_retry_snapshot
+    && (pending_retry_problem != problem || pending_retry_solution != q
+      || pending_retry_problem_active != problem_active[problem]
+      || pending_retry_deadline != problem_deadline[problem]
+      || pending_retry_consequence_resource != problem_loss_resource[problem]
+      || pending_retry_consequence_value != problem_loss_value[problem])){
+    return staleQuestReason(ACTION_RETRY_QUEST);
+  }
+  if (active_quest >= 0 || held_item != ITEM_NONE || quest_stage != 0){
+    return staleQuestReason(ACTION_RETRY_QUEST);
+  }
+  int solution_index = q - PREVENTIVE_COUNT;
+  if (!canPayResource(solution_resource[solution_index], solution_cost[solution_index])){
+    QuestActionReason reason = new QuestActionReason(QUEST_REASON_RESOURCE_INSUFFICIENT);
+    reason.resource_id = solution_resource[solution_index];
+    reason.available = resourceValue(solution_resource[solution_index]);
+    reason.required = solution_cost[solution_index];
+    return reason;
+  }
+  return clearQuestReason();
+}
+
+String questReasonText(QuestActionReason reason){
+  if (reason == null || reason.isClear()) return "";
+  if (QUEST_REASON_RESOURCE_INSUFFICIENT.equals(reason.kind)){
+    return "Falta " + resourceName(reason.resource_id) + ". Você tem "
+      + int(reason.available) + " de " + int(reason.required) + ".";
+  }
+  if (QUEST_REASON_CONFIRMATION_PENDING.equals(reason.kind)
+    || QUEST_REASON_WRONG_NPC.equals(reason.kind)){
+    String name = reason.expected_npc_id >= 0 && reason.expected_npc_id < CREW_COUNT
+      ? crew_name[reason.expected_npc_id] : "responsável";
+    String room = reason.expected_room_id == SCREEN_NONE ? "sua sala"
+      : roomTitle(reason.expected_room_id);
+    return "Confirme com " + name + " em " + room + ".";
+  }
+  if (QUEST_REASON_WRONG_POINT.equals(reason.kind)){
+    return "Local incorreto. Vá até " + pointDisplayLabel(reason.expected_point_id) + ".";
+  }
+  if (QUEST_REASON_WRONG_DISTANCE.equals(reason.kind)){
+    return "Aproxime-se de " + pointDisplayLabel(reason.expected_point_id) + ".";
+  }
+  if (QUEST_REASON_DAILY_LIMIT.equals(reason.kind)) return "A conclusão de hoje já foi usada.";
+  if (QUEST_REASON_INCIDENT_BLOCKED.equals(reason.kind)) return "Resolva o incidente antes de concluir esta ação.";
+  if (QUEST_REASON_NO_RISK.equals(reason.kind)) return "Não há pessoa em risco.";
+  if (QUEST_REASON_STALE_STATE.equals(reason.kind)) return "A ação mudou. Revise o painel.";
+  return "Ação indisponível. Revise o estado atual.";
 }
 
 void applyQuestAction(){
-  if (!pendingQuestEnabled()) return;
+  if (!pendingQuestEnabled()){
+    system_message = questReasonText(pendingQuestReason());
+    return;
+  }
   int action = pending_quest_action;
   technical_open = false;
-  pending_quest_action = ACTION_NONE;
   if (action == ACTION_ACCEPT_ORDER) acceptPreventive();
   else if (action == ACTION_COLLECT_QUEST) collectQuestObject();
   else if (action == ACTION_DELIVER_QUEST) deliverQuest();
   else if (action == ACTION_RESCUE) rescueUrgentSurvivor();
   else if (action == ACTION_RETRY_QUEST) acceptSolution(pending_retry);
+  pending_quest_action = ACTION_NONE;
 }
 
-String pointLocation(int point){ return point_label[point] + " (" + room_label[roomIndex(point_room[point])] + ")"; }
+String pointLocation(int point){
+  if (!pointExists(point) || point_room[point] == SCREEN_NONE) return "Local indisponível";
+  int room = roomIndexOrInvalid(point_room[point]);
+  if (room < 0) return "Local indisponível";
+  return point_label[point] + " (" + room_label[room] + ")";
+}
 
 String questEffect(int q){
   if (q < PREVENTIVE_COUNT) return "RECOMPENSA: +" + preventiveReward(q) + " " + resourceName(preventive_resource[q]);
@@ -584,9 +967,9 @@ String questFailure(int q){
 }
 
 String questDetails(int q){
-  return "RESPONSÁVEL: " + crew_name[quest_owner[q]] + ". OBJETO: " + quest_object[q]
-    + ". COLETA: " + pointLocation(quest_origin[q]) + ". ENTREGA: " + pointLocation(quest_destination[q])
-    + ". " + questEffect(q) + ". RESULTADO: " + quest_title[q] + ". " + questFailure(q);
+  return "Responsável: " + crewDisplayName(quest_owner[q]) + ". Coleta: "
+    + pointLocation(quest_origin[q]) + ". Entrega: " + pointLocation(quest_destination[q])
+    + ". " + questEffect(q) + ". " + questFailure(q);
 }
 
 String activeProblemSummary(){
@@ -600,40 +983,100 @@ String problemMapLine(int problem){
 }
 
 void drawQuestCard(PGraphics g, int q, float x, float y, float w, int action, boolean enabled){
-  drawPanel(g, x, y, w, 208, q == selected_order ? COL_CYAN : COL_BORDER);
-  float row = drawTextWrapped(g, (q < PREVENTIVE_COUNT ? "ORDEM PREVENTIVA — " : "SOLUÇÃO — ") + quest_title[q], x + 10, y + 10, w - 20, 16, 18, COL_CYAN);
-  row = drawTextWrapped(g, "RESPONSÁVEL: " + crew_name[quest_owner[q]] + " | " + quest_id[q], x + 10, row + 7, w - 20, 16, 18, COL_MUTED);
-  row = drawTextWrapped(g, "OBJETO: " + quest_object[q], x + 10, row + 7, w - 20, 16, 18, COL_TEXT);
-  row = drawTextWrapped(g, "COLETA: " + pointLocation(quest_origin[q]), x + 10, row + 7, w - 20, 16, 18, COL_TEXT);
-  row = drawTextWrapped(g, "ENTREGA: " + pointLocation(quest_destination[q]), x + 10, row + 7, w - 20, 16, 18, COL_TEXT);
-  row = drawTextWrapped(g, questEffect(q), x + 10, row + 7, w - 20, 16, 18, COL_GREEN);
-  drawTextWrapped(g, questFailure(q), x + 10, row + 7, w - 20, 16, 18, COL_ORANGE);
-  if (action != ACTION_NONE) drawButton(g, x + 10, y + 175, w - 20, 23,
-    q < PREVENTIVE_COUNT ? "ESCOLHER; CONFIRMAR COM " + crew_name[quest_owner[q]] : "ESCOLHER SOLUÇÃO", action, enabled);
+  drawQuestCard(g, q, x, y, w, action, enabled, false);
+}
+
+void drawQuestCard(PGraphics g, int q, float x, float y, float w, int action, boolean enabled,
+  boolean expanded){
+  float card_height = expanded ? 254 : 208;
+  drawPanel(g, x, y, w, card_height, q == selected_preventive_id ? COL_CYAN : COL_BORDER);
+  text(g, questVisibleTitle(q), x + 10, y + 10, 16, COL_CYAN);
+  if (expanded){
+    float row = drawTextWrapped(g, questDetails(q), x + 10, y + 30, w - 20, 16, 18, COL_TEXT);
+    row = drawTextWrapped(g, "Objeto: " + quest_object[q], x + 10, row + 2, w - 20, 16, 18, COL_TEXT);
+    row = drawTextWrapped(g, questBenefitLabel(q), x + 10, row + 2, w - 20, 16, 18, COL_GREEN);
+    text(g, "Custo: " + questCostLabel(q), x + 10, row + 2, 16, COL_TEXT);
+    if (action != ACTION_NONE){
+      String action_label = q < PREVENTIVE_COUNT
+        ? "ESCOLHER · FALAR COM " + crewDisplayName(quest_owner[q])
+        : action == ACTION_CONFIRM_QUEST ? "RETOMAR SOLUÇÃO" : "VERIFICAR SOLUÇÃO";
+      drawButton(g, x + 10, y + 220, w - 20, 23, action_label, action, enabled);
+    }
+    return;
+  }
+  drawTextWrapped(g, crewDisplayName(quest_owner[q]) + " · " + questMotivation(q),
+    x + 10, y + 28, w - 20, 16, 18, COL_MUTED);
+  text(g, "Objeto: " + quest_object[q], x + 10, y + 64, 16, COL_TEXT);
+  drawTextWrapped(g, "Rota: " + pointLocation(quest_origin[q]) + " → "
+    + pointLocation(quest_destination[q]), x + 10, y + 82, w - 20, 16, 18, COL_TEXT);
+  text(g, questBenefitLabel(q), x + 10, y + 100, 16, COL_GREEN);
+  text(g, "Custo: " + questCostLabel(q), x + 10, y + 118, 16, COL_TEXT);
+  drawTextWrapped(g, questCardConsequence(q), x + 10, y + 136, w - 20, 16, 18, COL_ORANGE);
+  if (action != ACTION_NONE){
+    String action_label = q < PREVENTIVE_COUNT
+      ? "ESCOLHER · FALAR COM " + crewDisplayName(quest_owner[q])
+      : action == ACTION_CONFIRM_QUEST ? "RETOMAR SOLUÇÃO" : "VERIFICAR SOLUÇÃO";
+    drawButton(g, x + 10, y + (expanded ? 220 : 175), w - 20, 23,
+      action_label, action, enabled);
+  }
+}
+
+String questCardConsequence(int q){
+  if (q < PREVENTIVE_COUNT){
+    return "Consequência: falha custa " + preventiveFailure(q) + " "
+      + resourceName(preventive_resource[q]) + ".";
+  }
+
+  int problem = questProblem(q);
+  int deadline = problem_active[problem] ? problem_deadline[problem] : problem_initial_deadline[problem];
+  return "Consequência: " + problemLossLabel(problem) + " · prazo " + deadline
+    + " · " + problem_crisis[problem] + ".";
 }
 
 void drawOrdersPanel(PGraphics g){
   drawModalShade(g);
-  drawPanel(g, 22, 55, 596, 267, COL_CYAN);
-  text(g, "ORDENS — DIA " + day + " | UMA CONCLUSÃO POR DIA", 34, 64, 16, COL_CYAN);
+  drawPanel(g, 16, 20, 608, 328, COL_CYAN);
+  text(g, "ORDENS — DIA " + day + " | UMA CONCLUSÃO POR DIA", 28, 29, 16, COL_CYAN);
   if (active_quest >= 0){
-    drawQuestCard(g, active_quest, 34, 83, 572, ACTION_NONE, false);
-    text(g, quest_stage == QUEST_COLLECT ? "ETAPA: COLETAR" : "ETAPA: ENTREGAR", 46, 258, 16, COL_GREEN);
+    drawQuestCard(g, active_quest, 28, 48, 584, ACTION_NONE, false);
+    text(g, quest_stage == QUEST_COLLECT ? "ETAPA: COLETAR" : "ETAPA: ENTREGAR", 40, 312, 16, COL_GREEN);
   } else if (quest_completed){
-    text(g, "QUEST CONCLUÍDA. RETORNE AO SEU BELICHE.", 40, 106, 16, COL_GREEN);
-    drawTextWrapped(g, questNightSummary(), 40, 132, 556, 16, 18, COL_ORANGE);
+    text(g, "QUEST CONCLUÍDA. RETORNE AO SEU BELICHE.", 34, 68, 16, COL_GREEN);
+    drawTextWrapped(g, questNightSummary(), 34, 94, 572, 16, 18, COL_ORANGE);
   } else if (orders_page >= 0){
-    drawQuestCard(g, problem_solution[orders_page], 34, 83, 572, ACTION_RETRY_QUEST, selected_order < 0);
+    int retry_action = pending_quest_action == ACTION_RETRY_QUEST
+      ? ACTION_CONFIRM_QUEST : ACTION_RETRY_QUEST;
+    drawQuestCard(g, problem_solution[orders_page], 28, 48, 584, retry_action,
+      selected_preventive_id < 0, orders_details_open);
   } else {
     for (int i = 0; i < 2; i++) if (daily_offers[i] >= 0)
-      drawQuestCard(g, daily_offers[i], 34 + i * 290, 83, 282, i == 0 ? ACTION_ORDER_A : ACTION_ORDER_B, true);
+      drawQuestCard(g, daily_offers[i], 28 + i * 294, 48, 288,
+        i == 0 ? ACTION_ORDER_A : ACTION_ORDER_B, true, orders_details_open);
   }
-  if (dailyQuestFree() && incidentForDay(day) == PROBLEM_NONE && activeProblemCount() > 0)
-    drawButton(g, 34, 297, 218, 20, "OFERTAS / PRÓXIMA RETOMADA", ACTION_NEXT_RETRY, true);
-  drawButton(g, 518, 297, 84, 20, "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+  if (active_quest < 0 && !quest_completed){
+    drawButton(g, 28, 306, orders_page >= 0 ? 220 : 242, 20,
+      orders_details_open ? "OCULTAR DETALHES" : "VER DETALHES", ACTION_TOGGLE_ORDER_DETAILS, true);
+  }
+  int pending_count = pendingQuestCount();
+  if (dailyQuestFree() && incidentForDay(day) == PROBLEM_NONE && pending_count > 0){
+    drawModalFooter(g, 326, "PENDÊNCIAS (" + pending_count + ")", ACTION_NEXT_RETRY, true,
+      "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+  } else {
+    drawModalFooter(g, 326, "", ACTION_NONE, false,
+      "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+  }
+}
+
+int pendingQuestCount(){
+  int count = 0;
+  for (int problem = 0; problem < PROBLEM_COUNT; problem++){
+    if (problem_active[problem] && problem_solution[problem] >= PREVENTIVE_COUNT) count++;
+  }
+  return count;
 }
 
 void cycleRetry(){
+  if (hasNewIncident() || event_open) return;
   for (int p = orders_page + 1; p < PROBLEM_COUNT; p++){
     if (problem_active[p] && problem_solution[p] >= 0){ orders_page = p; return; }
   }
@@ -641,10 +1084,19 @@ void cycleRetry(){
 }
 
 void reviewRetry(){
-  if (orders_page < 0 || !dailyQuestFree() || selected_order >= 0) return;
+  if (orders_page < 0 || !dailyQuestFree() || selected_preventive_id >= 0
+    || hasNewIncident() || event_open) return;
   int q = problem_solution[orders_page];
-  orders_open = false;
-  openTechnical("RETOMAR A MESMA SOLUÇÃO?", questDetails(q) + " A PREVENTIVA NÃO ACEITA CONTINUA SUJEITA À NEGLIGÊNCIA.");
+  int problem = questProblem(q);
+  if (!validQuestId(q) || problem < 0 || problem >= PROBLEM_COUNT
+    || !problem_active[problem] || problem_solution[problem] != q) return;
+  orders_details_open = true;
   pending_retry = q;
+  pending_retry_problem = problem;
+  pending_retry_solution = q;
+  pending_retry_problem_active = problem_active[problem];
+  pending_retry_deadline = problem_deadline[problem];
+  pending_retry_consequence_resource = problem_loss_resource[problem];
+  pending_retry_consequence_value = problem_loss_value[problem];
   pending_quest_action = ACTION_RETRY_QUEST;
 }

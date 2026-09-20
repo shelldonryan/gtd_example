@@ -40,6 +40,7 @@ final int ACTION_RETRY_QUEST = 25;
 final int ACTION_ACCEPT_SOLUTION = 26;
 final int ACTION_BACK_SOLUTION = 27;
 final int ACTION_CONFIRM_QUEST = 28;
+final int ACTION_TOGGLE_ORDER_DETAILS = 29;
 final int ACTION_EVENT_A = 30;
 final int ACTION_EVENT_B = 31;
 final int ACTION_RESUME = 40;
@@ -47,6 +48,12 @@ final int ACTION_RESTART = 41;
 final int ACTION_MAIN_MENU = 42;
 final int ACTION_NEW_GAME = 43;
 final int ACTION_OPEN_HELP = 44;
+final int ACTION_MAP_MY_ROOM = 45;
+final int ACTION_MAP_TARGET_ROOM = 46;
+final int ACTION_OPEN_RESCUE = 47;
+final int ACTION_MAP_BUNK_QUERY = 48;
+final int ACTION_MAP_RESCUE_QUERY = 49;
+final int ACTION_MAP_ROUTE = 50;
 
 /* playable room - interface/ROOMS.md */
 final int PLAYER_W = 16;
@@ -69,6 +76,7 @@ final float ROOM_LEFT = 8;
 final float ROOM_RIGHT = 632;
 final float ROOM_TOP = 56;
 final float ROOM_BOTTOM = 284;
+final int DECK_COUNT = 3;
 final int ITEM_NONE = 0;
 
 /* rules - mechanics/ACTIONS.md */
@@ -163,6 +171,8 @@ int map_selected_room = 0;
 boolean dialog_open = false;
 String dialog_name = "";
 String dialog_text = "";
+String dialog_result = "";
+int dialog_crew = -1;
 boolean technical_open = false;
 String technical_title = "";
 String technical_text = "";
@@ -224,9 +234,26 @@ interface SceneHook {
   boolean draw(PGraphics target);
 }
 
+interface OptionalKeyHook {
+  boolean handle();
+}
+
+interface OptionalOverlayHook {
+  void draw(PGraphics target);
+}
+
 Runnable harness_setup = () -> {};
 Runnable harness_update = () -> {};
 SceneHook harness_scene = (target) -> false;
+OptionalKeyHook optional_test_key_hook = () -> false;
+OptionalOverlayHook optional_test_overlay_hook = (target) -> {};
+boolean optional_mode_enabled = false;
+boolean optional_mode_force_visual = false;
+
+
+boolean optionalVisualOverrideActive(){
+  return optional_mode_enabled && optional_mode_force_visual;
+}
 
 
 void settings(){
@@ -293,8 +320,7 @@ void drawBase(){
     }
   }
 
-  // [TEST-MODE] Overlay visual do modo de teste
-  drawTestModeOverlay(base);
+  optional_test_overlay_hook.draw(base);
 
   base.endDraw();
 }
@@ -352,7 +378,7 @@ void updateInput(){
 
 
 void handleClick(float x, float y){
-  if (isMenuScreen() && screen == SCREEN_VIGNETTE){
+  if (uiLayer() == LAYER_SCENE && isMenuScreen() && screen == SCREEN_VIGNETTE){
     doAction(ACTION_VIGNETTE_NEXT);
     return;
   }
@@ -370,7 +396,7 @@ void handleEscape(){
     return;
   }
 
-  if (closeTopModal()){
+  if (uiLayer() != LAYER_SCENE && closeTopModal()){
     return;
   }
 
@@ -379,24 +405,28 @@ void handleEscape(){
 
 
 void handleEnter(){
-  if (paused) return;
-  if (transmission_open){
+  int active_layer = uiLayer();
+
+  if (active_layer == LAYER_PAUSE || active_layer == LAYER_MAP || active_layer == LAYER_HELP){
+    return;
+  }
+  if (active_layer == LAYER_ORDERS){
+    if (pending_quest_action == ACTION_RETRY_QUEST) doAction(ACTION_CONFIRM_QUEST);
+    return;
+  }
+  if (active_layer == LAYER_TRANSMISSION){
     doAction(ACTION_CLOSE_MODAL);
     return;
   }
-  if (event_open){
+  if (active_layer == LAYER_EVENT){
     if (quest_review >= 0) doAction(ACTION_ACCEPT_SOLUTION);
     return;
   }
-  if ((dialog_open || technical_open) && pending_quest_action != ACTION_NONE){
-    doAction(ACTION_CONFIRM_QUEST);
+  if (active_layer == LAYER_DIALOGUE || active_layer == LAYER_TECHNICAL){
+    doAction(pending_quest_action != ACTION_NONE ? ACTION_CONFIRM_QUEST : ACTION_CLOSE_MODAL);
     return;
   }
-  if (dialog_open || technical_open){
-    doAction(ACTION_CLOSE_MODAL);
-    return;
-  }
-  if (end_day_open){
+  if (active_layer == LAYER_SLEEP){
     doAction(ACTION_END_DAY);
     return;
   }
@@ -435,8 +465,7 @@ void mousePressed(){
 
 
 void keyPressed(){
-  // [TEST-MODE] Intercepta atalhos do modo de teste
-  if (testModeKeyPressed()) return;
+  if (optional_test_key_hook.handle()) return;
 
   if (keyCode == ESC){
     key = 0;
