@@ -144,11 +144,80 @@ float modalButtonWidth(PGraphics g, String label, float max_width){
     return 0;
   }
 
-  float text_width = max(0, max_width - 18);
-  float text_size = fitTextSize(g, label, MIN_TEXT_SIZE, text_width);
-  g.textSize(renderTextSize(text_size));
+  g.textSize(renderTextSize(MIN_TEXT_SIZE));
   return min(max_width, max(84, g.textWidth(label) + 18));
 }
+
+String[] modalButtonLines(PGraphics g, String label, float max_width){
+  ArrayList<String> lines = new ArrayList<String>();
+  String[] words = split(label.replace('\n', ' '), ' ');
+  float text_size = renderTextSize(MIN_TEXT_SIZE);
+  max_width = max(1, max_width);
+  g.textSize(text_size);
+  String line = "";
+
+  for (String word : words){
+    if (word.length() == 0) continue;
+    String candidate = line.length() == 0 ? word : line + " " + word;
+    if (line.length() > 0 && g.textWidth(candidate) > max_width){
+      lines.add(line);
+      line = "";
+    }
+
+    if (g.textWidth(word) <= max_width){
+      line = line.length() == 0 ? word : line + " " + word;
+      continue;
+    }
+
+    String fragment = "";
+    for (int index = 0; index < word.length(); index++){
+      String character = word.substring(index, index + 1);
+      String next = fragment + character;
+      if (fragment.length() > 0 && g.textWidth(next) > max_width){
+        lines.add(fragment);
+        fragment = character;
+      } else {
+        fragment = next;
+      }
+    }
+    line = fragment;
+  }
+
+  if (line.length() > 0 || lines.size() == 0) lines.add(line);
+  return lines.toArray(new String[lines.size()]);
+}
+
+
+float modalButtonHeight(PGraphics g, String label, float width){
+  if (label.length() == 0) return 0;
+  float line_height = renderTextSize(MIN_TEXT_SIZE) + 1;
+  int line_count = modalButtonLines(g, label, max(1, width - 16)).length;
+  return max(MODAL_BUTTON_HEIGHT, line_count * line_height + 3);
+}
+
+
+void drawModalFooterButton(PGraphics g, float x, float y, float w, float h,
+  String label, int action, boolean on){
+  boolean hover = on && uiLayer() == draw_layer && isHovering(x, y, w, h);
+  int border = on ? (hover ? COL_CYAN : COL_BORDER) : COL_DIM;
+  int colour = on ? (hover ? COL_CYAN : COL_TEXT) : COL_DIM;
+  drawPanel(g, x, y, w, h, border);
+
+  String[] lines = modalButtonLines(g, label, max(1, w - 16));
+  float render_size = renderTextSize(MIN_TEXT_SIZE);
+  float line_height = render_size + 1;
+  float block_height = lines.length * render_size + max(0, lines.length - 1);
+  float text_y = y + (h - block_height) / 2.0;
+  g.fill(colour);
+  g.textSize(render_size);
+  for (int index = 0; index < lines.length; index++){
+    g.text(lines[index], x + (w - g.textWidth(lines[index])) / 2.0,
+      text_y + index * line_height);
+  }
+
+  addButton(x, y, w, h, action, on);
+}
+
 
 void drawModalFooter(PGraphics g, float y, String secondary, int secondary_action, boolean secondary_on,
   String primary, int primary_action, boolean primary_on){
@@ -165,21 +234,34 @@ void drawModalFooter(PGraphics g, float y, String secondary, int secondary_actio
   float total_w = primary_w + secondary_w + (secondary_w > 0 ? MODAL_FOOTER_GAP : 0);
 
   if (total_w > content_w){
-    float available_w = content_w - (secondary_w > 0 ? MODAL_FOOTER_GAP : 0);
-    float primary_ratio = primary_w / max(1, primary_w + secondary_w);
-    if (secondary_w > 0){
-      primary_w = constrain(available_w * primary_ratio, 84, available_w - 84);
+    if (secondary.length() > 0 && primary.length() > 0){
+      float available_w = content_w - MODAL_FOOTER_GAP;
+      float primary_ratio = primary_w / max(1, primary_w + secondary_w);
+      if (available_w >= 168){
+        primary_w = constrain(available_w * primary_ratio, 84, available_w - 84);
+      } else {
+        primary_w = available_w * primary_ratio;
+      }
       secondary_w = available_w - primary_w;
-    } else {
-      primary_w = available_w;
+    } else if (primary.length() > 0){
+      primary_w = content_w;
+    } else if (secondary.length() > 0){
+      secondary_w = content_w;
     }
   }
 
-  if (primary.length() > 0) drawButton(g, right - primary_w, y, primary_w, MODAL_BUTTON_HEIGHT,
-    primary, primary_action, primary_on);
-  if (secondary.length() > 0) drawButton(g, right - primary_w - MODAL_FOOTER_GAP - secondary_w, y,
-    secondary_w, MODAL_BUTTON_HEIGHT,
-    secondary, secondary_action, secondary_on);
+  float footer_height = max(modalButtonHeight(g, primary, primary_w),
+    modalButtonHeight(g, secondary, secondary_w));
+  float footer_y = y + MODAL_BUTTON_HEIGHT - footer_height;
+  if (primary.length() > 0) drawModalFooterButton(g, right - primary_w, footer_y,
+    primary_w, footer_height, primary, primary_action, primary_on);
+  if (secondary.length() > 0){
+    float secondary_x = primary.length() > 0
+      ? right - primary_w - MODAL_FOOTER_GAP - secondary_w
+      : right - secondary_w;
+    drawModalFooterButton(g, secondary_x, footer_y, secondary_w, footer_height,
+      secondary, secondary_action, secondary_on);
+  }
 }
 
 
