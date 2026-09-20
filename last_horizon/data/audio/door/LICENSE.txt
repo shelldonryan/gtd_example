@@ -4,8 +4,7 @@ Som da porta — Last Horizon (issue #28)
 Arquivo desta pasta:
   door.wav — toca uma vez no inicio da travessia de porta
 
-Escolhido pelo usuario entre seis candidatos: ar continuo ("tsssss") com
-batente metalico no fim. Duas camadas, ambas de bancos livres (CC0):
+Duas camadas, ambas de bancos livres (CC0):
 
 1. Chiado de ar: "100 CC0 SFX #2", de rubberduck — arquivo sfx100v2_air_01.ogg
    Licenca: CC0 — https://opengameart.org/content/100-cc0-sfx-2
