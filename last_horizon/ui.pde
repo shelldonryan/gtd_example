@@ -191,7 +191,7 @@ void drawBackdrop(PGraphics g, float x, float y, float w, float h){
 void drawModalShade(PGraphics g){
   g.noStroke();
   g.fill(0xB8000000);
-  g.rect(0, 0, BASE_W, BASE_H);
+  g.rect(0, 52, BASE_W, BASE_H - 52);
 }
 
 

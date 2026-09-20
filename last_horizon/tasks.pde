@@ -988,19 +988,19 @@ void drawQuestCard(PGraphics g, int q, float x, float y, float w, int action, bo
 
 void drawQuestCard(PGraphics g, int q, float x, float y, float w, int action, boolean enabled,
   boolean expanded){
-  float card_height = expanded ? 254 : 208;
+  float card_height = 190;
   drawPanel(g, x, y, w, card_height, q == selected_preventive_id ? COL_CYAN : COL_BORDER);
   text(g, questVisibleTitle(q), x + 10, y + 10, 16, COL_CYAN);
   if (expanded){
-    float row = drawTextWrapped(g, questDetails(q), x + 10, y + 30, w - 20, 16, 18, COL_TEXT);
-    row = drawTextWrapped(g, "Objeto: " + quest_object[q], x + 10, row + 2, w - 20, 16, 18, COL_TEXT);
-    row = drawTextWrapped(g, questBenefitLabel(q), x + 10, row + 2, w - 20, 16, 18, COL_GREEN);
-    text(g, "Custo: " + questCostLabel(q), x + 10, row + 2, 16, COL_TEXT);
+    float row = drawTextWrapped(g, questDetails(q), x + 10, y + 26, w - 20, 15, 16, COL_TEXT);
+    row = drawTextWrapped(g, "Objeto: " + quest_object[q], x + 10, row + 2, w - 20, 15, 16, COL_TEXT);
+    row = drawTextWrapped(g, questBenefitLabel(q), x + 10, row + 2, w - 20, 15, 16, COL_GREEN);
+    text(g, "Custo: " + questCostLabel(q), x + 10, row + 2, 15, COL_TEXT);
     if (action != ACTION_NONE){
       String action_label = q < PREVENTIVE_COUNT
         ? "ESCOLHER · FALAR COM " + crewDisplayName(quest_owner[q])
         : action == ACTION_CONFIRM_QUEST ? "RETOMAR SOLUÇÃO" : "VERIFICAR SOLUÇÃO";
-      drawButton(g, x + 10, y + 220, w - 20, 23, action_label, action, enabled);
+      drawButton(g, x + 10, y + 158, w - 20, 23, action_label, action, enabled);
     }
     return;
   }
@@ -1016,7 +1016,7 @@ void drawQuestCard(PGraphics g, int q, float x, float y, float w, int action, bo
     String action_label = q < PREVENTIVE_COUNT
       ? "ESCOLHER · FALAR COM " + crewDisplayName(quest_owner[q])
       : action == ACTION_CONFIRM_QUEST ? "RETOMAR SOLUÇÃO" : "VERIFICAR SOLUÇÃO";
-    drawButton(g, x + 10, y + (expanded ? 220 : 175), w - 20, 23,
+    drawButton(g, x + 10, y + 158, w - 20, 23,
       action_label, action, enabled);
   }
 }
@@ -1035,35 +1035,35 @@ String questCardConsequence(int q){
 
 void drawOrdersPanel(PGraphics g){
   drawModalShade(g);
-  drawPanel(g, 16, 20, 608, 328, COL_CYAN);
-  text(g, "ORDENS — DIA " + day + " | UMA CONCLUSÃO POR DIA", 28, 29, 16, COL_CYAN);
+  drawPanel(g, 16, 79, 608, 252, COL_CYAN);
+  text(g, "ORDENS — DIA " + day + " | UMA CONCLUSÃO POR DIA", 28, 88, 16, COL_CYAN);
   if (active_quest >= 0){
-    drawQuestCard(g, active_quest, 28, 48, 584, ACTION_NONE, false);
-    text(g, quest_stage == QUEST_COLLECT ? "ETAPA: COLETAR" : "ETAPA: ENTREGAR", 40, 312, 16, COL_GREEN);
+    drawQuestCard(g, active_quest, 28, 105, 582, ACTION_NONE, false);
+    text(g, quest_stage == QUEST_COLLECT ? "ETAPA: COLETAR" : "ETAPA: ENTREGAR", 40, 305, 16, COL_GREEN);
   } else if (quest_completed){
-    text(g, "QUEST CONCLUÍDA. RETORNE AO SEU BELICHE.", 34, 68, 16, COL_GREEN);
-    drawTextWrapped(g, questNightSummary(), 34, 94, 572, 16, 18, COL_ORANGE);
+    text(g, "QUEST CONCLUÍDA. RETORNE AO SEU BELICHE.", 34, 109, 16, COL_GREEN);
+    drawTextWrapped(g, questNightSummary(), 34, 133, 572, 16, 18, COL_ORANGE);
   } else if (orders_page >= 0){
     int retry_action = pending_quest_action == ACTION_RETRY_QUEST
       ? ACTION_CONFIRM_QUEST : ACTION_RETRY_QUEST;
-    drawQuestCard(g, problem_solution[orders_page], 28, 48, 584, retry_action,
+    drawQuestCard(g, problem_solution[orders_page], 28, 105, 582, retry_action,
       selected_preventive_id < 0, orders_details_open);
   } else {
     for (int i = 0; i < 2; i++) if (daily_offers[i] >= 0)
-      drawQuestCard(g, daily_offers[i], 28 + i * 294, 48, 288,
+      drawQuestCard(g, daily_offers[i], 28 + i * 294, 105, 288,
         i == 0 ? ACTION_ORDER_A : ACTION_ORDER_B, true, orders_details_open);
   }
   if (active_quest < 0 && !quest_completed){
-    drawButton(g, 28, 306, orders_page >= 0 ? 220 : 242, 20,
+    drawButton(g, 28, 303, orders_page >= 0 ? 220 : 242, 20,
       orders_details_open ? "OCULTAR DETALHES" : "VER DETALHES", ACTION_TOGGLE_ORDER_DETAILS, true);
   }
   int pending_count = pendingQuestCount();
   if (dailyQuestFree() && incidentForDay(day) == PROBLEM_NONE && pending_count > 0){
-    drawModalFooter(g, 326, "PENDÊNCIAS (" + pending_count + ")", ACTION_NEXT_RETRY, true,
-      "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+    drawModalFooter(g, 303, "PENDÊNCIAS (" + pending_count + ")", ACTION_NEXT_RETRY, true,
+      "FECHAR (ESC)", ACTION_CLOSE_MODAL, true, 28, 610);
   } else {
-    drawModalFooter(g, 326, "", ACTION_NONE, false,
-      "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+    drawModalFooter(g, 303, "", ACTION_NONE, false,
+      "FECHAR (ESC)", ACTION_CLOSE_MODAL, true, 28, 610);
   }
 }
 
