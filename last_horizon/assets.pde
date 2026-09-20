@@ -57,7 +57,7 @@ String[] art_station_file = {
   null, "mesa_grupo", "mesa_comum", "beliche_tecnico", null
 };
 
-/* 4 survivors in data/npc/ and data/portraits/ */
+/* 4 survivors in data/npc/ */
 String[] art_crew_file = {"vera", "bento", "neusa", "silvia"};
 
 /* 4 rooms in data/rooms/ and data/map/ */
@@ -387,9 +387,9 @@ void loadArtAssets(){
       ART_NPC_DIR + art_crew_file[crew] + ".png",
       ART_NPC_DIR + art_crew_file[crew] + ".json");
     prepareNpcGlow(crew);
-    art_portrait[crew] = loadArt(ART_PORTRAIT_DIR + art_crew_file[crew] + ".png");
-    if (art_portrait[crew] == null){
-      art_portrait[crew] = loadArt(ART_NPC_DIR + art_crew_file[crew] + "_portrait.png");
+    art_portrait[crew] = loadArt(ART_NPC_DIR + art_crew_file[crew] + "_portrait.png");
+    if (art_portrait[crew] == null && artExists(ART_PORTRAIT_DIR + art_crew_file[crew] + ".png")){
+      art_portrait[crew] = loadArt(ART_PORTRAIT_DIR + art_crew_file[crew] + ".png");
     }
   }
 
@@ -627,58 +627,39 @@ int crewIndexForName(String name){
 
 
 PImage[] crewArtFramesFacing(int crew, int facing){
-  if (crew < 0 || crew >= CREW_COUNT){
-    return null;
-  }
-
-  if (facing < 0 && art_crew_frames_left != null && art_crew_frames_left[crew][0] != null){
-    return art_crew_frames_left[crew];
-  }
-  if (facing > 0 && art_crew_frames_right != null && art_crew_frames_right[crew][0] != null){
-    return art_crew_frames_right[crew];
-  }
-  if (art_crew_frames != null && art_crew_frames[crew][0] != null){
-    return art_crew_frames[crew];
-  }
-
-  return null;
+  return selectCrewArtFrames(crew, facing,
+    art_crew_frames, art_crew_frames_left, art_crew_frames_right);
 }
 
 
 PImage[] crewArtGlowFramesFacing(int crew, int facing){
-  if (crew < 0 || crew >= CREW_COUNT){
-    return null;
-  }
-
-  if (facing < 0 && art_crew_glow_left != null && art_crew_glow_left[crew][0] != null){
-    return art_crew_glow_left[crew];
-  }
-  if (facing > 0 && art_crew_glow_right != null && art_crew_glow_right[crew][0] != null){
-    return art_crew_glow_right[crew];
-  }
-  if (art_crew_glow != null && art_crew_glow[crew][0] != null){
-    return art_crew_glow[crew];
-  }
-
-  return null;
+  return selectCrewArtFrames(crew, facing,
+    art_crew_glow, art_crew_glow_left, art_crew_glow_right);
 }
 
 
 PImage[] crewArtOrangeGlowFramesFacing(int crew, int facing){
+  return selectCrewArtFrames(crew, facing,
+    art_crew_glow_orange, art_crew_glow_orange_left, art_crew_glow_orange_right);
+}
+
+
+PImage[] selectCrewArtFrames(int crew, int facing, PImage[][] front,
+  PImage[][] left, PImage[][] right){
   if (crew < 0 || crew >= CREW_COUNT){
     return null;
   }
 
-  if (facing < 0 && art_crew_glow_orange_left != null && art_crew_glow_orange_left[crew][0] != null){
-    return art_crew_glow_orange_left[crew];
-  }
-  if (facing > 0 && art_crew_glow_orange_right != null && art_crew_glow_orange_right[crew][0] != null){
-    return art_crew_glow_orange_right[crew];
-  }
-  if (art_crew_glow_orange != null && art_crew_glow_orange[crew][0] != null){
-    return art_crew_glow_orange[crew];
-  }
+  boolean has_left = left != null && crew < left.length
+    && left[crew] != null && left[crew].length > 0 && left[crew][0] != null;
+  boolean has_right = right != null && crew < right.length
+    && right[crew] != null && right[crew].length > 0 && right[crew][0] != null;
+  boolean has_front = front != null && crew < front.length
+    && front[crew] != null && front[crew].length > 0 && front[crew][0] != null;
 
+  if (facing < 0 && has_left) return left[crew];
+  if (facing > 0 && has_right) return right[crew];
+  if (has_front) return front[crew];
   return null;
 }
 
