@@ -41,9 +41,9 @@ As peças são uma contagem numérica, sem barra.
 Os seis recursos usam **ícones de 16×16** na paleta do HUD — energia, oxigênio,
 água, comida, peças e moral. Cada cartão mostra **ícone + número + rótulo de
 texto** — `ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS`, `MORAL` — e, nos
-recursos de barra, a barra de preenchimento. O rótulo é texto provisório: o
-inventário troca os ícones geométricos por assets de 32×32 em `data/icons/`,
-listados em [[INVENTORY]], sem mudar o restante do cartão.
+recursos de barra, a barra de preenchimento. Os assets PNG de 32×32 em
+`data/icons/` são preparados uma vez e reutilizados; na ausência de um arquivo,
+o ícone geométrico mantém o cartão executável.
 
 ## Onde cada elemento fica
 
@@ -97,7 +97,7 @@ círculo por construção, sem depender da métrica da fonte.
 - O objeto só existe como parte de uma ordem aceita e pode ser carregado um por
   vez. Recursos comuns são pagos ou recebidos no destino.
 
-Os botões dos modais repetem o atalho no rótulo: `FECHAR (ESC)`, `VOLTAR (ESC)`,
+Os botões dos modais repetem o atalho no rótulo: `FECHAR (ESC)`, `AGORA NÃO (ESC)`,
 `CONFIRMAR (ENTER)`, `ACEITAR ORDEM (ENTER)`, `ENTREGAR (ENTER)` e o botão de
 dormir. O botão de pausa é `CONTINUAR (ESC)`.
 
@@ -201,6 +201,10 @@ O mapa contém a comparação completa. A ficha da sala mostra, para cada proble
 a perda diária, o prazo e a consequência quando ele chegar a zero. Para dano no
 casco, a ficha pertence ao cômodo que contém o local alcançável sorteado naquela
 ocorrência. A estrutura e os valores numéricos estão em [[ACTIONS]].
+
+Os textos editoriais de Vera, Bento, Neusa e Sílvia são derivados do contexto e
+dos resultados reais. A validação exige 22 entradas ligadas por `quest_id`,
+fallback factual e até 160 caracteres por campo.
 
 ## Referências
 

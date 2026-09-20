@@ -1,0 +1,141 @@
+{
+  "round": "E6",
+  "recordedAt": "2026-09-20T14:00:00-03:00",
+  "environment": {
+    "machine": "E6-FIXTURE-01",
+    "os": "Linux x86_64",
+    "processing": "4.5.6",
+    "font": "Segoe UI",
+    "assets": "assets@16d81f1",
+    "window": "1280x720",
+    "logicalCanvas": "640x360",
+    "state": "seed=20260919;day=1;room=Comando;fixture=deterministic"
+  },
+  "participants": [
+    {
+      "id": "P1",
+      "pseudonym": "Lia",
+      "firstVersion": "anterior",
+      "route": "Depósito -> Comando -> Dormitório",
+      "tasks": ["preventive", "acceptance", "collection", "delivery", "incident", "insufficientDelivery", "map", "fatalWarning", "voices"],
+      "timeToNextPassageSeconds": 8.4,
+      "selectionAcceptanceErrors": 0,
+      "reopens": { "orders": 1, "map": 1 },
+      "wrongTurns": 0,
+      "deckTraversal": "pass",
+      "fatalWarning": true,
+      "selectionVsAcceptance": true,
+      "costOrConsequence": true,
+      "voices": ["Vera", "Bento", "Neusa", "Sílvia"],
+      "clarity": 4,
+      "continue": 4,
+      "cycleScore": 4,
+      "comment": "O mapa ajuda a decidir sem tirar a exploração."
+    },
+    {
+      "id": "P2",
+      "pseudonym": "Caio",
+      "firstVersion": "nova",
+      "route": "Depósito -> Comando -> Dormitório",
+      "tasks": ["preventive", "acceptance", "collection", "delivery", "incident", "insufficientDelivery", "map", "fatalWarning", "voices"],
+      "timeToNextPassageSeconds": 12.1,
+      "selectionAcceptanceErrors": 2,
+      "reopens": { "orders": 2, "map": 2 },
+      "wrongTurns": 1,
+      "deckTraversal": "retry",
+      "fatalWarning": true,
+      "selectionVsAcceptance": false,
+      "costOrConsequence": false,
+      "voices": ["Vera", "Bento", "Neusa", "Sílvia"],
+      "clarity": 3,
+      "continue": 4,
+      "cycleScore": 3,
+      "comment": "Eu queria saber antes que selecionar ainda não aceitava."
+    },
+    {
+      "id": "P3",
+      "pseudonym": "Rui",
+      "firstVersion": "anterior",
+      "route": "Depósito -> Comando -> Dormitório",
+      "tasks": ["preventive", "acceptance", "collection", "delivery", "incident", "insufficientDelivery", "map", "fatalWarning", "voices"],
+      "timeToNextPassageSeconds": 7.6,
+      "selectionAcceptanceErrors": 1,
+      "reopens": { "orders": 1, "map": 2 },
+      "wrongTurns": 0,
+      "deckTraversal": "pass",
+      "fatalWarning": true,
+      "selectionVsAcceptance": true,
+      "costOrConsequence": true,
+      "voices": ["Vera", "Bento", "Neusa"],
+      "clarity": 4,
+      "continue": 4,
+      "cycleScore": 4,
+      "comment": "O aviso da noite foi claro; a volta pelo convés confundiu."
+    }
+  ],
+  "successCriteria": {
+    "nextPassageUnder10Seconds": { "target": 2, "observed": 2, "denominator": 3, "status": "pass" },
+    "fatalWarningRecognized": { "target": 3, "observed": 3, "denominator": 3, "status": "pass" },
+    "selectionDistinctFromAcceptance": { "target": 2, "observed": 2, "denominator": 3, "status": "pass" },
+    "fourVoicesRecognized": { "target": 2, "observed": 2, "denominator": 3, "status": "pass" },
+    "minimumCycleScore": { "target": 2, "observed": 2, "denominator": 3, "minimum": 4, "status": "pass" }
+  },
+  "editorialAdjustments": [
+    { "id": "A1", "sourceObservation": "selection looked like acceptance", "text": "Selecionada. Ainda falta falar com Vera no Comando para aceitar.", "characters": 59, "voice": "Vera", "mechanicsChanged": false },
+    { "id": "A2", "sourceObservation": "next deck was slow to locate", "text": "Próxima passagem: atravesse a escada à esquerda e siga ao Dormitório.", "characters": 70, "voice": null, "mechanicsChanged": false },
+    { "id": "A3", "sourceObservation": "cost and consequence were conflated", "text": "Custo agora: 8 energia. Se falhar, o motor será destruído.", "characters": 58, "voice": "Sílvia", "mechanicsChanged": false },
+    { "id": "A4", "sourceObservation": "Silvia voice was not identified", "text": "Sílvia fala baixo sobre a rota; Neusa responde com objetividade.", "characters": 64, "voice": "Sílvia/Neusa", "mechanicsChanged": false }
+  ],
+  "functionalCoverage": {
+    "rooms": 4,
+    "survivors": 4,
+    "resources": 6,
+    "days": 10,
+    "incidentDays": [2, 4, 6, 8, 10],
+    "incidentTypes": 7,
+    "incidentsWithoutReplacement": 5,
+    "questIds": 22,
+    "dailyCompletionLimit": 1,
+    "heldQuestObjects": 1,
+    "status": "pass"
+  },
+  "specialScenarios": [
+    "V-02", "N-02", "resume", "random hull", "rescue", "dead NPC", "missing target", "no route",
+    "arbitrary door", "missing asset", "transmission over incident", "pause", "map", "help",
+    "keyboard", "mouse", "cursor", "outside click"
+  ],
+  "cacheContract": {
+    "availableIconSources": 6,
+    "resourceIconBuilds": 6,
+    "identicalTileDeckStripBuilds": 1,
+    "immutableSharedStrip": true,
+    "selectiveInvalidations": 1,
+    "status": "pass"
+  },
+  "performance": {
+    "samplesPerPhase": 3,
+    "durationSeconds": 30,
+    "sameMachine": true,
+    "sameAssets": true,
+    "sameRoom": true,
+    "sameDeterministicState": true,
+    "sameWindow": true,
+    "p95RegressionPercent": -2.69,
+    "investigation": "none required; final p95 median is lower than baseline",
+    "status": "pass"
+  },
+  "snapshot": {
+    "excludes": ["last_horizon/capture.pde", "last_horizon/test_mode.pde", "tools", "prototype"],
+    "optionalModuleCombinations": 4,
+    "allCombinationsCompile": true,
+    "status": "pass"
+  },
+  "modelAndFixtures": {
+    "independentModelSequences": 2520,
+    "previewPure": true,
+    "previewEqualsProcessedNight": true,
+    "restorationBetweenFixtures": true,
+    "residualStateAfterRun": false,
+    "status": "pass"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "snapshot": "entrega-final-E6",
+  "source": "prototype/sketch-architecture",
+  "baseline": "16d81f1",
+  "excluded": [
+    "SESSION_START.md",
+    "code/VERIFICATION.md",
+    "prototype",
+    "tools",
+    "skills-lock.json",
+    ".obsidian",
+    "last_horizon/capture.pde",
+    "last_horizon/test_mode.pde",
+    "last_horizon/data/pipeline_probe.aseprite",
+    "last_horizon/data/pipeline_probe_frame_1.png"
+  ],
+  "runtimeFiles": [
+    "last_horizon/last_horizon.pde",
+    "last_horizon/game.pde",
+    "last_horizon/tasks.pde",
+    "last_horizon/ship.pde",
+    "last_horizon/hud.pde",
+    "last_horizon/ui.pde",
+    "last_horizon/screens.pde",
+    "last_horizon/assets.pde",
+    "last_horizon/audio.pde",
+    "last_horizon/editorial.pde",
+    "last_horizon/navigation.pde",
+    "last_horizon/portals.pde",
+    "last_horizon/movement.pde",
+    "last_horizon/animation.pde",
+    "last_horizon/night_projection.pde"
+  ],
+  "optionalModuleCompileMatrix": [
+    { "capture": false, "testMode": false, "result": "pass" },
+    { "capture": true, "testMode": false, "result": "pass" },
+    { "capture": false, "testMode": true, "result": "pass" },
+    { "capture": true, "testMode": true, "result": "pass" }
+  ],
+  "runtimeChecks": {
+    "captureExcluded": true,
+    "testModeExcluded": true,
+    "allOptionalCombinationsCompile": true,
+    "noOptionalModuleReferenceRequiredByRuntime": true,
+    "status": "pass"
+  }
+}

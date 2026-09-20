@@ -20,6 +20,9 @@ Ela pode ser a origem ou o destino de uma ordem ([[ACTIONS]]). Uma crise pode
 colocar uma pessoa em risco; há no máximo uma pessoa em risco por vez e o
 socorro é uma quest simples. Se morrer, deixa de oferecer ordens.
 
+Sua voz editorial varia por fase da viagem e contexto do grupo; risco e
+reconhecimento usam memórias separadas.
+
 ## Vínculos
 
 - Técnico: entrega a leitura do grupo e espera a decisão dele ([[PLAYER]]).

@@ -11,6 +11,16 @@ do planeta se esgotando, a viagem até Marte é necessária para a sobrevivênci
 
 Durante o percurso, o jogador precisa manter a nave funcionando, administrar os estoques e tomar decisões diante de problemas.
 
+## Documentação vigente
+
+O índice reconciliado da execução E0 está em
+[docs/Docs20260919_145427/README.md](docs/Docs20260919_145427/README.md). Ele
+aponta para a SPEC, o baseline, a verificação, as regras mecânicas, a interface,
+os eventos, os personagens e as ADRs.
+O relatório consolidado da E6 está em
+[docs/E6_REPORT.md](docs/E6_REPORT.md), com playtest, métricas, regressão,
+snapshot, visual diff e a matriz de rastreabilidade final.
+
 ## Genero e perspectiva
 
 - Gerenciamento de recursos

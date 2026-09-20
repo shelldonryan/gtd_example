@@ -21,6 +21,9 @@ aparece quando pertence à ordem aceita; não entrega recursos comuns fora da
 etapa de entrega. Se morrer, deixa de oferecer ordens; o pool validado usa os
 sobreviventes vivos.
 
+Sua voz editorial varia por fase da viagem e contexto do estoque; reconhecimento
+de resultado aparece uma vez e expira no dia seguinte.
+
 ## Vínculos
 
 - Técnico: só solta o estoque depois que ele decide o que priorizar ([[PLAYER]]).

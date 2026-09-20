@@ -206,7 +206,7 @@ O catálogo de quests e o balanceamento numérico estão em [[ACTIONS]] e nas no
 de `events/`. O sketch `last_horizon/` executa esse contrato. O botão `ORDENS`
 reabre as ofertas ou os detalhes da quest; `OFERTAS / PRÓXIMA RETOMADA` permite
 consultar as soluções pendentes em dias sem incidente. A arte das estações e
-dos objetos ainda usa a representação geométrica do protótipo. O que o jogador
+dos objetos usa PNGs carregados com fallback geométrico. O que o jogador
 vê na tela está em [[HUD]], e a ordem das telas está em [[FLOW]].
 
 ## Referências

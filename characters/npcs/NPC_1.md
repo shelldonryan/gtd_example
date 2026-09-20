@@ -20,6 +20,9 @@ Ela pode ser a origem ou o destino de uma ordem ([[ACTIONS]]). Suas ordens não
 recebem bônus numérico. Se morrer, deixa de oferecer ordens; o pool validado usa
 os sobreviventes vivos.
 
+Sua voz editorial varia por fase da viagem e contexto da ordem; reconhecimento
+de resultado aparece uma vez e expira no dia seguinte.
+
 ## Vínculos
 
 - Técnico: recebe dele a decisão de mexer ou não na rota ([[PLAYER]]).

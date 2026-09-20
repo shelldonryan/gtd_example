@@ -156,7 +156,7 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
 Os botões exibem no próprio rótulo o atalho de teclado que controla a ação:
 `INICIAR (ENTER)`, `CONTINUAR (ENTER)`, `CONTINUAR (ESC)`, `CONFIRMAR (ENTER)`,
 `ACEITAR ORDEM (ENTER)`, `ENTREGAR (ENTER)`, `ENCERRAR DIA (ENTER)`,
-`VOLTAR (ESC)` e `FECHAR (ESC)`. Botões sem atalho de teclado permanecem
+`AGORA NÃO (ESC)` e `FECHAR (ESC)`. Botões sem atalho de teclado permanecem
 acionados pelo mouse.
 
 ## Referências

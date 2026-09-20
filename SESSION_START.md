@@ -93,6 +93,11 @@ reporte e não escolha silenciosamente.
   agora com confirmação, coleta e entrega físicas em `last_horizon/`.
 - #26 foi concluída: números, pool, falhas, negligência, crises, risco e socorro
   estão implementados tanto no modelo Node quanto no sketch Processing.
+- E4B foi implementada no sketch: a seleção preventiva usa `selected_preventive_id`,
+  as consultas de disponibilidade compartilham `QuestActionReason` com as
+  mutações, e aceite, coleta, entrega, retomada e socorro revalidam o estado
+  atomicamente. O ponto de socorro continua consultável durante bloqueios e
+  incidentes novos mantêm prioridade sobre retomadas.
 - #27 foi concluída após validação manual do retorno pelas portas. Nesta sessão,
   os portais ganharam limiar `x/y` independente de deck e chegada configurável
   (`x/y/direção`) em qualquer ponto válido da sala; a porta das Máquinas no
@@ -1437,4 +1442,82 @@ e integrados pelo carregador de assets existente.
     - Emolduramento estrutural para portas (`drawDoorSurround`), integrando os vãos aos trilhos dos conveses com verga translúcida e base chanfrada sem alterar as coordenadas de colisão e travessia.
   - **Código e assets alterados:** `last_horizon/ship.pde`, `last_horizon/data/environment/window_space.png`.
   - **Documentação sincronizada:** `SESSION_START.md`.
-  - **Evidência D-185:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+- **Evidência D-185:** `--asset-pipeline-test` carregou 39 de 67 imagens (`pipeline: OK`); `--hit-test` retornou 5 `OK`; `--ladder-test` retornou 6 `OK`; `--capture` concluiu com 169 asserções `OK`, zero `FALHOU`, `QUEST CHECK: PASS` e 2.520/2.520 campanhas simuladas vencidas no harness.
+
+### Sprint E3 — camada modal, organização e módulos opcionais
+
+- `uiLayer()` agora resolve sem efeitos colaterais a prioridade `pausa → transmissão → incidente → ordens → mapa → diálogo → técnico → sono → ajuda → cena`; desenho, ENTER, ESC, clique, cursor e hit-test consultam essa mesma camada.
+- A transmissão continua cobrindo o incidente; ESC volta da revisão da solução, pausa na comparação obrigatória e fecha painéis consultivos sem atravessar uma camada encoberta.
+- A coordenação de portais, movimento e desenho do técnico foi separada em `last_horizon/portals.pde`, `last_horizon/movement.pde` e `last_horizon/animation.pde`, preservando as rotinas de física, gravidade, passos, áudio e transição.
+- `capture.pde` e `test_mode.pde` usam hooks opcionais com defaults inertes no runtime; `tools/snapshot-entrega.mjs` exclui os dois arquivos do corte de entrega.
+- Verificação E3 concluída com `git diff --check`; os hooks opcionais têm defaults inertes e a matriz de compilação está registrada no snapshot final.
+
+### Sprint E4A — catálogo editorial, memória e vozes
+
+- `last_horizon/editorial.pde` cobre os 22 `quest_id` mecânicos com título visível,
+  motivação curta, fala-base e fallback factual sem expor IDs técnicos.
+- Resultados editoriais são registrados depois das transições mecânicas, com
+  prioridade socorro → ajuda → falha → omissão; risco e reconhecimento possuem
+  memória separada e reset explícito por partida.
+- `editorialContextLine`, `editorialPhaseLine` e `editorialRecognition` são
+  consultas puras. `beginNpcConversation` é a única abertura que captura a fala,
+  incrementa `conversation_count` e marca a apresentação do contexto mostrado.
+- O diálogo distingue narrativa de resultado mecânico, orienta etapas com frases
+  curtas e ignora NPCs mortos. O harness valida esse contrato em
+  `checkEditorialContract()`.
+- `git diff --check` passou; o contrato editorial foi consolidado no registro E6 e a matriz de execução está em `docs/evidence/e6-results.json`.
+
+### Sprint E4B — questline, retomada e socorro
+
+- `choosePreventive` recebe o ID da quest e só grava `selected_preventive_id`
+  quando a oferta está disponível em um dia sem incidente; fechar o painel é
+  responsabilidade da ação de interface.
+- `QuestActionReason` concentra o discriminador e os campos estruturados de
+  bloqueio. `pendingQuestEnabled`, `pendingQuestReason` e as mutações usam as
+  mesmas consultas para evitar divergência entre botão e domínio.
+- `acceptPreventive`, `collectQuestObject`, `deliverQuest`, a retomada e
+  `rescueUrgentSurvivor` validam NPC, sala, ponto, distância, etapa, objeto,
+  custo, prazo, incidente e limite antes de qualquer débito ou conclusão.
+- O beliche de socorro só abre com risco, mas permanece consultável quando a
+  ação está bloqueada. A conclusão remove apenas o risco e mantém as perdas de
+  negligência preventiva e o processamento normal da noite.
+- `node --check prototype/balance-model.mjs`, `node prototype/balance-model.mjs
+  --simulate` e `git diff --check` passaram. A matriz Processing está
+  consolidada em `docs/Docs20260919_145427/verification.md`.
+
+### Sprint E4C/E5 — projeção noturna e equivalência do ciclo
+
+- `last_horizon/night_projection.pde` introduz `NightSnapshot` e
+  `NightProjection`. `simulateNightTransition` copia recursos, tripulação,
+  riscos, problemas, quests, objeto, conclusão, sequência e índice de
+  incidentes, aplica os efeitos noturnos uma única vez e retorna deltas,
+  efeitos, condições fatais e desfecho.
+- `projectNight` é o adaptador puro do preview. `processNight` chama a
+  simulação uma vez e aplica a cópia confirmada; registros editoriais e a
+  transmissão de perda só acontecem nessa aplicação.
+- `endDay` só incrementa o dia e abre a próxima sala depois de um resultado
+  contínuo. Vitória no dia 10 e derrota por ausência de sobreviventes entram na
+  projeção antes da preparação do novo dia.
+- O harness ganhou `checkNightProjection()`, cobrindo RNG, globais, memória,
+  arrays independentes, equivalência numérica, processamento único, dia 10 e
+  condições fatais. `npm run typecheck`, a simulação Node e `git diff --check`
+  passaram; o resultado sem resíduos está em `docs/evidence/e6-results.json`.
+
+### Sprint E6 — playtest, desempenho e documentação final
+
+- `last_horizon/capture.pde` ganhou `checkCacheContract()`: seis fontes de
+  ícone, seis caches estáveis, uma faixa compartilhada para tiles idênticos e
+  invalidação seletiva de uma fonte alterada.
+- O modo `--metrics` aquece 120 quadros e registra três amostras de 30 segundos
+  com mediana, p95, tempo de carga, memória adicional e os contadores
+  `resource_icon_builds`, `deck_strip_builds` e `cache_invalidations` em
+  `last_horizon/output/performance__metricas.csv`.
+- `tools/e6-audit.mjs` passou 33 contratos estáticos; `npm run typecheck`, a
+  simulação independente e `git diff --check` passaram. O snapshot mantém
+  `capture.pde` e `test_mode.pde` fora do corte por inspeção do script.
+- `tools/e6-evidence.mjs` passou o playtest com P1/P2/P3, as três amostras
+  comparáveis, a matriz funcional, os cenários especiais, os caches, a
+  restauração de fixtures e as quatro combinações de módulos opcionais.
+- O relatório consolidado está em `docs/E6_REPORT.md`, com os ponteiros para
+  baseline, verification, metrics, playtest e visual-diff. O registro de
+  resultados está em `docs/evidence/e6-results.json`.

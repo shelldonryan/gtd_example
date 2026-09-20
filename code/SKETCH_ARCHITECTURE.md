@@ -25,6 +25,13 @@ plano e executa o contrato descrito em [[ACTIONS]] e nas notas de `events/`.
 | `ship.pde` | hub, quatro salas, portais configuráveis, mapa consultável, plataformas, escadas, NPCs e estações |
 | `game.pde` | calendário, turno, incidentes, consumo, crises e condições de término |
 | `tasks.pde` | catálogo e estado de ordens, soluções, retomadas, problemas, sobreviventes, risco e objetos |
+| `editorial.pde` | catálogo factual, vozes, memória editorial e abertura única de conversa |
+| `night_projection.pde` | snapshot puro, preview e aplicação equivalente da transição noturna |
+| `navigation.pde`, `portals.pde`, `movement.pde`, `animation.pde` | consulta do mapa e blocos procedurais coesos extraídos do runtime |
+
+`capture.pde` e `test_mode.pde` são módulos de desenvolvimento. Seus hooks têm
+defaults inertes em `last_horizon.pde`, e os dois arquivos ficam fora do
+snapshot de entrega.
 
 ## Pipeline de assets
 
@@ -100,8 +107,8 @@ estão em [[ACTIONS]] e nas notas de `events/` e são executados no sketch.
 
 O sketch usa as mesmas regras de [[ACTIONS]].
 Hub, mapa consultável, física, spritesheet e viewport foram preservados.
-A migração da lógica veio antes do inventário de assets; as estações e objetos
-usam a representação geométrica do protótipo.
+As estações e objetos carregam PNGs quando disponíveis e mantêm a representação
+geométrica como fallback do protótipo.
 
 O ciclo implementado contém:
 
@@ -189,7 +196,7 @@ recalibração local.
 - Os botões repetem no próprio rótulo os atalhos disponíveis: `INICIAR (ENTER)`,
   `CONTINUAR (ENTER)`, `CONTINUAR (ESC)`, `CONFIRMAR (ENTER)`,
   `ACEITAR ORDEM (ENTER)`, `ENTREGAR (ENTER)`, `ENCERRAR DIA (ENTER)`,
-  `VOLTAR (ESC)` e `FECHAR (ESC)`.
+  `AGORA NÃO (ESC)` e `FECHAR (ESC)`.
 - **Camadas de input**: menu, ofertas de ordem, sala jogável, mapa, diálogo,
   painel técnico, evento e pausa. Todas as camadas modais bloqueiam movimento
   e interação da sala.
@@ -227,13 +234,18 @@ reaproveita a posição de saída.
 
 O HUD implementa os seis cartões de recurso com **ícone de 16×16 + número +
 rótulo + barra**; os rótulos (`ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS`,
-`MORAL`) são texto provisório e [[INVENTORY]] troca apenas os ícones por
-assets. O cartão de quantos estão a bordo usa **A BORDO**; o recurso crítico
+`MORAL`) usam as fontes PNG de `data/icons/` quando disponíveis, com fallback
+geométrico. O cartão de quantos estão a bordo usa **A BORDO**; o recurso crítico
 pisca a borda e ganha ícone de aviso, sem linha de texto de alerta. A faixa
 inferior tem quatro linhas de campos fixos e o rodapé tem `MAPA`, `ORDENS` e o
 botão `?`, que abre o modal de ajuda. O mapa macro não imprime nome de nave.
 O botão `ORDENS` recebe o selo `!` quando há oferta ou retomada. Círculo e
 exclamação geométrica compartilham escala, cor e centro durante o pulso de 1,4 s.
+
+Os seis ícones são preparados em `prepareResourceIconCache()`; as faixas de
+piso são preparadas em `prepareDeckStrips()` e compartilham entradas quando a
+fonte, a largura e a geração são iguais. `resource_icon_builds`,
+`deck_strip_builds` e `cache_invalidations` são expostos ao modo `--metrics`.
 
 ## Leitura das regras do contrato novo
 

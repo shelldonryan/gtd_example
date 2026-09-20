@@ -9,7 +9,7 @@ alimentam essas ordens estão em [[HAZARDS]], [[SYSTEM_FAULTS]] e
 
 | Regra | Valor |
 | --- | --- |
-| Recursos em barra | energia, oxigênio, água, comida e moral |
+| Recursos do HUD | energia, oxigênio, água, comida, peças e moral |
 | Peças | contagem inteira, sem consumo diário |
 | Estoque inicial | energia 80; oxigênio 85; água 80; comida 70; moral 80; peças 4 |
 | Consumo diário | energia -7; oxigênio -4; água -6; comida -6; moral -2 |
@@ -230,10 +230,13 @@ continuar ativas após o reinício do prazo.
   no sketch `last_horizon/`.
 - O sketch executa as oito preventivas e quatorze soluções com confirmação,
   coleta e entrega físicas, retomadas e socorro no beliche de risco.
+- A previsão noturna e a noite confirmada compartilham `simulateNightTransition`;
+  o preview não altera recursos, prazos, RNG ou memória editorial.
+- A validação independente usa `prototype/balance-model.mjs`; a matriz final e
+  os limites de execução estão em [[E6_REPORT]].
 
 ## Referências
 
 - [#20 Balancear problemas persistentes e intervenções](https://github.com/shelldonryan/gtd_example/issues/20)
 - [#25 Redesenhar incidentes e ordens como quests físicas](https://github.com/shelldonryan/gtd_example/issues/25)
 - [#26 Simplificar mecânicas legadas e balancear o ciclo de quests](https://github.com/shelldonryan/gtd_example/issues/26)
-
