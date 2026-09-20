@@ -19,10 +19,46 @@ do repositório:
 "C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --hit-test
 "C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --ladder-test
 "C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --asset-pipeline-test
+"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --metrics
 ```
 
-`--capture`, `--hit-test`, `--ladder-test` e `--asset-pipeline-test` são a
-fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
+Para a validação técnica dos módulos JavaScript, o projeto mantém um script
+nativo do Node, sem dependências adicionais:
+
+```
+npm run typecheck
+```
+
+No Linux, os runners do repositório localizam o CLI embutido em
+`/opt/processing/bin/Processing` (ou em `PROCESSING_BIN`), copiam o sketch para
+uma pasta temporária chamada `last_horizon` e executam o modo Java com Xvfb
+quando não há `DISPLAY`. Se houver um socket PulseAudio local, ele é usado para
+que o `javax.sound.sampled` consiga abrir os WAVs durante o harness:
+
+```text
+./tools/build.sh
+./tools/run-headless.sh --capture
+./tools/run-headless.sh --hit-test
+./tools/run-headless.sh --ladder-test
+./tools/run-headless.sh --asset-pipeline-test
+./tools/regression-final.sh
+```
+
+O runner temporário mantém o nome da pasta igual ao arquivo `last_horizon.pde`,
+evita artefatos de compilação no sketch e copia `last_horizon/output/` de volta
+ao workspace ao terminar. A consolidação `tools/regression-final.sh` executa
+`tools/cleanup-verification-artifacts.mjs` antes da campanha e ao sair, removendo
+o diretório de saída transitório mesmo quando uma etapa falha.
+
+Ele executa `node --check` em `prototype/balance-model.mjs`,
+`tools/snapshot-entrega.mjs`, `tools/e6-audit.mjs`,
+`tools/compare-metrics.mjs` e `tools/e6-evidence.mjs`.
+
+`--capture`, `--hit-test`, `--ladder-test`, `--asset-pipeline-test` e `--metrics`
+são a fronteira pública de verificação. Sem argumento, o sketch abre o jogo
+normal. `--metrics` aquece por 120 quadros e grava três amostras de 30 segundos
+em `last_horizon/output/performance__metricas.csv`, com mediana, p95, carga de
+arte, memória adicional e contadores de cache.
 
 ## Contrato do harness
 
@@ -41,14 +77,24 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
   quest, escada em `x` arbitrário, as falas de NPC por estado, as transmissões
   (motor, casco, primeira perda, uma vez por partida) e as três variações da
   mensagem de Marte.
+- O bloco `checkEditorialContract()` valida a cobertura dos 22 IDs, o fallback
+  factual de entrada inválida, a pureza das consultas, o reconhecimento no dia
+  do resultado e no dia seguinte, a apresentação controlada pela abertura da
+  conversa, a separação entre risco e resultado e a prioridade socorro,
+  ajuda, falha e omissão.
+- O bloco `checkCacheContract()` valida as seis fontes de ícone, a estabilidade
+  dos seis caches, o compartilhamento de uma faixa de piso por tile/largura e a
+  invalidação seletiva quando uma única fonte muda.
 - **`--hit-test`** cobre as quatro fichas de sala e o letterbox, confirmando que
   o clique nunca transporta o técnico. **`--ladder-test`** cobre as rotas
   físicas da escada: saída lateral, travessia, encaixe no convés, rearme após
   soltar, repouso e escada em posição arbitrária; salva
-  `ladder_middle_exit.png`.
-- Asserção falha imprime `FALHOU`, marca o resultado como reprovado e encerra o
-  harness imediatamente. `QUEST CHECK: PASS` só aparece quando nenhuma asserção
-  falhou; havendo falha, sai `QUEST CHECK: FALHOU`.
+  `ladder__middle_exit__1280x720.png`.
+- Asserção falha imprime `FALHOU`, restaura o baseline das tabelas mutáveis e
+  encerra o harness imediatamente. Cada bloco de verificação começa e termina
+  com o mesmo reset, cobrindo sequência de incidentes, posição, flags, pontos,
+  portas, escadas e arte de portas. `QUEST CHECK: PASS` só aparece quando
+  nenhuma asserção falhou; havendo falha, sai `QUEST CHECK: FALHOU`.
 - **Campanhas internas:** o mesmo modo executa três estratégias vencedoras, uma
   omissão derrotada por motor destruído e as 2.520/2.520 sequências de
   incidentes vencidas pela reserva de peças, no próprio Processing, uma etapa
@@ -110,10 +156,17 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
   suavização do texto.
 - O comando é
   `"C:\Program Files\Processing\Processing.exe" cli --sketch=".\last_horizon" --run --asset-pipeline-test`.
-  Ele salva `pipeline_probe.png` e `pipeline_probe_window.png` em
+  Ele salva `pipeline__probe__1280x720.png` e
+  `pipeline_window__probe__1280x720.png` em
   `last_horizon/output/` e encerra com `pipeline: OK` quando o PNG é carregado
   por `loadImage()`, ou `pipeline: FALHOU` quando não é. O modo do pipeline não
   roda as asserções de gameplay.
+- Evidências temporárias ficam em `last_horizon/output/`: imagens usam
+  `etapa__estado__viewport.ext`, logs usam `etapa__execucao.log` e medições
+  usam `etapa__metricas.csv`. O arquivo documental `metrics.csv` é o relatório
+  consolidado; não é um nome alternativo para a medição temporária. O utilitário
+  de consolidação remove o diretório após a execução; nenhum PNG, log ou medição
+  transitória é retido sem política aprovada.
 
 ## Costura de verificação
 
@@ -133,7 +186,9 @@ fronteira pública de verificação. Sem argumento, o sketch abre o jogo normal.
 `captureStartDay()` em `capture.pde` fixa a sequência de incidentes antes de
 cada cenário. O sorteio podia repetir o motor no dia 4 e quebrar a asserção de
 prioridade do incidente novo, uma falha intermitente reproduzida no código
-original; com a sequência fixada, o cenário é reprodutível.
+original; com a sequência fixada, o cenário é reprodutível. O harness também
+captura as tabelas pós-carregamento e as restaura ao entrar, sair ou falhar em
+uma fixture, evitando que uma mutação de teste atravesse a próxima fixture.
 
 ## Modelo numérico
 
@@ -144,6 +199,35 @@ node --check prototype/balance-model.mjs
 
 A simulação imprime `BALANCE CHECK: PASS`; `--check` valida a sintaxe do
 arquivo. O modelo é a referência numérica independente do sketch.
+
+## Auditoria E6
+
+Na raiz, `npm run e6:audit` executa `tools/e6-audit.mjs`. A auditoria não
+substitui a compilação do Processing: ela confere a presença dos contratos T01–T10,
+as contagens do domínio, os 22 IDs editoriais, as entradas de projeção, os
+caches, o modo de métricas e a exclusão dos dois módulos opcionais no snapshot.
+`npm run e6:evidence` valida o playtest, as seis amostras, o ambiente
+equivalente, a matriz funcional, os cenários especiais, os caches e o snapshot.
+`npm run e6:compare -- baseline.csv final.csv` calcula a variação da mediana e
+do p95; aumento acima de 10% no p95 encerra com `INVESTIGATE` para exigir
+registro no relatório.
+
+## Projeção noturna
+
+`last_horizon/night_projection.pde` define a fronteira pura
+`simulateNightTransition()`. Ela clona recursos, tripulação, riscos, problemas,
+quests, objetos, conclusão, sequência e índice de incidentes antes de aplicar,
+uma única vez, consequência da quest, consumo, perdas, risco, prazos, crises,
+limite e condições de término. O retorno contém `projected_state`, `deltas`,
+`effects`, `fatal_conditions` e `game_outcome`.
+
+`projectNight()` é o adaptador de exibição do modal e `processNight()` consome
+exatamente uma projeção para aplicar o resultado confirmado. Nenhum deles
+seleciona o próximo dia; a preparação do novo dia permanece em `endDay()` e
+só ocorre depois de um resultado contínuo. O harness `--capture` também confere
+que recálculo do preview preserva RNG, globais, memória editorial, riscos e
+prazos, que snapshot e estado real não compartilham arrays, que a aplicação é
+numericamente equivalente ao preview e que o dia 10 projeta vitória.
 
 ## Caminho de arte com fixtures
 
@@ -173,8 +257,10 @@ git push origin entrega
   working tree, então o Obsidian aberto não atrapalha — e cria um commit novo em
   cima do snapshot anterior: o push é sempre normal, sem force.
 - Fora do snapshot: `SESSION_START.md`, `code/VERIFICATION.md`, `prototype/`,
-  `tools/`, `skills-lock.json`, `.obsidian/`, `last_horizon/capture.pde` e os
-  fixtures `pipeline_probe.*`.
+  `tools/`, `skills-lock.json`, `.obsidian/`, `last_horizon/capture.pde`,
+  `last_horizon/test_mode.pde` e os fixtures `pipeline_probe.*`.
+- O runtime mantém hooks inertes quando `capture.pde` e `test_mode.pde` estão
+  ausentes; os dois módulos são opcionais no sketch de desenvolvimento.
 - Se a árvore não mudou desde o último snapshot, o script não cria commit.
 - A pasta `../entrega_last_horizon/` é uma cópia local do mesmo corte, para
   conferência; a fonte continua sendo a branch de trabalho.

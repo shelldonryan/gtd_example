@@ -30,6 +30,7 @@ const EXCLUDED = [
   "skills-lock.json",
   ".obsidian",
   "last_horizon/capture.pde",
+  "last_horizon/test_mode.pde",
   "last_horizon/data/pipeline_probe.aseprite",
   "last_horizon/data/pipeline_probe_frame_1.png",
 ];
