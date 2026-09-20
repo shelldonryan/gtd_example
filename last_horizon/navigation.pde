@@ -12,6 +12,7 @@ final int MAP_REASON_OUTSIDE_DECK = 5;
 int map_target_point = MAP_TARGET_NONE;
 int map_target_room = SCREEN_NONE;
 int map_target_reason = MAP_REASON_NONE;
+int map_consult_point = MAP_TARGET_NONE;
 String map_target_text = "";
 int[] map_route_rooms;
 int[] map_route_doors;
@@ -75,7 +76,7 @@ int mapTargetPoint(){
 
 String mapTargetText(){
   int point = mapTargetPoint();
-  if (point < 0) return "Local indisponível. Nenhum objetivo automático.";
+  if (point < 0) return "";
   if (active_quest >= 0){
     if (quest_stage == QUEST_COLLECT) return "Pegue " + quest_object[active_quest] + " — " + pointLocation(point);
     return "Leve " + quest_object[active_quest] + " — " + pointLocation(point);
@@ -84,7 +85,7 @@ String mapTargetText(){
     + " — " + pointLocation(point);
   if (quest_completed) return "Volte ao seu beliche — " + pointLocation(POINT_TECH_BUNK);
   if (urgentRisk() >= 0) return "Ver local do socorro — " + pointLocation(POINT_RISK_BUNK);
-  return "Local indisponível. Consulte uma sala";
+  return "Nenhum destino ativo.";
 }
 
 String mapTargetKind(){
@@ -92,7 +93,19 @@ String mapTargetKind(){
   if (selected_preventive_id >= 0) return "PRÓXIMA AÇÃO · CONFIRMAR";
   if (quest_completed) return "PRÓXIMA AÇÃO · DESCANSAR";
   if (urgentRisk() >= 0) return "CONSULTA · SOCORRO";
-  return "LOCAL INDISPONÍVEL";
+  return ordersAvailable() ? "SEM ORDEM SELECIONADA" : "SEM DESTINO ATIVO";
+}
+
+
+String mapNoTargetInstruction(){
+  if (map_consult_point >= 0){
+    return "Consulta de " + pointDisplayLabel(map_consult_point)
+      + ". Ela não altera sua ordem. Escolha uma oferta em Ordens para traçar uma rota.";
+  }
+  if (ordersAvailable()){
+    return "Escolha uma oferta em Ordens. O mapa mostrará quem procurar e as próximas passagens.";
+  }
+  return "Nenhuma tarefa tem destino agora. Selecione uma sala para consultar conveses e conexões.";
 }
 
 void calculateMapRoute(){
@@ -214,11 +227,11 @@ int findNextMapLadder(int point){
 }
 
 String mapRouteText(){
-  if (map_target_reason == MAP_REASON_NO_TARGET) return "Local indisponível. Nenhum objetivo automático.";
-  if (map_target_reason == MAP_REASON_INVALID_TARGET) return "Local indisponível. Confira a etapa atual.";
-  if (map_target_reason == MAP_REASON_NO_ROUTE) return "Não há rota configurada para este local.";
+  if (map_target_reason == MAP_REASON_NO_TARGET) return "Rota automática ainda não definida.";
+  if (map_target_reason == MAP_REASON_INVALID_TARGET) return "Destino da etapa inválido.";
+  if (map_target_reason == MAP_REASON_NO_ROUTE) return "Não há portas conectadas até o destino.";
   if (map_target_reason == MAP_REASON_VERTICAL_UNAVAILABLE)
-    return "Objetivo nesta sala, mas não há escada configurada para este convés.";
+    return "Não há escada configurada até o convés do objetivo.";
   String value = "";
   for (int i = 0; i < map_route_length; i++){
     if (i > 0) value += " → ";
@@ -237,11 +250,17 @@ int roomIndexOrInvalid(int room_id){
 }
 
 String mapNextInstruction(){
-  if (map_target_reason == MAP_REASON_VERTICAL_UNAVAILABLE) return mapRouteText();
+  if (map_target_reason == MAP_REASON_NO_TARGET) return mapNoTargetInstruction();
+  if (map_target_reason == MAP_REASON_INVALID_TARGET)
+    return "Confira a etapa atual em Ordens; o local indicado não existe na nave.";
+  if (map_target_reason == MAP_REASON_NO_ROUTE)
+    return "Confira as conexões das portas ou consulte outra sala.";
+  if (map_target_reason == MAP_REASON_VERTICAL_UNAVAILABLE)
+    return "O destino está nesta sala, mas falta uma escada até o convés certo.";
   if (map_target_reason == MAP_REASON_OUTSIDE_DECK && map_next_door >= 0)
     return "Próxima passagem: porta para " + roomTitle(door_target[map_next_door])
       + " em abertura fora do convés.";
-  if (map_target_reason != MAP_REASON_NONE) return mapRouteText();
+  if (map_target_reason != MAP_REASON_NONE) return "Consulte Ordens para conferir o destino atual.";
   if (map_target_room != screen && map_next_door >= 0){
     String deck = door_deck[map_next_door] >= 0 ? " no convés " + deckLabel(door_deck[map_next_door]) : " em abertura fora do convés";
     return "Próxima passagem: porta para " + roomTitle(door_target[map_next_door]) + deck + ".";

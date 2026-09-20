@@ -221,7 +221,17 @@ void drawMapOverlay(PGraphics g){
   drawModalShade(g);
   drawPanel(g, 12, 30, 616, 298, COL_CYAN);
   text(g, "MAPA DA NAVE", 50, 54, 16, COL_CYAN);
-  text(g, mapTargetKind() + " · " + mapTargetText(), 50, 72, 16, COL_TEXT);
+  String fatal_warning = nightFatalWarning();
+  String map_header = mapTargetKind();
+  String target_text = mapTargetText();
+  if (target_text.length() > 0) map_header += " · " + target_text;
+  if (fatal_warning.length() > 0){
+    text(g, "ALERTA FATAL · " + fatal_warning, 50, 72, 16, COL_RED);
+  } else if (map_consult_point >= 0){
+    text(g, "CONSULTA · " + pointDisplayLabel(map_consult_point), 50, 72, 16, COL_ORANGE);
+  } else {
+    text(g, map_header, 50, 72, 16, COL_TEXT);
+  }
 
   g.stroke(COL_BORDER);
   g.strokeWeight(2);
@@ -240,8 +250,9 @@ void drawMapOverlay(PGraphics g){
   drawButton(g, 22, 296, 86, 20, "SALA", ACTION_MAP_MY_ROOM, true);
   drawButton(g, 114, 296, 98, 20, "BELICHE", ACTION_MAP_BUNK_QUERY, true);
   drawButton(g, 218, 296, 104, 20, "SOCORRO", ACTION_MAP_RESCUE_QUERY, urgentRisk() >= 0);
-  drawButton(g, 328, 296, 132, 20, "VOLTAR À ROTA", ACTION_MAP_ROUTE,
-    map_target_room != SCREEN_NONE);
+  String route_label = map_consult_point >= 0 ? "MINHA ROTA" : "VOLTAR À ROTA";
+  drawButton(g, 328, 296, 132, 20, route_label, ACTION_MAP_ROUTE,
+    map_consult_point >= 0 || map_target_room != SCREEN_NONE);
   drawModalFooter(g, 296, "", ACTION_NONE, false,
     "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
 }
@@ -288,17 +299,28 @@ void drawMapRoomCard(PGraphics g, int index){
   g.rect(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H, 3);
   textCentered(g, room_label[index], room_x[index] + MAP_ROOM_W / 2.0,
     MAP_ROOM_Y + 8, 16, selected ? COL_CYAN : COL_TEXT);
-  textCentered(g, roomProblemCount(room_screen[index]) + " alerta(s)",
-    room_x[index] + MAP_ROOM_W / 2.0, MAP_ROOM_Y + 28, 16, COL_MUTED);
+  int alert_count = roomProblemCount(room_screen[index]);
+  if (alert_count > 0){
+    String alert_label = alert_count == 1 ? "1 alerta" : alert_count + " alertas";
+    textCentered(g, alert_label,
+      room_x[index] + MAP_ROOM_W / 2.0, MAP_ROOM_Y + 28, 16, COL_MUTED);
+  }
+
+  boolean consult_room = map_consult_point >= 0 && map_consult_point < point_room.length
+    && point_room[map_consult_point] == room_screen[index];
+  if (consult_room){
+    textCentered(g, "CONSULTA", room_x[index] + MAP_ROOM_W / 2.0,
+      MAP_ROOM_Y + 41, 16, COL_ORANGE);
+  }
 
   if (room_screen[index] == screen){
     textCentered(g, "VOCÊ ESTÁ AQUI", room_x[index] + MAP_ROOM_W / 2.0,
-      MAP_ROOM_Y + 48, 16, COL_ORANGE);
+      MAP_ROOM_Y + (consult_room ? 53 : 48), 16, COL_ORANGE);
   }
 
   if (room_screen[index] == map_target_room){
     textCentered(g, "OBJETIVO", room_x[index] + MAP_ROOM_W / 2.0,
-      MAP_ROOM_Y + 61, 16, COL_GREEN);
+      MAP_ROOM_Y + (consult_room ? 64 : 61), 16, COL_GREEN);
   }
 
   addButton(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H,
@@ -318,8 +340,13 @@ int roomIndex(int room_id){
 void drawMapRoomDetails(PGraphics g){
   int index = constrain(map_selected_room, 0, ROOM_COUNT - 1);
   int selected_room = room_screen[index];
-  text(g, mapRouteText(), 50, 168, 16, COL_CYAN);
-  float y = drawTextWrapped(g, mapNextInstruction(), 50, 186, 540, 16, 18, COL_TEXT);
+  float y;
+  if (map_target_reason == MAP_REASON_NO_TARGET){
+    y = drawTextWrapped(g, mapNextInstruction(), 50, 168, 540, 16, 18, COL_TEXT);
+  } else {
+    text(g, mapRouteText(), 50, 168, 16, COL_CYAN);
+    y = drawTextWrapped(g, mapNextInstruction(), 50, 186, 540, 16, 18, COL_TEXT);
+  }
   drawMapDeckPlan(g, selected_room, 50, y + 4, 238, 76);
   text(g, roomOccupant(index) + " · " + roomSystems(index), 304, 204, 16, COL_TEXT);
   y = 224;
@@ -338,9 +365,11 @@ void drawMapRoomDetails(PGraphics g){
   }
   int risk = urgentRisk();
   if (selected_room == SCREEN_DORMITORY && risk >= 0){
-    drawTextWrapped(g, crewDisplayName(risk) + " em risco: " + crew_risk_deadline[risk] + " noite(s). Socorro: -8 água, -2 comida.", 304, y + 6, 290, 16, 18, COL_ORANGE);
-    drawButton(g, 470, 272, 124, 20, "VER SOCORRO", ACTION_OPEN_RESCUE,
-      uiLayer() == LAYER_MAP);
+    String risk_prefix = map_consult_point == POINT_RISK_BUNK
+      ? "Consulta · Socorro: " : "Pessoa em risco: ";
+    drawTextWrapped(g, risk_prefix + crewDisplayName(risk) + " · "
+      + crew_risk_deadline[risk] + " noite(s) · Custo: -8 água, -2 comida.",
+      304, y + 6, 290, 16, 18, COL_ORANGE);
   }
 }
 
@@ -391,6 +420,16 @@ void drawMapDeckPlan(PGraphics g, int selected_room, float x, float y, float w, 
     g.fill(COL_GREEN);
     g.rect(tx - 4, ty - 4, 8, 8);
     text(g, deck >= 0 ? "Objetivo" : "Objetivo · altura livre", tx + 6, ty - 8, 16, COL_GREEN);
+  }
+  if (map_consult_point >= 0 && map_consult_point < point_room.length
+    && point_room[map_consult_point] == selected_room){
+    float qx = x + constrain(point_x[map_consult_point] / BASE_W, 0, 1) * w;
+    int deck = pointDeck(map_consult_point);
+    float qy = mapDeckPlanY(point_y[map_consult_point], deck, y, h);
+    g.noFill();
+    g.stroke(COL_ORANGE);
+    g.ellipse(qx, qy, 12, 12);
+    textCentered(g, "?", qx, qy + 3, 16, COL_ORANGE);
   }
 }
 
@@ -1317,210 +1356,6 @@ void loadPlayerAssets(){
 }
 
 
-void updatePlayerFacing(){
-  if (move_left_held && !move_right_held){
-    player_facing = -1;
-  } else if (move_right_held && !move_left_held){
-    player_facing = 1;
-  }
-}
-
-
-boolean playerIsMoving(){
-  return move_left_held || move_right_held || move_up_held || move_down_held;
-}
-
-
-/* Animation states: run falls back to walk when the sheet has no run frames
-   (Aseprite without the tag), so the technician never freezes mid-sprint. */
-final int PLAYER_ANIM_IDLE = 0;
-final int PLAYER_ANIM_WALK = 1;
-final int PLAYER_ANIM_CLIMB = 2;
-final int PLAYER_ANIM_JUMP = 3;
-final int PLAYER_ANIM_RUN = 4;
-
-
-/* Shift only sprints on a deck, and only with one direction held: left+right
-   cancels out, so running in place would be noise. */
-boolean playerIsRunning(){
-  return run_held && (move_left_held != move_right_held) && player_grounded && !player_on_ladder;
-}
-
-
-int playerCurrentAnimationState(){
-  if (player_has_climb && player_on_ladder){
-    return PLAYER_ANIM_CLIMB;
-  }
-  if (player_has_jump && !player_grounded && !player_on_ladder){
-    return PLAYER_ANIM_JUMP;
-  }
-  if (playerIsRunning()){
-    return player_has_run ? PLAYER_ANIM_RUN : PLAYER_ANIM_WALK;
-  }
-  if (playerIsMoving()){
-    return PLAYER_ANIM_WALK;
-  }
-  return PLAYER_ANIM_IDLE;
-}
-
-
-int playerCurrentFrame(){
-  if (!player_assets_loaded){
-    return 0;
-  }
-
-  int state = playerCurrentAnimationState();
-  boolean climb_moving = (state == PLAYER_ANIM_CLIMB && (move_up_held || move_down_held));
-  if (state != player_anim_state || (state == PLAYER_ANIM_CLIMB && climb_moving != player_animation_moving)){
-    player_anim_state = state;
-    player_animation_moving = (state == PLAYER_ANIM_WALK || climb_moving);
-    player_animation_started_at = millis();
-  }
-
-  int first = player_idle_start;
-  int last = player_idle_end;
-
-  if (state == PLAYER_ANIM_WALK){
-    first = player_walk_start;
-    last = player_walk_end;
-  } else if (state == PLAYER_ANIM_RUN){
-    first = player_run_start;
-    last = player_run_end;
-  } else if (state == PLAYER_ANIM_CLIMB && player_has_climb){
-    first = player_climb_start;
-    last = player_climb_end;
-    if (!move_up_held && !move_down_held){
-      return first;
-    }
-  } else if (state == PLAYER_ANIM_JUMP && player_has_jump){
-    first = player_jump_start;
-    last = player_jump_end;
-  }
-
-  int total_duration = 0;
-  for (int index = first; index <= last; index++){
-    total_duration += max(1, player_frame_durations[index]);
-  }
-
-  int frame = first;
-  int raw_elapsed = max(0, millis() - player_animation_started_at);
-  int elapsed = (state == PLAYER_ANIM_JUMP)
-    ? min(raw_elapsed, total_duration - 1)
-    : (total_duration > 0 ? raw_elapsed % total_duration : 0);
-
-  while (frame < last){
-    int duration = max(1, player_frame_durations[frame]);
-    if (elapsed < duration){
-      break;
-    }
-    elapsed -= duration;
-    frame++;
-  }
-
-  return frame;
-}
-
-
-void updatePlayerFrameLayer(int frame){
-  if (player_frame_layer == null
-    || frame == player_rendered_frame
-    && player_facing == player_rendered_facing){
-    return;
-  }
-
-  player_frame_layer.beginDraw();
-  player_frame_layer.clear();
-  player_frame_layer.imageMode(CENTER);
-  player_frame_layer.pushMatrix();
-  player_frame_layer.translate(
-    PLAYER_DRAW_W * RENDER_SCALE / 2.0,
-    PLAYER_DRAW_H * RENDER_SCALE / 2.0
-  );
-  player_frame_layer.scale(player_facing, 1);
-  player_frame_layer.image(
-    player_frame_images[frame],
-    0,
-    0,
-    PLAYER_DRAW_W * RENDER_SCALE,
-    PLAYER_DRAW_H * RENDER_SCALE
-  );
-  player_frame_layer.popMatrix();
-  player_frame_layer.endDraw();
-
-  player_rendered_frame = frame;
-  player_rendered_facing = player_facing;
-}
-
-
-
-void enterRoom(int next_screen){
-  int door = doorInRoomLeadingTo(SCREEN_COMMAND, next_screen);
-
-  if (door >= 0){
-    enterRoomAtPosition(
-      next_screen,
-      door_arrival_y[door],
-      door_arrival_x[door],
-      door_arrival_facing[door]
-    );
-    return;
-  }
-
-  enterRoomAtPosition(next_screen, deck_y[DECK_COUNT - 1], ROOM_LEFT + 28, 1);
-}
-
-
-
-int doorInRoomLeadingTo(int room_id, int target){
-  for (int i = 0; i < DOOR_COUNT; i++){
-    if (door_room[i] == room_id && door_target[i] == target) return i;
-  }
-
-  return -1;
-}
-
-void enterRoomThroughDoor(int door){
-  if (!preparePortalTransition(door)){
-    return;
-  }
-
-  playSound(sound_door);
-  if (doorFrame(door) != null){
-    startDoorTransition(door);
-    return;
-  }
-
-  enterRoomAtPosition(
-    portal_prepared_target_room,
-    portal_prepared_arrival_y,
-    portal_prepared_arrival_x,
-    portal_prepared_arrival_facing
-  );
-  portal_transition_prepared = false;
-}
-
-
-void enterRoomAtPosition(int next_screen, float feet_y, float center_x, int facing){
-  screen = next_screen;
-  current_room = next_screen;
-  player_facing = facing;
-  float clamped_feet_y = constrain(feet_y, ROOM_TOP + PLAYER_H, ROOM_BOTTOM);
-  player_x = constrain(center_x - PLAYER_W / 2.0,
-    ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
-  player_y = clamped_feet_y - PLAYER_H;
-  player_velocity_y = 0;
-  player_grounded = isDeckSurface(clamped_feet_y);
-  player_on_ladder = false;
-  current_ladder = -1;
-  ladder_vertical_release_required = false;
-  jump_queued = false;
-  player_step_accum = 0;
-  walk_step_active = false;
-  walk_step_phase = 0;
-  interact_queued = false;
-}
-
-
 void resetRoomState(){
   current_room = SCREEN_COMMAND;
   player_facing = 1;
@@ -1541,6 +1376,7 @@ void resetRoomState(){
   interact_queued = false;
   held_item = ITEM_NONE;
   map_open = false;
+  map_consult_point = MAP_TARGET_NONE;
   dialog_open = false;
   dialog_result = "";
   dialog_crew = -1;
@@ -1560,343 +1396,6 @@ void resetRoomState(){
   door_transition_phase = DOOR_PHASE_CLOSED;
   door_transition_target = SCREEN_NONE;
   door_transition_return_door = -1;
-}
-
-
-void updatePlayerOnDeck(){
-  boolean was_airborne = !player_grounded;
-  if (jump_queued && player_grounded){
-    player_velocity_y = -sqrt(2 * GRAVITY * JUMP_HEIGHT);
-    player_grounded = false;
-    player_step_accum = 0;
-    walk_step_active = false;
-    playDeckStepSound(false);
-  }
-
-  float old_bottom = player_y + PLAYER_H;
-  player_velocity_y += GRAVITY;
-  float next_y = player_y + player_velocity_y;
-  player_grounded = false;
-
-  for (int i = 0; i < DECK_COUNT; i++){
-    if (player_velocity_y < 0){
-      continue;
-    }
-
-    boolean crossing = old_bottom <= deck_y[i] && next_y + PLAYER_H >= deck_y[i];
-    boolean overlaps = player_x + PLAYER_W > ROOM_LEFT && player_x < ROOM_RIGHT;
-
-    if (crossing && overlaps){
-      next_y = deck_y[i] - PLAYER_H;
-      player_velocity_y = 0;
-      player_grounded = true;
-      break;
-    }
-  }
-
-  player_y = min(next_y, deck_y[DECK_COUNT - 1] - PLAYER_H);
-
-  boolean landed = was_airborne && player_grounded;
-  if (landed){
-    playDeckStepSound(false);
-    player_step_accum = 0;
-    walk_step_active = false;
-  }
-
-  /* O passo sai do mesmo predicado da animação, e depois do convés resolver a
-     gravidade: no quadro da decolagem a velocidade já é a do ar, como o quadro
-     desenhado (D-153). */
-  float horizontal = 0;
-  float speed = playerIsRunning() ? PLAYER_RUN_SPEED : PLAYER_SPEED;
-
-  if (move_left_held){
-    horizontal -= speed;
-  }
-
-  if (move_right_held){
-    horizontal += speed;
-  }
-
-  player_x = constrain(player_x + horizontal, ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
-
-  if (player_grounded && horizontal != 0){
-    boolean running = playerIsRunning();
-    if (running){
-      walk_step_active = false;
-      if (player_step_accum <= 0 && !landed){
-        playDeckStepSound(true);
-      }
-      player_step_accum += abs(horizontal);
-      if (player_step_accum >= RUN_STEP_SPACING){
-        player_step_accum -= RUN_STEP_SPACING;
-        playDeckStepSound(true);
-      }
-    } else {
-      player_step_accum = 0;
-      int phase = (max(0, millis() - player_animation_started_at)
-        / WALK_STEP_HALF_CYCLE_MS) % 2;
-      if (!walk_step_active){
-        player_animation_started_at = millis();
-        walk_step_phase = 0;
-        walk_step_active = true;
-        if (!landed) playDeckStepSound(false);
-      } else if (phase != walk_step_phase){
-        walk_step_phase = phase;
-        playDeckStepSound(false);
-      }
-    }
-  } else {
-    player_step_accum = 0;
-    walk_step_active = false;
-  }
-
-  boolean vertical_input = move_up_held || move_down_held;
-  boolean horizontal_input = move_left_held || move_right_held;
-
-  if (!vertical_input){
-    ladder_vertical_release_required = false;
-  }
-
-  if (vertical_input && !horizontal_input && !ladder_vertical_release_required
-    && player_grounded){
-    int ladder = nearestLadder();
-
-    if (ladder >= 0){
-      current_ladder = ladder;
-      player_on_ladder = true;
-      player_grounded = false;
-      player_x = ladder_x[ladder] - PLAYER_W / 2.0;
-      player_velocity_y = 0;
-      ladder_climbing_active = false;
-      ladder_steps_taken = 0;
-      ladder_step_accum = 0;
-      updatePlayerOnLadder();
-    }
-  }
-}
-
-
-void updatePlayerOnLadder(){
-  int vertical = 0;
-
-  if (move_up_held){
-    vertical -= 1;
-  }
-
-  if (move_down_held){
-    vertical += 1;
-  }
-
-  int horizontal = 0;
-
-  if (move_left_held){
-    horizontal -= 1;
-  }
-
-  if (move_right_held){
-    horizontal += 1;
-  }
-
-  if (current_ladder < 0){
-    current_ladder = activeLadderIndex();
-  }
-
-  int top_deck = current_ladder >= 0 ? ladder_top_deck[current_ladder] : 0;
-  int bot_deck = current_ladder >= 0 ? ladder_bottom_deck[current_ladder] : DECK_COUNT - 1;
-
-  float old_y = player_y;
-  player_y += vertical * LADDER_SPEED;
-  float top = deck_y[top_deck] - PLAYER_H;
-  float bottom = deck_y[bot_deck] - PLAYER_H;
-  player_y = constrain(player_y, top, bottom);
-
-  float dy = abs(player_y - old_y);
-  if (dy > 0){
-    if (!ladder_climbing_active){
-      ladder_climbing_active = true;
-      ladder_steps_taken = 0;
-      ladder_step_accum = 0;
-    }
-    ladder_step_accum += dy;
-    float threshold = (ladder_steps_taken == 0) ? LADDER_FIRST_STEP : LADDER_STEP_SPACING;
-    if (ladder_step_accum >= threshold){
-      ladder_step_accum = 0;
-      ladder_steps_taken++;
-      playLadderStepSound();
-    }
-  } else {
-    ladder_climbing_active = false;
-    ladder_steps_taken = 0;
-    ladder_step_accum = 0;
-  }
-
-  boolean wants_deck = horizontal != 0 || vertical == 0;
-  int deck = ladderDeckAt(old_y, player_y, wants_deck);
-
-  if (deck >= 0 && wants_deck){
-    leaveLadderAtDeck(deck, horizontal);
-    return;
-  }
-
-  if (player_y <= top || player_y >= bottom){
-    int end_deck = player_y <= top ? top_deck : bot_deck;
-    leaveLadderAtDeck(end_deck, horizontal);
-  }
-}
-
-
-int ladderDeckAt(float old_y, float new_y, boolean allow_nearby){
-  final float snap_distance = 4;
-  int nearest = -1;
-  float nearest_distance = snap_distance + 1;
-
-  for (int i = 0; i < DECK_COUNT; i++){
-    float target_y = deck_y[i] - PLAYER_H;
-    boolean crossed = (old_y <= target_y && new_y >= target_y)
-      || (old_y >= target_y && new_y <= target_y);
-
-    if (crossed){
-      return i;
-    }
-
-    float distance = abs(new_y - target_y);
-
-    if (allow_nearby && distance <= snap_distance && distance < nearest_distance){
-      nearest = i;
-      nearest_distance = distance;
-    }
-  }
-
-  return nearest;
-}
-
-
-/* The grab sound plays when the technician leaves the ladder, never on mount:
-   the climb itself is covered by the steps (#28).
-   Cadence: 27 px gives a small pause between takes while staying close to the
-   420 ms half-cycle (3 frames @ 140 ms) of LPC climb;
-   initial step at 1 px ensures instant audio feedback upon starting to climb. */
-/* Walk follows the 800 ms LPC animation: one contact every 400 ms. Run keeps
-   the approved distance cadence; ladder remains independent (#28). */
-final int WALK_STEP_HALF_CYCLE_MS = 400;
-final float RUN_STEP_SPACING = 27;
-final float LADDER_STEP_SPACING = 27;
-final float LADDER_FIRST_STEP = 1;
-float ladder_step_accum = 0;
-int ladder_steps_taken = 0;
-float player_step_accum = 0;
-boolean walk_step_active = false;
-int walk_step_phase = 0;
-boolean ladder_climbing_active = false;
-
-
-void leaveLadderAtDeck(int deck, int horizontal){
-  playSound(sound_ladder);
-  player_y = deck_y[deck] - PLAYER_H;
-  player_x = constrain(player_x + horizontal * PLAYER_SPEED,
-    ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
-  current_ladder = -1;
-  player_on_ladder = false;
-  player_grounded = true;
-  player_velocity_y = 0;
-  ladder_vertical_release_required = move_up_held || move_down_held;
-  ladder_climbing_active = false;
-  ladder_steps_taken = 0;
-  ladder_step_accum = 0;
-  player_step_accum = 0;
-  walk_step_active = false;
-  walk_step_phase = 0;
-}
-
-
-int activeLadderIndex(){
-  float center_x = player_x + PLAYER_W / 2.0;
-  int best = -1;
-  float best_dist = 1000;
-
-  for (int i = 0; i < LADDER_COUNT; i++){
-    if (ladder_room[i] != screen) continue;
-    float top_y = deck_y[ladder_top_deck[i]] - PLAYER_H - 2;
-    float bot_y = deck_y[ladder_bottom_deck[i]] + 2;
-    if (player_y < top_y || player_y > bot_y) continue;
-    float dist = abs(center_x - ladder_x[i]);
-    if (dist < best_dist){
-      best_dist = dist;
-      best = i;
-    }
-  }
-
-  return best;
-}
-
-
-int nearestLadder(){
-  if (!player_grounded){
-    return -1;
-  }
-
-  float center_x = player_x + PLAYER_W / 2.0;
-  float bottom = player_y + PLAYER_H;
-
-  int current_deck = -1;
-  for (int i = 0; i < DECK_COUNT; i++){
-    if (abs(bottom - deck_y[i]) < 1.1){
-      current_deck = i;
-      break;
-    }
-  }
-
-  if (current_deck < 0){
-    return -1;
-  }
-
-  int result = -1;
-  float best_distance = INTERACTION_RANGE + 1;
-
-  for (int i = 0; i < LADDER_COUNT; i++){
-    if (ladder_room[i] != screen) continue;
-
-    if (current_deck < ladder_top_deck[i] || current_deck > ladder_bottom_deck[i]){
-      continue;
-    }
-
-    if (current_deck == ladder_top_deck[i] && !move_down_held){
-      continue;
-    }
-    if (current_deck == ladder_bottom_deck[i] && !move_up_held){
-      continue;
-    }
-
-    float distance = abs(center_x - ladder_x[i]);
-
-    if (distance <= INTERACTION_RANGE && distance < best_distance){
-      result = i;
-      best_distance = distance;
-    }
-  }
-
-  return result;
-}
-
-
-float ladderX(int room_id, int slot){
-  for (int i = 0; i < LADDER_COUNT; i++){
-    if (ladder_room[i] != room_id) continue;
-    if (slot-- == 0) return ladder_x[i];
-  }
-
-  return 0;
-}
-
-
-boolean isDeckSurface(float bottom){
-  for (int i = 0; i < DECK_COUNT; i++){
-    if (abs(bottom - deck_y[i]) < 1.1){
-      return true;
-    }
-  }
-
-  return false;
 }
 
 

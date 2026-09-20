@@ -1,5 +1,5 @@
-/* Portal controller. A door transition is prepared once, then the same
-   immutable departure/arrival record drives the animated and instant paths. */
+/* Entrada em salas e controlador de portais. A travessia é preparada uma vez;
+   o mesmo registro de saída/chegada dirige o caminho animado ou imediato. */
 
 boolean doorTransitionActive(){
   return door_transition_phase != DOOR_PHASE_CLOSED;
@@ -83,4 +83,71 @@ void updateDoorTransition(){
 
   door_transition_door = -1;
   door_transition_phase = DOOR_PHASE_CLOSED;
+}
+
+void enterRoom(int next_screen){
+  int door = doorInRoomLeadingTo(SCREEN_COMMAND, next_screen);
+
+  if (door >= 0){
+    enterRoomAtPosition(
+      next_screen,
+      door_arrival_y[door],
+      door_arrival_x[door],
+      door_arrival_facing[door]
+    );
+    return;
+  }
+
+  enterRoomAtPosition(next_screen, deck_y[DECK_COUNT - 1], ROOM_LEFT + 28, 1);
+}
+
+
+
+int doorInRoomLeadingTo(int room_id, int target){
+  for (int i = 0; i < DOOR_COUNT; i++){
+    if (door_room[i] == room_id && door_target[i] == target) return i;
+  }
+
+  return -1;
+}
+
+void enterRoomThroughDoor(int door){
+  if (!preparePortalTransition(door)){
+    return;
+  }
+
+  playSound(sound_door);
+  if (doorFrame(door) != null){
+    startDoorTransition(door);
+    return;
+  }
+
+  enterRoomAtPosition(
+    portal_prepared_target_room,
+    portal_prepared_arrival_y,
+    portal_prepared_arrival_x,
+    portal_prepared_arrival_facing
+  );
+  portal_transition_prepared = false;
+}
+
+
+void enterRoomAtPosition(int next_screen, float feet_y, float center_x, int facing){
+  screen = next_screen;
+  current_room = next_screen;
+  player_facing = facing;
+  float clamped_feet_y = constrain(feet_y, ROOM_TOP + PLAYER_H, ROOM_BOTTOM);
+  player_x = constrain(center_x - PLAYER_W / 2.0,
+    ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
+  player_y = clamped_feet_y - PLAYER_H;
+  player_velocity_y = 0;
+  player_grounded = isDeckSurface(clamped_feet_y);
+  player_on_ladder = false;
+  current_ladder = -1;
+  ladder_vertical_release_required = false;
+  jump_queued = false;
+  player_step_accum = 0;
+  walk_step_active = false;
+  walk_step_phase = 0;
+  interact_queued = false;
 }
