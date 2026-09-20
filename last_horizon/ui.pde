@@ -207,22 +207,29 @@ void openDialogue(String name, String value){
 
 void drawDialogue(PGraphics g){
   drawModalShade(g);
-  drawPortrait(g, dialog_name, 470, 72);
-  drawPanel(g, 24, 176, 592, 126, COL_CYAN);
-  text(g, dialog_name + " — FALA", 40, 188, 16, COL_CYAN);
-  drawTextWrapped(g, dialog_text, 40, 207, 552, 16, 18, COL_TEXT);
-  if (dialog_result.length() > 0){
-    drawPanel(g, 34, 254, 572, 42, COL_BORDER);
-    text(g, "RESULTADO", 46, 264, 16, COL_GREEN);
-    drawTextWrapped(g, dialog_result, 136, 264, 454, 16, 16, COL_TEXT);
+
+  boolean has_result = dialog_result.length() > 0;
+  float panel_bottom = 324;
+  float panel_h = has_result ? 122 : 92;
+  float panel_y = panel_bottom - panel_h;
+  float footer_y = panel_bottom - 30;
+  float portrait_y = panel_y - (ART_PORTRAIT_H - 26);
+
+  drawPortrait(g, dialog_name, 470, portrait_y);
+  drawPanel(g, 24, panel_y, 592, panel_h, COL_CYAN);
+  text(g, dialog_name + " — FALA", 40, panel_y + 12, 16, COL_CYAN);
+  drawTextWrapped(g, dialog_text, 40, panel_y + 31, 552, 16, 17, COL_TEXT);
+  if (has_result){
+    text(g, "Resultado", 40, panel_y + 51, 16, COL_GREEN);
+    drawTextWrapped(g, dialog_result, 40, panel_y + 69, 552, 16, 17, COL_TEXT);
   }
   if (pending_quest_action == ACTION_ACCEPT_ORDER){
     boolean enabled = pendingQuestEnabled();
-    drawModalFooter(g, 305, "AGORA NÃO (ESC)", ACTION_CLOSE_MODAL, true,
+    drawModalFooter(g, footer_y, "AGORA NÃO (ESC)", ACTION_CLOSE_MODAL, true,
       "ACEITAR (ENTER)", ACTION_CONFIRM_QUEST, enabled);
-    if (!enabled) text(g, questReasonText(pendingQuestReason()), 40, 288, 16, COL_ORANGE);
+    if (!enabled) text(g, questReasonText(pendingQuestReason()), 40, footer_y + 2, 16, COL_ORANGE);
   } else {
-    drawModalFooter(g, 305, "", ACTION_NONE, false,
+    drawModalFooter(g, footer_y, "", ACTION_NONE, false,
       "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true);
   }
 }
