@@ -295,13 +295,12 @@ void drawInitScreen(PGraphics g){
   textCentered(g, "A TERRA FICOU PARA TRÁS. MARTE É O DESTINO.", BASE_W / 2.0, 108, 10, COL_MUTED);
 
   drawPanel(g, 220, 138, 200, 46, COL_BORDER);
-  text(g, "TÉCNICO", 228, 144, 9, COL_MUTED);
-  text(g, player_name + "_", 228, 158, 13, COL_TEXT);
+  text(g, "Nome do seu personagem:", 228, 144, 9, COL_MUTED);
+  String name_cursor = (millis() / 500) % 2 == 0 ? "_" : "";
+  text(g, player_name + name_cursor, 228, 158, 13, COL_TEXT);
 
   drawButton(g, 198, 196, 150, 24, "INICIAR (ENTER)", ACTION_START_GAME, player_name.trim().length() > 0);
   drawButton(g, 354, 196, 90, 24, "SAIR", ACTION_QUIT_GAME, true);
-
-  textCentered(g, "PROTÓTIPO - TEXTO PROVISÓRIO", BASE_W / 2.0, 320, 9, COL_DIM);
 }
 
 
