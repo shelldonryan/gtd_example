@@ -3,9 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "typecheck": "node --check prototype/balance-model.mjs && node --check tools/snapshot-entrega.mjs && node --check tools/cleanup-verification-artifacts.mjs && node --check tools/e6-audit.mjs && node --check tools/compare-metrics.mjs && node --check tools/e6-evidence.mjs",
+    "typecheck": "node --check prototype/balance-model.mjs && node --check tools/snapshot-entrega.mjs && node --check tools/cleanup-verification-artifacts.mjs && node --check tools/e6-audit.mjs && node --check tools/compare-metrics.mjs && node --check tools/e6-evidence.mjs && node --check tools/regression-windows.mjs",
     "e6:audit": "node tools/e6-audit.mjs",
     "e6:compare": "node tools/compare-metrics.mjs",
-    "e6:evidence": "node tools/e6-evidence.mjs"
+    "e6:evidence": "node tools/e6-evidence.mjs",
+    "regression:windows": "node tools/regression-windows.mjs"
   }
 }

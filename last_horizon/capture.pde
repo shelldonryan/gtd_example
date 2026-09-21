@@ -64,9 +64,6 @@ boolean installHarness(){
   harness_setup = () -> {
     readArgs();
     captureVerificationBaseline();
-    if (hit_test_mode){
-      surface.setSize(1400, 900);
-    }
   };
   harness_update = () -> updateCapture();
   harness_scene = (target) -> harnessDrawScene(target);
@@ -469,16 +466,14 @@ void runPipelineProbe(){
     && pipeline_probe_image.width == PIPELINE_PROBE_SIZE
     && pipeline_probe_image.height == PIPELINE_PROBE_SIZE;
 
+  verify("fixture PNG 16x16 carregado via loadImage", loaded);
+  if (!loaded) return;
+
   base.save(verificationOutputPath("pipeline", "probe", RENDER_W, RENDER_H));
   saveFrame(verificationOutputPath("pipeline_window", "probe", width, height));
 
-  if (loaded){
-    println("pipeline: OK - " + PIPELINE_PROBE_FILE
-      + " carregado via loadImage()");
-  } else {
-    println("pipeline: FALHOU - " + PIPELINE_PROBE_FILE
-      + " não foi carregado");
-  }
+  println("pipeline: OK - " + PIPELINE_PROBE_FILE
+    + " carregado via loadImage()");
 
   restoreVerificationFixture();
   exit();
@@ -492,7 +487,7 @@ void drawPipelineProbe(PGraphics target){
   target.text("ASSET PIPELINE", 24, 24);
   target.fill(COL_TEXT);
   target.textSize(12);
-  target.text("ASEPRITE -> PNG -> loadImage()", 24, 48);
+  target.text("PNG 16x16 -> loadImage()", 24, 48);
 
   target.fill(COL_PANEL);
   target.rect(244, 96, 152, 152);
