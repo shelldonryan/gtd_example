@@ -380,8 +380,8 @@ String currentAlertLine(){
   }
   int urgent = urgentProblem();
   if (urgent >= 0){
-    String warning = problem_short[urgent] + " · prazo " + problem_deadline[urgent]
-      + " dia(s) · " + roomTitle(problem_room[urgent]);
+    String warning = problem_short[urgent] + " · crise em " + problem_deadline[urgent]
+      + " dias: " + problem_crisis[urgent] + " · " + roomTitle(problem_room[urgent]);
     int other = max(0, activeProblemCount() - 1);
     if (other > 0) warning += " · +" + other + " problemas";
     return warning;

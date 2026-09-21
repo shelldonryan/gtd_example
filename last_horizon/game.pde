@@ -272,13 +272,17 @@ void drawEventCard(PGraphics g){
   text(g, "INCIDENTE — DIA " + day + " | " + problem_title[event_index], 34, 64, 16, COL_ORANGE);
   if (quest_review >= 0){
     drawQuestCard(g, quest_review, 34, 83, 572, ACTION_NONE, false);
+    text(g, "CUSTO NA ENTREGA: " + questCostLabel(quest_review), 44, 147, 14, COL_ORANGE);
     text(g, "CONFIRME A SOLUÇÃO. ELA NÃO PODE SER CANCELADA.", 46, 261, 16, COL_ORANGE);
     drawModalFooter(g, 297, "VOLTAR (ESC)", ACTION_BACK_SOLUTION, true,
       "CONFIRMAR (ENTER)", ACTION_ACCEPT_SOLUTION, true);
   } else {
     for (int i = 0; i < 2; i++){
-      drawQuestCard(g, PREVENTIVE_COUNT + event_index * 2 + i, 34 + i * 290, 83, 282,
+      int q = PREVENTIVE_COUNT + event_index * 2 + i;
+      float card_x = 34 + i * 290;
+      drawQuestCard(g, q, card_x, 83, 282,
         i == 0 ? ACTION_EVENT_A : ACTION_EVENT_B, true);
+      text(g, "CUSTO NA ENTREGA: " + questCostLabel(q), card_x + 10, 147, 14, COL_ORANGE);
     }
     text(g, "CUSTO PAGO NA ENTREGA. SEM RECURSOS, O PROBLEMA PODE PERMANECER ATIVO.", 34, 300, 16, COL_MUTED);
   }

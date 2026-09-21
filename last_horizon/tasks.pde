@@ -973,7 +973,7 @@ String questFailure(int q){
   if (q < PREVENTIVE_COUNT) return "SE FALHAR: -" + preventiveFailure(q) + " " + resourceName(preventive_resource[q]);
   int p = questProblem(q);
   int deadline = problem_active[p] ? problem_deadline[p] : problem_initial_deadline[p];
-  return "SE FALHAR: " + problemLossLabel(p) + "; PRAZO " + deadline + "; " + problem_crisis[p]
+  return "SE FALHAR: " + problemLossLabel(p) + "; CRISE EM " + deadline + " DIAS: " + problem_crisis[p]
     + (p == PROBLEM_ENGINE ? "." : "; REINICIA EM 2 DIAS.");
 }
 
@@ -988,9 +988,10 @@ String activeProblemSummary(){
   return urgent < 0 ? "NENHUM PROBLEMA ATIVO." : activeProblemCount() + " ATIVO(S). MAIS URGENTE: " + problemMapLine(urgent);
 }
 
-String problemLossLabel(int problem){ return resourceName(problem_loss_resource[problem]) + " -" + problem_loss_value[problem] + "/DIA"; }
+String problemLossLabel(int problem){ return resourceName(problem_loss_resource[problem]) + " -" + problem_loss_value[problem] + " por dia"; }
 String problemMapLine(int problem){
-  return problem_short[problem] + " | " + problemLossLabel(problem) + " | PRAZO " + problem_deadline[problem] + " | " + problem_crisis[problem];
+  return problem_short[problem] + " | " + problemLossLabel(problem) + " | CRISE EM "
+    + problem_deadline[problem] + " DIAS: " + problem_crisis[problem];
 }
 
 void drawQuestCard(PGraphics g, int q, float x, float y, float w, int action, boolean enabled){
@@ -1038,8 +1039,8 @@ String questCardConsequence(int q){
 
   int problem = questProblem(q);
   int deadline = problem_active[problem] ? problem_deadline[problem] : problem_initial_deadline[problem];
-  return "Consequência: " + problemLossLabel(problem) + " · prazo " + deadline
-    + " · " + problem_crisis[problem] + ".";
+  return "Consequência: " + problemLossLabel(problem) + " · crise em " + deadline
+    + " dias: " + problem_crisis[problem] + ".";
 }
 
 void drawOrdersPanel(PGraphics g){
