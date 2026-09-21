@@ -1,4 +1,0 @@
-sample,duration_s,frames,frame_median_ms,frame_p95_ms,load_ms,memory_additional_bytes,resource_icon_builds,deck_strip_builds,cache_invalidations,machine,assets,room,state,window,processing,environment
-1,30.000,1786,16.8,22.4,118,245760,6,1,0,E6-FIXTURE-01,assets@16d81f1,Comando,"seed=20260919;day=1;fixture=performance",1280x720,4.5.6,E6-FIXTURE-01|Processing4.5.6|SegoeUI|1280x720|seed=20260919
-2,30.000,1784,16.9,22.7,118,262144,6,1,0,E6-FIXTURE-01,assets@16d81f1,Comando,"seed=20260919;day=1;fixture=performance",1280x720,4.5.6,E6-FIXTURE-01|Processing4.5.6|SegoeUI|1280x720|seed=20260919
-3,30.000,1787,16.7,22.3,118,245760,6,1,0,E6-FIXTURE-01,assets@16d81f1,Comando,"seed=20260919;day=1;fixture=performance",1280x720,4.5.6,E6-FIXTURE-01|Processing4.5.6|SegoeUI|1280x720|seed=20260919
