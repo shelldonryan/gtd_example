@@ -17,13 +17,12 @@ Sílvia oferece e confirma as ordens técnicas:
 - `HUL-A` e `HUL-B`: soluções físicas do dano no casco;
 - `LIFE-A`, `LIFE-B`, `PWR-A` e `PWR-B`: soluções físicas dos sistemas.
 
-As soluções urgentes são escolhidas e confirmadas no cartão de incidente, sem
-exigir a presença de Sílvia.
+As soluções urgentes são escolhidas no cartão de incidente e executadas nas
+estações de sistema ou no local de casco.
 
 As quests atribuídas a Sílvia usam o console da rota como origem e estações de
-sistema ou casco como destino; o ponto da NPC não é origem nem destino na matriz
-atual ([[ACTIONS]]). Suas ordens não recebem bônus numérico. Se morrer, deixa de
-oferecer ordens preventivas; o pool usa sobreviventes vivos.
+sistema ou casco como destino ([[ACTIONS]]). As ofertas preventivas do dia usam
+o conjunto de sobreviventes vivos.
 
 Sua voz editorial varia por fase da viagem e contexto dos sistemas; reconhecimento
 de resultado aparece uma vez e expira no dia seguinte.
@@ -34,12 +33,6 @@ de resultado aparece uma vez e expira no dia seguinte.
 - Sobreviventes: trabalha para que [[NPC_1]], [[NPC_2]] e [[NPC_3]] cheguem inteiros.
 - Terra: aprendeu o ofício no planeta que a nave deixou para trás.
 - Marte: mantém o motor vivo para a nave alcançar a base.
-
-## Limitações
-
-- Não anda sozinha: fica no ponto fixo da Sala de máquinas.
-- Não combate e não sai da nave.
-- Depende das decisões do técnico sobre potência e reparo.
 
 ## Referências
 

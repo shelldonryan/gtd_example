@@ -1,45 +1,24 @@
-# Fontes e textos
+# Fontes e renderização de texto
 
-## HUD
-
-- Fonte **Segoe UI**, instalada no Windows, 16 px no render nativo, entrelinha
-  de 18 px.
-- Os seis cartões de recurso usam ícone de 16×16 + número + **rótulo de texto**;
-  os recursos de barra somam a barra de preenchimento. Os rótulos são
-  `ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS` e `MORAL`, além dos cartões
-  `DIA` e `A BORDO`. O número é o destaque do cartão. O rótulo é texto
-  provisório: o inventário [[INVENTORY]] troca apenas os ícones geométricos por
-  assets do Aseprite.
-
-## MENU
-
-- Títulos de tela em Segoe UI a 32 px. Corpo em 16 px.
-- Botões podem reduzir até 10 px apenas quando a frase não cabe na largura
-  disponível.
-
-## DIALOGS
-
-- Texto de evento, diálogos e avisos em Segoe UI a 16 px.
-- A fonte cobre o vocabulário PT-BR e a pontuação usada pelo jogo sem substituir
-  caracteres por quadrados.
+O sketch cria a fonte **Segoe UI** no setup. O texto é suavizado; sprites e
+imagens pixel art são desenhados sem interpolação.
 
 ## Escala
 
-- Resolução canônica do render: **1280×720 (720p)**, proporção 16:9. A janela
-  pode ampliar por fator inteiro.
-- A grade lógica 640×360 serve apenas para posicionamento; não define uma
-  resolução alternativa do render ou dos assets.
-- Desenhar tudo num buffer físico de 1280×720. A tipografia visível usa Segoe UI
-  com suavização; assets pixel art usam amostragem sem interpolação.
-- As regras de suavização do texto e de amostragem dos assets são independentes.
-- O sketch usa a família instalada no sistema; não há arquivo de fonte adicional
-  nem biblioteca externa ([[SKETCH_ARCHITECTURE]]).
+- O buffer de render tem 1280×720 pixels; o layout usa coordenadas lógicas
+  640×360 e um fator de render 2×.
+- Os helpers de texto convertem o tamanho lógico para o buffer físico e
+  aplicam limites de legibilidade. Títulos, HUD, modais e mensagens usam
+  tamanhos definidos por tela; botões podem reduzir o texto para caber.
+- Prompts de interação e rótulos compactos usam tamanhos menores que o corpo de
+  um modal; cada componente define o tamanho adequado ao seu texto.
 
-A validação visual do desenho 1:1 acompanha [[HUD]].
+## Aplicação
 
-## Referências
+HUD, salas e modais chamam os helpers de texto de `last_horizon/ui.pde`.
+Os cartões do HUD apresentam os nomes dos seis recursos, valores e ícones PNG;
+peças são mostradas por contagem numérica.
 
-- [#2 Fonte pixel com acentuação PT-BR no Processing](https://github.com/shelldonryan/gtd_example/issues/2)
-- [#6 Escala e estilo visual](https://github.com/shelldonryan/gtd_example/issues/6)
-- [#8 Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8)
-- [#18 Reestruturar navegação, tarefas e feedback após playtest](https://github.com/shelldonryan/gtd_example/issues/18)
+Os detalhes de layout e conteúdo estão em [`HUD.md`](HUD.md),
+[`FLOW.md`](FLOW.md) e [`ROOMS.md`](ROOMS.md). Os assets estão catalogados em
+[`../assets/INVENTORY.md`](../assets/INVENTORY.md).

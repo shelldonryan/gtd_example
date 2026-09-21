@@ -2,17 +2,25 @@
 
 **Status:** accepted
 
-A campanha tinha dias sem incidente em que dormir era a opção mais eficiente, enquanto os incidentes separavam contenção, problema persistente, coleta e correção. A decisão é tratar preparação e emergência como ordens curtas: dias sem incidente oferecem duas ordens preventivas e permitem concluir uma; dias com incidente oferecem duas soluções físicas em formato de quest, escolhidas e confirmadas no cartão do incidente. Cada quest informa objeto, origem, destino, recompensa ou resultado e consequência antes do compromisso, usa deslocamento curto e pode reutilizar assets de objetos ([[INVENTORY]]). Nas preventivas, a comparação inicial é remota e a escolhida é confirmada presencialmente com o sobrevivente responsável; o ponto desse sobrevivente só participa da rota quando a matriz da quest o especifica. Para soluções urgentes, o sobrevivente é responsável narrativo/mecânico, mas a aceitação não exige sua presença. A ordem preventiva aceita não pode ser cancelada. A escolha remove a camada separada de contenção sem remover problemas persistentes, prazos ou crises. O motivo é dar propósito aos dias tranquilos, atender à produção de objetos exigida pela atividade e manter a triagem como decisão central, sem criar uma lista de quests de MMORPG.
+## Decisão
 
-## Considered Options
+Nos dias sem incidente, duas ordens preventivas são oferecidas e uma pode ser
+concluída. Nos dias com incidente, o cartão apresenta duas soluções físicas e o
+jogador escolhe uma. Os cartões informam objeto, origem, destino, recompensa ou
+resultado e consequência antes da confirmação.
 
-- **Manter contenção e correção separadas:** rejeitada; preservava etapas redundantes e o vazio dos dias sem incidente.
-- **Aplicar a solução diretamente no cartão:** rejeitada; retirava a exploração física e a função mecânica dos objetos.
-- **Lista extensa de quests:** rejeitada; adicionava burocracia em vez de decisão.
+Preventivas são confirmadas com o sobrevivente responsável; soluções urgentes
+são confirmadas no cartão. As etapas físicas usam coleta e entrega, e o técnico
+carrega um objeto por vez. Quando o responsável também é a origem, a confirmação
+entrega o objeto diretamente ao técnico. Uma quest concluída ocupa o trabalho do
+dia.
 
-## Consequences
+## Consequências
 
-A nova unidade de ritmo é uma ordem concluída por dia. Uma ordem preventiva não concluída perde o recurso que protegeria; nenhuma ordem aceita gera perdas pequenas nos dois recursos oferecidos. Uma solução de incidente não concluída deixa o problema ativo e usa as perdas, prazos e crises normais. As matrizes de conteúdo, textos, rotas e apresentação ficam em [[ACTIONS]] e [[ROOMS]].
+Uma preventiva aceita e incompleta aplica sua perda; encerrar o dia sem aceitar
+aplica as perdas das duas ofertas. Uma solução de incidente incompleta mantém o
+problema com as consequências definidas na matriz. As regras e valores estão em
+[[ACTIONS]], e os pontos de interação em [[ROOMS]].
 
 ## Referências
 

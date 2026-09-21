@@ -14,14 +14,12 @@ Bento oferece e confirma as ordens de estoque e logística:
 
 - `B-01`: reforçar a reserva com caixa de provisões;
 - `B-02`: separar peças de emergência com chave de torque;
-- `FOOD-A` e `FOOD-B`: soluções físicas da falta de comida; são escolhidas e
-  confirmadas no cartão de incidente, sem exigir a presença de Bento.
+- `FOOD-A` e `FOOD-B`: soluções físicas da falta de comida, escolhidas no
+  cartão de incidente e executadas na nave.
 
 O ponto de Bento é o destino de `B-02`; as demais origens e destinos seguem a
-matriz de [[ACTIONS]]. As soluções urgentes atribuídas a ele não exigem sua
-presença. O objeto só aparece quando pertence à ordem aceita; ele não entrega
-recursos comuns fora da etapa de entrega. Se morrer, deixa de oferecer ordens
-preventivas; o pool usa sobreviventes vivos.
+matriz de [[ACTIONS]]. As ofertas preventivas do dia usam o conjunto de
+sobreviventes vivos. As entregas de recursos seguem a etapa da ordem ativa.
 
 Sua voz editorial varia por fase da viagem e contexto do estoque; reconhecimento
 de resultado aparece uma vez e expira no dia seguinte.
@@ -32,12 +30,6 @@ de resultado aparece uma vez e expira no dia seguinte.
 - Sobreviventes: responde pelo que [[NPC_1]], [[NPC_3]] e [[NPC_4]] consomem na viagem.
 - Terra: o estoque que ele guarda foi carregado no planeta que ficou para trás.
 - Marte: guarda o suficiente para a nave chegar à base.
-
-## Limitações
-
-- Não anda sozinho: fica no ponto fixo do Depósito.
-- Não combate e não sai da nave.
-- Depende das decisões do técnico para abrir ou segurar o estoque.
 
 ## Referências
 

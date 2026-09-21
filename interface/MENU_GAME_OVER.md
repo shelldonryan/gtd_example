@@ -20,8 +20,7 @@ sobrevivente vivo; a lista de derrotas está em [[ACTIONS]].
 
 ## Regras
 
-- A tela de derrota é um desfecho modal e informa a causa sem mensagem adicional
-  de Marte ([[MENU_VICTORY]]).
+- A tela de derrota é modal e informa a causa da viagem.
 - A mensagem muda conforme a causa:
 
 | Causa | Título | Mensagem |
@@ -31,12 +30,6 @@ sobrevivente vivo; a lista de derrotas está em [[ACTIONS]].
 | Moral em zero | MORAL ZERO | `A MORAL CAIU A ZERO. O GRUPO NÃO RESISTIU À VIAGEM.` |
 | Motor destruído | MOTOR DESTRUÍDO | `O MOTOR FOI DESTRUÍDO ANTES DE MARTE.` |
 | Nenhum sobrevivente vivo | SOBREVIVENTES PERDIDOS | `NENHUM SOBREVIVENTE RESTOU A BORDO.` |
-
-## Pendências
-
-Nenhuma. A derrota mostra a contagem, não os nomes: a linha de resumo é
-`DIA [n] DE 10   SOBREVIVENTES: [n]`, seguida do estado do motor. Os nomes dos
-sobreviventes aparecem apenas na vitória, na variação com perdas.
 
 ## Referências
 

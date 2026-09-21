@@ -1,20 +1,24 @@
 # Last Horizon — código enxuto, quests com propósito e interface a serviço da diversão
 
-Data: 19/09/2026. Base inspecionada: commit `16d81f1` e arquivos locais da sessão.
+## Escopo deste documento
 
-**Status: proposta de design; implementação completa não confirmada.** Esta SPEC descreve requisitos e critérios, não um retrato confiável do comportamento atual. A revisão estática de 21/09/2026 encontrou diferenças ainda abertas, especialmente no mapa e na orientação por salas/conveses. O código atual e as diferenças confirmadas estão resumidos em [`docs/CURRENT_IMPLEMENTATION.md`](docs/CURRENT_IMPLEMENTATION.md). Os resultados E6 são evidência registrada para a campanha de 20/09/2026 e não foram revalidados contra este checkout.
+**Status: proposta de produto.** Este documento registra experiência desejada e
+critérios de aceitação; não afirma que esses critérios estão implementados. O
+comportamento presente no código está em
+[`CURRENT_IMPLEMENTATION.md`](CURRENT_IMPLEMENTATION.md), e os resultados de
+validação em [`../code/VERIFICATION.md`](../code/VERIFICATION.md).
 
-Registro de publicação feito em 19/09/2026: a issue pretendida e a sincronização do Wayfinder estavam pendentes por falta de acesso autenticado; inventário, labels e bloqueadores nativos não foram verificados naquela ocasião. Esse estado externo não foi consultado nesta revisão local.
+## Necessidade de produto
 
-## Problem Statement
+O jogador deve sentir que mantém uma pequena tripulação viva durante uma viagem
+perigosa. A decisão central é priorizar necessidades usando recursos limitados;
+a interface deve tornar a escolha, o próximo passo e suas consequências fáceis
+de entender.
 
-O jogador deveria sentir que mantém uma pequena tripulação viva durante uma viagem perigosa. Hoje, parte dessa experiência aparece como um formulário: textos longos em maiúsculas, campos técnicos repetidos, informações sobre todas as etapas a cada interação e diálogos que explicam regras em vez de expressar pessoas.
-
-A decisão interessante existe — priorizar necessidades com recursos limitados — mas disputa atenção com burocracia visual. Depois de escolher uma ordem, o jogador continua relendo responsável, objeto, origem, destino, efeito e falha, mesmo quando só precisa saber para onde ir. Mensagens genéricas de bloqueio também não explicam exatamente o que falta.
-
-No código, repetições em tipografia, assets, portas, botões e seleção de modais tornam cada ajuste mais trabalhoso e propenso a inconsistências. Há trabalho de renderização estática repetido por quadro e uma aba que concentra nave, física, animação e áudio de movimento. Documentação desatualizada aumenta o risco de uma limpeza desfazer decisões recentes.
-
-O objetivo não é reduzir linhas a qualquer custo: é diminuir complexidade acidental, tornar consequências compreensíveis e devolver atenção à exploração, à escolha e ao vínculo com a tripulação.
+O projeto busca reduzir repetição de informação, explicar bloqueios com clareza
+e dar personalidade às conversas. A refatoração deve preservar regras e
+resultados mecânicos enquanto a experiência de apresentação é definida por
+critérios próprios.
 
 ## Solution
 
@@ -339,9 +343,10 @@ Sem animação de digitação, esperas artificiais ou som adicional obrigatório
 
 #### 5.6 Mapa útil: planejar o próximo deslocamento
 
-**Solicitação adicional do usuário:** o mapa precisa mostrar melhor para onde ir e ter utilidade real. Esta seção substitui a proposta anterior de apenas preservar o mapa consultivo. A orientação espacial é parte de E5; o mapa continua sem teleporte e sem executar ações de quest.
-
-**Diagnóstico verificado:** o mapa atual apresenta quatro cartões em sequência, localização da sala atual e detalhes da sala clicada. A coleta/entrega só aparece quando a sala correspondente está selecionada. Não há conexões desenhadas, posição do técnico dentro da sala ou orientação por porta/convés. A implementação inclusive pode mostrar o destino de entrega enquanto a coleta ainda está pendente. O redesenho distingue destino futuro de próximo passo executável.
+O mapa deve ajudar o jogador a localizar a sala atual, identificar o destino da
+quest e escolher a próxima passagem. Ele não deve transportar o técnico nem
+executar ações da quest. O estado implementado está descrito em
+[`CURRENT_IMPLEMENTATION.md`](CURRENT_IMPLEMENTATION.md).
 
 **Objetivo de produto:** responder em uma abertura: “Onde estou?”, “Para onde vou?” e “Qual é a próxima passagem?”. O mapa deve ensinar a disposição da nave e permitir memorizar rotas, sem transformar exploração em seguir uma linha permanente na cena.
 
@@ -434,7 +439,10 @@ Antes de editar qualquer função, classe ou método, executar impacto upstream 
 
 ### Costuras e referência
 
-Cobertura confirmada pelo usuário nesta sessão: **harness do próprio sketch, modelo de balanceamento independente e playtest de clareza/diversão**. O harness é a costura principal e já permite simular campanhas e capturar cenas. Não criar uma segunda infraestrutura de testes para exercitar helpers privados.
+Cobertura requerida: **harness do próprio sketch, modelo de balanceamento
+independente e playtest de clareza/diversão**. O harness é a costura principal
+para campanhas e capturas. Não criar uma segunda infraestrutura de testes para
+exercitar helpers privados.
 
 Um bom teste executa uma interação ou um dia e verifica consequência observável: destino, objeto, recursos, estado, texto relevante, disponibilidade e pixels. Evitar testes que apenas reproduzam condicionais ou obriguem uma organização específica de arquivos.
 
@@ -468,13 +476,21 @@ A análise anterior executou o modelo numérico: BALANCE CHECK: PASS, com 2.520/
 
 ### Desempenho
 
-Medir antes/depois na mesma máquina, assets, sala e tamanho de janela, separando inicialização de quadros estabilizados. Registrar mediana e p95 do tempo por quadro em três amostras de 30 segundos, mais tempo de carregamento e número de preparações de buffer/faixa. Instrumentação temporária não entra na entrega.
+Medir versões do protótipo na mesma máquina, assets, sala e tamanho de janela,
+separando inicialização de quadros estabilizados. Registrar mediana e p95 do
+tempo por quadro em três amostras de 30 segundos, mais tempo de carregamento e
+número de preparações de buffer/faixa. Instrumentação temporária não entra na
+entrega.
 
 Critério técnico: ícones não são recompostos continuamente e pisos idênticos não são construídos três vezes. Nenhuma regressão consistente de p95 acima de 10% sem investigação; se houver ruído, repetir em condições controladas antes de atribuir causa. Não remover suavização, fallback ou qualidade gráfica para atingir número.
 
 ### Playtest de diversão e clareza
 
-Realizar com três pessoas que não conheçam o código. Usar um trecho curto com preventiva, incidente, entrega insuficiente e previsão de noite perigosa; permitir exploração livre e conversas opcionais. Na comparação antes/depois, alternar a ordem das versões entre participantes para reduzir efeito de aprendizagem.
+Realizar com três pessoas que não conheçam o código. Usar um trecho curto com
+preventiva, incidente, entrega insuficiente e previsão de noite perigosa;
+permitir exploração livre e conversas opcionais. Na comparação entre versões,
+alternar a ordem apresentada aos participantes para reduzir efeito de
+aprendizagem.
 
 Observar sem explicar: tempo para encontrar próximo objetivo, consultas repetidas, erros de seleção/aceite, bloqueios incompreendidos, duração de leitura e interrupções. Não inferir diversão somente por velocidade.
 
@@ -482,7 +498,10 @@ Ao fim, pedir que expliquem o que fizeram, o que custou, o que aconteceria se do
 
 Metas iniciais de aceitação: pelo menos 2 de 3 encontram o próximo passo em até 10 segundos usando HUD/cena; 3 de 3 reconhecem o aviso fatal antes de confirmar sono; pelo menos 2 de 3 explicam corretamente o custo e distinguem seleção de aceite; pelo menos 2 de 3 reconhecem vozes diferentes e dão nota ≥4 para clareza e vontade de continuar. Nenhuma etapa obrigatória ganha confirmação extra. Esses números são critérios de projeto, não resultados já obtidos nem prova estatística.
 
-Se falhar, ajustar primeiro texto, hierarquia e feedback, depois repetir os cenários afetados. O registro da campanha E6 de 20/09/2026 marcou 2/3 para próxima passagem em até 10 segundos, 3/3 para aviso fatal, 2/3 para seleção versus aceite, 2/3 para vozes e 2/3 para nota mínima 4. A revisão de 21/09/2026 não revalidou esse playtest e não encontrou a orientação por escadas descrita em A2 no código atual. Os quatro ajustes permanecem registrados como resultados históricos da campanha.
+Se um critério falhar, ajustar texto, hierarquia ou feedback e repetir os
+cenários afetados. Resultados de execução ficam em
+[`CURRENT_IMPLEMENTATION.md`](CURRENT_IMPLEMENTATION.md) e
+[`../code/VERIFICATION.md`](../code/VERIFICATION.md).
 
 ## Out of Scope
 
@@ -492,7 +511,6 @@ Se falhar, ajustar primeiro texto, hierarquia e feedback, depois repetir os cen�
 - Novos assets obrigatórios, dublagem, fontes externas, bibliotecas ou migração de engine.
 - Remover fallbacks, compatibilidade Aseprite/LPC, harness ou modelo de balanceamento para reduzir contagem de linhas.
 - Substituir simulação independente por implementação compartilhada que possa reproduzir o mesmo erro.
-- Publicar build, fazer push, fechar issues, alterar balanceamento ou implementar esta spec durante a tarefa de documentação.
 
 ## Further Notes
 
@@ -506,10 +524,3 @@ Se falhar, ajustar primeiro texto, hierarquia e feedback, depois repetir os cen�
 - **Preview divergente:** conferir a previsão contra uma noite realmente processada a partir de estado equivalente, incluindo crises simultâneas e limites.
 - **Documentação conflitante:** posições e políticas recentes precisam de reconciliação explícita; a proposta não escolhe silenciosamente uma fonte antiga.
 
-### Fronteira desta entrega
-
-Este documento é o artefato detalhado solicitado. Os dez achados e o redesenho editorial/visual estão especificados, com contratos preservados, interfaces internas, cenários e ordem de execução. Nenhum código do jogo foi modificado.
-
-A publicação da spec e sincronização do Wayfinder continuam pendentes por indisponibilidade de acesso autenticado. Não há label aplicada, ticket atribuído, bloqueador nativo confirmado ou alegação de implementação concluída. Quando o acesso estiver disponível, conferir se já existe issue equivalente, publicar/atualizar a spec sem duplicar, aplicar ready-for-agent conforme o fluxo invocado e sincronizar o resumo operacional e o corpo do Wayfinder.
-
-Fonte de processo: skill to-spec invocada pelo usuário. Base de produto: análise daquela conversa, contrato mecânico, ADRs de quests físicas/ciclo simplificado, arquitetura, fluxo, HUD, salas, fontes, inventário, personagens e código então disponível. Este fechamento registra o estado da proposta em 19/09/2026. A revisão local de 21/09/2026 compara a implementação com estes requisitos sem alterar a decisão de produto ou declarar os critérios atendidos.

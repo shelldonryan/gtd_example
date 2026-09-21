@@ -16,7 +16,7 @@ uma, coleta o objeto indicado e o entrega no sistema correspondente.
 
 Cada solução informa antes da escolha o objeto, o recurso cobrado, a origem, o
 destino e o resultado. Se a solução não for concluída, a perda diária começa na
-noite daquela escolha; não existe multa adicional.
+noite daquela escolha e o problema mantém seu prazo e crise.
 
 | Incidente | ID | Responsável | Objeto | Custo | Origem | Destino | Resultado | Se falhar |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |

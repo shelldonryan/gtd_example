@@ -1,7 +1,7 @@
 # Ações e custos
 
-Este arquivo registra o contrato mecânico vigente do ciclo de quests; os valores
-foram definidos e simulados no modelo numérico e no sketch. Os eventos que
+Este arquivo registra os valores e regras do ciclo de quests implementados em
+`last_horizon/` e reproduzidos pelo modelo numérico independente. Os eventos que
 alimentam essas ordens estão em [[HAZARDS]], [[SYSTEM_FAULTS]] e
 [[CREW_ISSUES]], e as rotas físicas e os pontos de interação estão em [[ROOMS]].
 
@@ -10,31 +10,31 @@ alimentam essas ordens estão em [[HAZARDS]], [[SYSTEM_FAULTS]] e
 | Regra | Valor |
 | --- | --- |
 | Recursos do HUD | energia, oxigênio, água, comida, peças e moral |
-| Peças | contagem inteira, sem consumo diário |
+| Peças | contagem inteira usada pelos custos de ordens técnicas |
+| Limites | energia, oxigênio, água, comida e moral ficam entre 0 e 100; peças são contadas a partir de zero |
 | Estoque inicial | energia 80; oxigênio 85; água 80; comida 70; moral 80; peças 4 |
 | Consumo diário | energia -7; oxigênio -4; água -6; comida -6; moral -2 |
-| Sobreviventes | 4 a bordo; o técnico não entra na conta |
+| Tripulação | quatro sobreviventes e o técnico controlado pelo jogador |
 | Duração | 10 dias |
 | Incidentes | dias 2, 4, 6, 8 e 10 |
 | Incidentes por partida | 5 de 7 tipos, sem reposição |
 | Famílias de incidente | falhas técnicas, suprimentos e tripulação |
 | Trabalho diário | uma quest concluída por dia |
 
-O consumo é aplicado uma vez ao dormir. Nenhuma ordem preventiva cancela o
-consumo normal. Ao dormir, o jogo aplica, nesta ordem: consequência da ordem
+O consumo é aplicado uma vez ao dormir, independentemente da ordem escolhida.
+Ao dormir, o jogo aplica, nesta ordem: consequência da ordem
 preventiva incompleta ou negligência, consumo diário, perdas dos problemas
 ativos, contagem do risco individual, prazos e crises, limite dos recursos e
 condições de término.
 
-Economia e racionamento foram removidos. Também não existem bônus numéricos
-ocultos por sobrevivente nem um contador separado de intervenção. Os
-sobreviventes oferecem ordens, contextualizam os objetos e podem entrar em
-risco,
-mas não alteram silenciosamente os custos.
+Os sobreviventes oferecem e contextualizam ordens, e podem entrar em risco. Os
+custos e recompensas são definidos pelas tabelas de quest.
 
-Encerrar o dia continua exigindo dormir no beliche do técnico no Dormitório. O
-jogador pode dormir sem cumprir a ordem, mas assume a consequência prevista para
-aquele dia.
+Os ganhos de recursos respeitam o teto de 100. A recompensa indicada na tabela
+é o ganho nominal e pode ser menor se o recurso estiver próximo do limite.
+
+Encerrar o dia exige dormir no beliche do técnico no Dormitório. O processamento
+noturno considera a conclusão da ordem e aplica sua consequência.
 
 ## Consumo ao encerrar o dia
 
@@ -53,9 +53,8 @@ seus incidentes e crises continuam aplicando consequências.
 
 ## Ordens e problemas ativos
 
-O jogo não possui uma lista extensa de tarefas. O trabalho do dia é uma ordem
-física curta, com objeto, origem, destino, recompensa ou resultado e consequência
-visíveis antes do compromisso.
+O trabalho do dia é uma ordem física curta, com objeto, origem, destino,
+recompensa ou resultado e consequência visíveis antes do compromisso.
 
 Nos dias sem incidente, os sobreviventes oferecem duas ordens preventivas. O
 jogador compara as duas, confirma uma presencialmente e pode concluir somente
@@ -73,8 +72,7 @@ Cada solução informa seu objeto, origem, destino, custo e resultado. A escolha
 única e a solução precisa ser executada fisicamente.
 
 Se a solução de um incidente não for concluída antes de dormir, o problema
-permanece ativo. Sua perda diária, prazo e crise seguem normalmente; não há uma
-multa extra pela quest não concluída.
+permanece ativo com sua perda diária, prazo e crise previstos.
 
 ## Ordens preventivas
 
@@ -166,27 +164,14 @@ e não altera o custo ou a consequência já exibidos.
 Em dia com incidente novo, o cartão do incidente tem prioridade; a retomada fica
 disponível no próximo dia sem incidente, enquanto o problema permanece ativo.
 
-## Vocabulário da interface da quest
+## Apresentação das quests
 
-Os cartões e painéis usam frases curtas e os mesmos nomes da matriz:
-
-| Momento | Texto obrigatório |
-| --- | --- |
-| Oferta preventiva | `ORDEM PREVENTIVA — [ordem]` |
-| Campos da oferta | responsável; objeto; coleta; entrega |
-| Recompensa | `RECOMPENSA: +[n] [recurso]` |
-| Falha prevista | `SE FALHAR: -[n] [recurso]` |
-| Confirmação presencial | `[nome]: CONFIRME A ORDEM. ELA NÃO PODE SER CANCELADA.` |
-| Coleta | `COLETAR [objeto]? SERVE PARA [resultado]. DESTINO: [destino].` |
-| Entrega | `ENTREGAR [objeto]? RESULTADO: [resultado]. CUSTO: [custo].` |
-| Preventiva concluída | `ORDEM CONCLUÍDA: +[n] [recurso].` |
-| Preventiva incompleta | `ORDEM NÃO CONCLUÍDA: -[n] [recurso]. O OBJETO VOLTA À ORIGEM.` |
-| Nenhuma preventiva | `NENHUMA ORDEM ACEITA: -[n] [recurso 1] E -[n] [recurso 2].` |
-| Solução urgente incompleta | `SOLUÇÃO NÃO CONCLUÍDA. [PROBLEMA] PERMANECE ATIVO.` |
-
-Formato linear dos campos: `RESPONSÁVEL: [nome] | OBJETO: [objeto] | COLETA:
-[origem] | ENTREGA: [destino]`. O texto não pode esconder o recurso afetado,
-a origem, o destino, o custo ou o estado da ordem.
+Os cartões atuais identificam responsável e motivação. No detalhe, mostram
+objeto, coleta, entrega, benefício e consequência. A confirmação da etapa abre
+um painel `Pegar [objeto]?` ou `Levar [objeto]?`, com destino, resultado ou
+custo, consequência e texto editorial. O texto da interface está implementado
+em `last_horizon/tasks.pde`; esta matriz é a referência dos valores, não um
+contrato literal das frases exibidas.
 
 ## Calendário e processamento
 
@@ -231,11 +216,13 @@ continuar ativas após o reinício do prazo.
   crises, o socorro e a seleção do pool estão implementados
   no sketch `last_horizon/`.
 - O sketch executa as oito preventivas e quatorze soluções com confirmação,
-  coleta e entrega físicas, retomadas e socorro no beliche de risco.
+  coleta e entrega físicas, retomadas e socorro em um ponto fixo no Dormitório.
 - A previsão noturna e a noite confirmada compartilham `simulateNightTransition`;
   o preview não altera recursos, prazos, RNG ou memória editorial.
-- A validação independente usa `prototype/balance-model.mjs`; a matriz final e
-  os limites de execução estão em [[E6_REPORT]].
+- A validação independente usa `prototype/balance-model.mjs`; os resultados e
+  os limites da execução atual estão em
+  [`docs/CURRENT_IMPLEMENTATION.md`](../docs/CURRENT_IMPLEMENTATION.md) e
+  [`code/VERIFICATION.md`](../code/VERIFICATION.md).
 
 ## Referências
 

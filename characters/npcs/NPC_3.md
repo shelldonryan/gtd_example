@@ -14,14 +14,12 @@ Neusa oferece e confirma as ordens de água, convivência e mediação:
 
 - `N-01`: preparar água do grupo com filtro de água;
 - `N-02`: abrir espaço para a conversa com cartões de mediação;
-- `CON-A` e `CON-B`: soluções físicas do conflito no dormitório; são escolhidas
-  e confirmadas no cartão de incidente, sem exigir a presença de Neusa.
+- `CON-A` e `CON-B`: soluções físicas do conflito no dormitório, escolhidas no
+  cartão de incidente e executadas na nave.
 
 O ponto de Neusa é a origem de `N-02`; as demais origens e destinos seguem a
-matriz de [[ACTIONS]]. As soluções urgentes atribuídas a ela não exigem sua
-presença. Uma crise pode colocar uma pessoa em risco; há no máximo uma pessoa em
-risco por vez e o socorro é uma quest simples. Se morrer, deixa de oferecer
-ordens preventivas.
+matriz de [[ACTIONS]]. Uma crise pode colocar uma pessoa em risco; há no máximo
+uma pessoa em risco por vez e o socorro é uma quest simples.
 
 Sua voz editorial varia por fase da viagem e contexto do grupo; risco e
 reconhecimento usam memórias separadas.
@@ -32,12 +30,6 @@ reconhecimento usam memórias separadas.
 - Sobreviventes: acompanha [[NPC_1]], [[NPC_2]] e [[NPC_4]] e é quem segura o grupo.
 - Terra: traz na memória a rotina que o grupo perdeu no planeta.
 - Marte: trabalha para entregar os sobreviventes vivos à base.
-
-## Limitações
-
-- Não anda sozinha: fica no ponto fixo do Dormitório.
-- Não combate e não sai da nave.
-- Depende das decisões do técnico para tratar o grupo.
 
 ## Referências
 

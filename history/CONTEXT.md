@@ -14,17 +14,17 @@ essenciais para a viagem.
 
 ## Situação inicial
 
-O jogador assume o controle da espacionave logo após a partida. A nave possui
-quatro áreas principais:
+O jogador assume o controle do gerenciamento da espaçonave logo após a partida. 
+A nave possui quatro áreas principais:
 
 - Sala de comando, centro de navegação e comunicações.
 - Sala de máquinas, onde ficam motor, energia e suporte de vida.
 - Depósito, responsável por estoques e componentes especiais.
 - Dormitório, responsável por descanso, saúde e moral.
 
-A Sala de comando é o hub: uma porta em cada convés leva diretamente a uma das
-três salas periféricas, que não se conectam entre si. O mapa macro mostra a
-posição e os problemas de cada cômodo, mas nunca transporta o jogador.
+A Sala de comando é o hub: uma porta em cada convés leva ao Dormitório, ao
+Depósito ou à Sala de máquinas. O mapa mostra a sala atual, o objetivo e a
+contagem de problemas por cômodo.
 
 Dentro dos cômodos, o técnico pode andar, pular, usar escadas, atravessar
 plataformas e interagir com pessoas, sistemas e objetos.
@@ -32,14 +32,12 @@ plataformas e interagir com pessoas, sistemas e objetos.
 Quatro sobreviventes viajam a bordo, além do técnico: **Vera**, a piloto, no
 comando; **Bento**, o intendente, no depósito; **Neusa**, a enfermeira, no
 dormitório; e **Sílvia**, a mecânica, na Sala de máquinas ([[NPC_1]], [[NPC_2]],
-[[NPC_3]] e [[NPC_4]]). Eles ficam parados em
-pontos dos cômodos e respondem quando o técnico interage com eles. Não possuem
-rotinas autônomas. Se uma pessoa morrer, ela deixa de oferecer ordens e reduz
-a contagem a bordo; os custos das soluções não mudam.
+[[NPC_3]] e [[NPC_4]]). Eles ocupam pontos dos cômodos e respondem quando o
+técnico interage com eles. Se uma pessoa morrer, a contagem a bordo diminui e
+as ordens preventivas são oferecidas pelos sobreviventes vivos.
 
-Os sistemas estão funcionando, mas não foram preparados para uma viagem sem
-problemas. A nave precisa economizar energia, controlar os estoques e lidar com
-falhas que podem surgir durante o percurso.
+Os sistemas da nave exigem gestão de energia e estoques, e falhas podem surgir
+durante o percurso.
 
 ## Desenvolvimento da viagem
 
@@ -60,15 +58,14 @@ ordem for aceita, os dois recursos associados às ofertas sofrem uma perda maior
 se a ordem aceita não for concluída, perde-se uma quantidade menor do recurso
 protegido. A ordem aceita não pode ser cancelada.
 
-As ordens formam o trabalho do dia: não existe uma lista extensa nem cadeia
-universal de visitas. Componentes especiais continuam existindo como objetos de
-quest, carregados um por vez. O mapa mostra a origem e o destino, mas nunca
-transporta o técnico.
+As ordens formam o trabalho do dia. Componentes especiais são objetos de quest,
+carregados um por vez. A origem e o destino aparecem nos cartões e detalhes das
+ordens; o mapa mostra a sala atual, o objetivo e a contagem de problemas por
+cômodo.
 
 O jogador administra os seis recursos durante o consumo diário e decide qual
-risco ou preparação merece a única conclusão de quest do dia. Diagnósticos são
-opcionais e curtos; políticas de economia e racionamento e bônus numéricos dos
-sobreviventes não fazem parte do novo ciclo.
+risco ou preparação merece a única conclusão de quest do dia. Conversas e
+leituras das estações contextualizam as ordens.
 
 ## Objetivo
 

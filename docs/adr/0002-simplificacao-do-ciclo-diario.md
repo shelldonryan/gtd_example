@@ -1,23 +1,20 @@
-# Simplificação do ciclo diário
+# Ciclo diário
 
 **Status:** accepted
 
-O ciclo anterior acumulava seis recursos, políticas persistentes, bônus numéricos de sobreviventes, componentes livres, um contador de intervenção e riscos individuais concorrentes. A decisão é manter os seis recursos e o consumo diário, mas usar uma única conclusão de quest por dia; remover economia e racionamento; remover bônus numéricos de Vera, Bento, Neusa e Sílvia; usar componentes somente como objetos de quest; manter problemas persistentes com perda, prazo e crise; e permitir no máximo uma pessoa em risco por vez, com uma quest simples de socorro. A morte reduz a tripulação sem recalcular custos. O objetivo é preservar pressão, objetos, navegação e consequências humanas, eliminando modificadores ocultos e limites duplicados.
+## Decisão
 
-## Considered Options
+A viagem usa seis recursos com consumo diário e permite uma conclusão de quest
+por dia. Problemas persistentes têm perdas, prazos e crises. Uma crise pode
+colocar uma pessoa em risco; o estado admite uma pessoa em risco por vez e o
+resgate usa uma quest simples. A morte reduz a contagem de sobreviventes.
 
-- **Manter todas as políticas e bônus:** rejeitada; criava decisões paralelas e regras invisíveis à triagem.
-- **Remover também problemas, prazos e crises:** rejeitada; retirava a consequência que dá peso à escolha de solução.
-- **Manter um contador separado de intervenção:** rejeitada; duplicava a regra de uma conclusão por dia.
+## Consequências
 
-## Consequences
-
-A ordem preventiva, a solução urgente e o socorro compartilham a mesma unidade
-diária. Os valores de recompensas, perdas, custos, prazos e crises estão
-consolidados em [[ACTIONS]] e executados no sketch `last_horizon/`
-([[SKETCH_ARCHITECTURE]]); o risco
-individual e o socorro estão em [[CREW_ISSUES]].
-Esta ADR registra a forma do sistema e as remoções que a simplificação exigiu.
+Ordens preventivas, soluções urgentes e socorro compartilham o limite diário. Os
+valores de recompensa, perda, custo, prazo e crise estão em [[ACTIONS]] e são
+processados no sketch `last_horizon/`. As regras de risco e resgate estão em
+[[CREW_ISSUES]].
 
 ## Referências
 

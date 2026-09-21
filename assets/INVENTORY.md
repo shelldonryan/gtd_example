@@ -1,6 +1,7 @@
 # Inventário de assets
 
-Especificação e catálogo dos assets do jogo, documentando caminhos, dimensões, formato e o estado de integração em código.
+Inventário dos arquivos de arte e áudio usados pelo sketch em
+`last_horizon/data/`.
 
 ## Diretrizes de Renderização e Escala
 
@@ -9,10 +10,11 @@ Especificação e catálogo dos assets do jogo, documentando caminhos, dimensõe
 - **Dimensões**: O canvas do asset representa o tamanho exato ocupado na tela lógica multiplicada por 2. Por exemplo, o frame do técnico possui 64×64 pixels reais e é posicionado em uma caixa lógica de 32×32.
 - **Carregamento**: Definido em `last_horizon/assets.pde`. Os assets em `last_horizon/data/` são carregados dinamicamente na inicialização do sketch.
 - **Formato**:
-  - Assets estáticos: imagens PNG (e arquivos `.aseprite` de origem quando disponíveis).
+  - Assets estáticos: imagens PNG; arquivos-fonte são catalogados junto aos assets correspondentes.
   - Assets animados: spritesheet PNG acompanhada de arquivo JSON de metadados (`frames`).
   - Áudio: arquivos WAV PCM 16 bits, 44,1 kHz, mono, executados nativamente via `javax.sound.sampled`.
-- **Licenciamento**: Cada pasta de asset em `data/` inclui seu próprio `LICENSE.txt` com a devida atribuição de autoria.
+- **Licenciamento**: as pastas de assets presentes incluem `LICENSE.txt` com as
+  atribuições correspondentes.
 
 ---
 
@@ -81,7 +83,7 @@ As posições de escadas e estações são definidas em código (`ship.pde`) e e
 
 ### 7. Ícones do HUD
 - **Localização**: `data/icons/`
-  - 6 imagens PNG de 32×32 px (renderizadas em 16×16 lógicos) e seus arquivos `.aseprite` de origem:
+  - 6 imagens PNG de 64×64 px (renderizadas em 16×16 unidades lógicas) e seus arquivos `.aseprite` de origem:
     - `energia.png`, `oxigenio.png`, `agua.png`, `comida.png`, `pecas.png`, `moral.png`.
   - Nota: O ícone de alerta crítico permanece desenhado proceduralmente em código.
 
@@ -100,9 +102,9 @@ As posições de escadas e estações são definidas em código (`ship.pde`) e e
 
 ---
 
-## Elementos Mantidos Exclusivamente em Código
+## Componentes desenhados pelo sketch
 
-Os seguintes componentes visuais e de interface são gerados nativamente por código e não demandam assets:
+O sketch também desenha os componentes de interface:
 - Painéis, molduras e caixas de diálogo modais.
 - Cartões de recursos (barras de progresso, molduras e indicador de pulso).
 - Linhas informativas da faixa inferior (objetivo e alertas).

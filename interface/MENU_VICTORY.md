@@ -19,8 +19,6 @@ derrota.
 | Recursos finais | Valores textuais restantes de energia, oxigênio, água, comida, peças e moral |
 | Mensagem de Marte | Texto da base confirmando o recebimento da nave; usa o nome do técnico |
 | Botão "Nova partida" | Volta para o [[MENU_INIT]] |
-A tela de vitória é o desfecho modal e incorpora a mensagem de Marte; não há
-um cartão adicional antes ou depois dela.
 
 ## Variações
 
@@ -31,11 +29,6 @@ um cartão adicional antes ou depois dela.
 `[NOME]` é o nome digitado para o técnico. Se houver perdas e a chegada
 acontecer logo após um reparo, prevalece a variação de reparo no limite; o
 resumo continua listando os sobreviventes.
-
-## Pendências
-
-Nenhuma. A tela encerra a partida: não existe continuar jogando depois da
-chegada. O botão `NOVA PARTIDA` volta ao `MENU_INIT`.
 
 ## Implementação
 

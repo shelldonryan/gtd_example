@@ -38,12 +38,11 @@ As peças são uma contagem numérica, sem barra.
 
 ## Ícones
 
-Os seis recursos usam **ícones de 16×16** na paleta do HUD — energia, oxigênio,
+Os seis recursos renderizam **ícones de 16×16 unidades lógicas** — energia, oxigênio,
 água, comida, peças e moral. Cada cartão mostra **ícone + número + rótulo de
 texto** — `ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS`, `MORAL` — e, nos
-recursos de barra, a barra de preenchimento. Os assets PNG de 32×32 em
-`data/icons/` são preparados uma vez e reutilizados; na ausência de um arquivo,
-o ícone geométrico mantém o cartão executável.
+recursos de barra, a barra de preenchimento. Os PNGs de 64×64 em `data/icons/`
+são preparados uma vez e reutilizados.
 
 ## Onde cada elemento fica
 
@@ -63,11 +62,9 @@ contagem de problemas por sala. Fechá-lo retorna à mesma sala e posição.
 
 ### Mapa
 
-O botão `MAPA` abre uma sobreposição com a imagem da nave e quatro cartões
-estáticos de sala. Cada cartão mostra o nome e pode marcar a sala atual, o
-objetivo e a contagem de problemas (`!N`). Os cartões não são clicáveis: não
-mostram ocupantes, sistemas, detalhes de problemas, rotas, portas ou escadas. O
-mapa não transporta o técnico.
+O botão `MAPA` abre uma sobreposição com a imagem da nave e quatro cartões de
+sala. Cada cartão mostra o nome e pode marcar a sala atual, o objetivo e a
+contagem de problemas (`!N`).
 
 ### Diálogos e ordens
 
@@ -75,11 +72,10 @@ O botão `ORDENS` reabre as duas ofertas antes do aceite ou a ficha completa da
 quest ativa. Nos dias sem incidente, `OFERTAS / PRÓXIMA RETOMADA` percorre as
 soluções pendentes com seus prazos atuais. Nenhum desses botões move o técnico.
 
-O início do jogo e os dias sem incidente não abrem o modal automaticamente.
-O botão mostra `!` pulsando suavemente em tamanho e cor, com ciclo de 1,4 s,
-enquanto houver oferta/retomada disponível e nenhuma seleção ou quest em curso.
-Consultar e fechar sem escolher mantém o aviso; selecionar uma ordem o remove.
-Cartões obrigatórios de incidentes continuam abrindo normalmente.
+O botão `ORDENS` mostra `!` pulsando suavemente em tamanho e cor, com ciclo de
+1,4 s, enquanto houver oferta ou retomada disponível e nenhuma seleção ou quest
+em curso. Consultar e fechar sem escolher mantém o aviso; selecionar uma ordem
+o remove. Os incidentes abrem seu cartão ao iniciar o dia.
 O círculo e a exclamação formam um selo único: os dois crescem e mudam de cor
 juntos, na mesma proporção; o glifo nunca fica parado enquanto o círculo pulsa.
 A exclamação é desenhada como geometria — barra e ponto — e fica centrada no
@@ -99,27 +95,24 @@ círculo por construção, sem depender da métrica da fonte.
 - O objeto só existe como parte de uma ordem aceita e pode ser carregado um por
   vez. Recursos comuns são pagos ou recebidos no destino.
 
-Os botões dos modais repetem o atalho no rótulo: `FECHAR (ESC)`, `AGORA NÃO (ESC)`,
-`CONFIRMAR (ENTER)`, `ACEITAR ORDEM (ENTER)`, `ENTREGAR (ENTER)` e o botão de
-dormir. O botão de pausa é `CONTINUAR (ESC)`.
+Os botões exibem os atalhos disponíveis: `FECHAR (ESC)`, `AGORA NÃO (ESC)`,
+`ACEITAR (ENTER)`, `DORMIR (ENTER)` e o controle de pausa `CONTINUAR (ESC)`.
+Nos painéis de quest, o rótulo da ação acompanha a etapa.
 
 ### Ajuda
 
 O botão `?` do rodapé abre um modal `AJUDA — CONTROLES` com a lista de teclas e
-botões, fechado por `FECHAR (ESC)`, clique ou `ESC`. A dica de teclas fixa que
-antes ocupava o rodapé saiu: os botões padrão são `MAPA`, `ORDENS` e `?`; com
-pessoa em risco, também aparece `SOCORRO`.
+botões, fechado por `FECHAR (ESC)`, clique ou `ESC`. O rodapé reúne `MAPA`,
+`ORDENS` e `?`; com pessoa em risco, também aparece `SOCORRO`.
 
 ### Faixa de objetivo e alerta
 
 A faixa inferior desenha duas linhas: `currentObjectiveLine()` e
 `currentAlertLine()`. A primeira identifica a ação e o ponto atual de interação
 quando há uma ordem, uma pessoa em risco ou uma quest concluída. Sem alvo e sem
-ofertas, o fallback atual é `Local indisponível. Consulte o mapa`. A segunda
-prioriza aviso fatal, risco individual e problemas ativos. As funções
-`orderStageLine()`, `orderRouteLine()`, `orderFailureLine()` e
-`problemWarningLine()` permanecem no código, mas não são chamadas pelo desenho
-atual do HUD. Detalhes completos de ofertas e quests ficam no painel `ORDENS`.
+ofertas, a faixa indica consultar o mapa. A segunda prioriza aviso fatal, risco
+individual e problemas ativos. Detalhes completos de ofertas e quests ficam no
+painel `ORDENS`.
 
 ### Transmissões
 
@@ -130,18 +123,18 @@ primeiro; fechá-la revela o cartão do incidente.
 
 ### Encerrar o dia
 
-Não existe botão persistente `Passar dia`. O técnico precisa chegar ao próprio
-beliche no Dormitório e interagir. Antes de dormir, o resumo modal mostra:
+O técnico encerra o dia ao interagir com o próprio beliche no Dormitório. Antes
+de dormir, o resumo modal mostra:
 
 1. consumo previsto dos recursos;
 2. recompensa ou perda da ordem preventiva, se houver;
-3. etapa e resultado da ordem ativa, ou ausência de ordem;
+3. estado e resultado do trabalho do dia;
 4. problemas ativos, prazos e crises iminentes;
 5. confirmação para dormir e opção de voltar.
 
 Dormir com uma preventiva aceita e incompleta mostra a perda, devolve o objeto à
 origem e encerra a ordem. Dormir com uma solução urgente incompleta mantém o
-problema sem penalidade adicional; a mesma solução reaparece como retomada nos
+problema ativo com suas perdas, prazos e crise; a mesma solução reaparece como retomada nos
 dias seguintes. Em dia com incidente novo, o cartão novo tem prioridade e a
 retomada volta a aparecer no próximo dia sem incidente. Os valores e a ordem do
 processamento estão em [[ACTIONS]].
@@ -151,8 +144,8 @@ processamento estão em [[ACTIONS]].
 O fluxo completo de telas está em [[FLOW]] e os pontos de interação de cada sala
 em [[ROOMS]].
 
-- **Salas de interior:** o Comando é o hub; Dormitório, Depósito e Máquinas
-  ligam-se somente a ele.
+- **Salas de interior:** o Comando é o hub e tem portais para Dormitório,
+  Depósito e Máquinas.
 - **Ofertas de ordem:** duas ordens preventivas comparáveis nos dias sem
   incidente; apenas uma pode ser aceita presencialmente.
 - **Diálogo de confirmação:** retrato e caixa inferior; confirma a ordem ao
@@ -163,7 +156,7 @@ em [[ROOMS]].
   item.
 - **Entrega:** mostra recompensa, custo, resultado ou problema resolvido antes
   de aplicar.
-- **Mapa:** preserva sala e posição e marca sala atual, objetivo e contagem de problemas; não mostra rota ou detalhes por sala.
+- **Mapa:** preserva sala e posição e marca sala atual, objetivo e contagem de problemas.
 - **Incidente:** modal técnico com duas soluções físicas; bloqueia exploração
   até a escolha e confirmação.
 - **Falha de preventiva:** exibe a perda do recurso protegido e devolve o objeto
@@ -179,20 +172,18 @@ em [[ROOMS]].
 Um recurso em vermelho (de 1 a 29) avisa por três canais ao mesmo tempo: a cor,
 um **ícone de aviso** ao lado do número e a **borda do cartão piscando** (meio
 segundo aceso, meio apagado). A cor sozinha deixa quem não a distingue sem
-nenhuma pista. O alerta **não tem canal sonoro**: o aviso é só visual, por
-decisão da [#28](https://github.com/shelldonryan/gtd_example/issues/28).
+nenhuma pista. Os cartões indicam criticidade por cor, ícone e borda pulsante.
 
 Alertas críticos usam os cartões de recurso: cor, ícone de aviso e borda
 piscando. A linha de alerta também pode mostrar uma condição fatal, o risco
-individual mais urgente ou um problema ativo. Não há uma quarta linha de detalhes
-no HUD. Quando há pessoa em risco, o rodapé inclui o botão `SOCORRO`.
+individual mais urgente ou um problema ativo. Quando há pessoa em risco, o
+rodapé inclui o botão `SOCORRO`.
 
 Se dois problemas tiverem o mesmo prazo, permanece em destaque o que foi
 ativado primeiro. A ordem não muda quando o jogador troca de sala.
 
-O mapa não contém uma ficha de comparação. Ele apresenta contagem de problemas
-por cômodo, sem listar perda diária, prazo ou consequência de crise. O detalhe
-completo e os valores numéricos estão em [[ACTIONS]] e nos painéis de ordens.
+O mapa apresenta contagem de problemas por cômodo. Detalhes e valores numéricos
+estão em [[ACTIONS]] e nos painéis de ordens.
 
 Os textos editoriais de Vera, Bento, Neusa e Sílvia são derivados do contexto e
 dos resultados reais. A validação exige 22 entradas ligadas por `quest_id`,

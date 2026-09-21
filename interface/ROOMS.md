@@ -1,43 +1,34 @@
 # Cômodos jogáveis
 
-Os quatro cômodos formam uma topologia em estrela inspirada na composição
-lateral de `COMMAND_ROOM_CONCEPT_ART.png`. A Sala de comando é o hub central:
-uma porta por convés leva ao Dormitório, ao Depósito e à Sala de máquinas. As
-três salas periféricas não possuem portas entre si. O mapa é apenas consultável.
+Os quatro cômodos formam uma topologia com a Sala de comando como hub. Três
+portas ligam o Comando ao Dormitório, ao Depósito e à Sala de máquinas. O mapa
+é uma sobreposição consultiva com quatro cartões de cômodo.
 
-```
-  convés superior  y≈164   [ estação ]        [ estação ]
-  convés médio     y≈232   [ estação ]   esc  [ estação ]
-  convés inferior  y≈300   [ estação ]   esc  [ estação ]
-                            x≈150                x≈330
-```
-
-As posições acima são indicativas; o ajuste fino é da implementação, desde que
-cada estação fique alcançável andando ou subindo escada. O pulo de 48 px
-**não** alcança o convés de cima: trocar de nível é papel da escada.
-As posições definitivas de escadas e estações, congeladas para a pintura dos
-fundos, estão em [[INVENTORY]].
+Os conveses usam `y = 128`, `202` e `278` na grade lógica. As duas escadas de
+cada sala e os pontos de interação estão configurados em `last_horizon/ship.pde`.
+O pulo tem 48 px e a troca de convés é feita pelas escadas.
 
 ## Pontos de interação
 
-| Tipo | Interrompe movimento | O que faz |
-| --- | --- | --- |
-| Leitura técnica | sim | abre painel inferior sem retrato |
-| Oferta de ordem | sim | mostra uma ordem do sobrevivente e permite compará-la com outra |
-| Confirmação de ordem | sim | confirma a ordem escolhida antes da coleta |
-| Coleta | sim | entrega ou libera o objeto da ordem |
-| Entrega | sim | aplica a recompensa ou resolve a solução escolhida |
-| Conversa | sim | abre retrato e caixa inferior do sobrevivente |
-| Porta | não | troca entre o Comando e uma sala periférica |
+| Tipo | O que faz |
+| --- | --- |
+| Leitura técnica | abre painel inferior com informações da estação |
+| Oferta de ordem | mostra as opções preventivas do dia |
+| Confirmação de ordem | confirma a ordem escolhida com o responsável |
+| Coleta | entrega ao técnico o objeto associado à ordem |
+| Entrega | aplica a recompensa ou resolve a solução escolhida |
+| Conversa | abre retrato e painel do sobrevivente |
+| Porta | leva à sala conectada |
 
 Regras que valem em todos os cômodos:
 
-- Alcance de interação de 12 px para estações e portas, e 22 px lateral para NPCs
-  (D-144), na mesma altura. NPCs vivos mantêm o nome; ao entrar no alcance, o
-  sprite recebe contorno/halo cyan e o `E` aparece na diagonal superior direita,
-  próximo da cabeça, sem moldura geométrica.
+- Alcances dependem do ponto. Portas exigem até 18 px na horizontal e na vertical;
+  NPCs aceitam até 22 px na horizontal e 3 px na vertical; cada estação usa o
+  alcance definido por seu ponto.
+  NPCs vivos mantêm o nome; ao entrar no alcance, o sprite recebe halo cyan e
+  aparece a indicação `E`.
 - O técnico carrega **um objeto de quest por vez**. O item aparece como parte da
-  ordem aceita e é entregue no destino; não há coleta livre de componentes.
+  ordem aceita e é entregue no destino.
 - Coleta e entrega são as duas etapas leves de uma ordem. A entrega aplica custo,
   recompensa, correção ou risco correspondente.
 - Uma quest pode ser concluída por dia. Ordens preventivas aceitas não podem ser
@@ -53,10 +44,10 @@ Regras que valem em todos os cômodos:
   concluída, problema ativo sem escolha ou nada pendente. Portas e beliche do
   técnico permanecem acessíveis; socorro habilita com pessoa em risco e quest
   diária livre.
-- O mapa marca a sala atual, o ponto objetivo e a contagem de problemas por sala; não mostra origem/destino, rota ou detalhes e não transporta o técnico.
+- O mapa marca a sala atual, o ponto objetivo e a contagem de problemas por sala.
 - Indicações usam ações concretas, nunca termos internos.
-- A ordem ativa usa somente pontos que aparecem na oferta. O mapa atual não
-  expõe objetos, origem ou destino.
+- Cada ordem define os pontos de coleta e entrega; os detalhes aparecem na oferta
+  e no painel `ORDENS`.
 - A matriz completa das oito ordens preventivas e das quatorze soluções de
   incidente está em [[ACTIONS]]; estes pontos preservam as rotas físicas e a
   leitura local.
@@ -65,8 +56,8 @@ Regras que valem em todos os cômodos:
 ## Sala de comando
 
 O cômodo é o hub físico e concentra navegação, comunicações e comparação inicial
-das ordens. As ofertas podem ser lidas remotamente; não existe visita obrigatória
-ao Comando para aceitar uma ordem.
+das ordens. As ofertas podem ser lidas remotamente e são confirmadas junto ao
+sobrevivente responsável.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
@@ -77,10 +68,10 @@ ao Comando para aceitar uma ordem.
 | inferior | porta da Sala de máquinas | porta |
 | inferior | antena — destino de ordens de comunicação | entrega |
 
-No primeiro dia, o técnico começa no Comando. Nos demais, chega ao hub pela
-porta superior vinda do Dormitório.
+No primeiro dia, o técnico começa no Comando. Os dias seguintes começam no
+Dormitório.
 O console da rota informa jornada, dias restantes e previsão de consumo antes
-das decisões de quest. Não existe aceleração que elimine dias.
+das decisões de quest.
 
 ## Sala de máquinas
 O cômodo concentra motor, energia e suporte de vida.
@@ -106,11 +97,13 @@ rota curta.
 | superior | prateleira de reserva — objetos da ordem ativa | leitura e coleta condicionadas à ordem |
 | acesso | porta única para o convés médio do Comando | porta |
 
+## Dormitório
+
 O cômodo concentra descanso, saúde, moral e encerramento do turno.
 
 | Convés | Ponto | Tipo |
 | --- | --- | --- |
-| inferior | beliche temporário `SOCORRER [NOME]` de sobrevivente em risco | entrega de socorro |
+| inferior | ponto fixo de socorro | entrega de socorro para a pessoa em risco |
 | médio | Neusa — ordens da tripulação e confirmação | conversa, confirmação e coleta/entrega condicionadas à ordem |
 | médio | mesa do grupo — destino de ordens de convivência | entrega |
 | superior | mesa comum — destino de ordens de moral | entrega |
@@ -166,7 +159,7 @@ O cartão informa também o custo e o resultado; os valores numéricos estão em
 | Solução técnica | correção | console da rota (Comando) | estação do motor, energia, suporte, comunicações ou casco |
 | Solução de suprimentos | recuperação | console da rota (Comando) | estoque de comida |
 | Solução da tripulação | convivência | Neusa ou console da rota | mesa do grupo |
-| Socorro | recuperação humana | recursos do estoque, pagos na confirmação | beliche da pessoa em risco |
+| Socorro | recuperação humana | recursos do estoque, pagos na confirmação | ponto fixo de socorro no Dormitório |
 
 Ordens preventivas e soluções possuem duas etapas leves: `COLETAR` e `ENTREGAR`. A rota usa
 no máximo dois cômodos distintos, o sobrevivente responsável pode ser origem ou
@@ -177,37 +170,33 @@ Após a confirmação da ordem, a coleta mostra o objeto e sua finalidade. A ord
 preventiva exige confirmação presencial com o responsável; a solução de incidente
 é confirmada no cartão. A entrega mostra o resultado antes de aplicar. Se uma
 ordem preventiva aceita falhar ao dormir, o objeto retorna à origem; se uma
-solução urgente falhar, o problema permanece ativo sem multa adicional e a mesma
-solução reaparece como retomada.
+solução urgente falhar, o problema permanece ativo com suas perdas, prazo e
+crise, e a mesma solução reaparece como retomada.
 Em dia com incidente novo, o cartão do incidente tem prioridade; a retomada do
 problema anterior fica disponível no próximo dia sem incidente.
 
-O socorro simplificado é confirmado presencialmente no beliche da pessoa em
-risco: paga `-8 água` e `-2 comida` e conclui a quest do dia, conforme o modelo
-numérico. Não há objeto adicional nem cadeia de visitas para socorrer.
+O socorro é confirmado presencialmente no ponto fixo de socorro do Dormitório:
+paga `-8 água` e `-2 comida` e conclui a quest do dia.
 
 
 ## Leitura do jogador
 
-O HUD mostra a ordem ativa com estágio, responsável, objeto, origem, destino,
-recompensa ou resultado e consequência da falha. Também destaca o problema
-ativo com menor prazo e quantos outros existem.
+O HUD mostra o objetivo e o alerta atuais. O botão `ORDENS` apresenta os dados
+detalhados da oferta ou quest ativa: responsável, objeto, origem, destino,
+benefício, custo e consequência.
 
-O mapa atual mostra quatro cartões estáticos de sala. Cada cartão pode marcar a
-sala atual, o objetivo da etapa e a contagem de problemas. Não lista problemas,
-perdas, prazos, consequências, origem, destino, portas ou escadas e não responde
-a cliques nos cartões. O mapa não transporta o técnico.
+O mapa mostra quatro cartões de sala e marca a sala atual, o objetivo da etapa
+e a contagem de problemas. As informações da ordem ficam no painel `ORDENS`.
 
 Quando o dano no casco estiver ativo, ele pertence ao cômodo sorteado para aquela
 ocorrência e a quest aponta para o local alcançável correspondente. A origem das
 duas soluções é o console da rota no Comando.
 
-O catálogo de quests e o balanceamento numérico estão em [[ACTIONS]] e nas notas
-de `events/`. O sketch `last_horizon/` executa esse contrato. O botão `ORDENS`
-reabre as ofertas ou os detalhes da quest; `OFERTAS / PRÓXIMA RETOMADA` permite
-consultar as soluções pendentes em dias sem incidente. A arte das estações e
-dos objetos usa PNGs carregados com fallback geométrico. O que o jogador
-vê na tela está em [[HUD]], e a ordem das telas está em [[FLOW]].
+O catálogo de quests e os valores estão em [[ACTIONS]] e nas notas de `events/`.
+O botão `ORDENS` reabre as ofertas ou os detalhes da quest; `OFERTAS / PRÓXIMA
+RETOMADA` permite consultar soluções pendentes em dias sem incidente. Estações
+usam os assets catalogados e os objetos da quest têm representação no sketch. O
+HUD está em [[HUD]] e a ordem das telas em [[FLOW]].
 
 ## Referências
 

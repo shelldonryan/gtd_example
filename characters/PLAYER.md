@@ -12,20 +12,20 @@
 
 O protagonista é o jogador dentro da nave. Ele controla diretamente o técnico
 pelos quatro cômodos. A Sala de comando é o hub; suas portas por convés levam
-ao Dormitório, ao Depósito e à Sala de máquinas. O mapa mostra quatro cartões
-de sala e marca a sala atual, o objetivo e a contagem de problemas; não calcula
-rotas nem detalha problemas. Os pontos de interação de cada cômodo estão em
-[[ROOMS]].
+ao Dormitório, ao Depósito e à Sala de máquinas. O mapa mostra a nave em quatro
+cartões e marca a sala atual, o objetivo e a contagem de problemas. Os pontos de
+interação de cada cômodo estão em [[ROOMS]].
 
 Incidentes criam problemas locais persistentes. Nos dias com incidente, o técnico
 escolhe uma entre duas soluções físicas e executa a rota correspondente
 ([[ACTIONS]]). Nos dias sem incidente, compara duas ordens preventivas e confirma
 uma presencialmente com o sobrevivente responsável.
 
-Uma quest tem as etapas `COLETAR` e `ENTREGAR`. O técnico carrega somente o
-objeto da ordem aceita, que aparece no ponto de origem e é entregue no destino.
-Diagnósticos e conversas fora da ordem são opcionais; não existem políticas,
-coleta livre de componentes ou cadeia universal de visitas.
+Uma quest usa as etapas `COLETAR` e `ENTREGAR`. O técnico carrega um objeto por
+vez. Em geral, ele confirma a coleta na origem e o entrega no destino; nas
+ordens V-02 e N-02, a própria confirmação com o responsável entrega o objeto
+diretamente ao técnico. As interações com a tripulação e as estações acompanham
+a ordem ou o incidente ativo.
 
 ## Representação visual
 
@@ -58,9 +58,9 @@ Andar custa 1,0 px lógico por quadro; correr com `Shift` custa 2,4. A caminhada
 foi calibrada pelo ciclo de 800 ms da própria animação: 1,0 px/quadro cobre 48 px
 lógicos por ciclo, perto de duas alturas do técnico, e foi o valor que reduziu o
 deslize dos pés sem tornar a navegação lenta (D-154). A corrida vale só no
-convés: escada e ar mantêm o ritmo normal, e o pulo não muda de altura. Parado,
-`Shift` não anima nada — não existe corrida no lugar. Se a spritesheet não
-trouxer a faixa de `run`, o passo acelera e a animação continua na caminhada.
+convés: escada e ar mantêm o ritmo normal, e o pulo não muda de altura. Com
+`Shift` acelera o deslocamento no convés, e a animação acompanha o estado de
+corrida do técnico.
 
 ## Controles
 
@@ -94,17 +94,15 @@ O personagem possui acesso a:
 - Painel de informações da nave.
 - Estoque de peças para reparos.
 
-O personagem não possui recursos ilimitados. Cada reparo, mudança de rota ou
-ação de emergência pode consumir energia, peças, comida, água ou moral. Por
-isso, sua principal habilidade é decidir qual problema deve ser resolvido
-primeiro.
+As soluções de incidente podem cobrar energia, peças, comida ou moral, e o
+socorro cobra água e comida. O jogador escolhe qual ordem ou problema resolver
+dentro do limite de uma quest concluída por dia.
 
 ## Relação com a progressão
 
-O personagem não recebe novos poderes durante a primeira versão do jogo. A
-progressão acontece por meio do conhecimento do jogador sobre os sistemas da
-nave e pelas consequências acumuladas de suas decisões ao longo dos dez dias
-de viagem.
+Ao longo dos dez dias, a campanha avança por recursos, quests, problemas ativos
+e estado da tripulação. O histórico e o objetivo narrativos desta ficha
+complementam o papel do técnico na viagem.
 
 ## Referências
 

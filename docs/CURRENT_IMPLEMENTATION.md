@@ -1,75 +1,43 @@
-# Estado da implementação atual
+# Estado atual da implementação
 
-Revisão estática do checkout em **21/09/2026**. As fontes consultadas foram
-`last_horizon/*.pde`, `prototype/balance-model.mjs` e os arquivos de assets
-presentes em `last_horizon/data/`. O worktree já continha uma alteração local em
-`last_horizon/screens.pde`; ela foi incluída na leitura e não foi modificada.
+Esta página resume o sketch Processing em `last_horizon/`, suas mecânicas e a
+validação registrada no Windows. Os requisitos de produto estão em
+[`SPEC_ENXUGAMENTO_E_IMERSAO.md`](SPEC_ENXUGAMENTO_E_IMERSAO.md).
 
-Esta revisão comparou documentação e código por inspeção. Não compilou nem
-executou o jogo, o harness, campanhas de balanceamento ou playtests. Os
-resultados E6 abaixo continuam sendo registros datados, não validação deste
-checkout.
+## Validação registrada em 21/09/2026
 
-## Comportamento visível no código
+- `npm.cmd run typecheck`: passou.
+- `npm.cmd run regression:windows`: passou em quatro cenários — captura,
+  hit-test, escadas e pipeline de imagem.
+- `node prototype/balance-model.mjs --simulate`: passou em 2.520 sequências.
+- O pipeline carrega um PNG sintético 16×16 por `loadImage()` na cópia
+  temporária do sketch.
 
-| Área | Estado observado |
-| --- | --- |
-| HUD | Mostra os cartões de recursos, uma linha de objetivo e uma linha de alerta. O rodapé mostra `MAPA`, `ORDENS`, `?` e, quando há risco individual, `SOCORRO`. |
-| Mapa | Desenha a nave e quatro cartões estáticos. Identifica a sala atual, o objetivo atual e a contagem de problemas por sala. Não seleciona salas, calcula rotas, nomeia portas/escadas ou detalha os problemas. |
-| Objetivo | `currentObjective()` fornece o próximo ponto da ordem, o beliche de socorro ou o beliche do técnico após concluir a quest. O HUD mostra a ação e o nome do ponto, sem caminho entre salas ou conveses. |
-| Ordens preventivas | Duas ofertas aparecem em dias sem incidente; uma fica pendente até confirmação presencial com o responsável vivo. |
-| Soluções de incidente | São escolhidas e confirmadas no cartão do incidente. O NPC associado identifica a responsabilidade da solução, mas não precisa estar presente para aceitá-la. |
-| Socorro | Custa 8 de água e 2 de comida e usa o limite de uma quest por dia. `rescueActionReason()` bloqueia a ação em dia com incidente novo ou cartão de incidente aberto. |
-| Vitória e derrota | A vitória apresenta recursos como números em texto. A derrota mostra dia, sobreviventes e estado do motor; não mostra distância até Marte. |
-| Tela inicial | O rótulo do campo é `Nome do seu personagem:` e há cursor intermitente. A alteração local removeu o texto `PROTÓTIPO - TEXTO PROVISÓRIO`; ainda não foi validada em runtime. |
+## Jogo
 
-## Navegação e posições atuais
+- A partida dura dez dias e começa no Comando; os dias seguintes começam no
+  Dormitório. A equipe tem quatro sobreviventes além do técnico.
+- Os recursos iniciais são energia 80, oxigênio 85, água 80, comida 70, moral
+  80 e quatro peças. Energia, oxigênio, água, comida e moral variam entre 0 e
+  100; peças são contagem inteira.
+- O técnico explora Comando, Sala de máquinas, Depósito e Dormitório usando
+  movimento, corrida, salto, escadas, portas e pontos de interação.
+- Dias sem incidente oferecem duas ordens preventivas. Incidentes aparecem nos
+  dias 2, 4, 6, 8 e 10 e apresentam duas soluções. Uma quest pode ser concluída
+  por dia; ordens e soluções usam objetos, origens e destinos definidos no
+  catálogo de mecânicas.
+- O encerramento do dia processa consequências da ordem, consumo, perdas dos
+  problemas, riscos, prazos, crises e condições de vitória ou derrota. A
+  previsão e a aplicação usam `simulateNightTransition()`.
+- O HUD mostra dia, tripulação, recursos, objetivo e alerta. O mapa mostra a
+  nave em quatro cartões e marca sala atual, objetivo e contagem de problemas.
 
-As escadas são definidas por `ladder_room` e `ladder_x` em `ship.pde`:
+## Código e conteúdo
 
-| Sala | Posições x atuais |
-| --- | --- |
-| Comando | 127, 532 |
-| Máquinas | 468, 136 |
-| Depósito | 520, 130 |
-| Dormitório | 542, 243 |
-
-Os portais continuam declarados por dados em `ship.pde` e têm transição em
-`portals.pde`. O mapa não calcula a sequência de portais nem a próxima escada.
-
-## Estado dos assets esperado pelo loader
-
-| Grupo | Encontrado no checkout | Observação |
-| --- | --- | --- |
-| Estações | 11 PNGs em `data/stations/` | O código carrega esses nomes. |
-| NPCs e retratos | 4 spritesheets e 4 retratos em `data/npc/` | Retratos usam `npc/<nome>_portrait.png`; `portraits/<nome>.png` é fallback previsto. |
-| Porta | `door_sheet.png` e `door_sheet.json` | Presentes em `data/doors/`. |
-| Ícones | 6 PNGs | Presentes em `data/icons/`. |
-| Mapa | `1.png`–`4.png`, `ship.png` e origem Aseprite | Presentes em `data/map/`; o loader associa as miniaturas pela ordem `4, 2, 1, 3`. |
-| Áudio | pastas `door`, `ladder`, `run` e `walk` | Presentes em `data/audio/`. |
-| Objetos de quest | Não encontrados em `data/objects/` | O loader prevê os arquivos; o código mantém fallback. |
-| Fundos das salas | Não encontrados em `data/rooms/` | O loader prevê os arquivos; o código mantém fallback. |
-| Casco animado | Não encontrados `stations/casco_sheet.png` e `.json` | O loader prevê os arquivos; há fallback de desenho. |
-| Fundos de tela | Não encontrados em `data/screens/` | O loader prevê os arquivos; há fallback de estrelas. |
-
-## Diferenças documentais a manter explícitas
-
-- `interface/HUD.md`, `interface/FLOW.md` e `interface/ROOMS.md` descreviam
-  detalhes de sala e orientação por rota que não estão no mapa atual.
-- `assets/INVENTORY.md` misturava planejamento de produção com arquivos já
-  integrados; as miniaturas atuais têm nomes numéricos e alguns grupos previstos
-  continuam ausentes.
-- A matriz de regras de `mechanics/ACTIONS.md` corresponde aos valores centrais
-  lidos no código, mas a vitória exige também energia, oxigênio e moral acima de
-  zero, além de motor operante e sobrevivente vivo.
-- Os documentos de E6 registram resultados da campanha de 20/09/2026. Não foram
-  repetidos nesta revisão e não demonstram que o checkout atual tem o mesmo
-  comportamento visual ou os mesmos resultados.
-
-## Fontes correntes
-
-O código em `last_horizon/` é a fonte desta descrição do comportamento atual.
-As especificações de produto preservam requisitos e decisões; quando divergem
-do código, a divergência deve permanecer visível até haver decisão e
-implementação correspondentes. Veja também o [relatório histórico E6](E6_REPORT.md)
-e o [inventário de assets](../assets/INVENTORY.md).
+- O render usa buffer 1280×720, grade lógica 640×360 e ampliação inteira. O
+  texto usa Segoe UI; sprites e pixel art são desenhados sem interpolação.
+- Os assets usados pelo sketch estão catalogados em
+  [`../assets/INVENTORY.md`](../assets/INVENTORY.md). `assets.pde` carrega arte
+  e áudio, enquanto os componentes de interface são desenhados pelo sketch.
+- As tabelas numéricas estão em [`../mechanics/ACTIONS.md`](../mechanics/ACTIONS.md)
+  e os fluxos de interface em [`../interface/FLOW.md`](../interface/FLOW.md).
