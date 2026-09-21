@@ -195,7 +195,6 @@ void restoreVerificationFixture(){
   door_transition_facing = 1;
   screen = SCREEN_COMMAND;
   current_room = SCREEN_COMMAND;
-  map_selected_room = 0;
 }
 
 void beginVerificationFixture(){
@@ -211,7 +210,6 @@ void beginVerificationFixture(){
   arrayCopy(deterministic_sequence, incident_sequence);
   screen = SCREEN_COMMAND;
   current_room = SCREEN_COMMAND;
-  map_selected_room = 0;
 }
 
 void endVerificationFixture(){
@@ -540,8 +538,8 @@ void runCaptureStep(int step){
   else if (step == 8){
     float before = player_x;
     int before_room = screen;
-    clickAction(ACTION_INSPECT_DEPOT);
-    verify("mapa não transporta", screen == before_room && player_x == before);
+    verify("mapa gráfico não transporta", map_open
+      && screen == before_room && player_x == before);
     clickAction(ACTION_CLOSE_MODAL);
     captureInteract(POINT_RESERVE);
   } else if (step == 9){
@@ -1743,23 +1741,21 @@ void runHitTest(){
 
   for (int i = 0; i < ROOM_COUNT; i++){
     int before_screen = screen;
-    float room_cx = room_x[i] + MAP_ROOM_W / 2.0;
-    float room_cy = MAP_ROOM_Y + MAP_ROOM_H / 2.0;
+    float room_cx = room_x[i] + room_w[i] / 2.0;
+    float room_cy = room_y[i] + room_h[i] / 2.0;
     mouseX = int(room_cx * RENDER_SCALE * view_scale + view_offset_x);
     mouseY = int(room_cy * RENDER_SCALE * view_scale + view_offset_y);
     mouse_pressed = true;
     updateInput();
-    verify("hit-test ficha " + room_label[i], map_selected_room == i
-      && screen == before_screen && map_open);
+    verify("hit-test imagem inerte " + room_label[i],
+      screen == before_screen && map_open);
   }
 
-  int before_selection = map_selected_room;
   mouseX = 4;
   mouseY = 4;
   mouse_pressed = true;
   updateInput();
-  verify("hit-test letterbox preserva mapa", map_open
-    && map_selected_room == before_selection && screen == SCREEN_COMMAND);
+  verify("hit-test letterbox preserva mapa", map_open && screen == SCREEN_COMMAND);
   restoreVerificationFixture();
   exit();
 }

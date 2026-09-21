@@ -21,10 +21,6 @@ final int ACTION_NONE = 0;
 final int ACTION_START_GAME = 1;
 final int ACTION_QUIT_GAME = 2;
 final int ACTION_VIGNETTE_NEXT = 3;
-final int ACTION_INSPECT_COMMAND = 10;
-final int ACTION_INSPECT_MACHINES = 11;
-final int ACTION_INSPECT_DEPOT = 12;
-final int ACTION_INSPECT_DORMITORY = 13;
 final int ACTION_OPEN_MAP = 14;
 final int ACTION_CLOSE_MODAL = 15;
 final int ACTION_END_DAY = 16;
@@ -48,12 +44,7 @@ final int ACTION_RESTART = 41;
 final int ACTION_MAIN_MENU = 42;
 final int ACTION_NEW_GAME = 43;
 final int ACTION_OPEN_HELP = 44;
-final int ACTION_MAP_MY_ROOM = 45;
-final int ACTION_MAP_TARGET_ROOM = 46;
 final int ACTION_OPEN_RESCUE = 47;
-final int ACTION_MAP_BUNK_QUERY = 48;
-final int ACTION_MAP_RESCUE_QUERY = 49;
-final int ACTION_MAP_ROUTE = 50;
 
 /* playable room - interface/ROOMS.md */
 final int PLAYER_W = 16;
@@ -78,6 +69,7 @@ final float ROOM_TOP = 56;
 final float ROOM_BOTTOM = 284;
 final int DECK_COUNT = 3;
 final int ITEM_NONE = 0;
+final int MAP_TARGET_NONE = -1;
 
 /* rules - mechanics/ACTIONS.md */
 final int RESOURCE_MAX = 100;
@@ -167,7 +159,6 @@ int held_item = ITEM_NONE;
 
 /* overlays */
 boolean map_open = false;
-int map_selected_room = 0;
 boolean dialog_open = false;
 String dialog_name = "";
 String dialog_text = "";

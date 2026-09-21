@@ -1,15 +1,22 @@
 final int ROOM_COUNT = 4;
-final float MAP_ROOM_Y = 88;
-final float MAP_ROOM_W = 120;
-final float MAP_ROOM_H = 72;
+final float MAP_SHIP_X = 38;
+final float MAP_SHIP_Y = 88;
+final float MAP_SHIP_W = 564;
+final float MAP_SHIP_H = 210;
+final float MAP_SOURCE_W = 2057;
+final float MAP_SOURCE_H = 764;
+final float MAP_ROOM_SOURCE_W = 510;
+final float MAP_ROOM_SOURCE_H = 185;
 
 String[] room_label = {"COMANDO", "MÁQUINAS", "DEPÓSITO", "DORMITÓRIO"};
-float[] room_x = {60, 184, 308, 432};
+/* Slots measured from reference.png, in the original 2057 x 764 canvas. */
+float[] map_room_source_x = {480, 480, 1067, 1067};
+float[] map_room_source_y = {164, 421, 421, 164};
+float[] room_x = new float[ROOM_COUNT];
+float[] room_y = new float[ROOM_COUNT];
+float[] room_w = new float[ROOM_COUNT];
+float[] room_h = new float[ROOM_COUNT];
 int[] room_screen = {SCREEN_COMMAND, SCREEN_MACHINES, SCREEN_DEPOT, SCREEN_DORMITORY};
-int[] room_action = {
-  ACTION_INSPECT_COMMAND, ACTION_INSPECT_MACHINES,
-  ACTION_INSPECT_DEPOT, ACTION_INSPECT_DORMITORY
-};
 
 float[] deck_y = {128, 202, 278};
 final int LADDER_PER_ROOM = 2;
@@ -217,114 +224,89 @@ void drawShipArea(PGraphics g){
 
 
 void drawMapOverlay(PGraphics g){
-  calculateMapRoute();
   drawModalShade(g);
-  drawPanel(g, 12, 30, 616, 298, COL_CYAN);
-  text(g, "MAPA DA NAVE", 50, 54, 16, COL_CYAN);
-  String fatal_warning = nightFatalWarning();
-  String map_header = mapTargetKind();
-  String target_text = mapTargetText();
-  if (target_text.length() > 0) map_header += " · " + target_text;
-  if (fatal_warning.length() > 0){
-    text(g, "ALERTA FATAL · " + fatal_warning, 50, 72, 16, COL_RED);
-  } else if (map_consult_point >= 0){
-    text(g, "CONSULTA · " + pointDisplayLabel(map_consult_point), 50, 72, 16, COL_ORANGE);
-  } else {
-    text(g, map_header, 50, 72, 16, COL_TEXT);
-  }
+  drawPanel(g, 16, 60, 608, 270, COL_CYAN);
 
-  g.stroke(COL_BORDER);
-  g.strokeWeight(2);
-  for (int from = 0; from < ROOM_COUNT; from++){
-    for (int to = from + 1; to < ROOM_COUNT; to++){
-      drawMapConnection(g, from, to);
-    }
+  updateMapRoomLayout();
+  text(g, "MAPA DA NAVE", 32, 70, 16, COL_CYAN);
+
+  if (art_map_ship != null){
+    drawArtCorner(g, art_map_ship, MAP_SHIP_X, MAP_SHIP_Y, MAP_SHIP_W, MAP_SHIP_H);
+  } else {
+    g.noStroke();
+    g.fill(COL_ROOM);
+    g.rect(MAP_SHIP_X, MAP_SHIP_Y, MAP_SHIP_W, MAP_SHIP_H, 4);
   }
-  g.strokeWeight(1);
 
   for (int i = 0; i < ROOM_COUNT; i++){
     drawMapRoomCard(g, i);
   }
 
-  drawMapRoomDetails(g);
-  drawButton(g, 22, 296, 86, 20, "SALA", ACTION_MAP_MY_ROOM, true);
-  drawButton(g, 114, 296, 98, 20, "BELICHE", ACTION_MAP_BUNK_QUERY, true);
-  drawButton(g, 218, 296, 104, 20, "SOCORRO", ACTION_MAP_RESCUE_QUERY, urgentRisk() >= 0);
-  String route_label = map_consult_point >= 0 ? "MINHA ROTA" : "VOLTAR À ROTA";
-  drawButton(g, 328, 296, 132, 20, route_label, ACTION_MAP_ROUTE,
-    map_consult_point >= 0 || map_target_room != SCREEN_NONE);
-  drawModalFooter(g, 296, "", ACTION_NONE, false,
+  drawModalFooter(g, 300, "", ACTION_NONE, false,
     "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
 }
 
 
-void drawMapConnection(PGraphics g, int from, int to){
-  int from_screen = room_screen[from];
-  int to_screen = room_screen[to];
-  boolean connected = false;
-  for (int door = 0; door < DOOR_COUNT; door++){
-    if ((door_room[door] == from_screen && door_target[door] == to_screen)
-      || (door_room[door] == to_screen && door_target[door] == from_screen)){
-      connected = true;
-      break;
-    }
+void updateMapRoomLayout(){
+  for (int room = 0; room < ROOM_COUNT; room++){
+    room_x[room] = MAP_SHIP_X + map_room_source_x[room] / MAP_SOURCE_W * MAP_SHIP_W;
+    room_y[room] = MAP_SHIP_Y + map_room_source_y[room] / MAP_SOURCE_H * MAP_SHIP_H;
+    room_w[room] = MAP_ROOM_SOURCE_W / MAP_SOURCE_W * MAP_SHIP_W;
+    room_h[room] = MAP_ROOM_SOURCE_H / MAP_SOURCE_H * MAP_SHIP_H;
   }
-  if (!connected) return;
-  boolean route = false;
-  for (int i = 0; i < map_route_length - 1; i++){
-    int a = map_route_rooms[i];
-    int b = map_route_rooms[i + 1];
-    if ((a == from && b == to) || (a == to && b == from)) route = true;
-  }
-  g.stroke(route ? COL_CYAN : COL_DIM);
-  g.line(room_x[from] + MAP_ROOM_W / 2.0, MAP_ROOM_Y + MAP_ROOM_H / 2.0,
-    room_x[to] + MAP_ROOM_W / 2.0, MAP_ROOM_Y + MAP_ROOM_H / 2.0);
 }
 
 
-
-
 void drawMapRoomCard(PGraphics g, int index){
-  boolean hover = uiLayer() == LAYER_MAP
-    && isHovering(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H);
-  boolean selected = map_selected_room == index;
-  boolean route = false;
-  for (int i = 0; i < map_route_length; i++) if (map_route_rooms[i] == index) route = true;
-  int border = selected || route ? COL_CYAN : (hover ? COL_CYAN : COL_BORDER);
+  int objective_point = currentObjective();
+  int objective_room = objective_point >= 0 && objective_point < point_room.length
+    ? point_room[objective_point] : SCREEN_NONE;
+  boolean current = room_screen[index] == screen;
+  boolean objective = room_screen[index] == objective_room;
+  int border = current || objective ? COL_CYAN : COL_BORDER;
 
-  drawPanel(g, room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H, border);
-  drawArtCorner(g, art_map == null ? null : art_map[index], room_x[index], MAP_ROOM_Y, ART_MAP_W, ART_MAP_H);
+  drawPanel(g, room_x[index], room_y[index], room_w[index], room_h[index], border);
+  drawArtCorner(g, art_map == null ? null : art_map[index], room_x[index], room_y[index],
+    room_w[index], room_h[index]);
   g.noFill();
   g.stroke(border);
-  g.rect(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H, 3);
-  textCentered(g, room_label[index], room_x[index] + MAP_ROOM_W / 2.0,
-    MAP_ROOM_Y + 8, 16, selected ? COL_CYAN : COL_TEXT);
+  g.strokeWeight(current || objective ? 2 : 1);
+  g.rect(room_x[index], room_y[index], room_w[index], room_h[index], 2);
+  g.strokeWeight(1);
+
+  g.noStroke();
+  g.fill(COL_BG, 220);
+  float label_w = min(room_w[index] - 4, max(42.0f, room_label[index].length() * 5.5f));
+  g.rect(room_x[index] + (room_w[index] - label_w) / 2.0,
+    room_y[index] + 2, label_w, 10, 2);
+  textCentered(g, room_label[index], room_x[index] + room_w[index] / 2.0,
+    room_y[index] + 3, 9, objective ? COL_CYAN : COL_TEXT);
+
   int alert_count = roomProblemCount(room_screen[index]);
+  String status = "";
+  int status_color = COL_MUTED;
   if (alert_count > 0){
-    String alert_label = alert_count == 1 ? "1 alerta" : alert_count + " alertas";
-    textCentered(g, alert_label,
-      room_x[index] + MAP_ROOM_W / 2.0, MAP_ROOM_Y + 28, 16, COL_MUTED);
+    status = "!" + alert_count;
+    status_color = COL_RED;
   }
-
-  boolean consult_room = map_consult_point >= 0 && map_consult_point < point_room.length
-    && point_room[map_consult_point] == room_screen[index];
-  if (consult_room){
-    textCentered(g, "CONSULTA", room_x[index] + MAP_ROOM_W / 2.0,
-      MAP_ROOM_Y + 41, 16, COL_ORANGE);
+  if (current){
+    status = appendMapStatus(status, "VOCÊ ESTÁ AQUI");
+    status_color = COL_ORANGE;
   }
-
-  if (room_screen[index] == screen){
-    textCentered(g, "VOCÊ ESTÁ AQUI", room_x[index] + MAP_ROOM_W / 2.0,
-      MAP_ROOM_Y + (consult_room ? 53 : 48), 16, COL_ORANGE);
+  if (objective){
+    status = appendMapStatus(status, "OBJETIVO");
+    status_color = COL_GREEN;
   }
-
-  if (room_screen[index] == map_target_room){
-    textCentered(g, "OBJETIVO", room_x[index] + MAP_ROOM_W / 2.0,
-      MAP_ROOM_Y + (consult_room ? 64 : 61), 16, COL_GREEN);
+  if (status.length() > 0){
+    g.noStroke();
+    textCentered(g, status, room_x[index] + room_w[index] / 2.0,
+      room_y[index] + room_h[index] - 10, 8, status_color);
   }
+}
 
-  addButton(room_x[index], MAP_ROOM_Y, MAP_ROOM_W, MAP_ROOM_H,
-    room_action[index], true);
+
+String appendMapStatus(String current, String value){
+  return current.length() == 0 ? value : current + " · " + value;
 }
 int roomIndex(int room_id){
   for (int i = 0; i < ROOM_COUNT; i++){
@@ -337,119 +319,14 @@ int roomIndex(int room_id){
 }
 
 
-void drawMapRoomDetails(PGraphics g){
-  int index = constrain(map_selected_room, 0, ROOM_COUNT - 1);
-  int selected_room = room_screen[index];
-  float y;
-  if (map_target_reason == MAP_REASON_NO_TARGET){
-    y = drawTextWrapped(g, mapNextInstruction(), 50, 168, 540, 16, 18, COL_TEXT);
-  } else {
-    text(g, mapRouteText(), 50, 168, 16, COL_CYAN);
-    y = drawTextWrapped(g, mapNextInstruction(), 50, 186, 540, 16, 18, COL_TEXT);
-  }
-  drawMapDeckPlan(g, selected_room, 50, y + 4, 238, 76);
-  text(g, roomOccupant(index) + " · " + roomSystems(index), 304, 204, 16, COL_TEXT);
-  y = 224;
-  if (active_quest >= 0){
-    int q = active_quest;
-    if (quest_stage == QUEST_COLLECT && point_room[quest_origin[q]] == selected_room)
-      y = drawTextWrapped(g, "Pegar: " + quest_object[q] + " · " + point_label[quest_origin[q]], 304, y, 290, 16, 18, COL_CYAN);
-    if (quest_stage == QUEST_DELIVER && point_room[quest_destination[q]] == selected_room)
-      y = drawTextWrapped(g, "Levar: " + point_label[quest_destination[q]] + " · " + questEffect(q), 304, y, 290, 16, 18, COL_GREEN);
-  } else if (selected_preventive_id >= 0 && point_room[crew_point[quest_owner[selected_preventive_id]]] == selected_room){
-    y = drawTextWrapped(g, "Falar com " + crewDisplayName(quest_owner[selected_preventive_id]), 304, y, 290, 16, 18, COL_CYAN);
-  }
-  for (int p = 0; p < PROBLEM_COUNT; p++){
-    if (!problem_active[p] || problem_room[p] != selected_room) continue;
-    y = drawTextWrapped(g, problemMapLine(p), 304, y + 6, 290, 16, 18, COL_ORANGE);
-  }
-  int risk = urgentRisk();
-  if (selected_room == SCREEN_DORMITORY && risk >= 0){
-    String risk_prefix = map_consult_point == POINT_RISK_BUNK
-      ? "Consulta · Socorro: " : "Pessoa em risco: ";
-    drawTextWrapped(g, risk_prefix + crewDisplayName(risk) + " · "
-      + crew_risk_deadline[risk] + " noite(s) · Custo: -8 água, -2 comida.",
-      304, y + 6, 290, 16, 18, COL_ORANGE);
-  }
-}
-
-void drawMapDeckPlan(PGraphics g, int selected_room, float x, float y, float w, float h){
-  g.noFill();
-  g.stroke(COL_BORDER);
-  for (int deck = 0; deck < DECK_COUNT; deck++){
-    float line_y = y + 12 + deck * 24;
-    g.line(x, line_y, x + w, line_y);
-    text(g, deckLabel(deck), x + 4, line_y - 12, 16, COL_MUTED);
-  }
-  for (int ladder = 0; ladder < LADDER_COUNT; ladder++){
-    if (ladder_room[ladder] != selected_room) continue;
-    float lx = x + constrain(ladder_x[ladder] / BASE_W, 0, 1) * w;
-    float top = y + 12 + ladder_top_deck[ladder] * 24;
-    float bottom = y + 12 + ladder_bottom_deck[ladder] * 24;
-    g.stroke(COL_ORANGE);
-    g.line(lx, top, lx, bottom);
-  }
-  for (int door = 0; door < DOOR_COUNT; door++){
-    if (door_room[door] != selected_room) continue;
-    float dx = x + constrain(door_x[door] / BASE_W, 0, 1) * w;
-    boolean has_deck = door_deck[door] >= 0 && door_deck[door] < DECK_COUNT;
-    float dy = mapDeckPlanY(door_y[door], door_deck[door], y, h);
-    g.stroke(door == map_next_door ? COL_CYAN : COL_DIM);
-    if (has_deck){
-      g.line(dx - 3, dy - 4, dx + 3, dy + 4);
-    } else {
-      g.line(dx - 4, dy, dx + 4, dy);
-      text(g, "Abertura fora do convés", dx + 6, dy - 8, 16,
-        door == map_next_door ? COL_CYAN : COL_MUTED);
+int roomIndexOrInvalid(int room_id){
+  for (int i = 0; i < ROOM_COUNT; i++){
+    if (room_screen[i] == room_id){
+      return i;
     }
   }
-  if (selected_room == screen){
-    float px = x + constrain((player_x + PLAYER_W / 2.0) / BASE_W, 0, 1) * w;
-    int deck = playerDeckForMap();
-    float py = mapDeckPlanY(player_y + PLAYER_H, deck, y, h);
-    g.noStroke();
-    g.fill(COL_ORANGE);
-    g.ellipse(px, py, 7, 7);
-    text(g, deck >= 0 ? "Você" : "Você · altura livre", px + 5, py - 8, 16, COL_ORANGE);
-  }
-  if (map_target_room == selected_room && map_target_point >= 0){
-    float tx = x + constrain(point_x[map_target_point] / BASE_W, 0, 1) * w;
-    int deck = pointDeck(map_target_point);
-    float ty = mapDeckPlanY(point_y[map_target_point], deck, y, h);
-    g.noStroke();
-    g.fill(COL_GREEN);
-    g.rect(tx - 4, ty - 4, 8, 8);
-    text(g, deck >= 0 ? "Objetivo" : "Objetivo · altura livre", tx + 6, ty - 8, 16, COL_GREEN);
-  }
-  if (map_consult_point >= 0 && map_consult_point < point_room.length
-    && point_room[map_consult_point] == selected_room){
-    float qx = x + constrain(point_x[map_consult_point] / BASE_W, 0, 1) * w;
-    int deck = pointDeck(map_consult_point);
-    float qy = mapDeckPlanY(point_y[map_consult_point], deck, y, h);
-    g.noFill();
-    g.stroke(COL_ORANGE);
-    g.ellipse(qx, qy, 12, 12);
-    textCentered(g, "?", qx, qy + 3, 16, COL_ORANGE);
-  }
-}
 
-
-float mapDeckPlanY(float height, int deck, float y, float h){
-  if (deck >= 0 && deck < DECK_COUNT) return y + 12 + deck * 24;
-  return y + constrain((height - ROOM_TOP) / (ROOM_BOTTOM - ROOM_TOP), 0, 1) * h;
-}
-
-
-String roomOccupant(int index){
-  int crew = index == 0 ? CREW_VERA : index == 1 ? CREW_SILVIA : index == 2 ? CREW_BENTO : CREW_NEUSA;
-  return crew_name[crew] + (crew_alive[crew] ? "" : " — FALECEU");
-}
-
-
-String roomSystems(int index){
-  String[] systems = {"ROTA E COMUNICAÇÕES", "MOTOR, ENERGIA E SUPORTE",
-    "ESTOQUES E COMPONENTES", "DESCANSO, SAÚDE E MORAL"};
-  return systems[index];
+  return -1;
 }
 
 
@@ -1376,7 +1253,6 @@ void resetRoomState(){
   interact_queued = false;
   held_item = ITEM_NONE;
   map_open = false;
-  map_consult_point = MAP_TARGET_NONE;
   dialog_open = false;
   dialog_result = "";
   dialog_crew = -1;

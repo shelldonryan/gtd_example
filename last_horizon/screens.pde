@@ -122,7 +122,6 @@ boolean closeTopModal(){
   }
   if (active_layer == LAYER_MAP){
     map_open = false;
-    map_consult_point = MAP_TARGET_NONE;
     return true;
   }
   if (active_layer == LAYER_DIALOGUE){
@@ -168,48 +167,8 @@ void doAction(int action){
     return;
   }
 
-  if (action >= ACTION_INSPECT_COMMAND && action <= ACTION_INSPECT_DORMITORY){
-    map_selected_room = action - ACTION_INSPECT_COMMAND;
-    return;
-  }
-
-  if (action == ACTION_MAP_MY_ROOM){
-    map_selected_room = roomIndex(screen);
-    calculateMapRoute();
-    return;
-  }
-
-  if (action == ACTION_MAP_TARGET_ROOM){
-    if (map_target_room != SCREEN_NONE) map_selected_room = roomIndex(map_target_room);
-    calculateMapRoute();
-    return;
-  }
-  if (action == ACTION_MAP_BUNK_QUERY){
-    map_consult_point = POINT_TECH_BUNK;
-    map_selected_room = roomIndex(point_room[POINT_TECH_BUNK]);
-    calculateMapRoute();
-    return;
-  }
-  if (action == ACTION_MAP_RESCUE_QUERY){
-    if (urgentRisk() >= 0){
-      map_consult_point = POINT_RISK_BUNK;
-      map_selected_room = roomIndex(point_room[POINT_RISK_BUNK]);
-      calculateMapRoute();
-    }
-    return;
-  }
-  if (action == ACTION_MAP_ROUTE){
-    map_consult_point = MAP_TARGET_NONE;
-    map_selected_room = map_target_room == SCREEN_NONE ? roomIndex(screen) : roomIndex(map_target_room);
-    calculateMapRoute();
-    return;
-  }
-
   if (action == ACTION_OPEN_MAP){
     map_open = true;
-    map_consult_point = MAP_TARGET_NONE;
-    map_selected_room = roomIndex(screen);
-    calculateMapRoute();
     return;
   }
 
@@ -235,7 +194,6 @@ void doAction(int action){
   }
   if (action == ACTION_OPEN_RESCUE){
     map_open = false;
-    map_consult_point = MAP_TARGET_NONE;
     orders_open = false;
     openRescuePanel();
     return;

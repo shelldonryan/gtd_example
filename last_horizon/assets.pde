@@ -38,8 +38,6 @@ final float ART_PORTRAIT_W = 112;
 final float ART_PORTRAIT_H = 138;
 final float ART_BACKDROP_TOP = 56;
 final float ART_BACKDROP_H = 228;
-final float ART_MAP_W = 120;
-final float ART_MAP_H = 72;
 final int ART_NPC_FRAME_MS = 500;
 final int ART_HULL_FRAME_MS = 500;
 final int ART_DOOR_PHASE_MS = 180;
@@ -60,8 +58,9 @@ String[] art_station_file = {
 /* 4 survivors in data/npc/ */
 String[] art_crew_file = {"vera", "bento", "neusa", "silvia"};
 
-/* 4 rooms in data/rooms/ and data/map/ */
+/* 4 rooms in data/rooms/; the map uses the numbered captures supplied for it. */
 String[] art_room_file = {"command", "machines", "depot", "dormitory"};
+String[] art_map_file = {"4", "2", "1", "3"};
 
 PImage[] art_icon;
 PImage[] art_station;
@@ -71,6 +70,7 @@ PImage[] art_object;
 PImage[] art_backdrop;
 PImage[] art_portrait;
 PImage[] art_map;
+PImage art_map_ship;
 PImage[] art_screen = new PImage[3];
 PImage[][] art_crew_frames;
 PImage[][] art_crew_frames_left;
@@ -395,8 +395,9 @@ void loadArtAssets(){
 
   for (int room = 0; room < ROOM_COUNT; room++){
     art_backdrop[room] = loadArt(ART_ROOM_DIR + art_room_file[room] + ".png");
-    art_map[room] = loadArt(ART_MAP_DIR + art_room_file[room] + ".png");
+    art_map[room] = loadArt(ART_MAP_DIR + art_map_file[room] + ".png");
   }
+  art_map_ship = loadArt(ART_MAP_DIR + "ship.png");
 
   loadArtFrames(art_door_frames, ART_DOOR_SHEET, ART_DOOR_DATA);
   prepareDoorGlow();
