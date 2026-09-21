@@ -1,7 +1,7 @@
 # Inventário de assets
 
-Lista final de imagens a produzir no Aseprite, com canvas, onde cada uma aparece
-e se é estática ou animada — mais a ordem de produção.
+Especificação dos assets esperados pelo jogo, com caminho, uso e formato. A lista
+abaixo distingue arquivos presentes no checkout de itens ainda não encontrados.
 
 O que decide tamanho: **1 pixel de arte = 1 pixel no render 1280×720**. A grade
 640×360 só posiciona; o sketch desenha em unidades lógicas e o render
@@ -10,10 +10,18 @@ escala: o quadro do técnico tem 64×64 e é desenhado em 32×32 lógicos = 64×
 pixels reais. Um objeto desenhado com 24 px de altura dentro de um canvas de
 64×64 aparece com 24 px.
 
-O sketch já carrega por esses nomes de arquivo e cai no desenho geométrico
-quando o arquivo não existe ([[SKETCH_ARCHITECTURE]]), então este inventário é o
-**contrato de drop-in da arte**: criar o PNG no caminho indicado basta para a
-peça entrar no jogo.
+O sketch tenta carregar os nomes definidos em `last_horizon/assets.pde` e usa
+fallback quando um arquivo está ausente ([[SKETCH_ARCHITECTURE]]). Portanto,
+arquivo descrito como esperado não significa que esteja integrado.
+
+## Estado dos arquivos em 21/09/2026
+
+Encontrados: 11 imagens de estação, quatro spritesheets e quatro retratos de
+NPC, spritesheet da porta, seis ícones, cinco imagens de mapa (`1.png`–`4.png` e
+`ship.png`) e áudio de porta, passos e escada. Não encontrados: objetos de quest,
+fundos das salas, spritesheet animada do casco e fundos das telas. O código tem
+referências e fallbacks para esses grupos ausentes. Esta é uma conferência
+estática dos caminhos presentes, não uma validação visual de carregamento.
 
 Convenções que continuam valendo: nomes ASCII em `snake_case`, `.aseprite`
 acompanha a exportação quando disponível, e todo asset **animado** é uma
@@ -38,7 +46,7 @@ colisão. Escadas e conveses abaixo são definitivos:
 | --- | --- | --- |
 | Comando | 127 e 532 | Vera 575 (superior); console da rota 260 (médio); antena 598 (inferior) |
 | Sala de máquinas | 468 e 136 | suporte 454 (superior); Sílvia 570 e distribuição 215 (médio); bancada do motor 271 (inferior) |
-| Depósito | 520 (inferior) e 130 (superior) | reserva 530 (superior); Bento 310 (médio); estoque de comida 85 (inferior) |
+| Depósito | 520 e 130 | reserva 530 (superior); Bento 310 (médio); estoque de comida 85 (inferior) |
 | Dormitório | 542 e 243 | seu beliche 185 e mesa comum 525 (superior); Neusa 330 e mesa do grupo 440 (médio); socorro 85 (inferior) |
 
 Conveses em `y = 128`, `202` e `278`; a faixa útil da sala é `x` de 8 a 632 e
@@ -63,8 +71,9 @@ objetos nem NPCs: tudo isso é sprite desenhado por cima.
 ## 2. Estações — 11 imagens + 1 spritesheet, canvas 64×64
 
 Ancoragem: base no convés (`point_y`) e centro no `x` do ponto; o desenho ocupa
-a parte de baixo do canvas. Substituem o retângulo genérico de 24×18 que existe
-hoje; o rótulo de texto acima do ponto continua.
+a parte de baixo do canvas. Os PNGs listados estão presentes em `data/stations/`
+e são carregados pelo sketch; o código mantém fallback geométrico para arquivo
+ausente. O rótulo de texto acima do ponto continua.
 
 | Arquivo | Estação | Sala e convés |
 | --- | --- | --- |
@@ -87,7 +96,9 @@ pintado, sem moldura de parede e sem depender de um canto específico.
 
 ## 3. Objetos de quest — 16 imagens, 64×64, estáticas
 
-Em `data/objects/`. Desenhados no tamanho real dentro do canvas, como o
+Ainda não encontrados em `last_horizon/data/objects/`; o código prevê esse
+caminho e mantém fallback quando os PNGs faltam. Desenhados no tamanho real
+dentro do canvas, como o
 técnico: a chave de torque ocupa pouco, a caixa de provisões quase tudo. O
 mesmo PNG é usado no ponto de coleta, na mão do técnico (com a linha
 `NA MÃO: [objeto]`) e como ícone nos painéis de `COLETAR` e `ENTREGAR`.
@@ -140,13 +151,15 @@ crítico (`aviso`) permanece desenhado exclusivamente em código; não há
 
 ## 7. Retratos — 4 imagens, 224×276, estáticas
 
-Em `data/portraits/`, no diálogo com sobrevivente: `vera.png`, `bento.png`,
-`neusa.png`, `silvia.png`. Substituem o bloco geométrico atual de 112×138
-lógicos; uma expressão por personagem.
+Encontrados em `data/npc/` com os nomes `vera_portrait.png`,
+`bento_portrait.png`, `neusa_portrait.png` e `silvia_portrait.png`. O loader
+procura primeiro esses arquivos e aceita `data/portraits/<nome>.png` como
+fallback. A arte ocupa 112×138 lógicos.
 
 ## 8. Telas — 3 imagens, 1280×720, estáticas
 
-Em `data/screens/`.
+Ainda não encontrados em `data/screens/`; o loader prevê esses caminhos e usa
+estrelas como fallback quando os fundos faltam.
 
 | Arquivo | Onde aparece | Conteúdo |
 | --- | --- | --- |
@@ -157,11 +170,13 @@ Em `data/screens/`.
 Pausa, ajuda, transmissões, ordens, incidente, coleta, entrega e o resumo de
 dormir continuam em painel de texto, sem arte nova.
 
-## 9. Mapa — 4 miniaturas, 240×144, estáticas
+## 9. Mapa — 4 miniaturas e 1 imagem da nave, estáticas
 
-Em `data/map/`: `command.png`, `machines.png`, `depot.png` e `dormitory.png`.
-Uma miniatura por cômodo dentro do cartão do mapa consultável; a moldura, os
-textos e o `VOCÊ ESTÁ AQUI` continuam por código.
+Encontrados em `data/map/`: `1.png`, `2.png`, `3.png`, `4.png` e `ship.png` (há
+também o original Aseprite da nave). O loader associa os cartões de Comando,
+Máquinas, Depósito e Dormitório aos arquivos na ordem `4.png`, `2.png`, `1.png`,
+`3.png`; `ship.png` fornece a imagem de fundo. A moldura e os indicadores de
+sala atual, objetivo e contagem de problemas continuam desenhados por código.
 
 ## 10. Áudio — uma pasta por evento
 
@@ -191,26 +206,16 @@ de congusbongus/Eelke (CC-BY 3.0) e `ladder.wav` com impacto da Kenney (CC0).
 Clique de UI, alerta de recurso crítico e os demais eventos ficaram fora — o
 alerta continua apenas visual ([[HUD]]).
 
-## Ordem de produção
+## Próximos grupos ainda ausentes
 
-Cada bloco é utilizável sozinho; a ordem segue o que desbloqueia leitura de jogo
-mais rápido e o que depende de posição já congelada.
+1. **Objetos de quest (16 PNGs)** em `data/objects/`.
+2. **Fundos de salas (4 PNGs)** em `data/rooms/`.
+3. **Casco avariado** em `data/stations/casco_sheet.png` e `.json`.
+4. **Fundos de tela (3 PNGs)** em `data/screens/`.
 
-1. **Ícones (6)** — troca direta no HUD, sem mexer em layout.
-2. **Porta (1 sheet) e casco (1 sheet)** — fecham a leitura de interação; a
-   porta pede o estado de travessia no sketch.
-3. **Objetos (16)** — fecham a leitura das 22 quests: ponto de coleta, mão e
-   painéis.
-4. **NPCs (4 sheets)** — substituem os retângulos; o idle pede o carregamento
-   da spritesheet no lugar do desenho geométrico.
-5. **Estações (13 + casco)** — posições congeladas nesta sessão.
-6. **Retratos (4)** — diálogo de confirmação e conversa.
-7. **Fundos (4)** — a peça maior; pintados por último dentro do jogo, com
-   escadas, conveses e estações já definitivos.
-8. **Telas (3) e miniaturas do mapa (4)** — desfechos e mapa; não bloqueiam
-   nada.
-9. **Áudio** — porta, caminhada, corrida e escada decididos e integrados em
-   `data/audio/door/`, `data/audio/walk/`, `data/audio/run/` e `data/audio/ladder/`.
+Ícones, porta, estações, NPCs, retratos, miniaturas do mapa e áudio já estão
+presentes no checkout. Esta lista registra ausência de arquivos, não prioridade
+nem aprovação para produzir arte.
 
 ## O que continua em código
 
@@ -227,4 +232,3 @@ a verdade de posicionamento.
 - [#10 Pipeline Aseprite → Processing](https://github.com/shelldonryan/gtd_example/issues/10)
 - [#28 Escolher e integrar os efeitos sonoros](https://github.com/shelldonryan/gtd_example/issues/28)
 - [#29 Camada de assets: sketch pronto para receber a arte](https://github.com/shelldonryan/gtd_example/issues/29)
-
