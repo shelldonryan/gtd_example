@@ -95,6 +95,17 @@ boolean checkRectOverlap(float ax, float ay, float aw, float ah, float bx, float
 }
 
 
+void drawDropShadow(PGraphics g, float x, float y, float w, float h, float r){
+  g.noStroke();
+  g.fill(0x18000000);
+  g.rect(x - 2, y + 2, w + 4, h + 4, r + 2);
+  g.fill(0x35000000);
+  g.rect(x - 1, y + 2, w + 2, h + 2, r + 1);
+  g.fill(0x55000000);
+  g.rect(x, y + 1, w, h + 1, r);
+}
+
+
 void drawButton(PGraphics g, float x, float y, float w, float h, String label, int action, boolean on){
   boolean hover = on && uiLayer() == draw_layer && isHovering(x, y, w, h);
   int border = on ? (hover ? COL_CYAN : COL_BORDER) : COL_DIM;
@@ -102,21 +113,65 @@ void drawButton(PGraphics g, float x, float y, float w, float h, String label, i
   float text_size = fitTextSize(g, label, MIN_TEXT_SIZE, w - 16);
   float render_size = renderTextSize(text_size);
 
-  drawPanel(g, x, y, w, h, border);
+  if (on && hover){
+    g.noStroke();
+    g.fill(0x303FC8E8);
+    g.rect(x - 2, y - 2, w + 4, h + 4, 4);
+    g.fill(0xFF142B42);
+    g.stroke(COL_CYAN);
+    g.rect(x, y - 1, w, h, 3);
+    g.stroke(0x703FC8E8);
+    g.line(x + 2, y, x + w - 2, y);
+  } else {
+    g.noStroke();
+    g.fill(0x40000000);
+    g.rect(x, y + 1.5f, w, h, 3);
+    g.fill(on ? COL_PANEL_2 : COL_PANEL);
+    g.stroke(border);
+    g.rect(x, y, w, h, 3);
+    if (on){
+      g.stroke(0x28FFFFFF);
+      g.line(x + 2, y + 1, x + w - 2, y + 1);
+    }
+  }
+
   g.fill(colour);
   g.textSize(render_size);
   float tx = max(x + 4, x + (w - g.textWidth(label)) / 2.0);
-  g.text(label, tx, y + (h - render_size) / 2.0);
+  float ty = (on && hover) ? y - 1 + (h - render_size) / 2.0 : y + (h - render_size) / 2.0;
+  g.text(label, tx, ty);
 
   addButton(x, y, w, h, action, on);
 }
 
 
+void drawTechCorners(PGraphics g, float x, float y, float w, float h, int colour){
+  float len = min(8, min(w, h) / 4.0f);
+  g.stroke(colour);
+  g.line(x, y + len, x, y);
+  g.line(x, y, x + len, y);
+  g.line(x + w - len, y, x + w, y);
+  g.line(x + w, y, x + w, y + len);
+  g.line(x, y + h - len, x, y + h);
+  g.line(x, y + h, x + len, y + h);
+  g.line(x + w - len, y + h, x + w, y + h);
+  g.line(x + w, y + h - len, x + w, y + h);
+}
+
+
 void drawPanel(PGraphics g, float x, float y, float w, float h, int border){
+  drawDropShadow(g, x, y, w, h, 3);
   g.fill(COL_PANEL);
   g.stroke(border);
   g.rect(x, y, w, h, 3);
+  g.stroke(0x28FFFFFF);
+  g.line(x + 2, y + 1, x + w - 2, y + 1);
+  if (w >= 120 && h >= 40){
+    drawTechCorners(g, x, y, w, h, border);
+  }
 }
+
+
 
 /* Núcleo único para o contorno. Os wrappers abaixo continuam decidindo
    alinhamento e piso tipográfico, enquanto este módulo concentra os cinco
@@ -201,13 +256,34 @@ void drawModalFooterButton(PGraphics g, float x, float y, float w, float h,
   boolean hover = on && uiLayer() == draw_layer && isHovering(x, y, w, h);
   int border = on ? (hover ? COL_CYAN : COL_BORDER) : COL_DIM;
   int colour = on ? (hover ? COL_CYAN : COL_TEXT) : COL_DIM;
-  drawPanel(g, x, y, w, h, border);
+
+  if (on && hover){
+    g.noStroke();
+    g.fill(0x303FC8E8);
+    g.rect(x - 2, y - 2, w + 4, h + 4, 4);
+    g.fill(0xFF142B42);
+    g.stroke(COL_CYAN);
+    g.rect(x, y - 1, w, h, 3);
+    g.stroke(0x703FC8E8);
+    g.line(x + 2, y, x + w - 2, y);
+  } else {
+    g.noStroke();
+    g.fill(0x40000000);
+    g.rect(x, y + 1.5f, w, h, 3);
+    g.fill(on ? COL_PANEL_2 : COL_PANEL);
+    g.stroke(border);
+    g.rect(x, y, w, h, 3);
+    if (on){
+      g.stroke(0x28FFFFFF);
+      g.line(x + 2, y + 1, x + w - 2, y + 1);
+    }
+  }
 
   String[] lines = modalButtonLines(g, label, max(1, w - 16));
   float render_size = renderTextSize(MIN_TEXT_SIZE);
   float line_height = render_size + 1;
   float block_height = lines.length * render_size + max(0, lines.length - 1);
-  float text_y = y + (h - block_height) / 2.0;
+  float text_y = (on && hover ? y - 1 : y) + (h - block_height) / 2.0;
   g.fill(colour);
   g.textSize(render_size);
   for (int index = 0; index < lines.length; index++){
@@ -272,8 +348,10 @@ void drawBackdrop(PGraphics g, float x, float y, float w, float h){
 }
 void drawModalShade(PGraphics g){
   g.noStroke();
-  g.fill(0xB8000000);
+  g.fill(0xC8040914);
   g.rect(0, 52, BASE_W, BASE_H - 52);
+  g.stroke(0x403FC8E8);
+  g.line(0, 52, BASE_W, 52);
 }
 
 
@@ -474,13 +552,54 @@ void drawHelpPanel(PGraphics g){
 
 void drawStars(PGraphics g){
   g.noStroke();
-  g.fill(COL_DIM);
 
-  for (int i = 0; i < 42; i++){
-    float x = 8 + ((i * 83) % 624);
-    float y = 8 + ((i * 47) % 344);
-    float side = (i % 5 == 0) ? 2 : 1;
-    g.rect(x, y, side, side);
+  // Camada 1: Micro-estrelas distantes de fundo
+  for (int i = 0; i < 64; i++){
+    float x = 6 + ((i * 101) % 628);
+    float y = 6 + ((i * 67) % 348);
+    g.fill(0x507895A5);
+    g.rect(x, y, 1, 1);
+  }
+
+  // Camada 2: Estrelas de plano médio com pulso sinusoidal independente
+  long now = millis();
+  for (int i = 0; i < 32; i++){
+    float x = 12 + ((i * 137) % 616);
+    float y = 10 + ((i * 89) % 340);
+    float phase = i * 1.37f;
+    float pulse = (1 + sin(now * 0.0025f + phase)) * 0.5f;
+    int star_col = lerpColor(0x403FC8E8, 0xE0EBF5, pulse);
+    g.fill(star_col);
+    float sz = (i % 4 == 0) ? 2 : 1;
+    g.rect(x, y, sz, sz);
+  }
+
+  // Camada 3: Estrelas de navegação com espículas de difração óptica
+  int[] hero_x = { 110, 240, 480, 560, 310 };
+  int[] hero_y = {  45, 115,  68, 220, 310 };
+  for (int i = 0; i < hero_x.length; i++){
+    float phase = i * 2.1f;
+    float pulse = 0.5f + 0.5f * sin(now * 0.003f + phase);
+    float hx = hero_x[i];
+    float hy = hero_y[i];
+    g.fill(0x303FC8E8);
+    g.rect(hx - 2, hy - 2, 5, 5);
+    g.stroke(0x60D9E8F2);
+    g.line(hx - 3, hy, hx + 3, hy);
+    g.line(hx, hy - 3, hx, hy + 3);
+    g.noStroke();
+    g.fill(0xFFFFFFFF);
+    g.rect(hx - 0.5f, hy - 0.5f, 2, 2);
+  }
+
+  // Camada 4: Poeira cósmica em suave deriva
+  for (int i = 0; i < 18; i++){
+    float speed = 0.012f + (i % 3) * 0.006f;
+    float raw_x = (i * 73 + now * speed) % (BASE_W + 40);
+    float x = BASE_W - raw_x;
+    float raw_y = (i * 43 + now * speed * 0.4f) % BASE_H;
+    g.fill(0x303FC8E8);
+    g.rect(x, raw_y, 1.5f, 1.5f);
   }
 }
 float fitTextSize(PGraphics g, String value, float desired_size, float max_width){

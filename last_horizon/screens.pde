@@ -276,6 +276,37 @@ void nextVignettePage(){
 }
 
 
+void drawCosmicAtmosphere(PGraphics g, boolean show_mars){
+  drawStars(g);
+
+  if (show_mars){
+    g.noStroke();
+    // Brilho difuso da atmosfera marciana
+    g.fill(0x0C9E2A14);
+    g.ellipse(BASE_W + 20, BASE_H + 40, 360, 260);
+    g.fill(0x14C0361C);
+    g.ellipse(BASE_W + 20, BASE_H + 40, 260, 190);
+    g.fill(0x22D44824);
+    g.ellipse(BASE_W + 20, BASE_H + 40, 180, 130);
+    g.fill(0x35E05830);
+    g.ellipse(BASE_W + 20, BASE_H + 40, 110, 80);
+    // Arco do limbo planetário
+    g.stroke(0x60FF7A50);
+    g.noFill();
+    g.arc(BASE_W + 20, BASE_H + 40, 260, 190, PI * 0.95f, PI * 1.55f);
+  }
+
+  // Linhas de telemetria orbital / coordenadas
+  g.noFill();
+  g.stroke(0x103FC8E8);
+  g.ellipse(BASE_W / 2.0, BASE_H / 2.0, 480, 480);
+  g.ellipse(BASE_W / 2.0, BASE_H / 2.0, 320, 320);
+  g.stroke(0x183FC8E8);
+  g.line(BASE_W / 2.0 - 15, BASE_H / 2.0, BASE_W / 2.0 + 15, BASE_H / 2.0);
+  g.line(BASE_W / 2.0, BASE_H / 2.0 - 15, BASE_W / 2.0, BASE_H / 2.0 + 15);
+}
+
+
 void drawScreenBackdrop(PGraphics g, int index){
   PImage art = art_screen == null ? null : art_screen[index];
 
@@ -284,38 +315,171 @@ void drawScreenBackdrop(PGraphics g, int index){
     return;
   }
 
-  drawStars(g);
+  drawCosmicAtmosphere(g, index == 0 || index == 1);
 }
 
 
 void drawInitScreen(PGraphics g){
   drawScreenBackdrop(g, 0);
 
-  textCentered(g, "LAST HORIZON", BASE_W / 2.0, 62, 32, COL_CYAN);
-  textCentered(g, "A TERRA FICOU PARA TRÁS. MARTE É O DESTINO.", BASE_W / 2.0, 108, 10, COL_MUTED);
+  float now = millis();
 
-  drawPanel(g, 220, 138, 200, 46, COL_BORDER);
-  text(g, "Nome do seu personagem:", 228, 144, 9, COL_MUTED);
-  String name_cursor = (millis() / 500) % 2 == 0 ? "_" : "";
-  text(g, player_name + name_cursor, 228, 158, 13, COL_TEXT);
+  // 1. Tag de missão e telemetria militar
+  textCentered(g, "MISSÃO STS-10 · DESTINO: MARTE", BASE_W / 2.0, 28, 9, 0x903FC8E8);
 
-  drawButton(g, 198, 196, 150, 24, "INICIAR (ENTER)", ACTION_START_GAME, player_name.trim().length() > 0);
-  drawButton(g, 354, 196, 90, 24, "SAIR", ACTION_QUIT_GAME, true);
+  // 2. Título LAST HORIZON com bloom holográfico em múltiplas passadas
+  float title_y = 50;
+  float title_pulse = (1 + sin(now * 0.002f)) * 0.5f;
+  int title_glow_col = lerpColor(0x1A3FC8E8, 0x353FC8E8, title_pulse);
+
+  textCentered(g, "LAST HORIZON", BASE_W / 2.0 - 2, title_y, 32, title_glow_col);
+  textCentered(g, "LAST HORIZON", BASE_W / 2.0 + 2, title_y, 32, title_glow_col);
+  textCentered(g, "LAST HORIZON", BASE_W / 2.0, title_y - 2, 32, title_glow_col);
+  textCentered(g, "LAST HORIZON", BASE_W / 2.0, title_y + 2, 32, title_glow_col);
+  textCentered(g, "LAST HORIZON", BASE_W / 2.0 - 1, title_y - 1, 32, 0x503FC8E8);
+  textCentered(g, "LAST HORIZON", BASE_W / 2.0 + 1, title_y + 1, 32, 0x503FC8E8);
+  textCentered(g, "LAST HORIZON", BASE_W / 2.0, title_y, 32, 0xFFEBF8FC);
+
+  // Delimitadores sci-fi com losangos centrais
+  g.stroke(0x403FC8E8);
+  g.line(BASE_W / 2.0 - 175, title_y + 16, BASE_W / 2.0 - 120, title_y + 16);
+  g.line(BASE_W / 2.0 + 120, title_y + 16, BASE_W / 2.0 + 175, title_y + 16);
+  g.noStroke();
+  g.fill(COL_CYAN);
+  g.rect(BASE_W / 2.0 - 122, title_y + 14.5f, 3, 3);
+  g.rect(BASE_W / 2.0 + 119, title_y + 14.5f, 3, 3);
+
+  // 3. Subtítulo com divisores
+  textCentered(g, "A TERRA FICOU PARA TRÁS. MARTE É O DESTINO.", BASE_W / 2.0, 90, 10, COL_MUTED);
+
+  // 4. Terminal de Registro do Personagem
+  float card_w = 280;
+  float card_h = 104;
+  float card_x = (BASE_W - card_w) / 2.0;
+  float card_y = 112;
+
+  // Sombra suave profunda
+  drawDropShadow(g, card_x, card_y, card_w, card_h, 4);
+
+  // Chassis do console
+  g.fill(0xF0081220);
+  g.stroke(COL_BORDER);
+  g.rect(card_x, card_y, card_w, card_h, 4);
+
+  // Cantoneiras técnicas
+  g.stroke(COL_CYAN);
+  g.line(card_x, card_y + 8, card_x, card_y);
+  g.line(card_x, card_y, card_x + 8, card_y);
+  g.line(card_x + card_w - 8, card_y, card_x + card_w, card_y);
+  g.line(card_x + card_w, card_y, card_x + card_w, card_y + 8);
+  g.line(card_x, card_y + card_h - 8, card_x, card_y + card_h);
+  g.line(card_x, card_y + card_h, card_x + 8, card_y + card_h);
+  g.line(card_x + card_w - 8, card_y + card_h, card_x + card_w, card_y + card_h);
+  g.line(card_x + card_w, card_y + card_h - 8, card_x + card_w, card_y + card_h);
+
+  // Faixa de cabeçalho do terminal
+  g.noStroke();
+  g.fill(0xFF0F2338);
+  g.rect(card_x + 1, card_y + 1, card_w - 2, 20, 3, 3, 0, 0);
+  g.stroke(0x303FC8E8);
+  g.line(card_x + 1, card_y + 21, card_x + card_w - 1, card_y + 21);
+
+  text(g, "TERMINAL DE EMBARQUE - REGISTRO", card_x + 10, card_y + 4, 9, COL_CYAN);
+
+  // LED de status com respiração suave
+  float led_pulse = (1 + sin(now * 0.006f)) * 0.5f;
+  float led_y = card_y + 8.5f;
+  g.noStroke();
+  g.fill(COL_GREEN, int(60 + 140 * led_pulse));
+  g.ellipse(card_x + card_w - 60, led_y, 7, 7);
+  g.fill(COL_GREEN);
+  g.ellipse(card_x + card_w - 60, led_y, 3.5f, 3.5f);
+  text(g, "ONLINE", card_x + card_w - 50, card_y + 4, 9, COL_GREEN);
+
+  // Campo de entrada rebaixado
+  float input_x = card_x + 14;
+  float input_y = card_y + 30;
+  float input_w = card_w - 28;
+  float input_h = 44;
+
+  g.fill(0xFF040810);
+  g.stroke(player_name.length() > 0 ? COL_CYAN_DARK : 0xFF183850);
+  g.rect(input_x, input_y, input_w, input_h, 3);
+  g.noStroke();
+  g.fill(0x35000000);
+  g.rect(input_x + 1, input_y + 1, input_w - 2, 3);
+
+  text(g, "IDENTIFICAÇÃO DO TÉCNICO:", input_x + 8, input_y + 6, 9, COL_MUTED);
+
+  // Prompt e texto
+  text(g, ">", input_x + 8, input_y + 21, 14, COL_CYAN);
+  text(g, player_name, input_x + 20, input_y + 21, 14, COL_TEXT);
+
+  // Cursor em bloco com respiração suave contínua
+  float cursor_alpha = 120 + 135 * sin(now * 0.009f);
+  if (cursor_alpha > 40){
+    g.textSize(renderTextSize(14));
+    float cursor_x = input_x + 20 + g.textWidth(player_name) + 2;
+    g.noStroke();
+    g.fill(COL_CYAN, cursor_alpha);
+    g.rect(cursor_x, input_y + 21, 7, 13, 1);
+  }
+
+  // Dica e contador
+  text(g, "[ DIGITE O NOME · ENTER CONFIRMA ]", card_x + 14, card_y + 82, 8.5f, COL_DIM);
+  text(g, player_name.length() + "/" + NAME_MAX_LENGTH, card_x + card_w - 42, card_y + 82, 9, COL_DIM);
+
+  // 5. Botões de ação alinhados com feedback tátil
+  float btn_y = 228;
+  boolean can_start = player_name.trim().length() > 0;
+  drawButton(g, 180, btn_y, 170, 26, "INICIAR (ENTER)", ACTION_START_GAME, can_start);
+  drawButton(g, 360, btn_y, 100, 26, "SAIR", ACTION_QUIT_GAME, true);
+
+  // 6. Rodapé de telemetria
+  textCentered(g, "SISTEMA OPERACIONAL MERCURY v4.5 · NAVE HORIZON · TELEMETRIA ATIVA", BASE_W / 2.0, 336, 8.5f, 0x60A6BBC7);
 }
 
 
 void drawVignetteScreen(PGraphics g){
   drawScreenBackdrop(g, 0);
 
-  float y = 132;
+  // Card central elevado para transmissão
+  float card_w = 480;
+  float card_h = 130;
+  float card_x = (BASE_W - card_w) / 2.0;
+  float card_y = 110;
 
+  drawDropShadow(g, card_x, card_y, card_w, card_h, 4);
+  drawPanel(g, card_x, card_y, card_w, card_h, COL_CYAN_DARK);
+
+  // Faixa de cabeçalho
+  g.noStroke();
+  g.fill(0xFF0F2338);
+  g.rect(card_x + 1, card_y + 1, card_w - 2, 20, 3, 3, 0, 0);
+  g.stroke(0x303FC8E8);
+  g.line(card_x + 1, card_y + 21, card_x + card_w - 1, card_y + 21);
+  text(g, "REGISTRO DE PARTIDA // TRANSMISSÃO TERRESTRE", card_x + 12, card_y + 4, 9, COL_CYAN);
+
+  float y = card_y + 36;
   for (int i = 0; i < vignette_lines[vignette_page].length; i++){
     textCentered(g, vignette_lines[vignette_page][i], BASE_W / 2.0, y, 13, COL_TEXT);
     y += 24;
   }
 
-  textCentered(g, "CLIQUE OU ENTER PARA CONTINUAR", BASE_W / 2.0, 268, 10, COL_CYAN);
-  textCentered(g, (vignette_page + 1) + "/" + VIGNETTE_PAGES, BASE_W / 2.0, 300, 9, COL_DIM);
+  // Paginação por pontos de telemetria
+  float dot_cx = BASE_W / 2.0;
+  float dot_y = card_y + card_h - 14;
+  g.noStroke();
+  for (int i = 0; i < VIGNETTE_PAGES; i++){
+    float dx = dot_cx + (i - (VIGNETTE_PAGES - 1) / 2.0f) * 12;
+    g.fill(i == vignette_page ? COL_CYAN : 0x50648091);
+    g.ellipse(dx, dot_y, i == vignette_page ? 5 : 3.5f, i == vignette_page ? 5 : 3.5f);
+  }
+
+  // Prompt pulsante inferior
+  float prompt_pulse = (1 + sin(millis() * 0.005f)) * 0.5f;
+  int prompt_col = lerpColor(0x903FC8E8, COL_CYAN, prompt_pulse);
+  textCentered(g, "CLIQUE OU ENTER PARA CONTINUAR", BASE_W / 2.0, 276, 10, prompt_col);
 
   addButton(0, 0, BASE_W, BASE_H, ACTION_VIGNETTE_NEXT, true);
 }

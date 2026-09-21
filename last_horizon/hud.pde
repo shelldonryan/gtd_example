@@ -98,6 +98,8 @@ float hudResourceFill(int resource){
 
 void drawHeaderCard(PGraphics g, float x, String label, String value, int accent){
   drawPanel(g, x, HUD_Y, HUD_CARD_W, HUD_H, COL_BORDER);
+  g.stroke(accent, 0x60);
+  g.line(x + 3, HUD_Y + 1, x + 22, HUD_Y + 1);
   text(g, label, x + 5, HUD_Y + 5, 16, COL_MUTED);
   text(g, value, x + 5, HUD_Y + 21, 16, accent);
 }
@@ -106,10 +108,23 @@ void drawHeaderCard(PGraphics g, float x, String label, String value, int accent
 void drawResourceCard(PGraphics g, float x, int resource, int icon, float value, String label,
   int accent, float fill){
   boolean critical = resource != RESOURCE_PARTS && value < RESOURCE_RED;
-  boolean blink_on = (frameCount / 30) % 2 == 0;
-  int border = critical && blink_on ? COL_RED : COL_BORDER;
+  float now = millis();
+  float alert_pulse = critical ? (1 + sin(now * 0.008f)) * 0.5f : 0;
+  int border = critical ? lerpColor(COL_BORDER, COL_RED, alert_pulse) : COL_BORDER;
 
-  drawPanel(g, x, HUD_Y, HUD_CARD_W, HUD_H, border);
+  if (critical){
+    g.noStroke();
+    g.fill(COL_RED, int(alert_pulse * 48));
+    g.rect(x - 2, HUD_Y - 2, HUD_CARD_W + 4, HUD_H + 4, 4);
+  }
+
+  drawDropShadow(g, x, HUD_Y, HUD_CARD_W, HUD_H, 3);
+  g.fill(critical ? lerpColor(COL_PANEL, 0xFF2A0A10, alert_pulse) : COL_PANEL);
+  g.stroke(border);
+  g.rect(x, HUD_Y, HUD_CARD_W, HUD_H, 3);
+  g.stroke(critical ? lerpColor(0x28FFFFFF, 0x80E8615A, alert_pulse) : 0x28FFFFFF);
+  g.line(x + 2, HUD_Y + 1, x + HUD_CARD_W - 2, HUD_Y + 1);
+
   drawResourceIcon(g, icon, x + 4, HUD_Y + 5, accent);
   text(g, str(int(value)), x + 24, HUD_Y + 6, 16, accent);
   text(g, label, x + 5, HUD_Y + 24, 16, COL_MUTED);
@@ -127,10 +142,21 @@ void drawResourceCard(PGraphics g, float x, int resource, int icon, float value,
   float bar_y = HUD_Y + HUD_H - 9;
 
   g.noStroke();
-  g.fill(COL_DIM);
-  g.rect(bar_x, bar_y, bar_w, 4);
-  g.fill(accent);
-  g.rect(bar_x, bar_y, bar_w * constrain(fill, 0, 1), 4);
+  g.fill(0xFF040810);
+  g.rect(bar_x, bar_y, bar_w, 4, 1);
+  g.stroke(0x40164968);
+  g.noFill();
+  g.rect(bar_x, bar_y, bar_w, 4, 1);
+
+  float current_fill = constrain(fill, 0, 1);
+  if (current_fill > 0){
+    g.noStroke();
+    int fill_col = critical ? lerpColor(accent, COL_RED, alert_pulse) : accent;
+    g.fill(fill_col);
+    g.rect(bar_x, bar_y, bar_w * current_fill, 4, 1);
+    g.stroke(0x60FFFFFF);
+    g.line(bar_x + 1, bar_y + 0.5f, bar_x + bar_w * current_fill - 1, bar_y + 0.5f);
+  }
 }
 
 
@@ -311,7 +337,10 @@ String resourceIconLabel(int icon){
 
 
 void drawWarningIcon(PGraphics g, float x, float y){
-  g.fill(COL_RED);
+  float alert_pulse = (1 + sin(millis() * 0.008f)) * 0.5f;
+  int col = lerpColor(COL_RED, 0xFFFF7766, alert_pulse);
+  g.noStroke();
+  g.fill(col);
   g.triangle(x + 8, y, x + 16, y + 16, x, y + 16);
   g.fill(COL_BG);
   g.rect(x + 7, y + 5, 2, 6);
@@ -321,6 +350,7 @@ void drawWarningIcon(PGraphics g, float x, float y){
 
 
 void drawObjectiveStrip(PGraphics g){
+  drawDropShadow(g, 6, OBJECTIVE_Y, BASE_W - 12, OBJECTIVE_H - 2, 3);
   drawPanel(g, 6, OBJECTIVE_Y, BASE_W - 12, OBJECTIVE_H - 2, COL_BORDER);
 
   if (!system_message.equals(last_system_message)){
@@ -328,8 +358,21 @@ void drawObjectiveStrip(PGraphics g){
     system_message_until = frameCount + 180;
   }
 
-  text(g, currentObjectiveLine(), 16, OBJECTIVE_Y + 4, 16, COL_CYAN);
-  text(g, currentAlertLine(), 16, OBJECTIVE_Y + 24, 16, alertLineColour());
+  // Linha divisoria sutil
+  g.stroke(0x2024516B);
+  g.line(16, OBJECTIVE_Y + 22, BASE_W - 16, OBJECTIVE_Y + 22);
+
+  // Linha 1: Objetivo com indicador em losango
+  g.noStroke();
+  g.fill(COL_CYAN);
+  g.quad(20, OBJECTIVE_Y + 7, 23, OBJECTIVE_Y + 10, 20, OBJECTIVE_Y + 13, 17, OBJECTIVE_Y + 10);
+  text(g, currentObjectiveLine(), 28, OBJECTIVE_Y + 4, 16, COL_CYAN);
+
+  // Linha 2: Alerta com indicador triangular
+  int alert_col = alertLineColour();
+  g.fill(alert_col);
+  g.triangle(20, OBJECTIVE_Y + 26, 24, OBJECTIVE_Y + 33, 16, OBJECTIVE_Y + 33);
+  text(g, currentAlertLine(), 28, OBJECTIVE_Y + 24, 16, alert_col);
 }
 
 /* A única fonte do alvo consultivo do HUD e do mapa. */
@@ -437,8 +480,14 @@ String problemWarningLine(){
 
 void drawFooter(PGraphics g){
   g.noStroke();
+  // Sombra superior projetada
+  g.fill(0x35000000);
+  g.rect(0, FOOTER_Y - 3, BASE_W, 3);
   g.fill(COL_PANEL_2);
   g.rect(0, FOOTER_Y, BASE_W, FOOTER_H);
+  // Linha de acabamento superior
+  g.stroke(0x303FC8E8);
+  g.line(0, FOOTER_Y, BASE_W, FOOTER_Y);
 
   boolean controls_on = !modalOpen() && !paused;
   drawButton(g, 6, FOOTER_Y + 4, 80, 22, "MAPA", ACTION_OPEN_MAP, controls_on);
@@ -461,6 +510,12 @@ float ordersPulse(){
 void drawOrdersBadge(PGraphics g, float cx, float cy, float pulse){
   g.pushMatrix();
   g.translate(cx, cy);
+
+  // Onda de radar expansiva ao redor do badge
+  g.noFill();
+  g.stroke(COL_ORANGE, int((1 - pulse) * 130));
+  g.ellipse(0, 0, 8 + pulse * 12, 8 + pulse * 12);
+
   g.scale(1 + pulse * 0.375);
   g.noStroke();
   g.fill(lerpColor(COL_ORANGE, COL_YELLOW, pulse));
