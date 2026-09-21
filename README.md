@@ -11,15 +11,17 @@ do planeta se esgotando, a viagem até Marte é necessária para a sobrevivênci
 
 Durante o percurso, o jogador precisa manter a nave funcionando, administrar os estoques e tomar decisões diante de problemas.
 
-## Documentação vigente
+## Documentação
 
-O índice reconciliado da execução E0 está em
-[docs/Docs20260919_145427/README.md](docs/Docs20260919_145427/README.md). Ele
-aponta para a SPEC, o baseline, a verificação, as regras mecânicas, a interface,
-os eventos, os personagens e as ADRs.
-O relatório consolidado da E6 está em
-[docs/E6_REPORT.md](docs/E6_REPORT.md), com playtest, métricas, regressão,
-snapshot, visual diff e a matriz de rastreabilidade final.
+O [estado da implementação atual](docs/CURRENT_IMPLEMENTATION.md) resume o que
+foi confirmado por leitura estática do checkout em 21/09/2026 e separa isso da
+validação de runtime.
+
+As fontes de mecânicas, interface, eventos, personagens, assets e arquitetura
+estão organizadas nos diretórios correspondentes e no [índice histórico E0](docs/Docs20260919_145427/README.md).
+O relatório E6, o playtest e a comparação visual registram uma campanha de
+20/09/2026; seus resultados não foram repetidos contra o checkout atual. Veja
+[E6_REPORT.md](docs/E6_REPORT.md) para o escopo e os limites dessa evidência.
 
 ## Genero e perspectiva
 
@@ -102,8 +104,8 @@ prazo e crise. A coleta e a entrega formam as duas etapas leves da quest, e uma
 única quest pode ser concluída por dia. Componentes especiais existem como
 objetos de quest e o técnico carrega um por vez.
 
-O objetivo é chegar a Marte com o motor operante e pelo menos um sobrevivente
-vivo. O jogador administra:
+O objetivo é chegar a Marte com o motor operante, pelo menos um sobrevivente
+vivo e energia, oxigênio e moral acima de zero. O jogador administra:
 
 - **Energia:** mantém o motor e os sistemas da nave funcionando.
 - **Oxigênio:** garante a sobrevivência das pessoas a bordo.

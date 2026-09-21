@@ -1,234 +1,111 @@
 # Inventário de assets
 
-Especificação dos assets esperados pelo jogo, com caminho, uso e formato. A lista
-abaixo distingue arquivos presentes no checkout de itens ainda não encontrados.
+Especificação e catálogo dos assets do jogo, documentando caminhos, dimensões, formato e o estado de integração em código.
 
-O que decide tamanho: **1 pixel de arte = 1 pixel no render 1280×720**. A grade
-640×360 só posiciona; o sketch desenha em unidades lógicas e o render
-multiplica por 2. Portanto **canvas = tamanho que a peça ocupa na tela**, sem
-escala: o quadro do técnico tem 64×64 e é desenhado em 32×32 lógicos = 64×64
-pixels reais. Um objeto desenhado com 24 px de altura dentro de um canvas de
-64×64 aparece com 24 px.
+## Diretrizes de Renderização e Escala
 
-O sketch tenta carregar os nomes definidos em `last_horizon/assets.pde` e usa
-fallback quando um arquivo está ausente ([[SKETCH_ARCHITECTURE]]). Portanto,
-arquivo descrito como esperado não significa que esteja integrado.
+- **Escala 1:1**: 1 pixel da arte equivale a 1 pixel no render final em 1280×720.
+- **Espaço lógico**: A grade lógica é de 640×360 e a renderização aplica escala 2× (`RENDER_SCALE = 2`).
+- **Dimensões**: O canvas do asset representa o tamanho exato ocupado na tela lógica multiplicada por 2. Por exemplo, o frame do técnico possui 64×64 pixels reais e é posicionado em uma caixa lógica de 32×32.
+- **Carregamento**: Definido em `last_horizon/assets.pde`. Os assets em `last_horizon/data/` são carregados dinamicamente na inicialização do sketch.
+- **Formato**:
+  - Assets estáticos: imagens PNG (e arquivos `.aseprite` de origem quando disponíveis).
+  - Assets animados: spritesheet PNG acompanhada de arquivo JSON de metadados (`frames`).
+  - Áudio: arquivos WAV PCM 16 bits, 44,1 kHz, mono, executados nativamente via `javax.sound.sampled`.
+- **Licenciamento**: Cada pasta de asset em `data/` inclui seu próprio `LICENSE.txt` com a devida atribuição de autoria.
 
-## Estado dos arquivos em 21/09/2026
+---
 
-Encontrados: 11 imagens de estação, quatro spritesheets e quatro retratos de
-NPC, spritesheet da porta, seis ícones, cinco imagens de mapa (`1.png`–`4.png` e
-`ship.png`) e áudio de porta, passos e escada. Não encontrados: objetos de quest,
-fundos das salas, spritesheet animada do casco e fundos das telas. O código tem
-referências e fallbacks para esses grupos ausentes. Esta é uma conferência
-estática dos caminhos presentes, não uma validação visual de carregamento.
+## Posições e Conveses nas Salas
 
-Convenções que continuam valendo: nomes ASCII em `snake_case`, `.aseprite`
-acompanha a exportação quando disponível, e todo asset **animado** é uma
-spritesheet PNG única com JSON de metadados, no mesmo padrão de
-`data/player/player_sheet.png` ([[PLAYER]]). Animação é só onde foi decidido:
-NPCs, porta e casco.
+As posições de escadas e estações são definidas em código (`ship.pde`) e estruturadas em três conveses:
+- **Conveses (y)**: superior (`y = 128`), médio (`y = 202`), inferior (`y = 278`).
+- **Limites úteis da sala**: horizontal `x` de 8 a 632; vertical `y` de 56 a 284.
 
-## Origem da arte
+| Sala | Escadas (x) | Estações por convés |
+| :--- | :--- | :--- |
+| **Comando** | 127 e 532 | Superior: Vera (x=575)<br>Médio: Console da rota (x=260)<br>Inferior: Antena (x=598) |
+| **Máquinas** | 468 e 136 | Superior: Painel de suporte (x=454)<br>Médio: Sílvia (x=570), Distribuição (x=215)<br>Inferior: Bancada do motor (x=271) |
+| **Depósito** | 520 e 130 | Superior: Prateleira de reserva (x=530)<br>Médio: Bento (x=310)<br>Inferior: Estoque de comida (x=85) |
+| **Dormitório** | 542 e 243 | Superior: Beliche do técnico (x=185), Mesa comum (x=525)<br>Médio: Neusa (x=330), Mesa do grupo (x=440)<br>Inferior: Beliche de socorro (x=85) |
 
-- **Arte gerada por IA é proibida** pelo professor.
-- Arte com licença aberta **CC0 ou CC-BY** e spritesheets são permitidas, com o
-  crédito e a licença registrados junto do arquivo.
-- A seleção da arte é do usuário: o agente não escolhe nem produz arte.
+---
+
+## Catálogo de Assets Integrados
+
+### 1. Jogador (Técnico)
+- **Localização**: `data/player/`
+  - `player_sheet.png`: Spritesheet com frames de 64×64 px.
+  - `player_sheet.json`: Definição dos quadros e animações.
+- **Uso**: Controlado pelo jogador. Possui ciclos de animação para repouso (idle), caminhada (walk), corrida (run) e escadas (climb).
+
+### 2. Personagens (NPCs)
+- **Localização**: `data/npc/`
+  - **Spritesheets**: `vera.png`, `bento.png`, `neusa.png`, `silvia.png`.
+    - Quadros de 64×64 px (32×32 lógicos), com detecção de direção em relação ao técnico (perfil esquerdo, perfil direito e frontal) e ciclo de respiração idle de 2 quadros a 500 ms.
+  - **Retratos**: `vera_portrait.png`, `bento_portrait.png`, `neusa_portrait.png`, `silvia_portrait.png`.
+    - Imagens estáticas de 224×276 px (112×138 lógicos), exibidas nos modais de diálogo e confirmação presencial de ordens.
+  - **Efeito visual**: Contorno/halo cyan ou laranja gerado proceduralmente em tempo de execução via mapa de transparência (`buildNpcGlow` / `buildColoredGlow`).
+
+### 3. Portas
+- **Localização**: `data/doors/`
+  - `door_sheet.png`: Spritesheet de 210×97 px com dois estados: `fechada` e `aberta` (105×97 px cada, desenhado em 52.5×48.5 lógicos).
+  - `door_sheet.json`: Metadados das animações.
+- **Uso**: Utilizado em todas as conexões entre as salas. Ao aproximar-se, o jogo desenha o contorno cyan dinâmico e o rótulo da sala destino; a travessia executa a animação de abertura e fechamento.
+
+### 4. Estações de Trabalho e Interação
+- **Localização**: `data/stations/`
+  - 11 imagens PNG ancoradas pela base no convés (`point_y`) e centralizadas no `x` do ponto interativo:
+    - `antena.png` (Comando, convés inferior)
+    - `console_rota.png` (Comando, convés médio)
+    - `painel_suporte.png` (Máquinas, convés superior)
+    - `painel_distribuicao.png` (Máquinas, convés médio)
+    - `bancada_motor.png` (Máquinas, convés inferior)
+    - `prateleira_reserva.png` (Depósito, convés superior)
+    - `estoque_comida.png` (Depósito, convés inferior)
+    - `mesa_comum.png` (Dormitório, convés superior)
+    - `beliche_tecnico.png` (Dormitório, convés superior)
+    - `mesa_grupo.png` (Dormitório, convés médio)
+    - `beliche_socorro.png` (Dormitório, convés inferior)
+
+### 5. Decorações de Sala
+- **Localização**: `data/decorations/`
+  - 21 PNGs utilizados para compor a ambientação visual dos conveses e paredes em cada sala, carregados via `roomDetail()` em `ship.pde`:
+    - `Baril 1.png`, `Baril 2.png`, `Board 1.png`, `Computer 1.png`, `Electric wall.png`, `Lamp 1.png`, `Lockers 1.png`, `Neon.png`, `Pipe2.png`, `post it.png`, `Screen info 1.png`, `Screen info 2.png`, `Small Machine 1.png`, `Wall 3.png`, `Wall 4 Light.png`, `Wall cover 2.png`, `Wall cover 3.png`, `Wall electric pannel 1.png`, `Wall pipes.png`, `Wallbox 1.png`, `Window 2.png`.
+
+### 6. Elementos de Cenário e Ambiente
+- **Localização**: `data/environment/`
+  - `floor_1.png`: Módulo de piso texturizado utilizado para renderizar as faixas dos conveses (`art_deck_strip`).
+  - `dorm_bunk.png`: Arte complementar de beliche no dormitório.
+  - `window_space.png`: Fundo estelar exibido através da janela de observação.
+
+### 7. Ícones do HUD
+- **Localização**: `data/icons/`
+  - 6 imagens PNG de 32×32 px (renderizadas em 16×16 lógicos) e seus arquivos `.aseprite` de origem:
+    - `energia.png`, `oxigenio.png`, `agua.png`, `comida.png`, `pecas.png`, `moral.png`.
+  - Nota: O ícone de alerta crítico permanece desenhado proceduralmente em código.
+
+### 8. Mapa da Nave
+- **Localização**: `data/map/`
+  - `ship.png` e `ship.aseprite`: Vista estrutural da nave utilizada como fundo do modal de mapa.
+  - Miniaturas dos cômodos: `1.png`, `2.png`, `3.png`, `4.png`, mapeadas no loader nos cartões de Comando (`4.png`), Máquinas (`2.png`), Depósito (`1.png`) e Dormitório (`3.png`).
+
+### 9. Efeitos Sonoros (Áudio)
+- **Localização**: `data/audio/` (arquivos WAV PCM 16 bits, 44,1 kHz, mono):
+  - `audio/door/`: `door.wav` (tocado no início da travessia de porta).
+  - `audio/walk/`: `step_01.wav` a `step_04.wav` (passos durante caminhada).
+  - `audio/run/`: `step_01.wav` a `step_04.wav` (passos de ritmo acelerado na corrida).
+  - `audio/ladder/`: `ladder.wav` (impacto na escada) e `step_01.wav` a `step_04.wav` (passos metálicos durante subida/descida).
 
 
-## Posições congeladas (entrada para a pintura)
+---
 
-O piso e as escadas passam a ser **pintados no fundo**; o código mantém a
-colisão. Escadas e conveses abaixo são definitivos:
+## Elementos Mantidos Exclusivamente em Código
 
-| Sala | Escadas (x) | Estações por convés (x) |
-| --- | --- | --- |
-| Comando | 127 e 532 | Vera 575 (superior); console da rota 260 (médio); antena 598 (inferior) |
-| Sala de máquinas | 468 e 136 | suporte 454 (superior); Sílvia 570 e distribuição 215 (médio); bancada do motor 271 (inferior) |
-| Depósito | 520 e 130 | reserva 530 (superior); Bento 310 (médio); estoque de comida 85 (inferior) |
-| Dormitório | 542 e 243 | seu beliche 185 e mesa comum 525 (superior); Neusa 330 e mesa do grupo 440 (médio); socorro 85 (inferior) |
-
-Conveses em `y = 128`, `202` e `278`; a faixa útil da sala é `x` de 8 a 632 e
-`y` de 56 a 284. As portas continuam sendo sprites e podem mudar de lugar sem
-repintura. Regra de folga: nenhuma estação fica a menos de 40 px do eixo de uma
-escada. Os pontos de interação de cada sala estão em [[ROOMS]].
-
-## 1. Fundos das salas — 4 imagens, 1280×456, estáticas
-
-Pintados em `data/rooms/`. O canvas cobre a faixa `y` de 112 a 568 do render
-(8 px lógicos de sangria de cada lado) e traz paredes, tubulação, telas
-decorativas, iluminação, **o piso e as escadas**. Não traz portas, estações,
-objetos nem NPCs: tudo isso é sprite desenhado por cima.
-
-| Arquivo | Sala | Escadas pintadas em |
-| --- | --- | --- |
-| `rooms/command.png` | Sala de comando | x = 127 e 532 |
-| `rooms/machines.png` | Sala de máquinas | x = 468 (inferior) e 136 (superior) |
-| `rooms/depot.png` | Depósito | x = 520 (inferior) e 130 (superior) |
-| `rooms/dormitory.png` | Dormitório | x = 542 (inferior) e 243 (superior) |
-
-## 2. Estações — 11 imagens + 1 spritesheet, canvas 64×64
-
-Ancoragem: base no convés (`point_y`) e centro no `x` do ponto; o desenho ocupa
-a parte de baixo do canvas. Os PNGs listados estão presentes em `data/stations/`
-e são carregados pelo sketch; o código mantém fallback geométrico para arquivo
-ausente. O rótulo de texto acima do ponto continua.
-
-| Arquivo | Estação | Sala e convés |
-| --- | --- | --- |
-| `stations/antena.png` | antena | Comando, inferior (integrado com `Pillars.png`, 33×109 px) |
-| `stations/console_rota.png` | console da rota | Comando, médio (integrado com `BioComputer.png`, 181×117 px) |
-| `stations/painel_suporte.png` | painel de suporte de vida | Máquinas, superior (integrado com `Board 1.png` + `Health Pack 1.png` + `Props 4.png`, 93×74 px) |
-| `stations/painel_distribuicao.png` | painel de distribuição | Máquinas, médio (integrado com `CryoBox.png` + `Electric wall.png` + `CryoBox.png`, 165×111 px) |
-| `stations/bancada_motor.png` | bancada do motor | Máquinas, inferior (integrado com `Desk 1.png` + `Screen device.png` + `Small Machine 1.png`, 121×75 px) |
-| `stations/prateleira_reserva.png` | prateleira de reserva | Depósito, superior (integrado com `Lockers 1.png`, 104×83 px, armários com compartimento aberto e ferramentas) |
-| `stations/estoque_comida.png` | estoque de comida | Depósito, inferior (integrado com 4x `Locker.png`, 110×77 px, armários modulares com indicadores LED) |
-| `stations/mesa_comum.png` | mesa comum | Dormitório, superior (integrado com `Desk 1.png` + `Chair.png` + `Props 4.png`, 118×48 px) |
-| `stations/beliche_tecnico.png` | seu beliche | Dormitório, superior (sprite interativo com `Bed-1.png` isolado sobre canvas 142×112 px, contorno ciano exclusivo no leito) |
-| `stations/mesa_grupo.png` | mesa do grupo | Dormitório, médio (integrado com `Small machine 3-1.png` + `Desk 1.png` + 2x `Chair.png` + `books.png`, 140×46 px) |
-| `stations/beliche_socorro.png` | beliche de socorro | Dormitório, inferior (integrado com `Bed.png`, 99×47 px, leito médico com monitores) |
-| `stations/casco_sheet.png` + `.json` | casco avariado | **animado**, 2 quadros, sheet 128×64 |
-
-O casco é sorteado em qualquer sala, convés e `x` a cada problema, então o
-desenho precisa se sustentar sozinho em cima de qualquer trecho do piso
-pintado, sem moldura de parede e sem depender de um canto específico.
-
-## 3. Objetos de quest — 16 imagens, 64×64, estáticas
-
-Ainda não encontrados em `last_horizon/data/objects/`; o código prevê esse
-caminho e mantém fallback quando os PNGs faltam. Desenhados no tamanho real
-dentro do canvas, como o
-técnico: a chave de torque ocupa pouco, a caixa de provisões quase tudo. O
-mesmo PNG é usado no ponto de coleta, na mão do técnico (com a linha
-`NA MÃO: [objeto]`) e como ícone nos painéis de `COLETAR` e `ENTREGAR`.
-
-| Arquivo | Objeto | Usado em |
-| --- | --- | --- |
-| `objects/bobina_transmissao.png` | bobina de transmissão | V-01, COM-A |
-| `objects/cartao_rota.png` | cartão de rota | V-02 |
-| `objects/caixa_provisoes.png` | caixa de provisões | B-01, FOOD-A |
-| `objects/chave_torque.png` | chave de torque | B-02, ENG-A |
-| `objects/filtro_agua.png` | filtro de água | N-01 |
-| `objects/cartoes_mediacao.png` | cartões de mediação | N-02, CON-A |
-| `objects/modulo_rele.png` | módulo de relé | S-01, PWR-B |
-| `objects/cartucho_oxigenio.png` | cartucho de oxigênio | S-02, LIFE-A |
-| `objects/atuador_motor.png` | atuador do motor | ENG-B |
-| `objects/kit_vedacao.png` | kit de vedação | HUL-A |
-| `objects/placa_blindagem.png` | placa de blindagem | HUL-B |
-| `objects/filtro_co2.png` | filtro de CO2 | LIFE-B |
-| `objects/fusivel_potencia.png` | fusível de potência | PWR-A |
-| `objects/celula_sinal.png` | célula de sinal | COM-B |
-| `objects/selante_estoque.png` | selante de estoque | FOOD-B |
-| `objects/refeicao_quente.png` | refeição quente | CON-B |
-
-## 4. NPCs — 4 spritesheets (integrados em data/npc/)
-
-Em `data/npc/` com `LICENSE.txt`. Mesmo enquadramento do técnico: quadro 64×64
-desenhado em 32×32 lógicos, centrado na caixa de 16×24. Suporta os formatos
-Universal LPC e Aseprite. No LPC, o NPC vira dinamicamente na direção do técnico
-(linha 23 para a esquerda, linha 25 para a direita, linha 24 frontal), com idle
-de 2 quadros de respiração a 500 ms por quadro. Os sobreviventes não andam por contrato.
-Quando o técnico entra no raio de interação, o destaque é um contorno/halo cyan
-gerado em runtime a partir da transparência do frame; ele não é gravado no PNG.
-
-Integrados: `npc/vera.png`, `npc/bento.png`, `npc/neusa.png` e `npc/silvia.png`.
-## 5. Porta — 1 spritesheet, 210×97 (2 quadros de 105×97, integrada)
-
-`doors/door_sheet.png` + `doors/door_sheet.json`. Quadros `fechada` (`Doors 1.png`) e `aberta` (`Doors 2.png`), renderizados em 52.5×48.5 lógicos (105×97 reais em 720p, proporção 1:1 pixel-perfect).
-A base fica no limiar (`door_y`) e o centro em `door_x`; uma única arte serve as seis portas.
-Quando o técnico entra no alcance da porta, um contorno/halo cyan gerado em runtime a partir da transparência do frame é desenhado ao redor do asset (efeito idêntico aos NPCs em D-155), e o texto `E - [sala]` é exibido centralizado acima do topo da porta (`y - ART_DOOR_H - 6`), com ajuste proporcional (`fitTextSize`) para nunca sobrepor escadas ou bordas da tela.
-A travessia executa a animação em 2 quadros: abrir o quadro `aberta`, trocar de sala e fechar no destino.
-
-## 6. Ícones do HUD — 6 imagens, 32×32, estáticas
-
-Em `data/icons/`, substituindo os vetores atuais na caixa de 16×16 lógicos:
-`energia.png`, `oxigenio.png`, `agua.png`, `comida.png`, `pecas.png` e
-`moral.png`.
-O cartão mantém rótulo, número e barra: só o ícone troca ([[HUD]]). O alerta
-crítico (`aviso`) permanece desenhado exclusivamente em código; não há
-`aviso.png`.
-
-## 7. Retratos — 4 imagens, 224×276, estáticas
-
-Encontrados em `data/npc/` com os nomes `vera_portrait.png`,
-`bento_portrait.png`, `neusa_portrait.png` e `silvia_portrait.png`. O loader
-procura primeiro esses arquivos e aceita `data/portraits/<nome>.png` como
-fallback. A arte ocupa 112×138 lógicos.
-
-## 8. Telas — 3 imagens, 1280×720, estáticas
-
-Ainda não encontrados em `data/screens/`; o loader prevê esses caminhos e usa
-estrelas como fallback quando os fundos faltam.
-
-| Arquivo | Onde aparece | Conteúdo |
-| --- | --- | --- |
-| `screens/menu_space.png` | menu inicial e as três páginas da vinheta | a nave vista de fora, pequena contra o espaço, com a Terra alaranjada ao fundo |
-| `screens/victory_mars.png` | tela de vitória | a base marciana vista de fora, com a nave já pousada e luzes acesas |
-| `screens/defeat_space.png` | tela de derrota | espaço vazio, frio, com um ponto de luz se apagando |
-
-Pausa, ajuda, transmissões, ordens, incidente, coleta, entrega e o resumo de
-dormir continuam em painel de texto, sem arte nova.
-
-## 9. Mapa — 4 miniaturas e 1 imagem da nave, estáticas
-
-Encontrados em `data/map/`: `1.png`, `2.png`, `3.png`, `4.png` e `ship.png` (há
-também o original Aseprite da nave). O loader associa os cartões de Comando,
-Máquinas, Depósito e Dormitório aos arquivos na ordem `4.png`, `2.png`, `1.png`,
-`3.png`; `ship.png` fornece a imagem de fundo. A moldura e os indicadores de
-sala atual, objetivo e contagem de problemas continuam desenhados por código.
-
-## 10. Áudio — uma pasta por evento
-
-Os sons vivem em `data/audio/<evento>/`, cada pasta com o seu `LICENSE.txt`:
-
-| Pasta | Arquivos | Quando toca |
-| --- | --- | --- |
-| `audio/door/` | `door.wav` | uma vez no início da travessia de porta |
-| `audio/walk/` | `step_01..04.wav` | passos na caminhada, decolagem e aterrissagem |
-| `audio/run/` | `step_01..04.wav` | passos durante a corrida |
-| `audio/ladder/` | `ladder.wav`, `step_01..04.wav` | saída e passos durante a subida/descida |
-
-Formato de todos: WAV PCM 16 bits, 44,1 kHz, mono. A caminhada dispara no
-início e no meio do ciclo visual de 800 ms — um contato a cada 400 ms — usando
-apenas o primeiro ataque de cada take de botas, com cauda até 12 ms e sem
-impacto adicional. A corrida mantém a combinação `var_02`, com impacto curto
-de metal, pico próximo de −22 dBFS e cadência de 27 px lógicos. Na escada, os
-takes metálicos originais da issue #28 permanecem separados; o primeiro passo
-avisa o início após 1 px lógico e os seguintes tocam a cada 27 px,
-sincronizados à animação.
-
-Créditos e receitas ficam no `LICENSE.txt` de cada pasta. Caminhada usa
-`footsteps/boots/` derivados de swuing (CC-BY 3.0); corrida usa os mesmos takes
-com `impactMetal_000.ogg` de Kenney (CC0). A escada mantém os takes metálicos
-de congusbongus/Eelke (CC-BY 3.0) e `ladder.wav` com impacto da Kenney (CC0).
-
-Clique de UI, alerta de recurso crítico e os demais eventos ficaram fora — o
-alerta continua apenas visual ([[HUD]]).
-
-## Próximos grupos ainda ausentes
-
-1. **Objetos de quest (16 PNGs)** em `data/objects/`.
-2. **Fundos de salas (4 PNGs)** em `data/rooms/`.
-3. **Casco avariado** em `data/stations/casco_sheet.png` e `.json`.
-4. **Fundos de tela (3 PNGs)** em `data/screens/`.
-
-Ícones, porta, estações, NPCs, retratos, miniaturas do mapa e áudio já estão
-presentes no checkout. Esta lista registra ausência de arquivos, não prioridade
-nem aprovação para produzir arte.
-
-## O que continua em código
-
-Nada do que já funciona vira asset: painéis, cartões de recurso, barras,
-faixas, rodapé, botões, o selo `!` pulsante, o modal de ajuda, as estrelas dos
-menus, a moldura do mapa e todo o texto (Segoe UI). Quando os fundos entrarem,
-`drawDecks` e `drawLadders` saem do sketch — o piso e a escada passam a ser
-pintados — e a colisão, o `point_x`, o `point_y` e o `ladder_x` continuam sendo
-a verdade de posicionamento.
-
-## Referências
-
-- [#8 Inventário de assets](https://github.com/shelldonryan/gtd_example/issues/8)
-- [#10 Pipeline Aseprite → Processing](https://github.com/shelldonryan/gtd_example/issues/10)
-- [#28 Escolher e integrar os efeitos sonoros](https://github.com/shelldonryan/gtd_example/issues/28)
-- [#29 Camada de assets: sketch pronto para receber a arte](https://github.com/shelldonryan/gtd_example/issues/29)
+Os seguintes componentes visuais e de interface são gerados nativamente por código e não demandam assets:
+- Painéis, molduras e caixas de diálogo modais.
+- Cartões de recursos (barras de progresso, molduras e indicador de pulso).
+- Linhas informativas da faixa inferior (objetivo e alertas).
+- Botões interativos, selo de notificação `!` pulsante e modal de ajuda (`?`).
+- Tipografia Segoe UI renderizada vetorialmente.
+- Indicador visual e marcação de sala atual / objetivo no modal de mapa.

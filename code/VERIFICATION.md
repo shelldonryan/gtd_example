@@ -1,4 +1,11 @@
-# Verificação do sketch
+# Contrato e registro histórico de verificação do sketch
+
+Os comandos e resultados descritos nesta nota registram o fluxo de verificação
+da campanha E6 em 20/09/2026. A revisão estática de 21/09/2026 não compilou nem
+executou o sketch, o harness ou o modelo. O mapa do checkout atual não possui a
+orientação por rota/escada mencionada em cenários históricos; consulte
+[`docs/CURRENT_IMPLEMENTATION.md`](../docs/CURRENT_IMPLEMENTATION.md) para o
+estado observado no código.
 
 Esta nota é só do repositório: é material de verificação do agente e **não faz
 parte da entrega**. As decisões de arquitetura e de jogo ficam em

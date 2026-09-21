@@ -2,9 +2,9 @@
 
 Data: 19/09/2026. Base inspecionada: commit `16d81f1` e arquivos locais da sessão.
 
-**Status: especificação implementada e consolidada na E6.** Os dez achados da análise, a questline, as falas e a UI estão cobertos pela implementação e pela matriz de evidências em `docs/E6_REPORT.md` e `docs/evidence/e6-results.json`. O baseline histórico continua identificado separadamente para comparação.
+**Status: proposta de design; implementação completa não confirmada.** Esta SPEC descreve requisitos e critérios, não um retrato confiável do comportamento atual. A revisão estática de 21/09/2026 encontrou diferenças ainda abertas, especialmente no mapa e na orientação por salas/conveses. O código atual e as diferenças confirmadas estão resumidos em [`docs/CURRENT_IMPLEMENTATION.md`](docs/CURRENT_IMPLEMENTATION.md). Os resultados E6 são evidência registrada para a campanha de 20/09/2026 e não foram revalidados contra este checkout.
 
-Publicação pretendida: issue do projeto `shelldonryan/gtd_example`, título deste documento e label `ready-for-agent`, conforme a skill to-spec. Publicação e sincronização do Wayfinder pendentes: CLI retornou 401; conector GitHub retornou 404 na issue principal e 422 na busca do repositório. Não foi possível verificar inventário, labels ou bloqueadores nativos. Nenhuma issue foi criada ou alterada.
+Registro de publicação feito em 19/09/2026: a issue pretendida e a sincronização do Wayfinder estavam pendentes por falta de acesso autenticado; inventário, labels e bloqueadores nativos não foram verificados naquela ocasião. Esse estado externo não foi consultado nesta revisão local.
 
 ## Problem Statement
 
@@ -482,7 +482,7 @@ Ao fim, pedir que expliquem o que fizeram, o que custou, o que aconteceria se do
 
 Metas iniciais de aceitação: pelo menos 2 de 3 encontram o próximo passo em até 10 segundos usando HUD/cena; 3 de 3 reconhecem o aviso fatal antes de confirmar sono; pelo menos 2 de 3 explicam corretamente o custo e distinguem seleção de aceite; pelo menos 2 de 3 reconhecem vozes diferentes e dão nota ≥4 para clareza e vontade de continuar. Nenhuma etapa obrigatória ganha confirmação extra. Esses números são critérios de projeto, não resultados já obtidos nem prova estatística.
 
-Se falhar, ajustar primeiro texto, hierarquia e feedback, depois repetir os cenários afetados. A rodada E6 passou: 2/3 identificaram a próxima passagem em até 10 segundos, 3/3 reconheceram o aviso fatal, 2/3 distinguiram seleção de aceite, 2/3 reconheceram as vozes e 2/3 deram nota mínima 4. Os quatro ajustes derivados preservaram balanceamento e controles.
+Se falhar, ajustar primeiro texto, hierarquia e feedback, depois repetir os cenários afetados. O registro da campanha E6 de 20/09/2026 marcou 2/3 para próxima passagem em até 10 segundos, 3/3 para aviso fatal, 2/3 para seleção versus aceite, 2/3 para vozes e 2/3 para nota mínima 4. A revisão de 21/09/2026 não revalidou esse playtest e não encontrou a orientação por escadas descrita em A2 no código atual. Os quatro ajustes permanecem registrados como resultados históricos da campanha.
 
 ## Out of Scope
 
@@ -512,4 +512,4 @@ Este documento é o artefato detalhado solicitado. Os dez achados e o redesenho 
 
 A publicação da spec e sincronização do Wayfinder continuam pendentes por indisponibilidade de acesso autenticado. Não há label aplicada, ticket atribuído, bloqueador nativo confirmado ou alegação de implementação concluída. Quando o acesso estiver disponível, conferir se já existe issue equivalente, publicar/atualizar a spec sem duplicar, aplicar ready-for-agent conforme o fluxo invocado e sincronizar o resumo operacional e o corpo do Wayfinder.
 
-Fonte de processo: skill to-spec invocada pelo usuário. Base de produto: análise desta conversa, contrato mecânico, ADRs de quests físicas/ciclo simplificado, arquitetura, fluxo, HUD, salas, fontes, inventário, personagens, verificação e código atual. Esta spec propõe o novo estado; documentos vigentes continuam descrevendo o produto existente até a aprovação e implementação das mudanças.
+Fonte de processo: skill to-spec invocada pelo usuário. Base de produto: análise daquela conversa, contrato mecânico, ADRs de quests físicas/ciclo simplificado, arquitetura, fluxo, HUD, salas, fontes, inventário, personagens e código então disponível. Este fechamento registra o estado da proposta em 19/09/2026. A revisão local de 21/09/2026 compara a implementação com estes requisitos sem alterar a decisão de produto ou declarar os critérios atendidos.

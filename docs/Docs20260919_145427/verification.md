@@ -83,7 +83,7 @@ estão em [`../metrics.csv`](../metrics.csv),
 [`../metrics-final.csv`](../metrics-final.csv).
 
 O snapshot exclui `capture.pde` e `test_mode.pde`, conforme
-[`snapshot-manifest.json`](../../snapshot-manifest.json). As quatro combinações
+[`snapshot-manifest.json`](../snapshot-manifest.json). As quatro combinações
 de módulos opcionais compilam. Capturas, logs e medições transitórias não são
 retidos; fixtures versionadas e documentos consolidados são os únicos artefatos
 permanentes.

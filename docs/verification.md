@@ -1,4 +1,7 @@
-# Verificação final
+# Verificação registrada na campanha E6
+
+Este arquivo resume resultados registrados em 20/09/2026. Eles não foram
+reexecutados contra o checkout atual; veja o [estado da implementação atual](CURRENT_IMPLEMENTATION.md).
 
 Os contratos históricos estão em
 [Docs20260919_145427/verification.md](Docs20260919_145427/verification.md) e
@@ -31,7 +34,7 @@ está em [E6_REPORT.md](E6_REPORT.md) e em
 | Casos especiais | V-02, N-02, retomada, casco aleatório, socorro, NPC morto, alvo ausente, rota ausente, porta arbitrária, asset ausente |
 | Interface e input | transmissão sobre incidente, pausa, mapa, ajuda, teclado, mouse, cursor e clique fora |
 
-Todos os casos acima retornaram `pass` no registro E6. As fixtures restauram
+O registro E6 marcou todos os casos acima como `pass`. As fixtures restauram
 tabelas, arte, RNG, posição, flags e memória antes do próximo caso.
 
 A campanha final remove `last_horizon/output/` ao começar e ao terminar por

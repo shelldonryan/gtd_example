@@ -2,7 +2,15 @@
 
 Data da consolidação: 2026-09-20
 Baseline: `16d81f1`, reconciliado em [baseline.md](Docs20260919_145427/baseline.md)
-Estado: **PASS — evidência E6 consolidada**
+Resultado registrado naquela campanha: **PASS — evidência E6 consolidada**.
+
+**Limite atual:** este relatório descreve a campanha de 20/09/2026 e não valida
+automaticamente o checkout de 21/09/2026. A revisão estática atual encontrou
+diferenças entre os resultados narrados e o código, inclusive a ausência da
+orientação por escadas descrita em A2. Nenhum build, harness, playtest ou diff
+visual foi repetido nesta revisão. Consulte o
+[estado atual do código](CURRENT_IMPLEMENTATION.md) antes de usar este PASS como
+critério de aceite vigente.
 
 Os artefatos permanentes são [baseline](baseline.md), [verification](verification.md),
 [metrics](metrics.csv), [playtest](playtest.md) e [visual-diff](visual-diff.md).
@@ -77,9 +85,10 @@ relatório.
 ## Rastreabilidade e documentação
 
 Os contratos T01–T10 estão na [SPEC normalizada](Docs20260919_145427/SPEC20260919_145427.md);
-as etapas E0–E6 estão na [SPEC detalhada](../SPEC_ENXUGAMENTO_E_IMERSAO.md) e
-em [SPEC_PROGRESS.md](../SPEC_PROGRESS.md). As 27 user stories e a matriz de
-rastreabilidade permanecem na seção 5.6 da SPEC normalizada.
+as etapas E0–E6 estão na [SPEC detalhada](../SPEC_ENXUGAMENTO_E_IMERSAO.md).
+O arquivo `SPEC_PROGRESS.md` citado em versões anteriores não existe neste
+checkout. As 27 user stories e a matriz de rastreabilidade permanecem na seção
+5.6 da SPEC normalizada.
 
 O índice aponta para `mechanics/`, `interface/`, `events/`, `characters/`,
 `code/`, `assets/` e `docs/adr/`. Os ADRs históricos foram preservados. A

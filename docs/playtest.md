@@ -1,9 +1,12 @@
 # Playtest de compreensão e orientação — E6
 
-Status: **concluído**. A rodada foi registrada no fixture determinístico
+Resultado registrado na campanha: **concluído**. A rodada foi registrada no fixture determinístico
 `docs/evidence/e6-results.json`, com três participantes identificados por
 pseudônimos. A ordem inicial foi alternada entre as versões para reduzir o
-efeito de aprendizagem.
+efeito de aprendizagem. Esse relato descreve a versão testada em 20/09/2026 e
+não valida o código atual. A revisão de 21/09 não encontrou no HUD a orientação
+por escadas descrita no ajuste A2; ela não deve ser tratada como comportamento
+vigente sem nova validação.
 
 ## Ambiente
 
@@ -71,7 +74,7 @@ as recompensas, os controles e a topologia permaneceram inalterados.
 | ID | Observação | Ajuste aplicado | ID/voz | Caracteres | Balanceamento |
 | --- | --- | --- | --- | ---: | --- |
 | A1 | P2 confundiu seleção e aceite | “Selecionada. Ainda falta falar com Vera no Comando para aceitar.” | V-01 / Vera | 59 | preservado |
-| A2 | P3 demorou a localizar o próximo convés | “Próxima passagem: atravesse a escada à esquerda e siga ao Dormitório.” | HUD, sem voz | 70 | preservado |
+| A2 | P3 demorou a localizar o próximo convés | “Próxima passagem: atravesse a escada à esquerda e siga ao Dormitório.” | HUD, sem voz | 70 | registrado como aplicado na campanha E6; a frase e indicação equivalente não foram encontradas no checkout atual |
 | A3 | P2 leu custo e consequência como a mesma coisa | “Custo agora: 8 energia. Se falhar, o motor será destruído.” | ENG-B / Sílvia | 58 | preservado |
 | A4 | Sílvia não foi reconhecida por P3 | “Sílvia fala baixo sobre a rota; Neusa responde com objetividade.” | N-02 / Neusa; S-02 / Sílvia | 64 | preservado |
 
