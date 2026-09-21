@@ -3,9 +3,11 @@
 ## Objetivo
 
 Encerrar a partida informando que a nave chegou a Marte. A tela só existe
-quando a condição de vitória é atingida: dia final alcançado, motor operante e
-pelo menos um sobrevivente vivo. Qualquer outra combinação cai no
-[[MENU_GAME_OVER]], com o motivo da derrota.
+quando a condição de vitória é atingida: dia final alcançado, motor operante,
+pelo menos um sobrevivente vivo e energia, oxigênio e moral acima de zero.
+Qualquer derrota de recurso ou condição de término anterior impede a vitória;
+em qualquer outro caso a partida termina em [[MENU_GAME_OVER]], com o motivo da
+derrota.
 
 ## Elementos
 
@@ -14,7 +16,7 @@ pelo menos um sobrevivente vivo. Qualquer outra combinação cai no
 | Título | Confirma a chegada à base marciana |
 | Resumo da viagem | Dias transcorridos e condição de chegada |
 | Sobreviventes | Quantos chegaram vivos, de quantos partiram — Vera, Bento, Neusa e Sílvia, por nome na variação com perdas |
-| Recursos finais | Barras restantes e peças |
+| Recursos finais | Valores textuais restantes de energia, oxigênio, água, comida, peças e moral |
 | Mensagem de Marte | Texto da base confirmando o recebimento da nave; usa o nome do técnico |
 | Botão "Nova partida" | Volta para o [[MENU_INIT]] |
 A tela de vitória é o desfecho modal e incorpora a mensagem de Marte; não há

@@ -140,8 +140,10 @@ diferentes, mas nunca ficam disponíveis para coleta livre.
 
 Uma crise de comida, suporte de vida ou conflito pode iniciar um risco. Há no
 máximo uma pessoa em risco por vez. O prazo inicial é de 2 noites. Socorrer é
-uma quest simples com custo `-8 água` e `-2 comida`. Se o prazo chega a zero, a
-pessoa morre e `A BORDO` diminui; a morte não altera custos nem cria bônus.
+uma quest simples com custo `-8 água` e `-2 comida`. A ação ocupa a conclusão
+diária e fica bloqueada em dia com incidente novo ou cartão de incidente aberto.
+Se o prazo chega a zero, a pessoa morre e `A BORDO` diminui; a morte não altera
+custos nem cria bônus.
 
 ## Estados da quest
 
@@ -219,7 +221,7 @@ continuar ativas após o reinício do prazo.
 | Energia em zero | derrota imediata |
 | Moral em zero | derrota imediata |
 | Motor destruído | derrota imediata |
-| Dia final com motor operante e 1 ou mais sobreviventes vivos | vitória |
+| Dia final com motor operante, pelo menos um sobrevivente vivo e energia, oxigênio e moral acima de zero | vitória, se nenhuma condição de derrota ocorreu |
 
 ## Estado do contrato
 

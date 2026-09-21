@@ -6,7 +6,7 @@
 | Papel | Mecânica |
 | Onde fica | Sala de máquinas, em ponto fixo junto aos sistemas |
 | Temperamento | Direta, sem paciência para desculpa |
-| Função nas ordens | Oferece e confirma S-01, S-02, ENG-A, ENG-B, HUL-A, HUL-B, LIFE-A, LIFE-B e PWR-A, PWR-B |
+| Função nas ordens | Oferece/confirma as preventivas S-01 e S-02; é responsável por ENG-A/B, HUL-A/B, LIFE-A/B e PWR-A/B, escolhidas no cartão de incidente |
 
 ## Papel no jogo
 
@@ -17,9 +17,13 @@ Sílvia oferece e confirma as ordens técnicas:
 - `HUL-A` e `HUL-B`: soluções físicas do dano no casco;
 - `LIFE-A`, `LIFE-B`, `PWR-A` e `PWR-B`: soluções físicas dos sistemas.
 
-Ela pode ser a origem ou o destino de uma ordem ([[ACTIONS]]). Suas ordens não
-recebem bônus numérico. Se morrer, deixa de oferecer ordens; o pool validado usa
-os sobreviventes vivos.
+As soluções urgentes são escolhidas e confirmadas no cartão de incidente, sem
+exigir a presença de Sílvia.
+
+As quests atribuídas a Sílvia usam o console da rota como origem e estações de
+sistema ou casco como destino; o ponto da NPC não é origem nem destino na matriz
+atual ([[ACTIONS]]). Suas ordens não recebem bônus numérico. Se morrer, deixa de
+oferecer ordens preventivas; o pool usa sobreviventes vivos.
 
 Sua voz editorial varia por fase da viagem e contexto dos sistemas; reconhecimento
 de resultado aparece uma vez e expira no dia seguinte.

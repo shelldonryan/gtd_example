@@ -12,8 +12,10 @@
 
 O protagonista é o jogador dentro da nave. Ele controla diretamente o técnico
 pelos quatro cômodos. A Sala de comando é o hub; suas portas por convés levam
-ao Dormitório, ao Depósito e à Sala de máquinas. O mapa apenas consulta posição
-e problemas. Os pontos de interação de cada cômodo estão em [[ROOMS]].
+ao Dormitório, ao Depósito e à Sala de máquinas. O mapa mostra quatro cartões
+de sala e marca a sala atual, o objetivo e a contagem de problemas; não calcula
+rotas nem detalha problemas. Os pontos de interação de cada cômodo estão em
+[[ROOMS]].
 
 Incidentes criam problemas locais persistentes. Nos dias com incidente, o técnico
 escolhe uma entre duas soluções físicas e executa a rota correspondente

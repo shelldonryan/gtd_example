@@ -22,12 +22,12 @@ plano e executa o contrato descrito em [[ACTIONS]] e nas notas de `events/`.
 | `ui.pde` | painéis, diálogos, retratos procedurais, texto, botões, hit-test e AABB |
 | `hud.pde` | cartões do topo, faixa do problema mais urgente e rodapé |
 | `screens.pde` | máquina de estados, camadas modais, menus, vinheta, pausa e desfechos |
-| `ship.pde` | hub, quatro salas, portais configuráveis, mapa consultável, plataformas, escadas, NPCs e estações |
+| `ship.pde` | hub, quatro salas, mapa em cartões estáticos, portais, plataformas, escadas, NPCs e estações |
 | `game.pde` | calendário, turno, incidentes, consumo, crises e condições de término |
 | `tasks.pde` | catálogo e estado de ordens, soluções, retomadas, problemas, sobreviventes, risco e objetos |
 | `editorial.pde` | catálogo factual, vozes, memória editorial e abertura única de conversa |
 | `night_projection.pde` | snapshot puro, preview e aplicação equivalente da transição noturna |
-| `navigation.pde`, `portals.pde`, `movement.pde`, `animation.pde` | consulta do mapa e blocos procedurais coesos extraídos do runtime |
+| `portals.pde`, `movement.pde`, `animation.pde` | transição de portas, movimento e animação do técnico, extraídos do runtime |
 
 `capture.pde` e `test_mode.pde` são módulos de desenvolvimento. Seus hooks têm
 defaults inertes em `last_horizon.pde`, e os dois arquivos ficam fora do
@@ -156,9 +156,9 @@ Portais e escadas vivem em tabelas. Cada porta declara `door_room`, `door_target
 abertura sem deck. `door_arrival_x`, `door_arrival_y` e `door_arrival_facing`
 definem a chegada padrão na sala destino; `enterRoomThroughDoor` reaproveita a
 posição `x/y` de saída quando o jogador retorna imediatamente pela sala anterior.
-As escadas declaram `ladder_room` e `ladder_x`; o par final é 127/532 (Comando),
-114/526 (Máquinas), 120/489 (Depósito) e 127/482 (Dormitório), com folga mínima
-de 40 px entre estação e eixo de escada. Transmissões usam
+As escadas declaram `ladder_room` e `ladder_x`; os valores atuais são 127/532
+(Comando), 468/136 (Máquinas), 520/130 (Depósito) e 542/243 (Dormitório).
+Transmissões usam
 `transmission_open`, `transmission_text` e as travas `earth_engine_sent`,
 `earth_hull_sent` e `earth_loss_sent`; a mensagem de Marte depende de
 `survivors` e de `engine_repaired_at_limit`. O modal de ajuda usa `help_open`.
@@ -236,9 +236,11 @@ O HUD implementa os seis cartões de recurso com **ícone de 16×16 + número +
 rótulo + barra**; os rótulos (`ENERGIA`, `OXIGÊNIO`, `ÁGUA`, `COMIDA`, `PEÇAS`,
 `MORAL`) usam as fontes PNG de `data/icons/` quando disponíveis, com fallback
 geométrico. O cartão de quantos estão a bordo usa **A BORDO**; o recurso crítico
-pisca a borda e ganha ícone de aviso, sem linha de texto de alerta. A faixa
-inferior tem quatro linhas de campos fixos e o rodapé tem `MAPA`, `ORDENS` e o
-botão `?`, que abre o modal de ajuda. O mapa macro não imprime nome de nave.
+pisca a borda e ganha ícone de aviso. A faixa inferior mostra uma linha de
+objetivo e outra de alerta. O rodapé tem `MAPA`, `ORDENS`, `?` e, com pessoa em
+risco, `SOCORRO`. O mapa atual desenha quatro cartões estáticos e marca a sala
+atual, o objetivo e a contagem de problemas; não mostra rota, portas, escadas ou
+detalhes de sala. O mapa macro não imprime nome de nave.
 O botão `ORDENS` recebe o selo `!` quando há oferta ou retomada. Círculo e
 exclamação geométrica compartilham escala, cor e centro durante o pulso de 1,4 s.
 

@@ -4,20 +4,20 @@
 
 | Tela | Como se chega | O que mostra |
 | --- | --- | --- |
-| MENU INIT | ao abrir o jogo | título, campo do nome do técnico e botão de início |
+| MENU INIT | ao abrir o jogo | título, campo `Nome do seu personagem:` com cursor intermitente e botão de início |
 | Vinheta | depois do INIT | 3 telas de texto, avançadas com clique |
 | Sala de comando | depois da vinheta ou pelas portas do hub | cena 2D jogável, rota, comunicações, ordens e acessos por convés |
 | Sala de máquinas | pela porta inferior do Comando | cena 2D jogável, motor, energia, suporte e ordens técnicas |
 | Depósito | pela porta média do Comando | cena 2D jogável, estoques, componentes e ordens logísticas |
 | Dormitório | pela porta superior do Comando e no início de cada novo dia | cena 2D jogável, descanso, saúde, moral, Neusa e ordens da tripulação |
 | Ordens | botão `ORDENS`, sem abertura automática; `!` pulsante quando disponível | duas ordens preventivas comparáveis, com objeto, rota, recompensa e perda |
-| Mapa | botão `MAPA` | sobreposição com posição, ordens ativas e problemas por sala; nunca transporta |
+| Mapa | botão `MAPA` | imagem da nave com quatro cartões estáticos que marcam sala atual, objetivo e contagem de problemas; nunca transporta |
 | Diálogo | interação com sobrevivente | retrato e caixa inferior; oferece ou confirma uma ordem |
 | Incidente | no início dos dias 2, 4, 6, 8 e 10 | cartão modal com duas soluções físicas |
 | Transmissão da Terra | primeira falha do motor, primeira chuva de meteoros e primeira perda | cartão modal com a mensagem; fecha com clique, `ENTER` ou `ESC` e não consome dia, tarefa ou recurso |
 | Ajuda | botão `?` do rodapé | modal com as teclas e os botões do jogo |
 | Pausa | ESC nas salas | continuar, reiniciar ou sair |
-| Vitória | fim da viagem, com motor operante e sobrevivente vivo | ver [[MENU_VICTORY]] |
+| Vitória | fim da viagem, com motor operante, sobrevivente vivo e energia, oxigênio e moral acima de zero | ver [[MENU_VICTORY]] |
 | Derrota | recurso crítico, motor destruído ou nenhum sobrevivente vivo | ver [[MENU_GAME_OVER]] |
 
 ## Grafo
@@ -119,12 +119,14 @@ beliche do técnico no Dormitório, conferir o resumo e dormir.
   usam a chegada padrão configurada.
 - A composição espacial toma `COMMAND_ROOM_CONCEPT_ART.png` como referência,
   sem adotar nomes ou números ilustrativos da imagem.
-- O mapa é uma sobreposição consultável. Marca `VOCÊ ESTÁ AQUI`, mostra a ordem
-  ativa e os problemas por cômodo; clicar numa sala não move o técnico.
+- O mapa é uma sobreposição consultável. Marca `VOCÊ ESTÁ AQUI`, o objetivo
+  atual e a contagem de problemas por cômodo. Os cartões não são clicáveis e não
+  calculam rotas, portas ou escadas.
 - Fechar o mapa retorna à mesma sala e à mesma posição.
-- O HUD mostra na ordem ativa o estágio `COLETAR` ou `ENTREGAR`, além de
-  responsável, objeto, origem, destino, recompensa e falha. Problemas ativos
-  continuam mostrando perda, prazo e crise ([[HUD]]).
+- O HUD mostra a próxima ação e o ponto da etapa atual em uma linha, além de um
+  alerta separado. Responsável, objeto, origem, destino, recompensa e falha
+  aparecem no painel `ORDENS`, não na faixa do HUD. O mapa mostra apenas sala
+  atual, objetivo e contagem de problemas por sala ([[HUD]]).
 - Nos dias sem incidente, as oito ofertas do pool são filtradas para um par
   válido. As duas ordens são apresentadas remotamente; a escolhida só se torna
   aceita ao encontrar o sobrevivente responsável.

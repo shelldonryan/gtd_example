@@ -6,7 +6,7 @@
 | Papel | Intendente |
 | Onde fica | Depósito, em ponto fixo junto aos estoques |
 | Temperamento | Ranzinza; guarda o estoque a sete chaves |
-| Função nas ordens | Oferece e confirma B-01, B-02, FOOD-A e FOOD-B |
+| Função nas ordens | Oferece/confirma as preventivas B-01 e B-02; é responsável por FOOD-A e FOOD-B, escolhidas no cartão de incidente |
 
 ## Papel no jogo
 
@@ -14,12 +14,14 @@ Bento oferece e confirma as ordens de estoque e logística:
 
 - `B-01`: reforçar a reserva com caixa de provisões;
 - `B-02`: separar peças de emergência com chave de torque;
-- `FOOD-A` e `FOOD-B`: soluções físicas da falta de comida.
+- `FOOD-A` e `FOOD-B`: soluções físicas da falta de comida; são escolhidas e
+  confirmadas no cartão de incidente, sem exigir a presença de Bento.
 
-Ele pode ser a origem ou o destino de uma ordem ([[ACTIONS]]). O objeto só
-aparece quando pertence à ordem aceita; não entrega recursos comuns fora da
-etapa de entrega. Se morrer, deixa de oferecer ordens; o pool validado usa os
-sobreviventes vivos.
+O ponto de Bento é o destino de `B-02`; as demais origens e destinos seguem a
+matriz de [[ACTIONS]]. As soluções urgentes atribuídas a ele não exigem sua
+presença. O objeto só aparece quando pertence à ordem aceita; ele não entrega
+recursos comuns fora da etapa de entrega. Se morrer, deixa de oferecer ordens
+preventivas; o pool usa sobreviventes vivos.
 
 Sua voz editorial varia por fase da viagem e contexto do estoque; reconhecimento
 de resultado aparece uma vez e expira no dia seguinte.

@@ -40,7 +40,9 @@ tripulação permanece ativo, cobra `-3 moral/dia`, reduz o prazo de 3 dias e ch
 Uma crise de comida ou conflito pode iniciar uma pessoa em risco. Uma crise do
 suporte de vida também pode iniciar risco. Há no máximo uma pessoa em risco por
 vez. O prazo inicial é de 2 noites. Socorrer é uma quest visível com custo
-`-8 água` e `-2 comida`.
+`-8 água` e `-2 comida`. A ação segue o limite de uma quest concluída por dia e
+fica bloqueada quando há um incidente novo ou seu cartão está aberto; o incidente
+do dia tem prioridade sobre o socorro.
 
 Se o prazo chegar a zero, a pessoa morre e `A BORDO` diminui; a morte não altera
 custos nem cria bônus ou penalidades ocultos.
@@ -51,7 +53,8 @@ As soluções físicas e os objetos de comida e convivência estão na matriz de
 [[ACTIONS]]; os valores numéricos são o contrato vigente do ciclo. As falhas de
 sistema estão em [[SYSTEM_FAULTS]] e os eventos externos, em [[HAZARDS]]. O
 socorro exige presença no beliche da pessoa em risco e confirmação do custo, sem
-uma cadeia adicional de coleta; usa a mesma conclusão diária das demais quests.
+uma cadeia adicional de coleta; usa a mesma conclusão diária das demais quests e
+não pode ser concluído em dia com incidente novo.
 
 ## Referências
 

@@ -6,7 +6,7 @@
 | Papel | Enfermeira |
 | Onde fica | Dormitório, em ponto fixo junto às camas |
 | Temperamento | Cansada, mas é quem segura o grupo |
-| Função nas ordens | Oferece e confirma N-01, N-02, CON-A e CON-B |
+| Função nas ordens | Oferece/confirma as preventivas N-01 e N-02; é responsável por CON-A e CON-B, escolhidas no cartão de incidente |
 
 ## Papel no jogo
 
@@ -14,11 +14,14 @@ Neusa oferece e confirma as ordens de água, convivência e mediação:
 
 - `N-01`: preparar água do grupo com filtro de água;
 - `N-02`: abrir espaço para a conversa com cartões de mediação;
-- `CON-A` e `CON-B`: soluções físicas do conflito no dormitório.
+- `CON-A` e `CON-B`: soluções físicas do conflito no dormitório; são escolhidas
+  e confirmadas no cartão de incidente, sem exigir a presença de Neusa.
 
-Ela pode ser a origem ou o destino de uma ordem ([[ACTIONS]]). Uma crise pode
-colocar uma pessoa em risco; há no máximo uma pessoa em risco por vez e o
-socorro é uma quest simples. Se morrer, deixa de oferecer ordens.
+O ponto de Neusa é a origem de `N-02`; as demais origens e destinos seguem a
+matriz de [[ACTIONS]]. As soluções urgentes atribuídas a ela não exigem sua
+presença. Uma crise pode colocar uma pessoa em risco; há no máximo uma pessoa em
+risco por vez e o socorro é uma quest simples. Se morrer, deixa de oferecer
+ordens preventivas.
 
 Sua voz editorial varia por fase da viagem e contexto do grupo; risco e
 reconhecimento usam memórias separadas.

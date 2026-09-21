@@ -15,7 +15,7 @@ sobrevivente vivo; a lista de derrotas está em [[ACTIONS]].
 | --- | --- |
 | Motivo | o nome da falha que encerrou a viagem |
 | Mensagem | uma linha fechando aquela falha |
-| Resumo | dia alcançado, sobreviventes vivos e distância até Marte |
+| Resumo | dia alcançado, sobreviventes vivos e estado do motor |
 | Botão "Nova partida" | volta ao [[MENU_INIT]] |
 
 ## Regras

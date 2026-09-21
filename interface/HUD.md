@@ -22,8 +22,8 @@ caso ela não seja concluída.
 | Comida | ícone, número e barra | quantidade de comida armazenada |
 | Peças | ícone e número | quantas peças podem ser usadas em ordens técnicas |
 | Moral | ícone, número e barra | estado emocional dos sobreviventes |
-| Ordem ativa | faixa textual e marcador | estágio, responsável, objeto, origem, destino, recompensa ou resultado e perda |
-| Problema urgente | faixa textual compacta | menor prazo, sala responsável e quantidade de outros problemas |
+| Objetivo atual | linha textual | próxima ação e ponto de interação da ordem, socorro ou retorno ao beliche |
+| Alerta atual | linha textual compacta | aviso fatal, risco individual ou condição relevante dos problemas ativos |
 
 ## Barras de recursos
 
@@ -51,22 +51,23 @@ o ícone geométrico mantém o cartão executável.
 | --- | --- |
 | Topo | dia, quantos estão a bordo e os seis indicadores de recurso |
 | Centro | sala 2D jogável usando toda a largura |
-| Faixa de ordem | estágio, responsável, objeto, origem, destino, recompensa ou resultado e perda da ordem ativa |
-| Faixa de urgência | problema com menor prazo e quantidade dos demais |
-| Rodapé | botões `MAPA`, `ORDENS` e `?`; `!` pulsante quando há oferta ou retomada |
+| Faixa de objetivo | próxima ação e ponto da etapa atual, quando houver |
+| Faixa de alerta | aviso fatal ou risco atual |
+| Rodapé | botões `MAPA`, `ORDENS` e `?`; `SOCORRO` quando há pessoa em risco; `!` pulsante quando há oferta ou retomada |
 | Sobreposição | ordens, mapa, diálogos, incidentes e resumo ao dormir |
 
-O mapa abre pelo botão `MAPA`, mostra `VOCÊ ESTÁ AQUI`, a ordem ativa e todas as
-salas afetadas. Fechá-lo retorna à mesma sala e posição.
+O mapa abre pelo botão `MAPA`, marca `VOCÊ ESTÁ AQUI`, o objetivo atual e a
+contagem de problemas por sala. Fechá-lo retorna à mesma sala e posição.
 
 ## Controles de alto nível
 
 ### Mapa
 
-O botão `MAPA` abre uma sobreposição consultável. Clicar num cômodo mostra
-ocupante, sistemas e todos os problemas locais. Cada problema informa perda
-diária, prazo restante e consequência da crise. O clique nunca transporta o
-técnico.
+O botão `MAPA` abre uma sobreposição com a imagem da nave e quatro cartões
+estáticos de sala. Cada cartão mostra o nome e pode marcar a sala atual, o
+objetivo e a contagem de problemas (`!N`). Os cartões não são clicáveis: não
+mostram ocupantes, sistemas, detalhes de problemas, rotas, portas ou escadas. O
+mapa não transporta o técnico.
 
 ### Diálogos e ordens
 
@@ -92,8 +93,9 @@ círculo por construção, sem depender da métrica da fonte.
 - Nos dias com incidente, o cartão mostra duas soluções físicas com responsável,
   custo, objeto, origem, destino, resultado e `SE FALHAR`: problema ativo, perda,
   prazo e crise. A solução escolhida deve ser executada.
-- A faixa da ordem ativa mostra `COLETAR` ou `ENTREGAR`; a entrega só aplica o
-  resultado depois da confirmação.
+- A linha de objetivo mostra a ação e o ponto da etapa atual; a entrega só
+  aplica o resultado depois da confirmação. `COLETAR`/`ENTREGAR` e os detalhes
+  completos ficam nos painéis da quest.
 - O objeto só existe como parte de uma ordem aceita e pode ser carregado um por
   vez. Recursos comuns são pagos ou recebidos no destino.
 
@@ -105,21 +107,19 @@ dormir. O botão de pausa é `CONTINUAR (ESC)`.
 
 O botão `?` do rodapé abre um modal `AJUDA — CONTROLES` com a lista de teclas e
 botões, fechado por `FECHAR (ESC)`, clique ou `ESC`. A dica de teclas fixa que
-antes ocupava o rodapé saiu: o rodapé tem apenas `MAPA`, `ORDENS` e `?`.
+antes ocupava o rodapé saiu: os botões padrão são `MAPA`, `ORDENS` e `?`; com
+pessoa em risco, também aparece `SOCORRO`.
 
-### Faixa de ordem e urgência
+### Faixa de objetivo e alerta
 
-A faixa inferior tem quatro linhas fixas, para o jogador não precisar reler a
-tela a cada quadro:
-
-1. `[ESTÁGIO]: [objeto] | RESPONSÁVEL: [nome]` — ou `CONFIRMAR COM [nome] EM [ponto] | OBJETO: [objeto]` antes do aceite;
-2. `COLETA: [ponto (sala)] | ENTREGA: [ponto (sala)]` (ou `NA MÃO: [objeto] | ENTREGA: [ponto (sala)]` quando o objeto já está com o jogador);
-3. `[RECOMPENSA: +n] ou [CUSTO: -n] | SE FALHAR: [perda; prazo; crise]`;
-4. problema mais urgente, prazo, sala, quantidade dos demais e pessoa em risco — ou a mensagem de sistema em vigor.
-
-Sem ordem ativa, as duas primeiras linhas exibem o estado da quest do dia
-(`NENHUMA ORDEM ATIVA — COMPARE AS DUAS OFERTAS EM ORDENS`, `UMA QUEST POR DIA.
-ACEITA: NÃO PODE SER CANCELADA.`).
+A faixa inferior desenha duas linhas: `currentObjectiveLine()` e
+`currentAlertLine()`. A primeira identifica a ação e o ponto atual de interação
+quando há uma ordem, uma pessoa em risco ou uma quest concluída. Sem alvo e sem
+ofertas, o fallback atual é `Local indisponível. Consulte o mapa`. A segunda
+prioriza aviso fatal, risco individual e problemas ativos. As funções
+`orderStageLine()`, `orderRouteLine()`, `orderFailureLine()` e
+`problemWarningLine()` permanecem no código, mas não são chamadas pelo desenho
+atual do HUD. Detalhes completos de ofertas e quests ficam no painel `ORDENS`.
 
 ### Transmissões
 
@@ -163,7 +163,7 @@ em [[ROOMS]].
   item.
 - **Entrega:** mostra recompensa, custo, resultado ou problema resolvido antes
   de aplicar.
-- **Mapa:** preserva sala e posição e marca origem, destino e problemas.
+- **Mapa:** preserva sala e posição e marca sala atual, objetivo e contagem de problemas; não mostra rota ou detalhes por sala.
 - **Incidente:** modal técnico com duas soluções físicas; bloqueia exploração
   até a escolha e confirmação.
 - **Falha de preventiva:** exibe a perda do recurso protegido e devolve o objeto
@@ -183,24 +183,16 @@ nenhuma pista. O alerta **não tem canal sonoro**: o aviso é só visual, por
 decisão da [#28](https://github.com/shelldonryan/gtd_example/issues/28).
 
 Alertas críticos usam os cartões de recurso: cor, ícone de aviso e borda
-piscando. Alerta não gera linha de texto: o problema ativo aparece na quarta
-linha da faixa e o recurso crítico se identifica pelo próprio cartão. A faixa de
-urgência mostra:
-
-1. problema ativo com menor prazo;
-2. prazo restante;
-3. sala onde a intervenção deve ocorrer;
-4. quantidade de outros problemas ativos.
-
-Exemplo: `MOTOR DANIFICADO — 2 DIAS — MÁQUINAS | +2 PROBLEMAS`.
+piscando. A linha de alerta também pode mostrar uma condição fatal, o risco
+individual mais urgente ou um problema ativo. Não há uma quarta linha de detalhes
+no HUD. Quando há pessoa em risco, o rodapé inclui o botão `SOCORRO`.
 
 Se dois problemas tiverem o mesmo prazo, permanece em destaque o que foi
 ativado primeiro. A ordem não muda quando o jogador troca de sala.
 
-O mapa contém a comparação completa. A ficha da sala mostra, para cada problema,
-a perda diária, o prazo e a consequência quando ele chegar a zero. Para dano no
-casco, a ficha pertence ao cômodo que contém o local alcançável sorteado naquela
-ocorrência. A estrutura e os valores numéricos estão em [[ACTIONS]].
+O mapa não contém uma ficha de comparação. Ele apresenta contagem de problemas
+por cômodo, sem listar perda diária, prazo ou consequência de crise. O detalhe
+completo e os valores numéricos estão em [[ACTIONS]] e nos painéis de ordens.
 
 Os textos editoriais de Vera, Bento, Neusa e Sílvia são derivados do contexto e
 dos resultados reais. A validação exige 22 entradas ligadas por `quest_id`,

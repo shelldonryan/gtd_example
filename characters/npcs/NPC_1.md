@@ -5,8 +5,8 @@
 | Nome | Vera |
 | Papel | Piloto |
 | Onde fica | Sala de comando, em ponto fixo junto ao painel de rota |
-| Temperamento | Pragmática; fala por números e horas |
-| Função nas ordens | Oferece e confirma V-01, V-02, COM-A e COM-B |
+| Temperamento | Pragmática |
+| Função nas ordens | Oferece/confirma as preventivas V-01 e V-02; é responsável por COM-A e COM-B, escolhidas no cartão de incidente |
 
 ## Papel no jogo
 
@@ -14,11 +14,13 @@ Vera oferece e confirma as ordens de rota e comunicações:
 
 - `V-01`: calibrar a antena com bobina de transmissão;
 - `V-02`: atualizar a rota com cartão de rota;
-- `COM-A` e `COM-B`: soluções físicas da falha nas comunicações.
+- `COM-A` e `COM-B`: soluções físicas da falha nas comunicações; são escolhidas
+  e confirmadas no cartão de incidente, sem exigir a presença de Vera.
 
-Ela pode ser a origem ou o destino de uma ordem ([[ACTIONS]]). Suas ordens não
-recebem bônus numérico. Se morrer, deixa de oferecer ordens; o pool validado usa
-os sobreviventes vivos.
+O ponto de Vera é a origem de `V-02`; as demais origens e destinos seguem a
+matriz de [[ACTIONS]]. As soluções urgentes atribuídas a ela não exigem sua
+presença. Suas ordens não recebem bônus numérico. Se morrer, deixa de oferecer
+ordens preventivas; o pool usa sobreviventes vivos.
 
 Sua voz editorial varia por fase da viagem e contexto da ordem; reconhecimento
 de resultado aparece uma vez e expira no dia seguinte.

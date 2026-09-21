@@ -53,10 +53,10 @@ Regras que valem em todos os cômodos:
   concluída, problema ativo sem escolha ou nada pendente. Portas e beliche do
   técnico permanecem acessíveis; socorro habilita com pessoa em risco e quest
   diária livre.
-- O mapa mostra a origem e o destino, mas não transporta o técnico.
+- O mapa marca a sala atual, o ponto objetivo e a contagem de problemas por sala; não mostra origem/destino, rota ou detalhes e não transporta o técnico.
 - Indicações usam ações concretas, nunca termos internos.
-- A ordem ativa usa somente pontos que aparecem na oferta. O objeto não fica
-  disponível no mapa antes da confirmação da ordem.
+- A ordem ativa usa somente pontos que aparecem na oferta. O mapa atual não
+  expõe objetos, origem ou destino.
 - A matriz completa das oito ordens preventivas e das quatorze soluções de
   incidente está em [[ACTIONS]]; estes pontos preservam as rotas físicas e a
   leitura local.
@@ -142,9 +142,8 @@ normalmente.
 
 Escadas continuam usando `ladder_room` e `ladder_x`; cada registro pode ocupar
 qualquer posição horizontal do cômodo sem alterar a lógica de travessia. As
-posições finais vieram da composição dos concept arts e estão fechadas para a
-pintura dos fundos: **127 e 532** no Comando, **114 e 526** na Sala de máquinas,
-**120 e 489** no Depósito e **127 e 482** no Dormitório. Nenhuma estação fica a
+posições atuais em `ship.pde` são **127 e 532** no Comando, **468 e 136** na Sala
+de máquinas, **520 e 130** no Depósito e **542 e 243** no Dormitório. Nenhuma estação fica a
 menos de 40 px do eixo de uma escada. Com os fundos em imagem, o piso e a
 escada passam a ser pintados e a colisão continua a mesma.
 
@@ -194,9 +193,10 @@ O HUD mostra a ordem ativa com estágio, responsável, objeto, origem, destino,
 recompensa ou resultado e consequência da falha. Também destaca o problema
 ativo com menor prazo e quantos outros existem.
 
-O mapa agrupa problemas e ordens por sala. Cada problema mostra perda diária,
-prazo e consequência da crise; cada ordem mostra o ponto de coleta, o destino e
-o estágio atual. O mapa nunca transporta o técnico.
+O mapa atual mostra quatro cartões estáticos de sala. Cada cartão pode marcar a
+sala atual, o objetivo da etapa e a contagem de problemas. Não lista problemas,
+perdas, prazos, consequências, origem, destino, portas ou escadas e não responde
+a cliques nos cartões. O mapa não transporta o técnico.
 
 Quando o dano no casco estiver ativo, ele pertence ao cômodo sorteado para aquela
 ocorrência e a quest aponta para o local alcançável correspondente. A origem das
