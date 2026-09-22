@@ -1,0 +1,52 @@
+# Processing export and output artifacts
+last_horizon/application.windows32/
+last_horizon/application.windows64/
+last_horizon/application.macosx/
+last_horizon/application.linux32/
+last_horizon/application.linux64/
+application.windows32/
+application.windows64/
+application.macosx/
+application.linux32/
+application.linux64/
+last_horizon/output/
+last_horizon/output/*
+last_horizon/*.class
+.processing/
+
+# Java build artifacts
+*.class
+*.jar
+
+# Node.js artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# GitNexus, AI assistants and agent tooling
+.gitnexus/
+.claude/
+.agents/
+.agents
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+
+# Operating-system files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+desktop.ini
+
+# Editor and IDE configurations
+*.swp
+*.swo
+*~
+.obsidian/
+.vscode/
+.idea/

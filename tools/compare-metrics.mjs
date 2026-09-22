@@ -1,11 +1,45 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
+import { basename, extname, join, resolve } from "node:path";
 
-/**
- * Parse the quoted CSV subset used by the performance report.
- *
- * @param {string} source - CSV source.
- * @returns {string[][]} Rows including the header.
- */
+const REQUIRED_SIDECAR_FIELDS = [
+  "environment", "machine", "assets", "room", "state", "nominal_window_s",
+  "processing", "hardware", "gpu", "os",
+];
+const REQUIRED_METRIC_FIELDS = [
+  "sample_id", "duration_real_s", "frame_count", "frame_time_median_ms",
+  "frame_time_p95_ms", "load_time_ms", "additional_memory_bytes", "icon_builds",
+  "floor_band_builds", "cache_invalidations", "allocations_per_frame",
+];
+const COST_FIELDS = REQUIRED_METRIC_FIELDS.slice(3);
+const NOMINAL_WINDOW_S = 30;
+const DURATION_TOLERANCE_S = 0.5;
+const MAX_REGRESSION_PERCENT = 10;
+const MAX_FRAME_TIME_P95_MS = 33.3;
+const ALLOCATION_METRIC = "allocations_per_frame";
+const COMPARISON_TIMEOUT_MS = 60_000;
+const LEGACY_NAMES = new Set(["performance__metricas.csv", "metrics.csv"]);
+const INTEGER_METRIC_FIELDS = new Set([
+  "frame_count", "additional_memory_bytes", "icon_builds", "floor_band_builds",
+  "cache_invalidations",
+]);
+const SIDECAR_STRING_FIELDS = REQUIRED_SIDECAR_FIELDS.filter((field) =>
+  field !== "nominal_window_s");
+
+class MetricsError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+function fail(message) {
+  return new MetricsError("FAIL", message);
+}
+
+function inconclusive(message) {
+  return new MetricsError("INCONCLUSIVO", message);
+}
+
 function parseCsv(source) {
   const rows = [];
   let row = [];
@@ -40,96 +74,271 @@ function parseCsv(source) {
   return rows;
 }
 
-/**
- * Read a metrics file.
- *
- * @param {string} path - CSV path.
- * @returns {Promise<Array<Record<string, string>>>} Parsed rows.
- * @throws {Error} If the file is missing or has no data rows.
- */
-async function readMetrics(path) {
-  const rows = parseCsv(await readFile(path, "utf8"));
-  if (rows.length < 2) throw new Error(`CSV sem amostras: ${path}`);
-  const [header, ...values] = rows;
-  return values.map((row) => Object.fromEntries(
-    header.map((field, index) => [field, row[index] ?? ""]),
-  ));
+function assertUniqueFields(fields, label) {
+  if (new Set(fields).size !== fields.length) {
+    throw fail(`${label} contém campos duplicados`);
+  }
 }
 
-/**
- * Calculate the median of numeric values.
- *
- * @param {number[]} values - Values to rank.
- * @returns {number} Median value.
- * @throws {Error} If no numeric values are available.
- */
+function assertExactFields(actual, expected, label) {
+  assertUniqueFields(actual, label);
+  if (actual.length !== expected.length || actual.some((field, index) => field !== expected[index])) {
+    throw fail(`${label} deve usar o cabeçalho canônico: ${expected.join(",")}`);
+  }
+}
+
+function finiteNumber(record, field, label) {
+  const rawValue = record[field];
+  if (typeof rawValue !== "string" || rawValue.trim().length === 0) {
+    throw fail(`${label}: métrica ausente em ${field}`);
+  }
+  const value = Number(rawValue);
+  if (!Number.isFinite(value)) throw fail(`${label}: métrica inválida em ${field}`);
+  if (INTEGER_METRIC_FIELDS.has(field) && !Number.isInteger(value)) {
+    throw fail(`${label}: métrica inteira inválida em ${field}`);
+  }
+  return value;
+}
+
+function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (value !== null && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((key) =>
+      `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+async function resolveSamplePaths(input, label) {
+  const absolute = resolve(input);
+  let inputStat;
+  try {
+    inputStat = await stat(absolute);
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      throw inconclusive(`${label}: pré-requisito ausente antes do início: ${input}`);
+    }
+    throw fail(`${label}: não foi possível inspecionar ${input}: ${error.message}`);
+  }
+
+  if (inputStat.isDirectory()) {
+    const entries = await readdir(absolute, { withFileTypes: true });
+    const csvPaths = entries
+      .filter((entry) => entry.isFile() && extname(entry.name) === ".csv")
+      .map((entry) => join(absolute, entry.name))
+      .sort();
+    if (csvPaths.length < 3) {
+      throw inconclusive(`${label} precisa de três CSVs canônicos; encontrados ${csvPaths.length}`);
+    }
+    if (csvPaths.length > 3) {
+      throw fail(`${label} precisa de exatamente três CSVs canônicos; encontrados ${csvPaths.length}`);
+    }
+    return csvPaths;
+  }
+
+  if (!inputStat.isFile()) throw fail(`${label}: caminho não é arquivo nem diretório: ${input}`);
+  if (LEGACY_NAMES.has(basename(absolute))) {
+    throw fail(`${label}: nome legado ${basename(absolute)} rejeitado; use amostras canônicas ou conversão explícita`);
+  }
+  return [absolute];
+}
+
+async function readSample(csvPath, label) {
+  const csvName = basename(csvPath);
+  if (LEGACY_NAMES.has(csvName)) {
+    throw fail(`${label}: nome legado ${csvName} rejeitado sem conversão explícita`);
+  }
+
+  const rows = parseCsv(await readFile(csvPath, "utf8"));
+  if (rows.length !== 2) throw fail(`${label}: ${csvName} deve conter cabeçalho e uma amostra`);
+  assertExactFields(rows[0], REQUIRED_METRIC_FIELDS, `${label} ${csvName}`);
+  const [values] = rows.slice(1);
+  if (values.length !== REQUIRED_METRIC_FIELDS.length) {
+    throw fail(`${label}: ${csvName} tem quantidade de colunas inválida`);
+  }
+  const record = Object.fromEntries(REQUIRED_METRIC_FIELDS.map((field, index) => [field, values[index] ?? ""]));
+  const expectedSampleId = csvName.slice(0, -".csv".length);
+  if (!/^[A-Za-z0-9._-]+$/.test(record.sample_id) || record.sample_id !== expectedSampleId) {
+    throw fail(`${label}: sample_id ${record.sample_id} não corresponde ao arquivo ${csvName}`);
+  }
+
+  const duration = finiteNumber(record, "duration_real_s", label);
+  if (duration < NOMINAL_WINDOW_S - DURATION_TOLERANCE_S
+    || duration > NOMINAL_WINDOW_S + DURATION_TOLERANCE_S) {
+    throw fail(`${label}: ${csvName} tem duração ${duration}s fora da tolerância de ±${DURATION_TOLERANCE_S}s`);
+  }
+  const frameCount = finiteNumber(record, "frame_count", label);
+  if (frameCount <= 0) {
+    throw fail(`${label}: ${csvName} tem frame_count inválido`);
+  }
+  for (const field of COST_FIELDS) {
+    const value = finiteNumber(record, field, label);
+    if (value < 0) throw fail(`${label}: ${csvName} tem valor negativo em ${field}`);
+  }
+
+  const sidecarPath = `${csvPath.slice(0, -".csv".length)}.sidecar.json`;
+  let sidecar;
+  try {
+    sidecar = JSON.parse(await readFile(sidecarPath, "utf8"));
+  } catch (error) {
+    if (error.code === "ENOENT") throw fail(`${label}: sidecar ausente para ${csvName}`);
+    throw fail(`${label}: sidecar inválido para ${csvName}: ${error.message}`);
+  }
+  if (sidecar === null || Array.isArray(sidecar) || typeof sidecar !== "object") {
+    throw fail(`${label}: sidecar não é um objeto JSON`);
+  }
+  assertExactFields(Object.keys(sidecar).sort(), [...REQUIRED_SIDECAR_FIELDS].sort(), `${label} ${csvName} sidecar`);
+  for (const field of REQUIRED_SIDECAR_FIELDS) {
+    if (sidecar[field] === null || sidecar[field] === undefined
+      || (typeof sidecar[field] === "string" && sidecar[field].trim().length === 0)) {
+      throw fail(`${label}: campo ausente no sidecar ${csvName}: ${field}`);
+    }
+  }
+  for (const field of SIDECAR_STRING_FIELDS) {
+    if (typeof sidecar[field] !== "string" || sidecar[field].trim().length === 0) {
+      throw fail(`${label}: campo de texto inválido no sidecar ${csvName}: ${field}`);
+    }
+  }
+  if (typeof sidecar.nominal_window_s !== "number" || !Number.isFinite(sidecar.nominal_window_s)
+    || sidecar.nominal_window_s !== NOMINAL_WINDOW_S) {
+    throw fail(`${label}: nominal_window_s deve ser o número ${NOMINAL_WINDOW_S} em ${csvName}`);
+  }
+
+  return { csvPath, sidecarPath, record, sidecar };
+}
+
+async function readPhase(input, label) {
+  const paths = await resolveSamplePaths(input, label);
+  const samples = await Promise.all(paths.map((path) => readSample(path, label)));
+  if (samples.length < 3) throw inconclusive(`${label} precisa de três amostras`);
+  if (samples.length > 3) throw fail(`${label} precisa de exatamente três amostras`);
+  const ids = samples.map((sample) => sample.record.sample_id);
+  if (new Set(ids).size !== ids.length) throw fail(`${label} possui sample_id duplicado`);
+  return samples;
+}
+
+function validateComparableManifests(baseline, revised) {
+  const all = [...baseline, ...revised];
+  const first = canonicalJson(all[0].sidecar);
+  if (all.some((sample) => canonicalJson(sample.sidecar) !== first)) {
+    throw fail("manifestos sidecar divergentes; baseline e versão revisada não são comparáveis");
+  }
+}
+
 function median(values) {
-  const sorted = values.filter(Number.isFinite).sort((left, right) => left - right);
-  if (sorted.length === 0) throw new Error("Nenhum valor numérico disponível");
+  const sorted = [...values].sort((left, right) => left - right);
   const middle = Math.floor(sorted.length / 2);
   return sorted.length % 2 === 0
     ? (sorted[middle - 1] + sorted[middle]) / 2
     : sorted[middle];
 }
 
-/**
- * Assert that a phase has the expected comparable sample shape.
- *
- * @param {Array<Record<string, string>>} rows - Phase rows.
- * @param {string} label - Phase label for diagnostics.
- * @returns {void}
- */
-function validatePhase(rows, label) {
-  if (rows.length !== 3) throw new Error(`${label} precisa de três amostras`);
-  if (!rows.every((row) => Number(row.duration_s) === 30)) {
-    throw new Error(`${label} precisa de janelas de 30 segundos`);
+function percentChange(before, after) {
+  if (before === 0) return after === 0 ? 0 : Number.POSITIVE_INFINITY;
+  return ((after - before) / before) * 100;
+}
+
+function comparePhases(baseline, revised) {
+  const baselineById = new Map(baseline.map((sample) => [sample.record.sample_id, sample]));
+  const revisedById = new Map(revised.map((sample) => [sample.record.sample_id, sample]));
+  if (baselineById.size !== revisedById.size
+    || [...baselineById.keys()].some((id) => !revisedById.has(id))) {
+    throw fail("baseline e versão revisada precisam usar os mesmos três sample_id");
+  }
+
+  const comparison = COST_FIELDS.map((field) => {
+    const before = median(baseline.map((sample) => Number(sample.record[field])));
+    const after = median(revised.map((sample) => Number(sample.record[field])));
+    const change = percentChange(before, after);
+    const pairwiseReductions = [...baselineById.entries()].filter(([id, sample]) =>
+      Number(revisedById.get(id).record[field]) < Number(sample.record[field])).length;
+    return { field, before, after, change, pairwiseReductions };
+  });
+  const regressions = comparison.filter((entry) => entry.change > MAX_REGRESSION_PERCENT);
+  const reproducibleReductions = comparison.filter((entry) =>
+    entry.after < entry.before && entry.pairwiseReductions >= 2);
+  const frameTimeP95 = comparison.find((entry) => entry.field === "frame_time_p95_ms");
+  const allocationMetric = comparison.find((entry) => entry.field === ALLOCATION_METRIC);
+  return {
+    comparison,
+    regressions,
+    reproducibleReductions,
+    frameTimeP95,
+    allocationGrowth: allocationMetric.after > allocationMetric.before,
+  };
+}
+
+function printComparison(result) {
+  for (const entry of result.comparison) {
+    console.log(`${entry.field}: antes=${entry.before.toFixed(3)} depois=${entry.after.toFixed(3)} variação=${entry.change.toFixed(2)}%`);
   }
 }
 
-/**
- * Compare the median frame time and p95 from before/after samples.
- *
- * @returns {Promise<void>} Resolves after reporting the comparison.
- */
 async function run() {
-  const [baselinePath, finalPath] = process.argv.slice(2);
-  if (!baselinePath || !finalPath) {
-    throw new Error("Uso: node tools/compare-metrics.mjs <baseline.csv> <final.csv>");
+  const [baselineInput, revisedInput] = process.argv.slice(2);
+  if (!baselineInput || !revisedInput) {
+    throw inconclusive("Uso: node tools/compare-metrics.mjs <baseline-dir> <revised-dir>");
   }
 
-  const [baseline, final] = await Promise.all([
-    readMetrics(baselinePath),
-    readMetrics(finalPath),
+  const phaseResults = await Promise.allSettled([
+    readPhase(baselineInput, "baseline"),
+    readPhase(revisedInput, "versão revisada"),
   ]);
-  validatePhase(baseline, "baseline");
-  validatePhase(final, "final");
+  const phaseErrors = phaseResults
+    .filter((result) => result.status === "rejected")
+    .map((result) => result.reason);
+  if (phaseErrors.length > 0) {
+    const prioritizedError = phaseErrors.find((error) => error instanceof MetricsError
+      && error.status === "FAIL") ?? phaseErrors[0];
+    throw prioritizedError;
+  }
+  const [baseline, revised] = phaseResults.map((result) => result.value);
+  validateComparableManifests(baseline, revised);
+  const result = comparePhases(baseline, revised);
+  printComparison(result);
 
-  const environmentFields = ["environment", "machine", "assets", "room", "state", "window", "processing"];
-  for (const field of environmentFields) {
-    const values = [...baseline, ...final].map((row) => row[field]);
-    if (new Set(values).size !== 1) {
-      throw new Error(`Ambiente não comparável no campo ${field}`);
-    }
+  if (result.regressions.length > 0) {
+    const fields = result.regressions.map((entry) => entry.field).join(", ");
+    console.log(`METRICS CHECK: FAIL — regressão superior a ${MAX_REGRESSION_PERCENT}% em ${fields}`);
+    console.error(`Diagnóstico: os custos ${fields} excederam o limite de regressão.`);
+    return "FAIL";
+  }
+  if (result.frameTimeP95.after > MAX_FRAME_TIME_P95_MS) {
+    console.log(`METRICS CHECK: FAIL — p95 agregado acima de ${MAX_FRAME_TIME_P95_MS} ms`);
+    console.error(`Diagnóstico: o p95 agregado revisado foi ${result.frameTimeP95.after.toFixed(3)} ms; o limite obrigatório é ${MAX_FRAME_TIME_P95_MS} ms.`);
+    return "FAIL";
+  }
+  if (result.allocationGrowth) {
+    const allocation = result.comparison.find((entry) => entry.field === ALLOCATION_METRIC);
+    console.log("METRICS CHECK: FAIL — allocations_per_frame cresceu");
+    console.error(`Diagnóstico: allocations_per_frame passou de ${allocation.before.toFixed(3)} para ${allocation.after.toFixed(3)} na mediana das três amostras.`);
+    return "FAIL";
+  }
+  if (result.reproducibleReductions.length === 0) {
+    console.log("METRICS CHECK: INCONCLUSIVO — nenhuma redução mensurável e reproduzível");
+    console.error("Diagnóstico: PASS exige redução na mediana e em pelo menos duas das três amostras.");
+    return "INCONCLUSIVO";
   }
 
-  const beforeMedian = median(baseline.map((row) => Number(row.frame_median_ms)));
-  const afterMedian = median(final.map((row) => Number(row.frame_median_ms)));
-  const beforeP95 = median(baseline.map((row) => Number(row.frame_p95_ms)));
-  const afterP95 = median(final.map((row) => Number(row.frame_p95_ms)));
-  const medianChange = ((afterMedian - beforeMedian) / beforeMedian) * 100;
-  const p95Change = ((afterP95 - beforeP95) / beforeP95) * 100;
-
-  console.log(`frame_median_ms: antes=${beforeMedian.toFixed(3)} ms depois=${afterMedian.toFixed(3)} ms variação=${medianChange.toFixed(2)}%`);
-  console.log(`frame_p95_ms: antes=${beforeP95.toFixed(3)} ms depois=${afterP95.toFixed(3)} ms variação=${p95Change.toFixed(2)}%`);
-  if (p95Change > 10) {
-    console.error("METRICS CHECK: INVESTIGATE — regressão consistente superior a 10% no p95");
-    process.exitCode = 1;
-    return;
-  }
-  console.log("METRICS CHECK: PASS — ambiente equivalente e nenhuma regressão superior a 10% no p95");
+  const fields = result.reproducibleReductions.map((entry) => entry.field).join(", ");
+  console.log(`METRICS CHECK: PASS — redução reproduzível em ${fields}; sem regressão superior a ${MAX_REGRESSION_PERCENT}%`);
+  return "PASS";
 }
 
-run().catch((error) => {
-  console.error(`METRICS CHECK: ERROR ${error.message}`);
-  process.exitCode = 1;
+const comparisonTimeout = setTimeout(() => {
+  console.log("METRICS CHECK: FAIL");
+  console.error("Diagnóstico: comparação excedeu o timeout fixo de 60s.");
+  process.exit(124);
+}, COMPARISON_TIMEOUT_MS);
+
+run().then((status) => {
+  clearTimeout(comparisonTimeout);
+  if (status === "FAIL") process.exitCode = 1;
+  if (status === "INCONCLUSIVO") process.exitCode = 2;
+}).catch((error) => {
+  clearTimeout(comparisonTimeout);
+  const status = error instanceof MetricsError ? error.status : "FAIL";
+  console.log(`METRICS CHECK: ${status}`);
+  console.error(`Diagnóstico: ${error.message}`);
+  process.exitCode = status === "INCONCLUSIVO" ? 2 : 1;
 });

@@ -1,0 +1,829 @@
+{
+  "project": {
+    "id": "6626b1e0010b7fcf138c8295143382f0",
+    "name": "preparacao-integrada-para-entrega",
+    "description": "Executar uma única entrega integrada para deixar o projeto pronto para apresentação e entrega, sem transformar os requisitos em features independentes e sem adicionar funcionalidades novas. Os cinco pontos abaixo são obrigatórios e devem ser tratados em conjunto: (1) otimização de performance; (2) remoção de todo código não usado ou duplicado; (3) remoção de todos os comentários do código; (4) melhor organização estrutural do código; (5) preservação do comportamento funcional existente. O resultado deve manter a mesma experiência e os mesmos comportamentos observáveis, com mudanças mínimas, rastreáveis e justificadas. A decomposição interna do pipeline pode organizar tarefas técnicas, mas não pode alterar esses cinco requisitos nem reduzi-los a um único hotspot.",
+    "path": "/home/ubuntu/pessoal/01-projetos/gtd_example",
+    "stack": [],
+    "config": {
+      "max_rounds_per_sprint": 3,
+      "use_playwright": false,
+      "evaluator_agent_id": "harness-evaluator",
+      "planner_agent_id": "harness-planner"
+    }
+  },
+  "sprints": [
+    {
+      "id": "sprint-001",
+      "index": 0,
+      "name": "Fundação de rastreabilidade e baseline",
+      "description": "Estabelecer o registro verificável da entrega, o inventário da superfície existente e a evidência funcional anterior às alterações de performance, organização e limpeza.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "Processing 4.5.6",
+        "Node.js",
+        "Bash"
+      ],
+      "features": [
+        {
+          "id": "feat-001",
+          "name": "Registro inicial de verificação",
+          "description": "Estruturar o registro de verificação com a identificação da referência baseline, comandos, pré-requisitos, timeouts, evidências, limitações e status normativos.",
+          "acceptance_criteria": [
+            "code/VERIFICATION.md contém as seções Identificação, Comandos e pré-requisitos, Equivalência funcional, Métricas de custo, Limitações e cenários não executados e Decisão, nesta ordem.",
+            "A referência baseline, commit ou hash e manifesto usado ficam identificados; qualquer verificação indisponível recebe status INCONCLUSIVO com motivo e impacto explícitos.",
+            "Nenhuma indisponibilidade ou comando não executado é registrada como PASS."
+          ]
+        },
+        {
+          "id": "feat-002",
+          "name": "Inventário autoritativo da entrega",
+          "description": "Registrar a superfície atual do sketch, das ferramentas, dos módulos opcionais, dos comandos do package.json e das fixtures de equivalência que não podem ser removidos ou enfraquecidos.",
+          "acceptance_criteria": [
+            "O inventário inclui todas as abas existentes do sketch, incluindo last_horizon/editorial.pde, e os scripts operacionais de tools/.",
+            "O inventário identifica os modos --capture, --hit-test, --ladder-test, --asset-pipeline-test e --metrics, além da matriz de fixtures de 22 quests e 34 estados de captura.",
+            "O inventário transcreve os scripts atuais de package.json: typecheck, e6:audit, e6:compare, e6:evidence e regression:windows, identificando tools/e6-audit.mjs e tools/e6-evidence.mjs como scripts históricos.",
+            "No contrato revisado da feature, nenhum dos scripts históricos tools/e6-audit.mjs e tools/e6-evidence.mjs permanece no comando typecheck; ambos continuam rastreados no inventário e nos comandos históricos e6:audit/e6:evidence até que a busca de uso definida nas sprints de auditoria autorize sua remoção, e não são pré-requisitos de regressão ou registro final."
+          ]
+        },
+        {
+          "id": "feat-003",
+          "name": "Baseline funcional",
+          "description": "Executar ou registrar a tentativa dos cenários funcionais existentes antes da refatoração, preservando as evidências necessárias para comparação posterior.",
+          "acceptance_criteria": [
+            "Cada cenário disponível de captura, hit-test, escadas e pipeline de assets recebe um resultado individual PASS, FAIL ou INCONCLUSIVO.",
+            "Falhas iniciadas recebem diagnóstico e código de saída diferente de zero; pré-requisitos ausentes recebem INCONCLUSIVO e não PASS.",
+            "Os artefatos e comandos usados para o baseline são referenciados em code/VERIFICATION.md."
+          ]
+        },
+        {
+          "id": "feat-004",
+          "name": "Guarda de escopo arquitetural",
+          "description": "Fixar os limites que todas as sprints seguintes devem respeitar: aplicação local Processing, estado global em memória, ferramentas CLI independentes e ausência de novas camadas de produto.",
+          "acceptance_criteria": [
+            "A implementação não adiciona banco, endpoint HTTP, backend persistente, autenticação, framework de UI, engine ou dependência de runtime.",
+            "A lista de abas existentes permanece rastreável e nenhuma nova aba .pde é criada.",
+            "O estado global, as funções procedurais, as constantes, as tabelas e as classes pontuais continuam sendo a forma de organização do runtime."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/",
+          "tools/",
+          "package.json",
+          "code/VERIFICATION.md",
+          "docs/CURRENT_IMPLEMENTATION.md",
+          "docs/adr/",
+          "mechanics/",
+          "events/",
+          "interface/"
+        ],
+        "key_interfaces": [
+          "package.json",
+          "code/VERIFICATION.md",
+          "--capture",
+          "--hit-test",
+          "--ladder-test",
+          "--asset-pipeline-test",
+          "--metrics",
+          "npm run typecheck",
+          "npm run regression:windows",
+          "e6:compare",
+          "e6:audit (histórico)",
+          "e6:evidence (histórico)",
+          "code/VERIFICATION.md#Comandos e pré-requisitos"
+        ],
+        "architecture_notes": "O projeto é um sketch Processing offline compilado como uma unidade. Preserve estado global, ordem de inicialização e contratos entre abas. Use somente os arquivos e comandos existentes como superfície de entrega. O contrato de package.json é a fonte de verdade: os comandos da feature são typecheck, regression:windows, e6:compare, os modos do harness, a simulação, o snapshot e a limpeza; e6:audit e e6:evidence são históricos e não podem ser pré-requisitos da entrega."
+      },
+      "dependencies": [],
+      "complexity": "medium",
+      "estimated_rounds": 2
+    },
+    {
+      "id": "sprint-002",
+      "index": 1,
+      "name": "Contrato de métricas e comparação baseline",
+      "description": "Tornar a captura de performance, os manifestos sidecar, o CSV e a comparação entre três amostras objetivos, equivalentes e auditáveis antes da otimização do runtime.",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "Node.js",
+        "Bash",
+        "Processing 4.5.6"
+      ],
+      "features": [
+        {
+          "id": "feat-005",
+          "name": "Captura canônica de métricas",
+          "description": "Adequar o modo --metrics para produzir o manifesto sidecar obrigatório e o CSV numérico canônico para cada captura.",
+          "acceptance_criteria": [
+            "Cada captura produz um sidecar com exatamente environment, machine, assets, room, state, nominal_window_s, processing, hardware, gpu e os, sem preencher campos ausentes com valores padrão.",
+            "O CSV disponibiliza sample_id, duration_real_s, frame_count, frame_time_median_ms, frame_time_p95_ms, load_time_ms, additional_memory_bytes, icon_builds, floor_band_builds, cache_invalidations e allocations_per_frame.",
+            "A coleta termina no primeiro quadro cujo relógio atinge ou ultrapassa 30 segundos; duração fora da tolerância definida invalida a amostra.",
+            "As capturas usam automaticamente a fixture aprovada, os mesmos assets, sala, estado, Processing e janela nominal em baseline e versão revisada.",
+            "Cada amostra é gravada em last_horizon/output/<versao>/<perfil>/<sample_id>.csv e o manifesto correspondente em last_horizon/output/<versao>/<perfil>/<sample_id>.sidecar.json; esses caminhos são preservados no registro final."
+          ]
+        },
+        {
+          "id": "feat-006",
+          "name": "Comparador de três amostras",
+          "description": "Implementar ou ajustar tools/compare-metrics.mjs para validar contratos, agregar amostras e calcular variações com a precedência de status definida na SPEC.",
+          "acceptance_criteria": [
+            "O comparador exige três amostras por referência, nominal_window_s igual a 30 e igualdade estrutural dos campos obrigatórios do sidecar.",
+            "A mediana dos três p95 é usada para métricas agregáveis; os demais custos são comparados pela mediana das três amostras.",
+            "A ausência de métrica, manifesto divergente, valor inválido ou dependência de nome legado sem conversão explícita impede a aprovação.",
+            "O status geral segue FAIL antes de INCONCLUSIVO antes de PASS; PASS exige redução mensurável e reproduzível em pelo menos um custo, sem regressão superior a 10%."
+          ]
+        },
+        {
+          "id": "feat-007",
+          "name": "Contrato operacional de falhas",
+          "description": "Alinhar os comandos de captura e comparação ao comportamento operacional de stdout, stderr, código de saída e timeout por ambiente.",
+          "acceptance_criteria": [
+            "Resumo operacional é emitido em stdout, diagnóstico em stderr e comandos iniciados que falham retornam código diferente de zero.",
+            "Timeout excedido em uma operação iniciada produz FAIL; pré-requisito ausente antes do início produz INCONCLUSIVO com motivo e impacto.",
+            "A matriz registra os timeouts de 60 segundos para typecheck, 300 segundos para regressão e build, 180 segundos por captura de métricas, 60 segundos para comparação e snapshot e 120 segundos para node prototype/balance-model.mjs --simulate.",
+            "node prototype/balance-model.mjs --simulate usa timeout fixo de 120 segundos; timeout depois do início produz FAIL explícito com diagnóstico e código diferente de zero, enquanto pré-requisito ausente antes do início produz INCONCLUSIVO com motivo e impacto.",
+            "Os comandos normativos da feature são npm(.cmd) run typecheck, npm(.cmd) run regression:windows, os modos do harness, node tools/compare-metrics.mjs, node prototype/balance-model.mjs --simulate, node tools/snapshot-entrega.mjs e node tools/cleanup-verification-artifacts.mjs; e6:audit e e6:evidence permanecem históricos, sem remoção ou uso obrigatório sem verificação de uso registrada.",
+            "node --check passa para os módulos .mjs alterados e os scripts Bash preservam suas diretivas obrigatórias."
+          ]
+        },
+        {
+          "id": "feat-008",
+          "name": "Registro de profiling comparável",
+          "description": "Definir a coleta e o vínculo do profiling antes e depois da revisão para o notebook Core i3 com vídeo integrado e para o perfil de referência, deixando o gate final executável e rastreável.",
+          "acceptance_criteria": [
+            "Cada resultado de profiling identifica perfil, versão, cenário, amostra e hotspot.",
+            "Os hotspots cobrem renderização, escalonamento de imagens, alocações por quadro, preview de transições e carregamento e cache de assets.",
+            "Cada resultado aponta para as métricas correspondentes do contrato E6 em code/VERIFICATION.md.",
+            "Os artefatos seguem o caminho canônico last_horizon/output/profiling/<versao>/<perfil>/<cenario>/<amostra>.json e são relacionados ao CSV e sidecar da mesma versão, perfil e amostra.",
+            "Perfil, cenário ou amostra indisponível é registrado como INCONCLUSIVO e não é usado como evidência de ganho; a conclusão só pode usar profiling executado para baseline e versão revisada nos dois perfis obrigatórios."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/capture.pde",
+          "tools/compare-metrics.mjs",
+          "tools/processing-cli.sh",
+          "tools/run-headless.sh",
+          "tools/regression-windows.mjs",
+          "tools/regression-final.sh",
+          "tools/build.sh",
+          "package.json",
+          "code/VERIFICATION.md",
+          "last_horizon/output/"
+        ],
+        "key_interfaces": [
+          "--metrics",
+          "capture.pde",
+          "compare-metrics.mjs",
+          "duration_real_s",
+          "frame_time_p95_ms",
+          "additional_memory_bytes",
+          "icon_builds",
+          "floor_band_builds",
+          "cache_invalidations",
+          "allocations_per_frame",
+          "node prototype/balance-model.mjs --simulate (120 s)",
+          "last_horizon/output/<versao>/<perfil>/<sample_id>.csv",
+          "last_horizon/output/<versao>/<perfil>/<sample_id>.sidecar.json",
+          "last_horizon/output/profiling/<versao>/<perfil>/<cenario>/<amostra>.json"
+        ],
+        "architecture_notes": "capture.pde é o produtor canônico do sidecar e do CSV em last_horizon/output/. O layout canônico usa CSV e sidecar por versão, perfil e amostra; o profiling usa last_horizon/output/profiling/<versao>/<perfil>/<cenario>/<amostra>.json. O comparador deve rejeitar divergências e métricas ausentes; não transforme ausência em zero. Mantenha CLI local, sem servidor persistente ou protocolo HTTP."
+      },
+      "dependencies": [
+        "sprint-001"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3
+    },
+    {
+      "id": "sprint-003",
+      "index": 2,
+      "name": "Otimização de renderização estática e assets",
+      "description": "Eliminar trabalho repetido de renderização dos seis ícones de recursos e das faixas de piso, preservando fallback individual, visual, mapeamentos e métricas de custo.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "Processing 4.5.6"
+      ],
+      "features": [
+        {
+          "id": "feat-009",
+          "name": "Cache dos seis ícones de recursos",
+          "description": "Preparar e reutilizar as representações estáticas de energia, oxigênio, água, comida, peças e moral no fluxo normal do HUD.",
+          "acceptance_criteria": [
+            "Os seis ícones são preparados no carregamento ou quando a fonte muda e o desenho normal não reconstrói o ícone a cada quadro.",
+            "O mapeamento explícito mantém a ordem energia, oxigênio, água, comida, peças e moral, incluindo valor, barra, cor, alerta crítico e ordem visual.",
+            "Números, barras, cores de estado, alertas, piscadas e objetivo continuam sendo calculados dinamicamente e não entram no cache estático.",
+            "Uma mudança de fonte substitui a representação correspondente e invalida somente os caches afetados."
+          ]
+        },
+        {
+          "id": "feat-010",
+          "name": "Cache seletivo de faixas de piso",
+          "description": "Reutilizar faixas de piso entre conveses quando tile, largura e geração da fonte forem iguais, mantendo a imagem compartilhada imutável.",
+          "acceptance_criteria": [
+            "Duas solicitações com a mesma fonte, tile, largura e geração reutilizam a mesma representação preparada.",
+            "Mudança de fonte, escala, largura ou geração reconstrói apenas a faixa afetada e incrementa a contagem de invalidação correspondente.",
+            "A mutação de uma PImage existente não é tratada como alteração válida; uma mudança exige uma nova referência de imagem.",
+            "A reutilização mantém o resultado visual e o funcionamento sem arte conforme o fallback existente."
+          ]
+        },
+        {
+          "id": "feat-011",
+          "name": "Fallback individual de assets",
+          "description": "Preservar a execução quando ícones, faixas, sprites, portas, estações ou imagens do pipeline estiverem ausentes, parciais ou inválidos.",
+          "acceptance_criteria": [
+            "PNG inválido, spritesheet incompleto ou asset individual ausente aciona fallback geométrico somente para o item afetado.",
+            "A partida continua sem bloqueio quando a arte estiver ausente ou parcial.",
+            "O diagnóstico canônico em last_horizon/output/fallback-diagnostics.jsonl identifica arquivo, tipo de falha e fallback usado em cada ocorrência prevista, e seu caminho é registrado em code/VERIFICATION.md.",
+            "Nenhum fallback altera textos, posições, cores, tamanhos, orientação de sprites, halos, som ou comportamento de gameplay."
+          ]
+        },
+        {
+          "id": "feat-012",
+          "name": "Instrumentação de custo dos caches",
+          "description": "Integrar as construções, invalidações e memória adicional dos caches ao contrato de métricas estabelecido na sprint anterior.",
+          "acceptance_criteria": [
+            "capture.pde registra icon_builds, floor_band_builds, cache_invalidations e additional_memory_bytes no CSV ou resumo canônico.",
+            "O cenário interativo comprova que a preparação estática não ocorre por ícone ou faixa a cada quadro.",
+            "Métrica indisponível ou captura inválida não é registrada como zero e impede PASS conforme as regras do comparador.",
+            "A instrumentação não altera o resultado observável do HUD, do mapa ou dos assets em modo normal."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/assets.pde",
+          "last_horizon/hud.pde",
+          "last_horizon/ship.pde",
+          "last_horizon/capture.pde",
+          "last_horizon/last_horizon.pde"
+        ],
+        "key_interfaces": [
+          "loadAssets",
+          "drawResourceCard",
+          "PImage",
+          "icon_builds",
+          "floor_band_builds",
+          "cache_invalidations",
+          "additional_memory_bytes",
+          "last_horizon/output/fallback-diagnostics.jsonl"
+        ],
+        "architecture_notes": "O cache é limitado aos seis ícones estáticos e às faixas de piso. Trate imagens compartilhadas como imutáveis e invalide seletivamente. Preserve o buffer 640x360, saída 1280x720, pixel art sem interpolação e os fallbacks existentes."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2
+    },
+    {
+      "id": "sprint-004",
+      "index": 3,
+      "name": "Transições, helpers e organização estrutural",
+      "description": "Consolidar a preparação de portais, remover duplicações inventariadas e organizar o sketch nas abas existentes sem alterar ordem de inicialização ou comportamento observável.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "Processing 4.5.6"
+      ],
+      "features": [
+        {
+          "id": "feat-013",
+          "name": "Preparação única de transição",
+          "description": "Centralizar em preparePortalTransition() a resolução de destino, saída, chegada, direção e retorno antes da escolha entre transição animada e imediata.",
+          "acceptance_criteria": [
+            "preparePortalTransition() resolve destino, posição de saída, posição de chegada, direção e porta de retorno antes da execução visual.",
+            "A posição de saída é capturada antes da movimentação e o retorno reutiliza essa posição quando essa é a regra atual.",
+            "A chegada preserva gravidade, coordenadas arbitrárias, travessias entre conveses e o resultado existente para ida e volta.",
+            "A transição preparada é limpa ao entrar ou encerrar e não permanece disponível para outra porta."
+          ]
+        },
+        {
+          "id": "feat-014",
+          "name": "Robustez do ciclo de portal",
+          "description": "Preservar fases, áudio, fallback e bloqueio de reentrada durante transições animadas, imediatas ou inválidas.",
+          "acceptance_criteria": [
+            "Uma nova entrada durante abertura, execução ou fechamento é ignorada e não cria uma segunda transição.",
+            "Arte completa mantém fases de abertura e fechamento e som; arte ausente ou falha de áudio não bloqueia a partida.",
+            "Porta inválida, destino inexistente, retorno ausente ou preparação inválida mantém o jogador na sala atual, limpa o estado preparado e registra diagnóstico.",
+            "A execução finaliza em estado consistente para a próxima interação."
+          ]
+        },
+        {
+          "id": "feat-015",
+          "name": "Organização nas abas existentes",
+          "description": "Manter cenário, nave, portais, movimento, animação e áudio identificáveis nas abas atuais, com movimentações mínimas e rastreáveis.",
+          "acceptance_criteria": [
+            "O código relacionado permanece distribuído entre ship.pde, portals.pde, movement.pde, animation.pde e audio.pde conforme suas responsabilidades existentes.",
+            "Nenhuma nova aba .pde ou hierarquia de entidades é criada; last_horizon/editorial.pde permanece no inventário.",
+            "Globais, funções entre abas e dependências de inicialização continuam disponíveis no momento de uso.",
+            "A ordem de atualização, física, chamadas de áudio, escadas e travessias de portas permanece equivalente e a verificação dessa equivalência é registrada em code/VERIFICATION.md."
+          ]
+        },
+        {
+          "id": "feat-016",
+          "name": "Consolidação de helpers inventariados",
+          "description": "Consolidar somente duplicações previamente listadas, incluindo texto com sombra, rodapé, arte de NPC, preparação de imagens e mapeamento de recursos, mantendo contratos explícitos.",
+          "acceptance_criteria": [
+            "Antes da primeira edição, cada duplicação candidata está listada em code/VERIFICATION.md na seção Inventário de duplicações, por arquivo, símbolo, categoria, referências e decisão; itens semelhantes mantidos possuem justificativa.",
+            "Cada item consolidado possui um único contrato compartilhado e todas as referências dependentes são atualizadas.",
+            "Helpers compartilhados preservam textos, posições, cores, tamanhos, fallbacks, orientação, halos, sons e preparação de imagens.",
+            "Helpers não decidem regras de gameplay de quests, incidentes ou modais."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/portals.pde",
+          "last_horizon/movement.pde",
+          "last_horizon/ship.pde",
+          "last_horizon/animation.pde",
+          "last_horizon/audio.pde",
+          "last_horizon/ui.pde",
+          "last_horizon/hud.pde",
+          "last_horizon/assets.pde",
+          "last_horizon/last_horizon.pde",
+          "last_horizon/editorial.pde"
+        ],
+        "key_interfaces": [
+          "preparePortalTransition()",
+          "drawButton",
+          "drawTextWrapped",
+          "drawModalFooter",
+          "drawResourceCard",
+          "resolveNpcArt",
+          "portal transition state",
+          "code/VERIFICATION.md#Inventário de duplicações"
+        ],
+        "architecture_notes": "Consulte os caches e o contrato de métricas das sprints anteriores antes de mover código. A compilação Processing trata todas as abas como uma unidade; preserve nomes globais, inicialização e referências indiretas. Consolide somente duplicações comprovadas pelo inventário."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3
+    },
+    {
+      "id": "sprint-005",
+      "index": 4,
+      "name": "Equivalência de quests e ciclo noturno",
+      "description": "Unificar previsão e aplicação noturna, preservar o contrato completo de quests e manter os resultados observáveis do ciclo de dez dias.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "Processing 4.5.6",
+        "Node.js"
+      ],
+      "features": [
+        {
+          "id": "feat-017",
+          "name": "Projeção noturna sem efeitos colaterais",
+          "description": "Garantir que simulateNightTransition() produza uma projeção completa sem alterar estado global, aleatoriedade, modais ou memória editorial.",
+          "acceptance_criteria": [
+            "simulateNightTransition() não altera estado global, aleatoriedade, flags de modal, inventário, calendário, memória editorial ou estado de quest.",
+            "A projeção contém consumo, perdas de problemas, falhas de quest, riscos, prazos, crises, condições fatais e desfecho aplicável.",
+            "Estados equivalentes produzem os mesmos valores e resultado quando a simulação é executada novamente.",
+            "projectNight() usa o mesmo contrato de simulação exibido no painel de sono."
+          ]
+        },
+        {
+          "id": "feat-018",
+          "name": "Aplicação única da projeção",
+          "description": "Fazer processNight() aplicar exatamente a NightProjection exibida, invalidando prévias obsoletas e evitando recálculo ou repetição de perdas.",
+          "acceptance_criteria": [
+            "A prévia guarda a NightProjection exibida e uma cópia ou assinatura do estado de origem.",
+            "Confirmação válida aplica o mesmo objeto uma única vez e não repete consumo, perdas ou consequências.",
+            "Qualquer mudança no estado de origem invalida a prévia, bloqueia a confirmação obsoleta e exige nova projeção.",
+            "Snapshots, restaurações e encerramento da noite não deixam estado residual."
+          ]
+        },
+        {
+          "id": "feat-019",
+          "name": "Preservação de quests e calendário",
+          "description": "Preservar ofertas preventivas, incidentes, soluções, seleção, confirmação presencial, coleta, entrega, retomada, socorro e o ciclo diário existente.",
+          "acceptance_criteria": [
+            "As fixtures existentes continuam cobrindo 22 quests e 34 estados de captura sem remoção, enfraquecimento ou alteração do oráculo.",
+            "Quatro cômodos, quatro sobreviventes além do técnico, seis recursos e dez dias continuam presentes.",
+            "O técnico carrega no máximo um objeto por vez e cada conclusão consome o limite diário conforme o comportamento de referência.",
+            "A matriz de equivalência usa as fixtures versionadas em last_horizon/capture.pde e gera a evidência canônica em last_horizon/output/equivalence-report.json.",
+            "Para cada uma das 22 quests e dos 34 estados, a comparação campo a campo registra identificador do estado, dia, quest e etapa, recursos e inventário, objeto carregado, problemas ativos, riscos, mortes, resultado editorial e desfecho de vitória ou derrota; qualquer diferença é registrada como FAIL e levada ao registro final.",
+            "Custos, recompensas, perdas, prazos, negligência, riscos, crises, mortes, vitória e derrota permanecem iguais."
+          ]
+        },
+        {
+          "id": "feat-020",
+          "name": "Ordem normativa e verificação noturna",
+          "description": "Validar a ordem das consequências noturnas, condições fatais e precedência de derrota, relacionando o resultado ao harness e ao modelo independente.",
+          "acceptance_criteria": [
+            "A aplicação segue a ordem consequências de quests, consumo diário, perdas de problemas, risco de sobrevivente, prazos e crises, limitação de recursos e condições finais.",
+            "As condições fatais são verificadas na ordem energia, oxigênio, moral, motor e sobreviventes; derrota prevalece sobre vitória no último dia quando ambas ocorrerem.",
+            "--capture e node prototype/balance-model.mjs --simulate são executados quando os pré-requisitos existirem e seus resultados são registrados.",
+            "Conflitos entre código, CURRENT_IMPLEMENTATION.md e documentação de mecânicas, eventos e interface são registrados sem alterar o código para ocultar a divergência."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/tasks.pde",
+          "last_horizon/game.pde",
+          "last_horizon/night_projection.pde",
+          "last_horizon/screens.pde",
+          "last_horizon/capture.pde",
+          "prototype/balance-model.mjs",
+          "docs/CURRENT_IMPLEMENTATION.md",
+          "mechanics/",
+          "events/",
+          "interface/"
+        ],
+        "key_interfaces": [
+          "NightSnapshot",
+          "NightProjection",
+          "simulateNightTransition()",
+          "projectNight()",
+          "processNight()",
+          "--capture",
+          "last_horizon/capture.pde (oráculo 22 quests × 34 estados)",
+          "last_horizon/output/equivalence-report.json"
+        ],
+        "architecture_notes": "A projeção deve ser pura e a confirmação deve aplicar o mesmo objeto validado. Preserve o estado global Processing, as fixtures versionadas e a ordem normativa de consequências. Não introduza persistência, aleatoriedade nova ou conteúdo de jogo."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003",
+        "sprint-004"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3
+    },
+    {
+      "id": "sprint-006",
+      "index": 5,
+      "name": "Camada modal e interação unificadas",
+      "description": "Fazer uiLayer() ser a única decisão de prioridade entre camadas e alinhar desenho, geometria, cursor, teclado, mouse e hit-test ao mesmo estado.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "Processing 4.5.6"
+      ],
+      "features": [
+        {
+          "id": "feat-021",
+          "name": "Resolução única de camada",
+          "description": "Centralizar em uiLayer() a prioridade entre pausa, transmissão, incidente, ordens, mapa, diálogo, painel técnico, sono, ajuda e cena.",
+          "acceptance_criteria": [
+            "Quando várias flags estiverem ativas, somente a primeira camada aplicável da prioridade normativa é desenhada e recebe entrada.",
+            "Desenho, registro de geometria, cursor, teclado, mouse e hit-test consomem a mesma camada retornada por uiLayer().",
+            "Nenhum clique, confirmação ou tecla alcança uma camada encoberta.",
+            "A prioridade preserva as dez posições definidas na tabela da SPEC."
+          ]
+        },
+        {
+          "id": "feat-022",
+          "name": "Geometria compartilhada de controles",
+          "description": "Usar a mesma geometria para desenho, cursor, mouse, teclado e hit-test, respeitando o limite de registros por camada.",
+          "acceptance_criteria": [
+            "drawButton e o helper de geometria usam a mesma área para desenhar e registrar a interação.",
+            "O registro aceita no máximo 24 botões por camada; controles além do limite não são interativos e são anotados no diagnóstico.",
+            "ENTER, mouse, cursor e hit-test selecionam exatamente o controle visível correspondente.",
+            "A alteração da geometria não muda paleta, texto, tamanhos, posições ou layout aprovados."
+          ]
+        },
+        {
+          "id": "feat-023",
+          "name": "Fechamento e limpeza de modais",
+          "description": "Preservar retornos, pendências e limpeza de estado para ESC, fechamento de transmissão, incidente, ordens, mapa, diálogo, painel técnico, sono, ajuda e cena.",
+          "acceptance_criteria": [
+            "Fechar transmissão revela incidente ou cena sem limpar o incidente aberto; ESC no detalhe retorna à comparação e ESC na comparação obrigatória preserva o incidente e abre pausa.",
+            "Fechar ordens não cancela ordem aceita e limpa somente seleção e paginação; fechar mapa, diálogo, painel técnico e ajuda limpa somente seu estado.",
+            "Fechar ou confirmar sono preserva a projeção no fechamento e aplica a projeção válida uma vez na confirmação.",
+            "E, ENTER, ESC, pausa, mapa, teclado e mouse mantêm os comportamentos validados pelo harness."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/screens.pde",
+          "last_horizon/ui.pde",
+          "last_horizon/last_horizon.pde",
+          "last_horizon/tasks.pde",
+          "last_horizon/capture.pde"
+        ],
+        "key_interfaces": [
+          "uiLayer()",
+          "drawButton",
+          "drawPanel",
+          "drawModalFooter",
+          "drawTextWrapped",
+          "hit-test registry",
+          "ENTER",
+          "ESC",
+          "E"
+        ],
+        "architecture_notes": "Use a resolução única de camada depois das mudanças de helpers e transições. A camada escolhida deve ser compartilhada por renderização e entrada. Não mova regras de quest para helpers visuais e preserve a limpeza seletiva de estados pendentes."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003",
+        "sprint-004",
+        "sprint-005"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2
+    },
+    {
+      "id": "sprint-007",
+      "index": 6,
+      "name": "Harness, módulos opcionais e snapshot de entrega",
+      "description": "Preservar o harness e o modo manual como módulos opcionais, validar todas as combinações de compilação e garantir que o snapshot final remova controles de desenvolvimento.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "Processing 4.5.6",
+        "Node.js",
+        "Bash"
+      ],
+      "features": [
+        {
+          "id": "feat-024",
+          "name": "Matriz de compilação opcional",
+          "description": "Validar o sketch como unidade nas combinações base, captura, manual e completa com os módulos capture.pde e test_mode.pde.",
+          "acceptance_criteria": [
+            "A combinação Base, sem capture.pde e test_mode.pde, compila e executa sem hooks.",
+            "A combinação Captura, com capture.pde e sem test_mode.pde, compila e disponibiliza os modos do harness.",
+            "A combinação Manual, com test_mode.pde e sem capture.pde, compila e disponibiliza Ctrl+K, teleporte e destaque.",
+            "A combinação Completa compila com os dois módulos simultaneamente; falha é FAIL e pré-requisito ausente é INCONCLUSIVO."
+          ]
+        },
+        {
+          "id": "feat-025",
+          "name": "Harness preservado e desacoplado",
+          "description": "Manter os modos de captura e validação disponíveis sem tornar os hooks obrigatórios ao runtime normal.",
+          "acceptance_criteria": [
+            "--capture, --hit-test, --ladder-test, --asset-pipeline-test e --metrics continuam reconhecidos pelos comandos existentes.",
+            "Sem capture.pde, o runtime compila e executa com hooks inertes e sem referências obrigatórias ao módulo ausente.",
+            "As fixtures de portas, escadas, assets, quests, noite, modais e restauração de tabelas continuam disponíveis.",
+            "Nenhum cenário é removido, reduzido ou alterado para esconder regressão."
+          ]
+        },
+        {
+          "id": "feat-026",
+          "name": "Segurança do modo manual",
+          "description": "Preservar Ctrl+K, teleporte e destaque visual apenas no modo manual incluído explicitamente, sem transformar destaque em autorização de gameplay.",
+          "acceptance_criteria": [
+            "Ctrl+K, teleporte e destaque visual somente existem quando test_mode.pde é incluído no ambiente de desenvolvimento.",
+            "O destaque forçado não autoriza pagamento, aceite, entrega ou conclusão de quest.",
+            "O runtime base não expõe overlay ou controle exclusivo do modo manual.",
+            "Os comportamentos manuais existentes continuam disponíveis para validação quando o módulo é incluído."
+          ]
+        },
+        {
+          "id": "feat-027",
+          "name": "Contrato de snapshot de entrega",
+          "description": "Adequar snapshot-entrega.mjs para aplicar as exclusões vigentes e produzir o manifesto intermediário dos arquivos excluídos e do runtime mantido antes da limpeza final.",
+          "acceptance_criteria": [
+            "node tools/snapshot-entrega.mjs gera output/snapshot-entrega-manifest.json com os caminhos excluídos e os arquivos de runtime mantidos.",
+            "O snapshot exclui harness, modo manual, ferramentas de verificação, protótipo de balanceamento e artefatos transitórios conforme a lista vigente em tools/snapshot-entrega.mjs.",
+            "A cópia intermediária compila e não expõe Ctrl+K, teleporte, destaque forçado, overlay de teste ou controles de desenvolvimento.",
+            "A lista de exclusões é herdada e rastreável, sem apagar arquivos de runtime necessários às campanhas e ao jogo.",
+            "O manifesto produzido nesta sprint é intermediário; não é evidência final e deve ser regenerado após sprint-008 para representar o estado completo da entrega."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/capture.pde",
+          "last_horizon/test_mode.pde",
+          "last_horizon/last_horizon.pde",
+          "tools/processing-cli.sh",
+          "tools/run-headless.sh",
+          "tools/regression-windows.mjs",
+          "tools/regression-final.sh",
+          "tools/snapshot-entrega.mjs",
+          "package.json",
+          "code/VERIFICATION.md"
+        ],
+        "key_interfaces": [
+          "capture.pde",
+          "test_mode.pde",
+          "--capture",
+          "--hit-test",
+          "--ladder-test",
+          "--asset-pipeline-test",
+          "--metrics",
+          "snapshot-entrega.mjs",
+          "output/snapshot-entrega-manifest.json"
+        ],
+        "architecture_notes": "capture.pde e test_mode.pde são opcionais. Preserve o runtime base sem esses módulos e mantenha a matriz de quatro combinações. Esta sprint valida o contrato e o snapshot intermediário; sprint-009 deve executar node tools/snapshot-entrega.mjs novamente depois de sprint-008 e tratar somente esse segundo manifesto como final."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003",
+        "sprint-004",
+        "sprint-005",
+        "sprint-006"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3
+    },
+    {
+      "id": "sprint-008",
+      "index": 7,
+      "name": "Remoção auditada de código e comentários",
+      "description": "Após concluir as alterações funcionais e de organização, remover código comprovadamente não usado, duplicações restantes aprovadas e comentários lexicais dos arquivos executáveis.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "Processing 4.5.6",
+        "Node.js",
+        "Bash"
+      ],
+      "features": [
+        {
+          "id": "feat-028",
+          "name": "Auditoria e remoção de código morto",
+          "description": "Localizar e remover somente símbolos comprovadamente não alcançados pelos entrypoints Processing, globais entre abas, entradas, harness, modo manual, compilação implícita ou package.json.",
+          "acceptance_criteria": [
+            "Cada remoção registra arquivo, símbolo, buscas de referências, entrypoints, entradas indiretas examinadas, justificativa, validação posterior e resultado.",
+            "Código alcançado por harness, test_mode.pde, compilação implícita ou entrada documentada não é classificado como morto.",
+            "Após cada remoção ou consolidação relevante, a validação correspondente é executada e registrada.",
+            "Nenhuma fixture, cenário, comando de regressão ou evidência é removido ou enfraquecido."
+          ]
+        },
+        {
+          "id": "feat-029",
+          "name": "Limpeza lexical de comentários",
+          "description": "Remover comentários de código dos arquivos rastreados .pde, .mjs e .sh, preservando shebangs, diretivas, strings e expressões executáveis.",
+          "acceptance_criteria": [
+            "A auditoria cobre todos os arquivos rastreados com extensão .pde, .mjs e .sh, incluindo last_horizon/editorial.pde e scripts operacionais de tools/.",
+            "Comentários //, /* ... */ e #, inclusive JSDoc e comentários após código, são removidos; shebangs e diretivas obrigatórias permanecem no local correto.",
+            "Sequências dentro de strings, textos editoriais, expressões Processing e comandos operacionais não são alterados.",
+            "docs/, code/, mechanics/, events/ e interface/ não sofrem limpeza de comentários por esta feature."
+          ]
+        },
+        {
+          "id": "feat-030",
+          "name": "Auditoria final da limpeza",
+          "description": "Registrar a cobertura, contagem antes e depois, exceções preservadas e verificações executadas para a remoção de comentários e código não usado.",
+          "acceptance_criteria": [
+            "code/VERIFICATION.md registra caminho, extensão, contagem antes e depois, exceções preservadas, comando executado e código de saída para cada arquivo coberto.",
+            "node --check passa para todos os módulos .mjs cobertos e os scripts Bash mantêm shebangs e diretivas válidas.",
+            "O sketch continua sem nova aba .pde e mantém last_horizon/editorial.pde no inventário.",
+            "As referências alteradas por remoções ou movimentações estão atualizadas antes da regressão final."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/",
+          "tools/",
+          "package.json",
+          "code/VERIFICATION.md",
+          "last_horizon/editorial.pde",
+          "tools/snapshot-entrega.mjs",
+          "tools/compare-metrics.mjs"
+        ],
+        "key_interfaces": [
+          "entrypoints Processing",
+          "globais compartilhadas entre abas",
+          "package.json scripts",
+          "capture.pde",
+          "test_mode.pde",
+          "node --check"
+        ],
+        "architecture_notes": "Esta sprint ocorre depois de todas as mudanças de runtime, harness e snapshot. Não remova código apenas por aparência ou sem busca de referências. A limpeza lexical deve distinguir comentários de strings e preservar shebangs e diretivas."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003",
+        "sprint-004",
+        "sprint-005",
+        "sprint-006",
+        "sprint-007"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3
+    },
+    {
+      "id": "sprint-009",
+      "index": 8,
+      "name": "Validação integrada e registro de conclusão",
+      "description": "Executar a validação funcional, estrutural e de performance da entrega completa nos ambientes disponíveis e fechar o registro único com evidências, variações e limitações honestas.",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "Processing 4.5.6",
+        "Node.js",
+        "Bash"
+      ],
+      "features": [
+        {
+          "id": "feat-031",
+          "name": "Regressão integrada da entrega",
+          "description": "Executar typecheck, compilação, regressão Processing, cenários funcionais, simulação e matriz de módulos opcionais sobre o estado final.",
+          "acceptance_criteria": [
+            "npm.cmd run typecheck ou npm run typecheck passa sem erros no ambiente correspondente.",
+            "--capture, --hit-test, --ladder-test e --asset-pipeline-test passam quando Processing e os pré-requisitos estão disponíveis; cada cenário possui evidência individual.",
+            "A matriz Base, Captura, Manual e Completa é executada ou registrada como INCONCLUSIVA quando o pré-requisito não puder iniciar.",
+            "A simulação independente executa node prototype/balance-model.mjs --simulate com timeout de 120 segundos quando disponível; timeout ou qualquer falha depois do início produz FAIL explícito, enquanto pré-requisito ausente antes do início produz INCONCLUSIVO com motivo e impacto, nunca aprovação ou resultado inconclusivo silencioso.",
+            "Cada uma das 22 quests e dos 34 estados de captura é comparada campo a campo entre baseline e versão revisada usando identificador do estado, dia, quest e etapa, recursos e inventário, objeto carregado, problemas ativos, riscos, mortes, resultado editorial e desfecho de vitória ou derrota; a evidência individual e cada diferença são registradas no resultado final."
+          ]
+        },
+        {
+          "id": "feat-032",
+          "name": "Gate de performance robusta",
+          "description": "Fechar o gate obrigatório de performance e profiling comparando baseline e versão revisada no notebook Core i3 com vídeo integrado e no perfil de referência, usando a mesma fixture, três amostras de 30 segundos e o contrato de custos.",
+          "acceptance_criteria": [
+            "Cada perfil e cenário obrigatório possui três amostras equivalentes ou é marcado como INCONCLUSIVO com motivo e impacto.",
+            "O maior p95 mediano de tempo de quadro entre perfis e cenários é no máximo 33,3 ms.",
+            "Nenhum custo E6 apresenta regressão superior a 10%, allocations_per_frame não aumenta persistentemente e não há falha de carregamento.",
+            "O profiling obrigatório é executado antes e depois nos dois perfis, cobrindo renderização, escalonamento de imagens, alocações por quadro, preview de transições e carregamento e cache de assets; cada resultado identifica perfil, versão, cenário, amostra e hotspot e aponta para o CSV e sidecar correspondentes.",
+            "Os resultados de profiling ficam em last_horizon/output/profiling/<versao>/<perfil>/<cenario>/<amostra>.json e o gate relaciona esses arquivos ao registro em code/VERIFICATION.md.",
+            "A ausência, incompletude ou não execução de qualquer profiling obrigatório mantém o gate como INCONCLUSIVO; falha de uma coleta iniciada produz FAIL. Sem profiling executado não se declara a otimização pronta.",
+            "PASS somente ocorre quando há redução mensurável e reproduzível em pelo menos um custo, todos os perfis, cenários, amostras e hotspots obrigatórios possuem evidência válida e nenhuma condição de FAIL ou INCONCLUSIVO permanece."
+          ]
+        },
+        {
+          "id": "feat-033",
+          "name": "Registro final de equivalência e custo",
+          "description": "Completar code/VERIFICATION.md com hashes, manifestos, comandos, resultados funcionais, métricas, variações, limitações e decisão geral.",
+          "acceptance_criteria": [
+            "O registro identifica baseline e versão revisada por referência, commit ou hash e manifesto exatos.",
+            "As tabelas de comandos, equivalência funcional, métricas de custo e limitações contêm status somente PASS, FAIL ou INCONCLUSIVO.",
+            "Diferenças, cenários não executados, métricas sem amostra e limitações de ambiente aparecem com impacto explícito e nunca são apresentados como ganho.",
+            "A equivalência funcional referencia last_horizon/output/equivalence-report.json e expõe diferenças campo a campo das 22 quests e dos 34 estados.",
+            "O registro referencia os resultados de profiling antes e depois nos dois perfis, os cinco grupos de hotspot e a decisão do gate como PASS, INCONCLUSIVO ou FAIL.",
+            "O status geral segue a precedência FAIL, depois INCONCLUSIVO, depois PASS e inclui justificativa baseada nas evidências registradas; sem profiling obrigatório executado, a otimização não é declarada pronta."
+          ]
+        },
+        {
+          "id": "feat-034",
+          "name": "Reprodutibilidade e artefatos finais",
+          "description": "Consolidar os artefatos de comparação, profiling, snapshot e limpeza para que a entrega possa ser revisada e repetida pelos comandos documentados.",
+          "acceptance_criteria": [
+            "Os caminhos dos CSVs, sidecars, perfis, logs, evidências funcionais e manifesto do snapshot são referenciados no registro final.",
+            "tools/cleanup-verification-artifacts.mjs remove somente saídas transitórias previstas e não apaga fontes, fixtures ou evidências permanentes necessárias.",
+            "Depois de sprint-008, node tools/snapshot-entrega.mjs é executado novamente; output/snapshot-entrega-manifest.json e a cópia compilada representam o estado pós-limpeza e são os únicos artefatos aceitos como snapshot final.",
+            "O snapshot intermediário produzido em sprint-007 não é tratado como evidência final; o snapshot final continua compilável e sem controles de desenvolvimento, conforme o manifesto regenerado.",
+            "A documentação final permite repetir as verificações com os mesmos comandos, pré-requisitos, timeouts e cenários declarados, incluindo os caminhos canônicos last_horizon/output/<versao>/<perfil>/<sample_id>.csv, last_horizon/output/<versao>/<perfil>/<sample_id>.sidecar.json, last_horizon/output/<versao>/<perfil>/<cenario>/<amostra>.log, last_horizon/output/profiling/<versao>/<perfil>/<cenario>/<amostra>.json, last_horizon/output/equivalence-report.json, last_horizon/output/fallback-diagnostics.jsonl e output/snapshot-entrega-manifest.json."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "code/VERIFICATION.md",
+          "tools/compare-metrics.mjs",
+          "tools/cleanup-verification-artifacts.mjs",
+          "tools/snapshot-entrega.mjs",
+          "tools/build.sh",
+          "tools/regression-final.sh",
+          "tools/regression-windows.mjs",
+          "tools/run-headless.sh",
+          "prototype/balance-model.mjs",
+          "package.json",
+          "last_horizon/"
+        ],
+        "key_interfaces": [
+          "code/VERIFICATION.md",
+          "compare-metrics.mjs",
+          "snapshot-entrega.mjs",
+          "output/snapshot-entrega-manifest.json",
+          "--metrics",
+          "--capture",
+          "--hit-test",
+          "--ladder-test",
+          "--asset-pipeline-test",
+          "node prototype/balance-model.mjs --simulate (120 s)",
+          "22 quests × 34 estados: comparação campo a campo",
+          "last_horizon/output/equivalence-report.json",
+          "last_horizon/output/profiling/<versao>/<perfil>/<cenario>/<amostra>.json",
+          "last_horizon/output/<versao>/<perfil>/<sample_id>.csv",
+          "last_horizon/output/<versao>/<perfil>/<sample_id>.sidecar.json",
+          "last_horizon/output/fallback-diagnostics.jsonl"
+        ],
+        "architecture_notes": "Esta é a única sprint de decisão final e depende de sprint-008 concluída. Preserve a distinção entre FAIL e INCONCLUSIVO: falha após início é FAIL; pré-requisito ausente antes do início é INCONCLUSIVO. O profiling antes/depois nos dois perfis e cinco grupos de hotspot é gate obrigatório; não declare otimização pronta sem profiling executado, redução mensurável e reproduzível nos dados válidos. Execute novamente o snapshot depois da limpeza e use somente seu manifesto como evidência final."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003",
+        "sprint-004",
+        "sprint-005",
+        "sprint-006",
+        "sprint-007",
+        "sprint-008"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "created_at": "2026-09-21T22:45:29.910Z",
+    "total_sprints": 9,
+    "total_features": 34
+  }
+}

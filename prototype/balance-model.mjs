@@ -1,16 +1,34 @@
 #!/usr/bin/env node
-/**
- * PROTÓTIPO EXECUTÁVEL — balanceamento da issue #26.
- *
- * O modelo usa o contrato de quests físicas: uma quest concluída por dia,
- * preventivas nos dias sem incidente e soluções físicas nos dias pares.
- * Simulação automática: node prototype/balance-model.mjs --simulate
- * Exploração interativa: node prototype/balance-model.mjs
- */
 
 import readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { pathToFileURL } from "node:url";
+
+const SIMULATION_TIMEOUT_MS = 120_000;
+let simulationDeadlineMs = 0;
+let simulationStarted = false;
+
+class SimulationError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+function assertSimulationPrerequisites() {
+  if (typeof process?.versions?.node !== "string") {
+    throw new SimulationError(
+      "INCONCLUSIVO",
+      "pré-requisito ausente antes do início: runtime Node.js",
+    );
+  }
+}
+
+function enforceSimulationTimeout() {
+  if (simulationDeadlineMs > 0 && Date.now() >= simulationDeadlineMs) {
+    throw new SimulationError("FAIL", "simulation excedeu o timeout fixo de 120s");
+  }
+}
 
 export const MAX_RESOURCE = 100;
 export const BAR_RESOURCES = Object.freeze([
@@ -741,15 +759,6 @@ function buildNightProjection(before, projected, effects = []) {
   };
 }
 
-/**
- * Simulates the end of the current day without mutating the input state.
- *
- * @param {object} state Current game state.
- * @returns {object} A projection with the copied state, deltas and outcome.
- * @example
- * const projection = simulateNightTransition(state);
- * console.log(projection.projectedState.resources.energy);
- */
 export function simulateNightTransition(state) {
   const before = copyState(state);
   const projected = copyState(state);
@@ -775,12 +784,6 @@ export function simulateNightTransition(state) {
   return buildNightProjection(before, projected, effects);
 }
 
-/**
- * Adapts the pure night simulation for preview consumers.
- *
- * @param {object} state Current game state.
- * @returns {object} Projection plus display-ready lines.
- */
 export function projectNight(state) {
   const projection = simulateNightTransition(state);
   const { resources } = projection.projectedState;
@@ -793,12 +796,6 @@ export function projectNight(state) {
   return projection;
 }
 
-/**
- * Runs exactly one pure transition and returns its applied result.
- *
- * @param {object} state Current game state.
- * @returns {object} The night projection; its projectedState is the new state.
- */
 export function processNight(state) {
   return simulateNightTransition(state);
 }
@@ -878,6 +875,7 @@ function runStrategy(strategy, incidentSequence = DEFAULT_INCIDENT_SEQUENCE) {
   let state = initialState(incidentSequence);
   const messages = [];
   while (state.outcome === "ongoing") {
+    enforceSimulationTimeout();
     state = reduce(state, { type: "begin" });
     messages.push(`D${state.day}: ${state.lastMessage}`);
 
@@ -988,6 +986,7 @@ function formatSolutionOption(problem, option, deadline = problem.deadline) {
 }
 
 function orderedSelections(items, length, prefix = []) {
+  enforceSimulationTimeout();
   if (prefix.length === length) return [prefix];
   const remaining = items.filter((item) => !prefix.includes(item));
   return remaining.flatMap((item) => orderedSelections(items, length, [...prefix, item]));
@@ -1102,6 +1101,9 @@ function printSimulation(title, result) {
 }
 
 export function simulateAll() {
+  assertSimulationPrerequisites();
+  simulationStarted = true;
+  simulationDeadlineMs = Date.now() + SIMULATION_TIMEOUT_MS;
   console.log("BALANCEAMENTO DO CICLO DE QUESTS — ISSUE #26");
   console.log(`estoque inicial: ${compactResources(INITIAL_RESOURCES)}`);
   console.log(`consumo diário: ${compactResources({ ...DAILY_CONSUMPTION, parts: 0 })}`);
@@ -1156,7 +1158,13 @@ export function simulateAll() {
   for (const [label, passed] of checks) console.log(`- ${label}: ${passed ? "OK" : "FALHOU"}`);
   const passed = checks.every(([, value]) => value);
   console.log(`\nBALANCE CHECK: ${passed ? "PASS" : "FAIL"}`);
-  if (!passed) process.exitCode = 1;
+  if (!passed) {
+    const failedChecks = checks.filter(([, value]) => !value).map(([label]) => label);
+    console.error(`Diagnóstico: critérios da simulação falharam: ${failedChecks.join(", ")}. Impacto: a simulação foi iniciada e falhou.`);
+    process.exitCode = 1;
+  }
+  simulationDeadlineMs = 0;
+  simulationStarted = false;
   return { checks, balanced, partsFirst, riskFirst, omission, comparison, risk, nearLimit, robustWins };
 }
 
@@ -1217,5 +1225,26 @@ async function interactive() {
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
-if (isMain && process.argv.includes("--simulate")) simulateAll();
+if (isMain && process.argv.includes("--simulate")) {
+  try {
+    simulateAll();
+  } catch (error) {
+    simulationDeadlineMs = 0;
+    const missingPrerequisite = !simulationStarted
+      && ["ENOENT", "MODULE_NOT_FOUND", "ERR_MODULE_NOT_FOUND"].includes(error?.code);
+    const status = error instanceof SimulationError
+      ? error.status
+      : missingPrerequisite ? "INCONCLUSIVO" : "FAIL";
+    if (status === "INCONCLUSIVO") {
+      console.log("BALANCE CHECK: INCONCLUSIVO");
+      console.error(`Diagnóstico: ${error.message} Impacto: a simulação não foi iniciada e não pode servir como evidência.`);
+      process.exitCode = 2;
+    } else {
+      console.log("BALANCE CHECK: FAIL");
+      console.error(`Diagnóstico: ${error.message} Impacto: a simulação foi iniciada e falhou.`);
+      process.exitCode = 1;
+    }
+    simulationStarted = false;
+  }
+}
 else if (isMain) await interactive();

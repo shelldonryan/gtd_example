@@ -5,46 +5,18 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const checks = [];
 
-/**
- * Read a UTF-8 file relative to the repository root.
- *
- * @param {string} relativePath - Repository-relative file path.
- * @returns {Promise<string>} File contents.
- * @throws {Error} If the file cannot be read.
- */
 async function readText(relativePath) {
   return readFile(resolve(root, relativePath), "utf8");
 }
 
-/**
- * Record one audit assertion.
- *
- * @param {string} label - Human-readable assertion label.
- * @param {boolean} condition - Assertion result.
- * @returns {void}
- */
 function assertCheck(label, condition) {
   checks.push({ label, passed: condition });
 }
 
-/**
- * Count regex matches in a string.
- *
- * @param {string} source - Source text to inspect.
- * @param {RegExp} expression - Global regular expression.
- * @returns {number} Number of matches.
- */
 function countMatches(source, expression) {
   return [...source.matchAll(expression)].length;
 }
 
-/**
- * Extract a delimited source block.
- *
- * @param {string} source - Source text to inspect.
- * @param {RegExp} startExpression - Expression locating the block start.
- * @returns {string} Text through the first closing `};`, or an empty string.
- */
 function sourceBlock(source, startExpression) {
   const start = source.search(startExpression);
   if (start < 0) return "";
@@ -52,12 +24,6 @@ function sourceBlock(source, startExpression) {
   return end < 0 ? "" : source.slice(start, end + 2);
 }
 
-/**
- * Run the final static contract audit for E6.
- *
- * @returns {Promise<void>} Resolves after all checks have been printed.
- * @throws {Error} If a required source file is missing.
- */
 async function run() {
   const files = {
     tasks: await readText("last_horizon/tasks.pde"),

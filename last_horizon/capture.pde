@@ -29,7 +29,38 @@ final int HIT_TEST_FRAME = 5;
 final int PERFORMANCE_WARMUP_FRAMES = 120;
 final int PERFORMANCE_SAMPLE_COUNT = 3;
 final long PERFORMANCE_SAMPLE_NANOS = 30000000000L;
+final float PERFORMANCE_DURATION_TOLERANCE_S = 0.5;
 final int PERFORMANCE_MAX_FRAMES = 4096;
+final String PERFORMANCE_FIXTURE_ID = "approved-metrics-fixture-v1";
+final String PERFORMANCE_ROOM_ID = "command";
+final String PERFORMANCE_STATE_ID = "day-1-command-ready";
+final String PERFORMANCE_SCENARIO_ID = "command-day1";
+final String PERFORMANCE_VERSION_ENV = "METRICS_VERSION";
+final String PERFORMANCE_PROFILE_ENV = "METRICS_PROFILE";
+final String PERFORMANCE_PROCESSING_VERSION_ENV = "METRICS_PROCESSING_VERSION";
+final String PERFORMANCE_METRICS_HEADER =
+  "sample_id,duration_real_s,frame_count,frame_time_median_ms,frame_time_p95_ms,"
+  + "load_time_ms,additional_memory_bytes,icon_builds,floor_band_builds,"
+  + "cache_invalidations,allocations_per_frame";
+final String EQUIVALENCE_REPORT_SCHEMA = "night-equivalence-v1";
+final String EQUIVALENCE_REPORT_FILE = "output/equivalence-report.json";
+final int EQUIVALENCE_EXPECTED_QUEST_COUNT = 22;
+final int EQUIVALENCE_EXPECTED_STATE_COUNT = 34;
+final String[] EQUIVALENCE_EXPECTED_QUEST_IDS = {
+  "V-01", "V-02", "B-01", "B-02", "N-01", "N-02", "S-01", "S-02",
+  "ENG-A", "ENG-B", "HUL-A", "HUL-B", "FOOD-A", "FOOD-B", "CON-A", "CON-B",
+  "LIFE-A", "LIFE-B", "PWR-A", "PWR-B", "COM-A", "COM-B"
+};
+final String[] EQUIVALENCE_EXPECTED_STATE_IDS = {
+  "menu_init", "vignette_1", "vignette_2", "vignette_3", "preventive_offers",
+  "preventive_selected", "preventive_confirmation", "quest_collect_route", "quest_map",
+  "quest_collect_confirmation", "quest_carrying", "quest_delivery_confirmation", "preventive_reward",
+  "night_forecast", "incident_choices", "incident_confirmation", "urgent_collect",
+  "urgent_carrying", "urgent_delivery", "urgent_solved", "preventive_failure",
+  "preventive_neglect", "urgent_retry", "survivor_risk", "rescue_confirmation",
+  "survivor_rescued", "pause", "defeat", "victory", "dense_night_forecast",
+  "day_3_night_modal", "help_panel", "day_2_free_dormitory", "earth_transmission"
+};
 
 int performance_warmup_frames = 0;
 int performance_sample_index = 0;
@@ -37,12 +68,13 @@ int performance_sample_frames = 0;
 long performance_last_frame_nanos = 0;
 long performance_sample_started_nanos = 0;
 long performance_sample_start_memory = 0;
-long performance_sample_peak_memory = 0;
 int performance_sample_resource_builds = 0;
 int performance_sample_deck_builds = 0;
 int performance_sample_invalidations = 0;
+long performance_sample_start_allocated_bytes = -1;
 float[] performance_frame_times = new float[PERFORMANCE_MAX_FRAMES];
-java.io.PrintWriter performance_metrics_writer;
+String performance_version = "";
+String performance_profile = "";
 
 String[] capture_label = {
   "menu_init", "vignette_1", "vignette_2", "vignette_3", "preventive_offers",
@@ -54,9 +86,6 @@ String[] capture_label = {
   "survivor_rescued", "pause", "defeat", "victory", "dense_night_forecast",
   "day_3_night_modal", "help_panel", "day_2_free_dormitory", "earth_transmission"
 };
-/* The harness lives only in the repository sketch: the delivered copy leaves
-   this tab out. It installs its hooks in the main tab's extension points and
-   returns false outside the verification modes, letting the game draw. */
 boolean harness_installed = installHarness();
 
 
@@ -64,6 +93,9 @@ boolean installHarness(){
   harness_setup = () -> {
     readArgs();
     captureVerificationBaseline();
+    if (performance_mode){
+      beginVerificationFixture();
+    }
   };
   harness_update = () -> updateCapture();
   harness_scene = (target) -> harnessDrawScene(target);
@@ -75,8 +107,6 @@ PImage[] door_art_saved;
 boolean door_art_cleared = false;
 
 
-/* Os testes de portal assumem a travessia instantânea: o bloco limpa a arte da
-   porta e devolve o estado anterior no fim. */
 void clearDoorArt(){
   if (!door_art_cleared){
     door_art_saved = art_door_frames;
@@ -95,12 +125,6 @@ void restoreDoorArt(){
   }
 }
 
-/*
- * Verification fixtures may replace configuration tables and art references.
- * Keep one post-load baseline and restore it at fixture boundaries and before
- * an assertion aborts the sketch. The game state itself is reset through the
- * normal resetRun() path, so this seam remains isolated from the runtime.
- */
 boolean verification_baseline_ready = false;
 int[] verification_baseline_incident_sequence = new int[5];
 float[] verification_baseline_ladder_x;
@@ -243,7 +267,23 @@ void readArgs(){
   }
 
   if (pipeline_test_mode){
-    pipeline_probe_image = loadImage(PIPELINE_PROBE_FILE);
+    File pipeline_file = new File(sketchPath("data/" + PIPELINE_PROBE_FILE));
+    if (!pipeline_file.isFile()){
+      recordFallbackDiagnostic(PIPELINE_PROBE_FILE, "pipeline_image",
+        "missing_file", "geometric_fallback");
+      pipeline_probe_image = null;
+    } else {
+      try {
+        pipeline_probe_image = loadImage(PIPELINE_PROBE_FILE);
+      } catch (RuntimeException error){
+        pipeline_probe_image = null;
+      }
+      if (!validArtImage(pipeline_probe_image)){
+        recordFallbackDiagnostic(PIPELINE_PROBE_FILE, "pipeline_image",
+          "invalid_png", "geometric_fallback");
+        pipeline_probe_image = null;
+      }
+    }
     preparePipelineProbe();
   }
 
@@ -252,19 +292,235 @@ void readArgs(){
   }
 
   if (performance_mode){
-    performance_metrics_writer = createWriter(sketchPath("output/performance__metricas.csv"));
-    performance_metrics_writer.println(
-      "sample,duration_s,frames,frame_median_ms,frame_p95_ms,load_ms,"
-      + "memory_additional_bytes,resource_icon_builds,deck_strip_builds,cache_invalidations"
-    );
-    performance_metrics_writer.flush();
+    requirePerformanceStartupEnvironment(PERFORMANCE_VERSION_ENV);
+    requirePerformanceStartupEnvironment(PERFORMANCE_PROFILE_ENV);
+    requirePerformanceStartupEnvironment("METRICS_ENVIRONMENT");
+    requirePerformanceStartupEnvironment("METRICS_MACHINE");
+    requirePerformanceStartupEnvironment("METRICS_GPU");
+    requirePerformanceStartupEnvironment(PERFORMANCE_PROCESSING_VERSION_ENV);
+    performance_version = performanceSegment(System.getenv(PERFORMANCE_VERSION_ENV), PERFORMANCE_VERSION_ENV);
+    performance_profile = performanceSegment(System.getenv(PERFORMANCE_PROFILE_ENV), PERFORMANCE_PROFILE_ENV);
+    if (performanceAllocatedBytes() < 0){
+      performanceFail("métricas de alocação não disponíveis nesta JVM");
+    }
+  }
+}
+
+
+String performanceSegment(String value, String name){
+  if (value == null || value.length() == 0 || !value.matches("[A-Za-z0-9._-]+")){
+    throw new RuntimeException(name + " deve conter apenas letras, números, ponto, hífen ou sublinhado");
+  }
+  return value;
+}
+
+
+String performanceRequiredProperty(String name){
+  String value = System.getProperty(name);
+  if (value == null || value.length() == 0){
+    throw new RuntimeException("Propriedade ausente: " + name);
+  }
+  return value;
+}
+
+
+String performanceRequiredEnvironment(String name){
+  String value = System.getenv(name);
+  if (value == null || value.length() == 0){
+    throw new RuntimeException("Metadado ausente: " + name);
+  }
+  return value;
+}
+
+
+void performanceInconclusive(String name){
+  String reason = "pré-requisito ausente antes do início: " + name;
+  println("METRICS CHECK: INCONCLUSIVO — " + reason);
+  System.err.println("Diagnóstico: " + reason
+    + ". Impacto: a captura não foi iniciada e não pode servir como evidência.");
+  System.exit(2);
+}
+
+
+void performanceFail(String reason){
+  println("METRICS CHECK: FAIL — " + reason);
+  System.err.println("Diagnóstico: " + reason
+    + ". Impacto: a amostra não pode servir como evidência.");
+  System.exit(1);
+}
+
+
+void requirePerformanceStartupEnvironment(String name){
+  String value = System.getenv(name);
+  if (value == null || value.length() == 0){
+    performanceInconclusive(name);
+  }
+}
+
+
+String performanceEnvironment(){
+  return performanceRequiredEnvironment("METRICS_ENVIRONMENT");
+}
+
+
+String performanceMachine(){
+  return performanceRequiredEnvironment("METRICS_MACHINE");
+}
+
+
+String performanceGpu(){
+  return performanceRequiredEnvironment("METRICS_GPU");
+}
+
+
+String performanceProcessingVersion(){
+  return performanceRequiredEnvironment(PERFORMANCE_PROCESSING_VERSION_ENV);
+}
+
+
+String performanceHardware(){
+  java.lang.management.OperatingSystemMXBean raw_os_bean =
+    java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+  if (!(raw_os_bean instanceof com.sun.management.OperatingSystemMXBean)){
+    throw new RuntimeException("Memória física indisponível para identificar o hardware");
+  }
+
+  com.sun.management.OperatingSystemMXBean os_bean =
+    (com.sun.management.OperatingSystemMXBean) raw_os_bean;
+  long total_memory_bytes = os_bean.getTotalMemorySize();
+  if (total_memory_bytes <= 0){
+    throw new RuntimeException("Memória física inválida para identificar o hardware");
+  }
+
+  return performanceRequiredProperty("os.arch")
+    + "/cpu-" + Runtime.getRuntime().availableProcessors()
+    + "/memory-" + total_memory_bytes + "-bytes";
+}
+
+
+String performanceOs(){
+  return performanceRequiredProperty("os.name")
+    + " " + performanceRequiredProperty("os.version");
+}
+
+
+String performanceAssets(){
+  return PERFORMANCE_FIXTURE_ID;
+}
+
+
+JSONObject performanceSidecar(){
+  JSONObject sidecar = new JSONObject();
+  sidecar.setString("environment", performanceEnvironment());
+  sidecar.setString("machine", performanceMachine());
+  sidecar.setString("assets", performanceAssets());
+  sidecar.setString("room", PERFORMANCE_ROOM_ID);
+  sidecar.setString("state", PERFORMANCE_STATE_ID);
+  sidecar.setInt("nominal_window_s", 30);
+  sidecar.setString("processing", performanceProcessingVersion());
+  sidecar.setString("hardware", performanceHardware());
+  sidecar.setString("gpu", performanceGpu());
+  sidecar.setString("os", performanceOs());
+  return sidecar;
+}
+
+
+void writePerformanceProfile(String sample_id, float median_ms, float p95_ms,
+  float allocations_per_frame, int icon_builds,
+  int floor_band_builds, int invalidations){
+  String profile_directory = sketchPath("output/profiling/" + performance_version
+    + "/" + performance_profile + "/" + PERFORMANCE_SCENARIO_ID);
+  new File(profile_directory).mkdirs();
+
+  JSONObject profiling = new JSONObject();
+  profiling.setString("profile", performance_profile);
+  profiling.setString("version", performance_version);
+  profiling.setString("scenario", PERFORMANCE_SCENARIO_ID);
+  profiling.setString("sample", sample_id);
+  profiling.setString("status", "EXECUTED");
+  profiling.setString("metrics_contract", "code/VERIFICATION.md#contrato-canônico-de-métricas");
+  profiling.setString("metrics_csv", "last_horizon/output/" + performance_version
+    + "/" + performance_profile + "/" + sample_id + ".csv");
+  profiling.setString("sidecar_json", "last_horizon/output/" + performance_version
+    + "/" + performance_profile + "/" + sample_id + ".sidecar.json");
+
+  JSONArray hotspots = new JSONArray();
+  JSONObject rendering = new JSONObject();
+  rendering.setString("hotspot", "rendering");
+  rendering.setString("metric", "frame_time_p95_ms");
+  rendering.setFloat("value", p95_ms);
+  rendering.setString("unit", "ms");
+  hotspots.append(rendering);
+
+  JSONObject image_scaling = new JSONObject();
+  image_scaling.setString("hotspot", "image_scaling");
+  image_scaling.setString("metric", "floor_band_builds");
+  image_scaling.setInt("value", floor_band_builds);
+  image_scaling.setString("unit", "builds");
+  hotspots.append(image_scaling);
+
+  JSONObject frame_allocations = new JSONObject();
+  frame_allocations.setString("hotspot", "per_frame_allocations");
+  frame_allocations.setString("metric", "allocations_per_frame");
+  frame_allocations.setFloat("value", allocations_per_frame);
+  frame_allocations.setString("unit", "bytes_per_frame");
+  hotspots.append(frame_allocations);
+
+  JSONObject transition_preview = new JSONObject();
+  transition_preview.setString("hotspot", "transition_preview");
+  transition_preview.setString("metric", "cache_invalidations");
+  transition_preview.setInt("value", invalidations);
+  transition_preview.setString("unit", "invalidations");
+  hotspots.append(transition_preview);
+
+  JSONObject asset_cache = new JSONObject();
+  asset_cache.setString("hotspot", "asset_loading_and_cache");
+  asset_cache.setString("metric", "load_time_ms");
+  asset_cache.setFloat("value", art_load_ms);
+  asset_cache.setString("unit", "ms");
+  hotspots.append(asset_cache);
+
+  profiling.setJSONArray("hotspots", hotspots);
+  saveJSONObject(profiling, profile_directory + "/" + sample_id + ".json");
+}
+
+
+String performanceSampleId(){
+  return "sample-" + nf(performance_sample_index + 1, 2);
+}
+
+
+String performanceSampleDirectory(){
+  return sketchPath("output/" + performance_version + "/" + performance_profile);
+}
+
+
+long performanceAllocatedBytes(){
+  try {
+    java.lang.management.ThreadMXBean bean =
+      java.lang.management.ManagementFactory.getThreadMXBean();
+    if (!(bean instanceof com.sun.management.ThreadMXBean)){
+      return -1;
+    }
+
+    com.sun.management.ThreadMXBean allocated = (com.sun.management.ThreadMXBean) bean;
+    if (!allocated.isThreadAllocatedMemorySupported()){
+      return -1;
+    }
+    if (!allocated.isThreadAllocatedMemoryEnabled()){
+      allocated.setThreadAllocatedMemoryEnabled(true);
+    }
+    return allocated.getThreadAllocatedBytes(Thread.currentThread().getId());
+  } catch (RuntimeException error){
+    return -1;
   }
 }
 
 
 long performanceUsedMemory(){
   Runtime runtime = Runtime.getRuntime();
-  return runtime.totalMemory() - runtime.freeMemory();
+  long used = runtime.totalMemory() - runtime.freeMemory();
+  return used >= 0 ? used : -1;
 }
 
 
@@ -273,10 +529,10 @@ void beginPerformanceSample(long started_nanos){
   performance_sample_started_nanos = started_nanos;
   performance_last_frame_nanos = started_nanos;
   performance_sample_start_memory = performanceUsedMemory();
-  performance_sample_peak_memory = performance_sample_start_memory;
   performance_sample_resource_builds = resource_icon_builds;
   performance_sample_deck_builds = deck_strip_builds;
   performance_sample_invalidations = cache_invalidations;
+  performance_sample_start_allocated_bytes = performanceAllocatedBytes();
 }
 
 
@@ -294,13 +550,46 @@ float performancePercentile(float[] values, int count, float percentile){
 
 void finishPerformanceSample(long ended_nanos){
   float duration_seconds = (ended_nanos - performance_sample_started_nanos) / 1000000000.0f;
+  if (performance_sample_frames <= 0){
+    performanceFail("amostra sem quadros medidos");
+  }
+  if (!cacheMetricsAvailable()){
+    performanceFail("contadores dos caches indisponíveis na amostra");
+  }
+  if (performance_sample_start_memory < 0 || performanceUsedMemory() < 0){
+    performanceFail("memória adicional indisponível na amostra");
+  }
   float median_ms = performancePercentile(performance_frame_times, performance_sample_frames, 0.50);
   float p95_ms = performancePercentile(performance_frame_times, performance_sample_frames, 0.95);
-  long additional_memory = java.lang.Math.max(0L,
-    performance_sample_peak_memory - performance_sample_start_memory);
+  long additional_memory = cache_memory_peak_bytes;
+  if (additional_memory < 0){
+    performanceFail("memória adicional do cache inválida na amostra");
+  }
+  if (!art_load_measured || art_load_ms < 0){
+    performanceFail("tempo de carregamento indisponível na amostra");
+  }
+  long allocated_bytes = performanceAllocatedBytes();
+  if (allocated_bytes < performance_sample_start_allocated_bytes
+    || performance_sample_start_allocated_bytes < 0){
+    performanceFail("contador de alocação inválido na amostra");
+  }
+  float allocations_per_frame = (allocated_bytes - performance_sample_start_allocated_bytes)
+    / (float) performance_sample_frames;
+  if (duration_seconds < PERFORMANCE_SAMPLE_NANOS / 1000000000.0f
+    - PERFORMANCE_DURATION_TOLERANCE_S
+    || duration_seconds > PERFORMANCE_SAMPLE_NANOS / 1000000000.0f
+    + PERFORMANCE_DURATION_TOLERANCE_S){
+    performanceFail("duração fora da tolerância na " + performanceSampleId());
+  }
+  String sample_id = performanceSampleId();
+  String sample_directory = performanceSampleDirectory();
+  new File(sample_directory).mkdirs();
 
-  performance_metrics_writer.println(
-    (performance_sample_index + 1) + ","
+  java.io.PrintWriter metrics_writer = createWriter(
+    sample_directory + "/" + sample_id + ".csv");
+  metrics_writer.println(PERFORMANCE_METRICS_HEADER);
+  metrics_writer.println(
+    sample_id + ","
       + Float.toString(duration_seconds) + ","
       + performance_sample_frames + ","
       + Float.toString(median_ms) + ","
@@ -309,17 +598,33 @@ void finishPerformanceSample(long ended_nanos){
       + additional_memory + ","
       + (resource_icon_builds - performance_sample_resource_builds) + ","
       + (deck_strip_builds - performance_sample_deck_builds) + ","
-      + (cache_invalidations - performance_sample_invalidations)
+      + (cache_invalidations - performance_sample_invalidations) + ","
+      + Float.toString(allocations_per_frame)
   );
-  performance_metrics_writer.flush();
+  metrics_writer.flush();
+  metrics_writer.close();
+  saveJSONObject(performanceSidecar(),
+    sample_directory + "/" + sample_id + ".sidecar.json");
+  writePerformanceProfile(sample_id, median_ms, p95_ms,
+    allocations_per_frame,
+    resource_icon_builds - performance_sample_resource_builds,
+    deck_strip_builds - performance_sample_deck_builds,
+    cache_invalidations - performance_sample_invalidations);
+
   println("metrics: amostra " + (performance_sample_index + 1)
     + " | mediana " + Float.toString(median_ms)
     + " ms | p95 " + Float.toString(p95_ms) + " ms"
-    + " | memória adicional " + additional_memory + " bytes");
+    + " | memória adicional " + additional_memory + " bytes"
+    + " | duração " + Float.toString(duration_seconds) + " s");
+  println("metrics: csv=last_horizon/output/" + performance_version + "/"
+    + performance_profile + "/" + sample_id + ".csv"
+    + " | sidecar=last_horizon/output/" + performance_version + "/"
+    + performance_profile + "/" + sample_id + ".sidecar.json"
+    + " | profiling=last_horizon/output/profiling/" + performance_version + "/"
+    + performance_profile + "/" + PERFORMANCE_SCENARIO_ID + "/" + sample_id + ".json");
 
   performance_sample_index++;
   if (performance_sample_index >= PERFORMANCE_SAMPLE_COUNT){
-    performance_metrics_writer.close();
     println("METRICS CHECK: PASS");
     exit();
     return;
@@ -346,17 +651,14 @@ void updatePerformanceMetrics(){
   }
 
   float frame_ms = (now_nanos - performance_last_frame_nanos) / 1000000.0f;
-  if (performance_sample_frames < performance_frame_times.length){
-    performance_frame_times[performance_sample_frames] = frame_ms;
+  if (performance_sample_frames >= performance_frame_times.length){
+    performanceFail("janela excedeu o limite de quadros da captura");
   }
+  performance_frame_times[performance_sample_frames] = frame_ms;
   performance_sample_frames++;
-  performance_sample_peak_memory = java.lang.Math.max(performance_sample_peak_memory,
-    performanceUsedMemory());
   performance_last_frame_nanos = now_nanos;
 
   if (now_nanos - performance_sample_started_nanos >= PERFORMANCE_SAMPLE_NANOS){
-    int measured_frames = min(performance_sample_frames, performance_frame_times.length);
-    performance_sample_frames = measured_frames;
     finishPerformanceSample(now_nanos);
   }
 }
@@ -378,6 +680,19 @@ void preparePipelineProbe(){
       PIPELINE_PROBE_SIZE * RENDER_SCALE,
       PIPELINE_PROBE_SIZE * RENDER_SCALE
     );
+  } else {
+    pipeline_probe_layer.noStroke();
+    pipeline_probe_layer.fill(COL_PANEL_2);
+    pipeline_probe_layer.rect(0, 0,
+      PIPELINE_PROBE_SIZE * RENDER_SCALE,
+      PIPELINE_PROBE_SIZE * RENDER_SCALE);
+    pipeline_probe_layer.stroke(COL_ORANGE);
+    pipeline_probe_layer.line(0, 0,
+      PIPELINE_PROBE_SIZE * RENDER_SCALE,
+      PIPELINE_PROBE_SIZE * RENDER_SCALE);
+    pipeline_probe_layer.line(
+      PIPELINE_PROBE_SIZE * RENDER_SCALE, 0, 0,
+      PIPELINE_PROBE_SIZE * RENDER_SCALE);
   }
   pipeline_probe_layer.endDraw();
 }
@@ -548,6 +863,7 @@ void runCaptureStep(int step){
   } else if (step == 12){ captureInteract(POINT_TECH_BUNK); }
   else if (step == 13){
     incident_sequence[0] = PROBLEM_ENGINE;
+    projectNight();
     pressEnter();
     verify("dormir aplica consumo e abre incidente", day == 2 && event_open && energy == 73 && morale == 86);
     verify("transmissão da Terra precede o incidente", transmission_open);
@@ -621,8 +937,6 @@ void runCaptureStep(int step){
 void captureStartDay(int target){
   resetRun();
   day = target;
-  /* deterministico: o sorteio podia repetir o motor no dia 4 e aceitar a
-     solucao do problema anterior, quebrando a assercao de prioridade */
   int[] capture_sequence = {PROBLEM_ENGINE, PROBLEM_HULL, PROBLEM_FOOD,
     PROBLEM_CONFLICT, PROBLEM_LIFE_SUPPORT};
   arrayCopy(capture_sequence, incident_sequence);
@@ -790,6 +1104,28 @@ void checkCacheContract(){
   verify("faixas de piso idênticas compartilham uma entrada imutável",
     shared_floor_source && shared_floor_bitmap && deck_strip_builds == 1);
 
+  int saved_floor_width = deck_strip_widths[0];
+  int saved_floor_scale = deck_strip_scales[0];
+  PImage saved_floor_source = art_floor[0];
+  int floor_builds_before = deck_strip_builds;
+  int floor_invalidations_before = cache_invalidations;
+  prepareDeckStrips(saved_floor_width + 1, saved_floor_scale);
+  boolean width_rebuilt = deck_strip_builds == floor_builds_before + 1
+    && cache_invalidations == floor_invalidations_before + 1;
+  prepareDeckStrips(saved_floor_width, saved_floor_scale + 1);
+  boolean scale_rebuilt = deck_strip_builds == floor_builds_before + 2
+    && cache_invalidations == floor_invalidations_before + 2;
+  PImage replacement_floor = createImage(saved_floor_source.width,
+    saved_floor_source.height, ARGB);
+  art_floor[0] = replacement_floor;
+  prepareDeckStrips(saved_floor_width, saved_floor_scale);
+  boolean source_rebuilt = deck_strip_builds == floor_builds_before + 3
+    && cache_invalidations == floor_invalidations_before + 3;
+  art_floor[0] = saved_floor_source;
+  prepareDeckStrips(saved_floor_width, saved_floor_scale);
+  verify("faixas invalidam largura, escala e fonte seletivamente",
+    width_rebuilt && scale_rebuilt && source_rebuilt);
+
   PImage saved_icon = art_icon[0];
   PImage alternate_icon = art_icon[1];
   PImage unaffected_cache = resource_icon_cache[1];
@@ -880,6 +1216,101 @@ void checkTransmissionMessages(){
 }
 
 
+void checkModalLayerContract(){
+  resetRun();
+  screen = SCREEN_INIT;
+  paused = true;
+  event_open = true;
+  verify("modal ativo mantém prioridade mesmo sobre tela de menu",
+    uiLayer() == LAYER_PAUSE);
+  handleEscape();
+  verify("ESC consulta a camada ativa antes da tela de menu",
+    !paused && event_open);
+
+  resetRun();
+  screen = SCREEN_COMMAND;
+  paused = true;
+  transmission_open = event_open = orders_open = map_open = dialog_open = true;
+  technical_open = end_day_open = help_open = true;
+  verify("prioridade começa na pausa", uiLayer() == LAYER_PAUSE);
+  paused = false;
+  verify("transmissão cobre incidente", uiLayer() == LAYER_TRANSMISSION);
+  transmission_open = false;
+  verify("incidente precede ordens", uiLayer() == LAYER_EVENT);
+  event_open = false;
+  verify("ordens precedem mapa", uiLayer() == LAYER_ORDERS);
+  orders_open = false;
+  verify("mapa precede diálogo", uiLayer() == LAYER_MAP);
+  map_open = false;
+  verify("diálogo precede painel técnico", uiLayer() == LAYER_DIALOGUE);
+  dialog_open = false;
+  verify("painel técnico precede sono", uiLayer() == LAYER_TECHNICAL);
+  technical_open = false;
+  verify("sono precede ajuda", uiLayer() == LAYER_SLEEP);
+  end_day_open = false;
+  verify("ajuda precede cena", uiLayer() == LAYER_HELP);
+  help_open = false;
+  verify("sem modal usa a cena", uiLayer() == LAYER_SCENE);
+
+  event_open = true;
+  event_index = PROBLEM_ENGINE;
+  quest_review = PREVENTIVE_COUNT;
+  closeTopModal();
+  verify("ESC no detalhe retorna à comparação",
+    event_open && !paused && quest_review < 0);
+  closeTopModal();
+  verify("ESC na comparação abre pausa e preserva incidente",
+    paused && event_open);
+
+  resetRun();
+  screen = SCREEN_COMMAND;
+  transmission_open = event_open = true;
+  doAction(ACTION_OPEN_MAP);
+  verify("ação de mapa encoberta é ignorada", !map_open
+    && uiLayer() == LAYER_TRANSMISSION);
+  doAction(ACTION_CLOSE_MODAL);
+  verify("fechar transmissão revela incidente", !transmission_open && event_open);
+
+  resetRun();
+  screen = SCREEN_COMMAND;
+  orders_open = true;
+  selected_preventive_id = 0;
+  active_quest = 1;
+  orders_page = PROBLEM_ENGINE;
+  orders_details_open = true;
+  closeTopModal();
+  verify("fechar ordens limpa apenas seu cursor",
+    !orders_open && selected_preventive_id == 0 && active_quest == 1
+      && orders_page < 0 && !orders_details_open);
+
+  resetRun();
+  screen = SCREEN_COMMAND;
+  end_day_open = true;
+  NightProjection preview = projectNight();
+  closeTopModal();
+  verify("fechar sono preserva a previsão exibida",
+    !end_day_open && night_preview == preview);
+
+  resetButtons();
+  help_open = true;
+  draw_layer = LAYER_HELP;
+  for (int button = 0; button < MAX_BUTTONS + 1; button++){
+    addButton(10 + button, 20, 12, 12, ACTION_CLOSE_MODAL, true);
+  }
+  verify("limite de botões é por camada e registra diagnóstico",
+    button_count == MAX_BUTTONS && uiButtonOverflowCount(LAYER_HELP) == 1
+      && uiButtonOverflowDiagnostic(LAYER_HELP).indexOf("button_limit_exceeded") >= 0);
+
+  resetButtons();
+  addButton(10, 20, 30, 40, ACTION_CLOSE_MODAL, true);
+  verify("hit-test usa a área visível do controle",
+    findButton(10, 20, LAYER_HELP) == ACTION_CLOSE_MODAL
+      && findButton(40, 60, LAYER_HELP) == ACTION_CLOSE_MODAL
+      && findButton(41, 61, LAYER_HELP) == ACTION_NONE);
+  resetRun();
+}
+
+
 void runRuleChecks(){
   beginVerificationFixture();
   checkCacheContract();
@@ -904,12 +1335,319 @@ void runRuleChecks(){
   if (!checks_failed){ beginVerificationFixture(); checkCrewRules(); endVerificationFixture(); }
   if (!checks_failed){ beginVerificationFixture(); checkHullDamageLocation(); endVerificationFixture(); }
   if (!checks_failed){ beginVerificationFixture(); checkTransmissionMessages(); endVerificationFixture(); }
+  if (!checks_failed){ beginVerificationFixture(); checkModalLayerContract(); endVerificationFixture(); }
   if (!checks_failed) startCampaignChecks();
 }
 
 
 void reportQuestCheck(){
+  writeEquivalenceReport();
   println(checks_failed ? "QUEST CHECK: FALHOU" : "QUEST CHECK: PASS");
+}
+
+
+void configureEquivalenceCase(int quest, int state_index){
+  beginVerificationFixture();
+  day = 1 + state_index % TRIP_DAYS;
+  opened_day = day;
+  resetDailyQuest();
+  current_room = SCREEN_DORMITORY;
+  screen = SCREEN_DORMITORY;
+  system_message = "EQUIVALENCE FIXTURE";
+
+  boolean carrying = state_index % 2 == 1;
+  if (quest < PREVENTIVE_COUNT){
+    daily_offers[0] = quest;
+    daily_offers[1] = -1;
+    preventive_committed = true;
+    active_quest = quest;
+    quest_stage = carrying ? QUEST_DELIVER : QUEST_COLLECT;
+    held_item = carrying ? quest + 1 : ITEM_NONE;
+    return;
+  }
+
+  int problem = questProblem(quest);
+  activateProblem(problem, problem_initial_deadline[problem]);
+  problem_solution[problem] = quest;
+  active_quest = quest;
+  quest_stage = carrying ? QUEST_DELIVER : QUEST_COLLECT;
+  held_item = carrying ? quest + 1 : ITEM_NONE;
+  event_index = problem;
+  event_open = false;
+  if (state_index % 11 == 0){
+    crew_risk_deadline[CREW_VERA] = 1;
+  }
+}
+
+
+JSONArray nightIntArrayJson(int[] values){
+  JSONArray result = new JSONArray();
+  for (int value : values) result.append(value);
+  return result;
+}
+
+
+JSONArray nightBooleanArrayJson(boolean[] values){
+  JSONArray result = new JSONArray();
+  for (boolean value : values) result.append(value);
+  return result;
+}
+
+
+JSONArray nightStringArrayJson(String[] values){
+  JSONArray result = new JSONArray();
+  for (String value : values) result.append(value == null ? "" : value);
+  return result;
+}
+
+
+JSONObject equivalenceResources(NightSnapshot state){
+  JSONObject resources = new JSONObject();
+  resources.setFloat("energy", state.energy);
+  resources.setFloat("oxygen", state.oxygen);
+  resources.setFloat("water", state.water);
+  resources.setFloat("food", state.food);
+  resources.setFloat("morale", state.morale);
+  resources.setInt("parts", state.parts);
+  return resources;
+}
+
+
+String equivalenceStage(int stage){
+  if (stage == QUEST_COLLECT) return "collect";
+  if (stage == QUEST_DELIVER) return "deliver";
+  return "idle";
+}
+
+
+JSONObject equivalenceState(NightSnapshot before, NightProjection projection){
+  NightSnapshot after = projection.projected_state;
+  JSONObject state = new JSONObject();
+  state.setInt("day", after.day);
+  state.setInt("opened_day", after.opened_day);
+  state.setString("quest_stage_before", equivalenceStage(before.quest_stage));
+  state.setString("quest_stage", equivalenceStage(after.quest_stage));
+  state.setInt("active_quest_before", before.active_quest);
+  state.setInt("active_quest", after.active_quest);
+  state.setJSONObject("resources_before", equivalenceResources(before));
+  state.setJSONObject("resources", equivalenceResources(after));
+
+  JSONObject inventory_before = new JSONObject();
+  inventory_before.setInt("held_item", before.held_item);
+  inventory_before.setBoolean("quest_completed", before.quest_completed);
+  inventory_before.setBoolean("preventive_committed", before.preventive_committed);
+  state.setJSONObject("inventory_before", inventory_before);
+
+  JSONObject inventory = new JSONObject();
+  inventory.setInt("held_item", after.held_item);
+  inventory.setBoolean("quest_completed", after.quest_completed);
+  inventory.setBoolean("preventive_committed", after.preventive_committed);
+  state.setJSONObject("inventory", inventory);
+  state.setInt("object_loaded_before", before.held_item);
+  state.setInt("object_loaded", after.held_item);
+  state.setJSONArray("problems_active_before", nightBooleanArrayJson(before.problem_active));
+  state.setJSONArray("problems_active", nightBooleanArrayJson(after.problem_active));
+  state.setJSONArray("problem_deadlines_before", nightIntArrayJson(before.problem_deadline));
+  state.setJSONArray("problem_deadlines", nightIntArrayJson(after.problem_deadline));
+  state.setJSONArray("risks_before", nightIntArrayJson(before.crew_risk_deadline));
+  state.setJSONArray("risks", nightIntArrayJson(after.crew_risk_deadline));
+  state.setJSONArray("crew_alive_before", nightBooleanArrayJson(before.crew_alive));
+  state.setJSONArray("crew_alive", nightBooleanArrayJson(after.crew_alive));
+  state.setInt("deaths", max(0, before.survivors - after.survivors));
+  state.setInt("survivors_before", before.survivors);
+  state.setInt("survivors", after.survivors);
+  state.setInt("engine_state", after.engine_state);
+  state.setJSONObject("editorial_before", equivalenceEditorialMemory(before));
+  state.setJSONObject("editorial", equivalenceEditorialMemory(after));
+
+  JSONArray editorial = new JSONArray();
+  for (int i = 0; i < projection.editorial_result_count; i++){
+    JSONObject result = new JSONObject();
+    result.setInt("quest", projection.editorial_quest_ids[i]);
+    result.setInt("result", projection.editorial_quest_results[i]);
+    editorial.append(result);
+  }
+  state.setJSONArray("editorial_result", editorial);
+  state.setJSONArray("effects", nightStringArrayJson(projection.effects));
+  state.setJSONArray("fatal_conditions", nightStringArrayJson(projection.fatal_conditions));
+  state.setString("outcome", projection.game_outcome == NIGHT_OUTCOME_VICTORY
+    ? "victory" : projection.game_outcome == NIGHT_OUTCOME_DEFEAT ? "defeat" : "ongoing");
+  state.setInt("game_over_reason", projection.game_over_reason);
+  return state;
+}
+
+
+JSONObject equivalenceEditorialMemory(NightSnapshot state){
+  JSONObject editorial = new JSONObject();
+  editorial.setJSONArray("last_result", nightIntArrayJson(state.editorial_last_result));
+  editorial.setJSONArray("last_result_day", nightIntArrayJson(state.editorial_last_result_day));
+  editorial.setJSONArray("last_seen_day", nightIntArrayJson(state.editorial_last_seen_day));
+  editorial.setJSONArray("was_presented", nightBooleanArrayJson(state.editorial_was_presented));
+  editorial.setJSONArray("last_risk_day", nightIntArrayJson(state.editorial_last_risk_day));
+  editorial.setJSONArray("risk_was_presented", nightBooleanArrayJson(state.editorial_risk_was_presented));
+  editorial.setJSONArray("conversation_count", nightIntArrayJson(state.editorial_conversation_count));
+  return editorial;
+}
+
+
+boolean sameNightIntArray(int[] left, int[] right){
+  if (left == null || right == null || left.length != right.length) return false;
+  for (int i = 0; i < left.length; i++) if (left[i] != right[i]) return false;
+  return true;
+}
+
+
+boolean sameNightFloatArray(float[] left, float[] right){
+  if (left == null || right == null || left.length != right.length) return false;
+  for (int i = 0; i < left.length; i++) if (left[i] != right[i]) return false;
+  return true;
+}
+
+
+boolean sameNightStringArray(String[] left, String[] right){
+  if (left == null || right == null || left.length != right.length) return false;
+  for (int i = 0; i < left.length; i++){
+    String left_value = left[i] == null ? "" : left[i];
+    String right_value = right[i] == null ? "" : right[i];
+    if (!left_value.equals(right_value)) return false;
+  }
+  return true;
+}
+
+
+JSONArray projectionDifferences(NightProjection reference, NightProjection revised){
+  JSONArray differences = new JSONArray();
+  if (!reference.source_signature.equals(revised.source_signature)) differences.append("source");
+  if (!reference.projected_signature.equals(revised.projected_signature)) differences.append("projected_state");
+  if (reference.game_outcome != revised.game_outcome) differences.append("outcome");
+  if (reference.game_over_reason != revised.game_over_reason) differences.append("game_over_reason");
+  if (reference.survivor_loss != revised.survivor_loss) differences.append("deaths");
+  if (!reference.quest_summary.equals(revised.quest_summary)) differences.append("quest_summary");
+  if (!reference.resource_line_a.equals(revised.resource_line_a)) differences.append("resources_a");
+  if (!reference.resource_line_b.equals(revised.resource_line_b)) differences.append("resources_b");
+  if (!reference.risk_line.equals(revised.risk_line)) differences.append("risks");
+  if (!reference.outcome_line.equals(revised.outcome_line)) differences.append("outcome_line");
+  if (!sameNightStringArray(reference.effects, revised.effects)) differences.append("effects");
+  if (!sameNightStringArray(reference.fatal_conditions, revised.fatal_conditions)) differences.append("fatal_conditions");
+  if (reference.editorial_result_count != revised.editorial_result_count
+    || !sameNightIntArray(reference.editorial_quest_ids, revised.editorial_quest_ids)
+    || !sameNightIntArray(reference.editorial_quest_results, revised.editorial_quest_results)){
+    differences.append("editorial_result");
+  }
+  if (reference.deltas == null || revised.deltas == null
+    || !sameNightFloatArray(reference.deltas.resources, revised.deltas.resources)
+    || reference.deltas.survivors != revised.deltas.survivors
+    || reference.deltas.engine_state != revised.deltas.engine_state
+    || !sameNightIntArray(reference.deltas.crew_risk_deadline, revised.deltas.crew_risk_deadline)
+    || !sameNightIntArray(reference.deltas.problem_deadline, revised.deltas.problem_deadline)){
+    differences.append("deltas");
+  }
+  return differences;
+}
+
+
+JSONArray appliedStateDifferences(NightProjection projection, NightSnapshot actual){
+  NightSnapshot expected = projection.projected_state;
+  JSONArray differences = new JSONArray();
+  if (expected.day != actual.day || expected.opened_day != actual.opened_day) differences.append("calendar");
+  if (expected.energy != actual.energy || expected.oxygen != actual.oxygen
+    || expected.water != actual.water || expected.food != actual.food
+    || expected.morale != actual.morale || expected.parts != actual.parts) differences.append("resources");
+  if (expected.engine_state != actual.engine_state || expected.survivors != actual.survivors) differences.append("survivors_or_engine");
+  if (expected.active_quest != actual.active_quest || expected.quest_stage != actual.quest_stage
+    || expected.held_item != actual.held_item || expected.quest_completed != actual.quest_completed
+    || expected.preventive_committed != actual.preventive_committed) differences.append("inventory");
+  if (!sameNightBooleanArray(expected.problem_active, actual.problem_active)
+    || !sameNightIntArray(expected.problem_deadline, actual.problem_deadline)
+    || !sameNightIntArray(expected.problem_solution, actual.problem_solution)) differences.append("problems");
+  if (!sameNightBooleanArray(expected.crew_alive, actual.crew_alive)
+    || !sameNightIntArray(expected.crew_risk_deadline, actual.crew_risk_deadline)) differences.append("risks");
+  if (!sameNightIntArray(expected.editorial_last_result, actual.editorial_last_result)
+    || !sameNightIntArray(expected.editorial_last_result_day, actual.editorial_last_result_day)
+    || !sameNightIntArray(expected.editorial_last_seen_day, actual.editorial_last_seen_day)
+    || !sameNightBooleanArray(expected.editorial_was_presented, actual.editorial_was_presented)
+    || !sameNightIntArray(expected.editorial_last_risk_day, actual.editorial_last_risk_day)
+    || !sameNightBooleanArray(expected.editorial_risk_was_presented, actual.editorial_risk_was_presented)
+    || !sameNightIntArray(expected.editorial_conversation_count, actual.editorial_conversation_count))
+    differences.append("editorial");
+  if (expected.transmission_open != actual.transmission_open
+    || !expected.transmission_text.equals(actual.transmission_text)) differences.append("transmission");
+  if (expected.game_over_reason != actual.game_over_reason) differences.append("game_over_reason");
+  return differences;
+}
+
+
+boolean sameNightBooleanArray(boolean[] left, boolean[] right){
+  if (left == null || right == null || left.length != right.length) return false;
+  for (int i = 0; i < left.length; i++) if (left[i] != right[i]) return false;
+  return true;
+}
+
+
+void writeEquivalenceReport(){
+  JSONObject report = new JSONObject();
+  report.setString("schema", EQUIVALENCE_REPORT_SCHEMA);
+  report.setString("fixture_source", "last_horizon/capture.pde");
+  report.setString("status", checks_failed ? "FAIL" : "PASS");
+  report.setInt("quest_count", quest_id.length);
+  report.setInt("state_count", capture_label.length);
+  report.setInt("expected_quest_count", EQUIVALENCE_EXPECTED_QUEST_COUNT);
+  report.setInt("expected_state_count", EQUIVALENCE_EXPECTED_STATE_COUNT);
+  report.setInt("expected_entries", EQUIVALENCE_EXPECTED_QUEST_COUNT * EQUIVALENCE_EXPECTED_STATE_COUNT);
+
+  boolean fixture_shape_valid = quest_id.length == EQUIVALENCE_EXPECTED_QUEST_COUNT
+    && capture_label.length == EQUIVALENCE_EXPECTED_STATE_COUNT
+    && sameNightStringArray(quest_id, EQUIVALENCE_EXPECTED_QUEST_IDS)
+    && sameNightStringArray(capture_label, EQUIVALENCE_EXPECTED_STATE_IDS);
+  report.setBoolean("fixture_shape_valid", fixture_shape_valid);
+  if (!fixture_shape_valid) checks_failed = true;
+
+  JSONArray entries = new JSONArray();
+  boolean equivalent = true;
+  for (int quest = 0; quest < quest_id.length; quest++){
+    for (int state_index = 0; state_index < capture_label.length; state_index++){
+      configureEquivalenceCase(quest, state_index);
+      NightSnapshot source = captureNightSnapshot();
+      NightProjection reference = simulateNightTransition(source);
+      NightProjection revised = projectNight();
+      JSONArray differences = projectionDifferences(reference, revised);
+      boolean applied = applyNightProjection(revised);
+      if (!applied){
+        differences.append("application");
+      } else {
+        NightSnapshot applied_state = captureNightSnapshot();
+        JSONArray application_differences = appliedStateDifferences(revised, applied_state);
+        for (int difference = 0; difference < application_differences.size(); difference++){
+          differences.append("applied_" + application_differences.getString(difference));
+        }
+      }
+      boolean case_equivalent = differences.size() == 0;
+      equivalent &= case_equivalent;
+
+      JSONObject entry = new JSONObject();
+      entry.setString("identifier", quest_id[quest] + "::" + capture_label[state_index]);
+      entry.setString("state_id", capture_label[state_index]);
+      entry.setString("quest_id", quest_id[quest]);
+      entry.setString("quest", quest_id[quest]);
+      entry.setInt("day", source.day);
+      entry.setString("stage", equivalenceStage(source.quest_stage));
+      entry.setJSONObject("reference", equivalenceState(source, reference));
+      entry.setJSONObject("revised", equivalenceState(source, revised));
+      entry.setJSONObject("fields", equivalenceState(source, revised));
+      entry.setJSONArray("differences", differences);
+      entry.setBoolean("application_valid", applied);
+      entry.setString("status", case_equivalent ? "PASS" : "FAIL");
+      entries.append(entry);
+      invalidateNightPreview();
+    }
+  }
+
+  if (!equivalent) checks_failed = true;
+  report.setString("status", checks_failed ? "FAIL" : "PASS");
+  report.setJSONArray("entries", entries);
+  new File(sketchPath("output")).mkdirs();
+  saveJSONObject(report, sketchPath(EQUIVALENCE_REPORT_FILE));
+  restoreVerificationFixture();
 }
 
 float[] badgeInkBox(PGraphics g, float cx, float cy, float radius){
@@ -1072,6 +1810,8 @@ void checkNightConsequences(){
 
 void checkNightProjection(){
   captureStartDay(1);
+  int editorial_owner = quest_owner[daily_offers[0]];
+  int editorial_before = editorial_last_result[editorial_owner];
   float saved_energy = energy;
   float saved_oxygen = oxygen;
   float saved_food = food;
@@ -1090,9 +1830,13 @@ void checkNightProjection(){
       && energy == saved_energy && oxygen == saved_oxygen && food == saved_food
       && problem_deadline[PROBLEM_ENGINE] == saved_deadline
       && editorial_last_risk_day[CREW_VERA] == saved_risk_day);
+  verify("preview projeta memória editorial sem escrevê-la",
+    preview.projected_state.editorial_last_result[editorial_owner] == EDITORIAL_RESULT_OMISSION
+      && editorial_last_result[editorial_owner] == editorial_before);
   NightProjection second_preview = projectNight();
   verify("recalcular preview é determinístico",
-    preview.projected_state.energy == second_preview.projected_state.energy
+    preview == second_preview
+      && preview.projected_state.energy == second_preview.projected_state.energy
       && preview.projected_state.food == second_preview.projected_state.food
       && preview.game_outcome == second_preview.game_outcome);
 
@@ -1104,9 +1848,22 @@ void checkNightProjection(){
 
   NightProjection applied = processNight();
   verify("aplicação usa o mesmo resultado do preview",
-    energy == applied.projected_state.energy && oxygen == applied.projected_state.oxygen
+    applied == preview
+      && energy == applied.projected_state.energy && oxygen == applied.projected_state.oxygen
       && food == applied.projected_state.food && morale == applied.projected_state.morale
       && survivors == applied.projected_state.survivors && day == 1);
+  verify("aplicação preserva o resultado editorial projetado",
+    editorial_last_result[editorial_owner] == applied.projected_state.editorial_last_result[editorial_owner]
+      && editorial_last_result_day[editorial_owner]
+        == applied.projected_state.editorial_last_result_day[editorial_owner]);
+  float applied_energy = energy;
+  verify("segunda confirmação não reaplica efeitos", processNight() == null && energy == applied_energy);
+
+  captureStartDay(1);
+  projectNight();
+  energy -= 1;
+  verify("mudança no estado invalida confirmação obsoleta",
+    processNight() == null && night_preview == null && energy == 79);
 
   captureStartDay(3);
   activateProblem(PROBLEM_FOOD, 1);
@@ -1118,6 +1875,18 @@ void checkNightProjection(){
   processNight();
   verify("crise e risco são aplicados uma única vez",
     problem_deadline[PROBLEM_FOOD] == 2 && urgentRisk() == CREW_VERA);
+
+  captureStartDay(3);
+  putSurvivorAtRisk(PROBLEM_FOOD);
+  crew_risk_deadline[CREW_VERA] = 1;
+  NightProjection loss_preview = projectNight();
+  verify("perda noturna projeta transmissão sem abrir modal",
+    loss_preview.projected_state.transmission_open && !transmission_open
+      && loss_preview.projected_state.survivors == CREW_START - 1);
+  processNight();
+  verify("aplicação da perda usa a transmissão projetada",
+    transmission_open && transmission_text.indexOf("UMA VIDA FOI PERDIDA") >= 0
+      && survivors == CREW_START - 1);
 
   captureStartDay(9);
   day = TRIP_DAYS;
@@ -1384,8 +2153,6 @@ void checkPlayerAnimationLoop(){
 }
 
 
-/* Compara dois quadros pixel a pixel: prova que a faixa carregada não é a de
-   outro movimento da mesma spritesheet. */
 boolean samePixels(PImage a, PImage b){
   if (a == null || b == null || a.width != b.width || a.height != b.height){
     return false;
@@ -1404,10 +2171,6 @@ boolean samePixels(PImage a, PImage b){
 }
 
 
-/* A corrida é decisão de convés: acelera o passo, anima a faixa de run do LPC
-   e não invade escada nem ar (D-153). A spritesheet sem a faixa é uma
-   configuração válida: nesse caso o teste cobra o passo acelerado com a
-   caminhada, e não a faixa que não existe. */
 void checkPlayerRun(){
   if (!player_assets_loaded){
     verify("spritesheet do jogador carregada", false);
@@ -1504,6 +2267,10 @@ void checkPlayerRun(){
 
 void checkPlayerFootsteps(){
   resetRun();
+  if (sound_walk_step[0] == null || sound_run_step[0] == null){
+    println("audio footsteps: INCONCLUSIVE — backend de áudio indisponível");
+    return;
+  }
   enterRoom(SCREEN_COMMAND);
   move_right_held = true;
   verify("caminhada usa take de ataque único",
@@ -1554,8 +2321,6 @@ void checkPlayerFootsteps(){
 
   resetRun();
 }
-/* A travessia em dois quadros só existe quando há arte de porta: o teste
-   instala um par de quadros e confere abrir -> trocar de sala -> fechar. */
 void checkDoorTraversalArt(){
   int door = doorInRoomLeadingTo(SCREEN_COMMAND, SCREEN_MACHINES);
   clearDoorArt();
@@ -1570,10 +2335,22 @@ void checkDoorTraversalArt(){
     doorFrame(door) != null && useNearbyDoor()
     && screen == SCREEN_COMMAND && doorTransitionActive());
 
+  enterRoomThroughDoor(door);
+  verify("reentrada durante abertura é ignorada",
+    screen == SCREEN_COMMAND && doorTransitionActive()
+    && door_transition_target == SCREEN_MACHINES);
+
   door_transition_started = millis() - ART_DOOR_PHASE_MS - 1;
   updateRoom();
   verify("travessia troca de sala com o quadro aberto",
     screen == SCREEN_MACHINES && doorTransitionActive());
+
+  int return_door = doorInRoomLeadingTo(SCREEN_MACHINES, SCREEN_COMMAND);
+  placePlayerAtDoor(return_door);
+  enterRoomThroughDoor(return_door);
+  verify("reentrada durante fechamento é ignorada",
+    screen == SCREEN_MACHINES && doorTransitionActive()
+    && door_transition_door == return_door);
 
   door_transition_started = millis() - ART_DOOR_PHASE_MS - 1;
   updateRoom();
@@ -1595,16 +2372,48 @@ void checkConnectedDoors(){
     int target = door_target[door];
     verify("porta " + door + " reconhece o limiar configurado",
       doorInRange(door));
+    float departure_x = player_x + PLAYER_W / 2.0;
+    float departure_y = player_y + PLAYER_H;
+    verify("preparação resolve saída, chegada e retorno antes da execução",
+      preparePortalTransition(door)
+      && abs(portal_prepared_departure_x - departure_x) <= 0.1
+      && abs(portal_prepared_departure_y - departure_y) <= 0.1
+      && portal_prepared_target_room == target
+      && portal_prepared_return_door == doorInRoomLeadingTo(target, door_room[door])
+      && !doorTransitionActive());
+    clearPreparedPortalTransition();
     verify("porta " + door + " leva a " + roomTitle(target),
       useNearbyDoor() && screen == target);
     verify("chegada usa coordenada e direção configuradas",
       abs(player_x + PLAYER_W / 2.0 - door_arrival_x[door]) <= 0.1
-      && abs(player_y + PLAYER_H - door_arrival_y[door]) <= 0.1
-      && player_facing == door_arrival_facing[door]);
+    && abs(player_y + PLAYER_H - door_arrival_y[door]) <= 0.1
+    && player_facing == door_arrival_facing[door]);
   }
+
+  final int invalid_door = 0;
+  int saved_invalid_target = door_target[invalid_door];
+  resetRun();
+  enterRoom(door_room[invalid_door]);
+  placePlayerAtDoor(invalid_door);
+  door_target[invalid_door] = SCREEN_NONE;
+  verify("destino inválido mantém a sala e limpa a preparação",
+    !preparePortalTransition(invalid_door)
+    && screen == door_room[invalid_door]
+    && !portal_transition_prepared);
+  door_target[invalid_door] = saved_invalid_target;
 
   int outbound = doorInRoomLeadingTo(SCREEN_COMMAND, SCREEN_MACHINES);
   int inbound = doorInRoomLeadingTo(SCREEN_MACHINES, SCREEN_COMMAND);
+  int saved_return_target = door_target[inbound];
+  resetRun();
+  enterRoom(SCREEN_COMMAND);
+  placePlayerAtDoor(outbound);
+  door_target[inbound] = SCREEN_NONE;
+  verify("retorno ausente mantém a sala e limpa a preparação",
+    !preparePortalTransition(outbound)
+    && screen == SCREEN_COMMAND && !portal_transition_prepared);
+  door_target[inbound] = saved_return_target;
+
   resetRun();
   enterRoom(SCREEN_COMMAND);
   placePlayerAtDoor(outbound);

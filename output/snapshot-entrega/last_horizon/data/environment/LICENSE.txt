@@ -1,0 +1,28 @@
+Elementos de Cenario e Conveses — Last Horizon (D-159, D-185)
+==============================================================
+
+Arquivos desta pasta:
+  floor_1.png      — piso metalico reforcado com sinalizadores ciano (16×16 px)
+  dorm_bunk.png    — modulo duplo de beliches estilizado para o Dormitorio
+  window_space.png — janela espacial com vista estelar e planeta ao fundo
+
+Origem da arte:
+1. floor_1.png:
+   Copiado diretamente de "Floor 1.png" do pacote "190+ Pixel Art Assets (Sci-fi & Forest)",
+   de Ganamoda (assets/PNG/).
+   Licenca: CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0/
+   Pagina: https://opengameart.org/content/190-pixel-art-assets-sci-fi-forest
+
+2. dorm_bunk.png:
+   Composto a partir dos modulos de leito "Bed.png" e anteparo "Wall 4 Light.png" do
+   mesmo pacote CC0 de Ganamoda (decisoes D-169 a D-174).
+   Licenca: CC0 1.0 Universal
+
+3. window_space.png:
+   Arte autoral (Jefferson) estelar integrada na decisao D-185 para o cenario dos conveses.
+   Licenca: CC0 / CC-BY de uso aberto
+
+Uso no jogo:
+  floor_1.png e montado em art_deck_strip em assets.pde e desenhado sob as escadas e
+  estacoes em ship.pde. dorm_bunk.png e window_space.png sao desenhados como elementos
+  fixos da arquitetura dos conveses.

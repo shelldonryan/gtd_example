@@ -5,22 +5,10 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const checks = [];
 
-/**
- * Read a UTF-8 repository file.
- *
- * @param {string} relativePath - Path relative to the repository root.
- * @returns {Promise<string>} File contents.
- */
 async function readText(relativePath) {
   return readFile(resolve(root, relativePath), "utf8");
 }
 
-/**
- * Read the transient verification output directory when it exists.
- *
- * @returns {Promise<string[]>} Remaining transient entries.
- * @throws {Error} If the directory cannot be inspected.
- */
 async function readTransientEntries() {
   try {
     return await readdir(resolve(root, "last_horizon/output"));
@@ -30,12 +18,6 @@ async function readTransientEntries() {
   }
 }
 
-/**
- * Parse the small RFC 4180 subset used by the metrics fixtures.
- *
- * @param {string} source - CSV source.
- * @returns {string[][]} Rows including the header.
- */
 function parseCsv(source) {
   const rows = [];
   let row = [];
@@ -71,12 +53,6 @@ function parseCsv(source) {
   return rows;
 }
 
-/**
- * Turn CSV rows into objects.
- *
- * @param {string[][]} rows - Parsed rows.
- * @returns {Array<Record<string, string>>} Records keyed by the header.
- */
 function records(rows) {
   const [header, ...values] = rows;
   return values.map((row) => Object.fromEntries(
@@ -84,23 +60,10 @@ function records(rows) {
   ));
 }
 
-/**
- * Record a named evidence assertion.
- *
- * @param {string} label - Assertion label.
- * @param {boolean} condition - Assertion result.
- * @returns {void}
- */
 function check(label, condition) {
   checks.push({ label, passed: condition });
 }
 
-/**
- * Calculate a median without mutating the input.
- *
- * @param {number[]} values - Numeric values.
- * @returns {number} Median value.
- */
 function median(values) {
   const sorted = [...values].sort((left, right) => left - right);
   const middle = Math.floor(sorted.length / 2);
@@ -109,11 +72,6 @@ function median(values) {
     : sorted[middle];
 }
 
-/**
- * Run the evidence checks consumed by the E6 report.
- *
- * @returns {Promise<void>} Resolves after printing the result.
- */
 async function run() {
   const evidence = JSON.parse(await readText("docs/evidence/e6-results.json"));
   const snapshot = JSON.parse(await readText("docs/snapshot-manifest.json"));

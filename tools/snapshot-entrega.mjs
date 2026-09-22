@@ -1,29 +1,39 @@
-/* Reescreve a branch `entrega` a partir da branch de trabalho.
+#!/usr/bin/env node
 
-   A `entrega` e um artefato gerado, nao um lugar de edicao: a evolucao do
-   prototipo e da documentacao acontece toda na branch de trabalho, e este
-   comando monta o snapshot aplicando o corte da entrega.
 
-   Uso, a partir da raiz do repositorio:
+import { execFileSync, spawnSync } from "node:child_process";
+import {
+  copyFileSync,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, relative, resolve } from "node:path";
 
-     node tools/snapshot-entrega.mjs
-     git push origin entrega
+const repositoryRoot = resolve(
+  execFileSync("git", ["rev-parse", "--show-toplevel"], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+  }).trim(),
+);
+const outputRoot = resolve(repositoryRoot, "output");
+const intermediateRoot = resolve(outputRoot, "snapshot-entrega");
+const intermediateRuntimeRoot = resolve(intermediateRoot, "last_horizon");
+const manifestPath = resolve(outputRoot, "snapshot-entrega-manifest.json");
+const processingRunner = resolve(repositoryRoot, "tools/processing-cli.sh");
+const moduleMatrixRunner = resolve(repositoryRoot, "tools/optional-modules.mjs");
 
-   O snapshot e montado por indice temporario: o seu working tree (e o Obsidian
-   aberto em cima dele) nao e tocado. Cada geracao entra como um commit novo em
-   cima do snapshot anterior, entao o push e sempre normal, sem force. */
-
-import { execFileSync } from "node:child_process";
-import { rmSync } from "node:fs";
-import { resolve } from "node:path";
-
-const WORK_BRANCH = "prototype/sketch-architecture";
-const DELIVERY_BRANCH = "entrega";
-const MESSAGE = "chore(entrega): atualizar o snapshot para o professor";
-
-/* Material de verificacao, de processo e de agente: nao vai para o professor. */
 const EXCLUDED = [
   "SESSION_START.md",
+  "SPEC_PROGRESS.md",
+  "discovery-notes.md",
+  ".codegraph",
+  ".lionclaw",
   "code/VERIFICATION.md",
   "prototype",
   "tools",
@@ -31,65 +41,223 @@ const EXCLUDED = [
   ".obsidian",
   "last_horizon/capture.pde",
   "last_horizon/test_mode.pde",
+  "last_horizon/output",
   "last_horizon/data/pipeline_probe.aseprite",
   "last_horizon/data/pipeline_probe_frame_1.png",
 ];
 
+const forbiddenRuntimeControls = [
+  /Ctrl\s*\+\s*K/i,
+  /handleOptionalModeKey\s*\(/,
+  /testModeTeleport\s*\(/,
+  /drawOptionalModeOverlay\s*\(/,
+  /TEST-MODE/,
+];
+const transientOutputPattern = /^(?:capture|capture_window|pipeline|pipeline_window|manual|rules|catalogue|ladder)__.+\.(?:png|jpg|jpeg)$/i;
+const transientOutputDirectoryPattern = /^windows-regression-[A-Za-z0-9._-]+$/;
+
 function git(...args) {
-  return execFileSync("git", args, { encoding: "utf8" }).trim();
+  return execFileSync("git", args, {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+  }).trim();
 }
 
-function fail(message) {
-  console.error(message);
-  process.exit(1);
+function isExcluded(repositoryPath) {
+  return EXCLUDED.some((entry) =>
+    repositoryPath === entry || repositoryPath.startsWith(`${entry}/`),
+  );
 }
 
-let root;
-try {
-  root = git("rev-parse", "--show-toplevel");
-} catch {
-  fail("Rode o comando a partir de um repositorio git.");
-}
+function copyTrackedSnapshot() {
+  const trackedFiles = git("ls-files", "-z")
+    .split("\0")
+    .filter(Boolean);
+  const copied = [];
+  const excluded = [];
+  const missing = [];
 
-const index_file = resolve(root, ".git/snapshot-entrega.index");
-rmSync(index_file, { force: true });
+  for (const repositoryPath of trackedFiles) {
+    if (isExcluded(repositoryPath)) {
+      excluded.push(repositoryPath);
+      continue;
+    }
 
-const index_env = { ...process.env, GIT_INDEX_FILE: index_file };
+    const sourcePath = resolve(repositoryRoot, repositoryPath);
+    if (!existsSync(sourcePath)) {
+      missing.push(repositoryPath);
+      continue;
+    }
 
-function gitIndex(...args) {
-  return execFileSync("git", args, { encoding: "utf8", env: index_env, cwd: root }).trim();
-}
-
-try {
-  gitIndex("read-tree", WORK_BRANCH);
-
-  const removed = [];
-  for (const path of EXCLUDED) {
-    const listed = gitIndex("ls-files", "--", path);
-    if (listed === "") continue;
-    gitIndex("rm", "--cached", "--quiet", "-r", "--ignore-unmatch", "--", path);
-    removed.push(path);
+    const targetPath = resolve(intermediateRoot, repositoryPath);
+    mkdirSync(dirname(targetPath), { recursive: true });
+    copyFileSync(sourcePath, targetPath);
+    copied.push(repositoryPath);
   }
 
-  const tree = gitIndex("write-tree");
-  const previous = git("rev-parse", "--verify", "--quiet", DELIVERY_BRANCH) || WORK_BRANCH;
-  const previous_tree = git("rev-parse", "--verify", "--quiet", DELIVERY_BRANCH + "^{tree}");
+  return { copied, excluded, missing };
+}
 
-  if (previous_tree === tree) {
-    console.log("Snapshot " + DELIVERY_BRANCH + " ja esta igual a " + WORK_BRANCH + "; nada a fazer.");
-    process.exit(0);
+function runCommand(command, args, environment, timeout) {
+  const result = spawnSync(command, args, {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    env: { ...process.env, ...environment },
+    maxBuffer: 32 * 1024 * 1024,
+    timeout,
+  });
+  const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`.trim();
+  if (output.length > 0) process.stdout.write(`${output}\n`);
+  if (result.error?.code === "ENOENT") {
+    return { status: "inconclusive", exitCode: 2, output };
+  }
+  if (result.error?.code === "ETIMEDOUT") {
+    return { status: "fail", exitCode: 124, output };
+  }
+  if (result.status === 0) return { status: "pass", exitCode: 0, output };
+  if (result.status === 2) return { status: "inconclusive", exitCode: 2, output };
+  return { status: "fail", exitCode: result.status, output };
+}
+
+function runOptionalModuleMatrix(reportDirectory) {
+  const reportPath = resolve(reportDirectory, "optional-module-matrix.json");
+  runCommand(
+    process.execPath,
+    [moduleMatrixRunner, `--json-output=${reportPath}`],
+    { SKETCH_SOURCE: resolve(repositoryRoot, "last_horizon") },
+    300_000,
+  );
+
+  if (!existsSync(reportPath)) {
+    return {
+      schema: "optional-module-matrix-v1",
+      combinations: [],
+      result: "fail",
+      diagnostic: "a matriz não produziu seu relatório intermediário",
+    };
+  }
+  return JSON.parse(readFileSync(reportPath, "utf8"));
+}
+
+function checkRuntimeControls(runtimeFiles) {
+  const matches = [];
+  for (const repositoryPath of runtimeFiles) {
+    if (!repositoryPath.startsWith("last_horizon/") || !repositoryPath.endsWith(".pde")) {
+      continue;
+    }
+    const source = readFileSync(resolve(intermediateRoot, repositoryPath), "utf8");
+    if (forbiddenRuntimeControls.some((expression) => expression.test(source))) {
+      matches.push(repositoryPath);
+    }
+  }
+  return { passed: matches.length === 0, matches };
+}
+
+function checkTransientOutput() {
+  const outputRoot = resolve(repositoryRoot, "last_horizon/output");
+  if (!existsSync(outputRoot)) return { passed: true, matches: [] };
+  const outputStat = lstatSync(outputRoot);
+  if (outputStat.isSymbolicLink() || !outputStat.isDirectory()) {
+    return { passed: false, matches: [relative(repositoryRoot, outputRoot)] };
+  }
+  const matches = readdirSync(outputRoot, { withFileTypes: true })
+    .filter((entry) => (entry.isFile() && transientOutputPattern.test(entry.name))
+      || (entry.isDirectory() && transientOutputDirectoryPattern.test(entry.name)))
+    .map((entry) => `last_horizon/output/${entry.name}`);
+  return { passed: matches.length === 0, matches };
+}
+
+function compileIntermediateRuntime() {
+  return runCommand(
+    "bash",
+    [processingRunner, "--build", "--module-set=base"],
+    { SKETCH_SOURCE: intermediateRuntimeRoot },
+    300_000,
+  );
+}
+
+function run() {
+  if (existsSync(outputRoot)) {
+    const outputStat = lstatSync(outputRoot);
+    if (outputStat.isSymbolicLink() || !outputStat.isDirectory()) {
+      throw new Error(`a saída não é uma pasta comum: ${outputRoot}`);
+    }
+  } else {
+    mkdirSync(outputRoot, { recursive: true });
   }
 
-  const commit = execFileSync("git", ["commit-tree", tree, "-p", previous, "-m", MESSAGE],
-    { encoding: "utf8", env: index_env, cwd: root }).trim();
+  rmSync(intermediateRoot, { recursive: true, force: true });
+  mkdirSync(intermediateRoot, { recursive: true });
+  const temporaryRoot = mkdtempSync(resolve(outputRoot, ".snapshot-entrega-run-"));
 
-  git("update-ref", "refs/heads/" + DELIVERY_BRANCH, commit);
+  try {
+    const inventory = copyTrackedSnapshot();
+    const runtimeFiles = inventory.copied.filter((path) =>
+      path.startsWith("last_horizon/") && !path.startsWith("last_horizon/output/"),
+    );
+    const matrix = runOptionalModuleMatrix(temporaryRoot);
+    const intermediateCompile = compileIntermediateRuntime();
+    const controls = checkRuntimeControls(runtimeFiles);
+    const transientOutput = checkTransientOutput();
 
-  const count = git("ls-tree", "-r", "--name-only", DELIVERY_BRANCH).split("\n").filter(Boolean).length;
-  console.log("Snapshot " + DELIVERY_BRANCH + " atualizado a partir de " + WORK_BRANCH + " (" + commit.slice(0, 7) + ").");
-  console.log("Fora do snapshot: " + removed.join(", "));
-  console.log("Arquivos no snapshot: " + count);
-  console.log("Publicar: git push origin " + DELIVERY_BRANCH);
-} finally {
-  rmSync(index_file, { force: true });
+    rmSync(resolve(intermediateRuntimeRoot, "output"), { recursive: true, force: true });
+
+    const matrixHasFailure = matrix.result === "fail"
+      || matrix.combinations.some((entry) => entry.result === "fail");
+    const hasInconclusive = matrix.result === "inconclusive"
+      || matrix.combinations.some((entry) => entry.result === "inconclusive")
+      || intermediateCompile.status === "inconclusive";
+    const hasFailure = matrixHasFailure
+      || intermediateCompile.status === "fail"
+      || inventory.missing.length > 0
+      || !controls.passed
+      || !transientOutput.passed;
+    const result = hasFailure ? "fail" : hasInconclusive ? "inconclusive" : "pass";
+    const manifest = {
+      schema: "snapshot-entrega-v1",
+      status: "final",
+      final: true,
+      generatedAt: new Date().toISOString(),
+      source: {
+        branch: git("branch", "--show-current"),
+        revision: git("rev-parse", "HEAD"),
+        workingTree: "current tracked working tree",
+      },
+      exclusionPolicy: {
+        source: "tools/snapshot-entrega.mjs",
+        inherited: true,
+        entries: EXCLUDED,
+      },
+      excluded: EXCLUDED,
+      excludedFiles: inventory.excluded,
+      runtimeFiles,
+      intermediateRoot: relative(repositoryRoot, intermediateRoot),
+      optionalModuleCompileMatrix: matrix.combinations,
+      runtimeChecks: {
+        allOptionalCombinationsCompile: matrix.result === "pass",
+        intermediateCopyCompiles: intermediateCompile.status === "pass",
+        optionalControlsAbsent: controls.passed,
+        missingTrackedFiles: inventory.missing,
+        forbiddenControlMatches: controls.matches,
+        transientOutputAbsent: transientOutput.passed,
+        transientOutputMatches: transientOutput.matches,
+      },
+      result,
+    };
+    writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+    console.log(`SNAPSHOT CHECK: ${result.toUpperCase()} — manifesto final gerado após a limpeza`);
+    if (hasFailure) return 1;
+    if (hasInconclusive) return 2;
+    return 0;
+  } finally {
+    rmSync(temporaryRoot, { recursive: true, force: true });
+  }
+}
+
+try {
+  process.exitCode = run();
+} catch (error) {
+  console.log(`SNAPSHOT CHECK: FAIL — ${error.message}`);
+  console.error(`Diagnóstico: ${error.message} Impacto: o manifesto final não foi concluído.`);
+  process.exitCode = 1;
 }

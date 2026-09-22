@@ -1,0 +1,22 @@
+{
+  "pipelineType": "architecture-review",
+  "runId": "20260921_141345-12a70d",
+  "projectId": "09f460143796402dd25ff954907befa4",
+  "projectPath": "/home/ubuntu/pessoal/01-projetos/gtd_example",
+  "createdAt": "2026-09-21T17:13:45.516Z",
+  "updatedAt": "2026-09-21T17:13:45.516Z",
+  "selectedCandidateId": null,
+  "documents": {
+    "mapMd": "/home/ubuntu/pessoal/01-projetos/gtd_example/.lionclaw/pipelines/architecture-review/20260921_141345-12a70d/ArchitectureMap-20260921_141345-12a70d.md",
+    "mapJson": "/home/ubuntu/pessoal/01-projetos/gtd_example/.lionclaw/pipelines/architecture-review/20260921_141345-12a70d/ArchitectureMap-20260921_141345-12a70d.json",
+    "candidatesMd": "/home/ubuntu/pessoal/01-projetos/gtd_example/.lionclaw/pipelines/architecture-review/20260921_141345-12a70d/ArchitectureCandidates-20260921_141345-12a70d.md",
+    "candidatesJson": "/home/ubuntu/pessoal/01-projetos/gtd_example/.lionclaw/pipelines/architecture-review/20260921_141345-12a70d/ArchitectureCandidates-20260921_141345-12a70d.json",
+    "diagnosisMd": "/home/ubuntu/pessoal/01-projetos/gtd_example/.lionclaw/pipelines/architecture-review/20260921_141345-12a70d/ArchitectureDiagnosis-20260921_141345-12a70d.md",
+    "diagnosisJson": "/home/ubuntu/pessoal/01-projetos/gtd_example/.lionclaw/pipelines/architecture-review/20260921_141345-12a70d/ArchitectureDiagnosis-20260921_141345-12a70d.json",
+    "decisionsMd": "/home/ubuntu/pessoal/01-projetos/gtd_example/.lionclaw/pipelines/architecture-review/20260921_141345-12a70d/ArchitectureDecisions-20260921_141345-12a70d.md",
+    "decisionsJson": "/home/ubuntu/pessoal/01-projetos/gtd_example/.lionclaw/pipelines/architecture-review/20260921_141345-12a70d/ArchitectureDecisions-20260921_141345-12a70d.json",
+    "specSourceMd": "/home/ubuntu/pessoal/01-projetos/gtd_example/.lionclaw/pipelines/architecture-review/20260921_141345-12a70d/ArchitectureSpecSource-20260921_141345-12a70d.md",
+    "specMd": "/home/ubuntu/pessoal/01-projetos/gtd_example/.lionclaw/pipelines/architecture-review/20260921_141345-12a70d/SPEC-20260921_141345-12a70d.md",
+    "sprintsJson": "/home/ubuntu/pessoal/01-projetos/gtd_example/.lionclaw/pipelines/architecture-review/20260921_141345-12a70d/sprints-20260921_141345-12a70d.json"
+  }
+}

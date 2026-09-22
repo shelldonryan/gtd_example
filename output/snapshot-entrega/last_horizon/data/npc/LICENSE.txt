@@ -1,0 +1,19 @@
+Universal LPC Character Spritesheets (NPCs: Vera, Bento, Neusa, Sílvia)
+========================================================================
+
+Generated using the Universal LPC Spritesheet Character Generator:
+https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/
+
+Components, Authors & Credits:
+- Base body & heads: bluecarrot16, JaidynReiman, Benjamin K. Smith (BenCreating),
+  Evert, Eliza Wyatt (ElizaWy), TheraHedwig, MuffinElZangano, Durrani,
+  Johannes Sjölund (wulax), Stephen Challener (Redshrike).
+- Faces & expressions: Redshrike, ElizaWy, JaidynReiman.
+- Hair & beards: JaidynReiman, Manuel Riecke (MrBeast), ElizaWy.
+- Clothes, shirts, uniforms, pants & boots: ElizaWy, bluecarrot16, JaidynReiman,
+  Stephen Challener (Redshrike), Johannes Sjölund (wulax), Matthew Krohn (makrohn).
+
+Licenses:
+- OGA-BY 3.0 (https://static.opengameart.org/OGA-BY-3.0.txt)
+- CC-BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/)
+- CC-BY 3.0 / CC-BY 4.0

@@ -1,0 +1,30 @@
+{
+  "frames": [
+    {
+      "filename": "door_closed",
+      "frame": { "x": 0, "y": 0, "w": 105, "h": 97 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 105, "h": 97 },
+      "sourceSize": { "w": 105, "h": 97 },
+      "duration": 180
+    },
+    {
+      "filename": "door_open",
+      "frame": { "x": 105, "y": 0, "w": 105, "h": 97 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 105, "h": 97 },
+      "sourceSize": { "w": 105, "h": 97 },
+      "duration": 180
+    }
+  ],
+  "meta": {
+    "app": "Aseprite",
+    "version": "1.3",
+    "image": "door_sheet.png",
+    "format": "RGBA8888",
+    "size": { "w": 210, "h": 97 },
+    "scale": "1"
+  }
+}

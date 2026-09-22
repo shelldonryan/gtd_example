@@ -1,0 +1,24 @@
+Decoracoes Cenograficas — Last Horizon
+=======================================
+
+Arquivos desta pasta:
+  21 imagens PNG de decoracao cenografica para os comodos da nave (Baril 1, Baril 2,
+  Board 1, Computer 1, Electric wall, Lamp 1, Lockers 1, Neon, Pipe2, post it,
+  Screen info 1, Screen info 2, Small Machine 1, Wall 3, Wall 4 Light, Wall cover 2,
+  Wall cover 3, Wall electric pannel 1, Wall pipes, Wallbox 1, Window 2).
+
+Origem e Autor:
+  Recortados e selecionados a partir de "190+ Pixel Art Assets (Sci-fi & Forest)",
+  de Ganamoda.
+  Pagina: https://opengameart.org/content/190-pixel-art-assets-sci-fi-forest
+  Arquivo original: Pack 01 (Pixel Art).zip
+
+Licenca:
+  CC0 1.0 Universal (Public Domain Dedication)
+  https://creativecommons.org/publicdomain/zero/1.0/
+  "Common sense CC0 (Use it for anything you want)"
+
+Uso no jogo:
+  Carregados estaticamente via art_decoration em assets.pde e desenhados
+  em ship.pde (drawRoomDecorations) para enriquecer a atmosfera e a identidade
+  visual de cada comodo (Comando, Maquinas, Deposito e Dormitorio).

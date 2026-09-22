@@ -1,0 +1,41 @@
+Estacoes Interativas da Nave — Last Horizon
+==============================================
+
+Arquivos desta pasta:
+  11 imagens PNG correspondentes aos pontos de estacao da nave:
+  - antena.png               (Comando inferior — comunicacoes e reparo)
+  - bancada_motor.png        (Maquinas inferior — manutencao mecanica)
+  - beliche_socorro.png      (Dormitorio inferior — leito medico emergencial)
+  - beliche_tecnico.png      (Dormitorio superior — descanso do jogador)
+  - console_rota.png         (Comando medio — console de navegacao com biocomputador)
+  - estoque_comida.png       (Deposito inferior — armarios de racoes)
+  - mesa_comum.png           (Dormitorio superior — refeitorio compartilhado)
+  - mesa_grupo.png           (Dormitorio medio — mesa de reunioes operacionais)
+  - painel_distribuicao.png  (Maquinas medio — chaveamento eletrico)
+  - painel_suporte.png       (Maquinas superior — controle ambiental/oxigenio)
+  - prateleira_reserva.png   (Deposito superior — pecas sobressalentes)
+
+Origem e Montagem:
+  Todas as estacoes foram ilustradas e compostas a partir dos elementos de pixel art
+  do pacote "190+ Pixel Art Assets (Sci-fi & Forest)", de Ganamoda (assets/PNG/):
+  - console_rota.png: derivado de "BioComputer.png" (decisao D-167);
+  - beliche_socorro.png: derivado de "Bed.png" (decisao D-174);
+  - beliche_tecnico.png: derivado de "Bed-1.png" e "Wall 4 Light.png" (decisao D-181);
+  - estoque_comida.png: derivado de 4 baias de "Locker.png" (decisao D-175);
+  - prateleira_reserva.png: derivado de "Lockers 1.png" (decisao D-176);
+  - mesas e paineis: derivados de mesas operacionais, modulos e tubulacoes do pacote.
+
+Autor original dos elementos:
+  Ganamoda (OpenGameArt.org)
+  Pagina: https://opengameart.org/content/190-pixel-art-assets-sci-fi-forest
+  Arquivo original: Pack 01 (Pixel Art).zip
+
+Licenca:
+  CC0 1.0 Universal (Public Domain Dedication)
+  https://creativecommons.org/publicdomain/zero/1.0/
+  "Common sense CC0 (Use it for anything you want)"
+
+Uso no jogo:
+  Carregadas em art_station[] em assets.pde e desenhadas nas posicoes fixas
+  congeladas dos 4 comodos em ship.pde, com deteccao de proximidade, prompts
+  e halos de destaque interativo.

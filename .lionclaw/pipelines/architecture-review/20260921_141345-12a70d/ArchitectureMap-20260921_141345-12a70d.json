@@ -1,0 +1,333 @@
+{
+  "runId": "20260921_141345-12a70d",
+  "summary": "Last Horizon é um jogo 2D de sobrevivência e gestão implementado como um sketch Processing cujas abas .pde compartilham estado global. O núcleo é formado por quests/problemas/recursos, ciclo diário e projeção noturna, apoiado pelo mundo físico de quatro cômodos, pela camada de telas/UI e por adapters de assets e áudio. A validação é externa ao fluxo normal e usa hooks no sketch, scripts Node/shell e Processing CLI.",
+  "domainVocabulary": [
+    { "term": "Last Horizon", "meaning": "Nome do jogo e da viagem da nave até Marte." },
+    { "term": "Técnico", "meaning": "Personagem controlado pelo jogador, responsável por explorar e executar ações físicas." },
+    { "term": "Dia / ciclo diário", "meaning": "Unidade de campanha em que uma quest pode ser concluída antes do sono; a viagem dura dez dias." },
+    { "term": "Recurso", "meaning": "Energia, oxigênio, água, comida, moral ou peças." },
+    { "term": "Cômodo", "meaning": "Comando, Sala de máquinas, Depósito ou Dormitório, com conveses, portas e pontos de interação." },
+    { "term": "Ordem preventiva", "meaning": "Quest oferecida em dias sem novo incidente para proteger um recurso." },
+    { "term": "Incidente / problema", "meaning": "Falha ou ameaça persistente com perda, prazo e crise possíveis." },
+    { "term": "Solução", "meaning": "Quest física escolhida para tratar um incidente, inclusive quando retomada." },
+    { "term": "Quest", "meaning": "Unidade de trabalho com responsável, objeto, origem, destino, recompensa/custo e consequência." },
+    { "term": "Ponto de interação", "meaning": "Estação, NPC, objeto, casco ou beliche definido em ship.pde." },
+    { "term": "Retomada", "meaning": "Reapresentação da solução de um problema ativo não concluído." },
+    { "term": "Projeção noturna", "meaning": "Resultado calculado de uma transição a partir de NightSnapshot antes da aplicação ao estado real." },
+    { "term": "Risco / crise", "meaning": "Ameaça à tripulação ou consequência de um problema cujo prazo terminou." },
+    { "term": "Estado do motor", "meaning": "Estado operante ou destruído, usado nas condições de vitória e derrota." }
+  ],
+  "modules": [
+    {
+      "id": "application-shell",
+      "name": "Application shell do sketch",
+      "path": "last_horizon/last_horizon.pde",
+      "role": "Mantém constantes e estado global, configura Processing, atualiza viewport/entrada, executa o loop e oferece hooks de extensão.",
+      "callers": ["Runtime do Processing", "Callbacks de teclado e mouse da plataforma"],
+      "dependencies": ["Processing PGraphics/janela/entrada", "screens.pde", "movement.pde", "ui.pde", "assets.pde", "audio.pde", "capture.pde", "test_mode.pde"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "engine"
+    },
+    {
+      "id": "screen-action-coordinator",
+      "name": "Orquestrador de telas e ações",
+      "path": "last_horizon/screens.pde",
+      "role": "Seleciona telas, camadas modais e roteia actions para o ciclo de jogo, quests e modais.",
+      "callers": ["last_horizon.pde", "capture.pde"],
+      "dependencies": ["game.pde", "tasks.pde", "ship.pde", "ui.pde", "hud.pde", "editorial.pde", "assets.pde"],
+      "risk": "high",
+      "layer": "frontend",
+      "kind": "service"
+    },
+    {
+      "id": "campaign-day-cycle",
+      "name": "Ciclo de campanha e dia",
+      "path": "last_horizon/game.pde",
+      "role": "Inicializa a partida, abre dias, seleciona incidentes, processa sono, transmissões e desfechos.",
+      "callers": ["screens.pde", "capture.pde"],
+      "dependencies": ["tasks.pde", "night_projection.pde", "ship.pde", "ui.pde", "editorial.pde", "estado global"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "quests-problems-resources",
+      "name": "Quests, problemas e recursos",
+      "path": "last_horizon/tasks.pde",
+      "role": "Mantém o catálogo e o estado de quests/problemas, regras de recursos, seleção, confirmação, coleta, entrega, socorro e retomadas.",
+      "callers": ["screens.pde", "ship.pde", "hud.pde", "game.pde", "capture.pde"],
+      "dependencies": ["estado global", "ship.pde", "editorial.pde", "night_projection.pde", "ui.pde"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "engine"
+    },
+    {
+      "id": "night-projection",
+      "name": "Projeção e aplicação noturna",
+      "path": "last_horizon/night_projection.pde",
+      "role": "Simula e aplica a transição noturna a partir de snapshot, cobrindo consumo, perdas, risco, prazos, crises e condições de término.",
+      "callers": ["tasks.pde", "game.pde", "ui.pde", "capture.pde"],
+      "dependencies": ["tasks.pde", "editorial.pde", "estado de campanha", "NightSnapshot/NightProjection"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "engine"
+    },
+    {
+      "id": "ship-world",
+      "name": "Mundo da nave e pontos de interação",
+      "path": "last_horizon/ship.pde",
+      "role": "Define e desenha cômodos, conveses, portas, escadas, estações, NPCs, casco e pontos de interação.",
+      "callers": ["screens.pde", "movement.pde", "portals.pde", "tasks.pde", "last_horizon.pde"],
+      "dependencies": ["assets.pde", "ui.pde", "animation.pde", "tasks.pde", "estado global"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "engine"
+    },
+    {
+      "id": "player-movement",
+      "name": "Movimento do técnico",
+      "path": "last_horizon/movement.pde",
+      "role": "Atualiza caminhada, corrida, salto, gravidade, conveses, escadas e decisão entre porta e ponto de interação.",
+      "callers": ["last_horizon.pde", "capture.pde"],
+      "dependencies": ["ship.pde", "portals.pde", "audio.pde", "animation.pde", "estado do jogador"],
+      "risk": "medium",
+      "layer": "main",
+      "kind": "engine"
+    },
+    {
+      "id": "portal-transitions",
+      "name": "Transições de portas",
+      "path": "last_horizon/portals.pde",
+      "role": "Prepara e executa travessias entre cômodos, preservando saída/retorno e posição de chegada.",
+      "callers": ["movement.pde", "screens.pde", "test_mode.pde", "capture.pde"],
+      "dependencies": ["ship.pde", "audio.pde", "estado do jogador", "movement.pde"],
+      "risk": "medium",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "player-animation",
+      "name": "Renderização e animação do jogador",
+      "path": "last_horizon/animation.pde",
+      "role": "Escolhe frames do técnico e desenha sprites ou fallback geométrico.",
+      "callers": ["ship.pde"],
+      "dependencies": ["movement.pde", "assets.pde", "estado de posição/direção"],
+      "risk": "low",
+      "layer": "frontend",
+      "kind": "util"
+    },
+    {
+      "id": "hud",
+      "name": "HUD e leitura de estado",
+      "path": "last_horizon/hud.pde",
+      "role": "Desenha recursos, dia, sobreviventes, objetivo, alertas, rodapé, botões e selo de ordens.",
+      "callers": ["last_horizon.pde"],
+      "dependencies": ["ui.pde", "tasks.pde", "ship.pde", "assets.pde", "estado de campanha"],
+      "risk": "medium",
+      "layer": "frontend",
+      "kind": "ui"
+    },
+    {
+      "id": "ui-toolkit-modals",
+      "name": "Toolkit de UI e modais",
+      "path": "last_horizon/ui.pde",
+      "role": "Implementa botões, painéis, texto escalado, hit-test e modais de diálogo, técnico, sono e ajuda.",
+      "callers": ["last_horizon.pde", "screens.pde", "hud.pde", "tasks.pde", "game.pde"],
+      "dependencies": ["Processing PGraphics", "assets.pde", "tasks.pde", "night_projection.pde"],
+      "risk": "medium",
+      "layer": "frontend",
+      "kind": "util"
+    },
+    {
+      "id": "editorial-conversations",
+      "name": "Editorial e conversas",
+      "path": "last_horizon/editorial.pde",
+      "role": "Mantém textos visíveis, falas, reconhecimento, contexto e memória de resultados por tripulante.",
+      "callers": ["tasks.pde", "ui.pde", "night_projection.pde"],
+      "dependencies": ["tasks.pde", "estado do dia", "estado da tripulação"],
+      "risk": "medium",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "image-assets-adapter",
+      "name": "Assets e caches de imagem",
+      "path": "last_horizon/assets.pde",
+      "role": "Carrega imagens/JSON, cria frames e glows e mantém caches de ícones, pisos e detalhes.",
+      "callers": ["last_horizon.pde", "ship.pde", "screens.pde", "hud.pde", "ui.pde", "animation.pde"],
+      "dependencies": ["last_horizon/data/", "filesystem", "Processing PImage/PGraphics/loadJSONObject"],
+      "risk": "medium",
+      "layer": "external",
+      "kind": "adapter"
+    },
+    {
+      "id": "audio-adapter",
+      "name": "Áudio de movimento e portas",
+      "path": "last_horizon/audio.pde",
+      "role": "Carrega WAV e controla Clips de passos, corrida, escadas e portas.",
+      "callers": ["last_horizon.pde", "movement.pde", "portals.pde"],
+      "dependencies": ["last_horizon/data/audio/", "javax.sound.sampled"],
+      "risk": "low",
+      "layer": "external",
+      "kind": "adapter"
+    },
+    {
+      "id": "verification-harness",
+      "name": "Harness de verificação",
+      "path": "last_horizon/capture.pde",
+      "role": "Instala hooks, injeta fixtures, executa verificações de regras/física/renderização e salva capturas.",
+      "callers": ["setup", "draw", "drawBase", "tools/"],
+      "dependencies": ["todos os Modules de runtime", "Processing args/PGraphics/loadImage", "last_horizon/output/"],
+      "risk": "high",
+      "layer": "shared",
+      "kind": "util"
+    },
+    {
+      "id": "optional-test-mode",
+      "name": "Modo de teste opcional",
+      "path": "last_horizon/test_mode.pde",
+      "role": "Fornece teleporte manual entre cômodos, forçamento visual de interação e sobreposição de estado.",
+      "callers": ["keyPressed", "drawBase"],
+      "dependencies": ["portals.pde", "ship.pde", "hooks do shell principal"],
+      "risk": "low",
+      "layer": "shared",
+      "kind": "util"
+    },
+    {
+      "id": "runtime-asset-catalog",
+      "name": "Catálogo de assets do runtime",
+      "path": "last_horizon/data/",
+      "role": "Fornece PNGs, spritesheets, JSON de frames e WAVs consumidos pelos adapters do sketch.",
+      "callers": ["assets.pde", "ship.pde", "audio.pde"],
+      "dependencies": ["filesystem", "convenções de path do Processing"],
+      "risk": "medium",
+      "layer": "external",
+      "kind": "adapter"
+    },
+    {
+      "id": "balance-model",
+      "name": "Modelo de balanceamento",
+      "path": "prototype/balance-model.mjs",
+      "role": "Modelo Node.js separado para simular quests, incidentes, recursos, riscos, crises, sono e desfechos.",
+      "callers": ["operador", "comando documentado no README/SESSION_START"],
+      "dependencies": ["Node.js e módulos nativos"],
+      "risk": "medium",
+      "layer": "shared",
+      "kind": "engine"
+    },
+    {
+      "id": "build-regression-toolchain",
+      "name": "Toolchain de build e regressão",
+      "path": "tools/",
+      "role": "Encapsula Processing CLI, execução headless, regressão Windows, auditorias, métricas e limpeza de artefatos.",
+      "callers": ["operador", "package.json"],
+      "dependencies": ["Node.js", "Processing CLI", "shell", "filesystem temporário", "last_horizon/output/"],
+      "risk": "medium",
+      "layer": "shared",
+      "kind": "util"
+    }
+  ],
+  "flows": [
+    {
+      "id": "startup-render-input",
+      "name": "Inicialização, renderização e entrada",
+      "steps": [
+        "Processing chama settings() e setup() em last_horizon.pde.",
+        "setup() cria o buffer, configura fonte, carrega assets/áudio e instala hooks.",
+        "draw() atualiza viewport, entrada e física do cômodo; drawBase() desenha a cena, HUD, modais e hooks.",
+        "drawWindow() apresenta o buffer escalado com letterbox."
+      ]
+    },
+    {
+      "id": "campaign-day-open",
+      "name": "Início da campanha e abertura do dia",
+      "steps": [
+        "O nome e ACTION_START_GAME chegam a doAction().",
+        "startGame() reinicia o estado e abre a vinheta.",
+        "nextVignettePage() entra no Comando e chama openDay().",
+        "openDay() reinicia o estado diário, escolhe incidente e disponibiliza ofertas ou cartão de incidente."
+      ]
+    },
+    {
+      "id": "preventive-quest",
+      "name": "Ordem preventiva física",
+      "steps": [
+        "drawOrdersPanel() mostra ofertas e choosePreventive() registra a seleção.",
+        "interactNpc() e beginNpcConversation() exigem confirmação presencial.",
+        "acceptPreventive() inicia coleta ou entrega direta.",
+        "interactNearby() conduz collectQuestObject() e deliverQuest() nos pontos corretos.",
+        "A entrega aplica recompensa/custo e encerra a quest diária."
+      ]
+    },
+    {
+      "id": "incident-solution-rescue",
+      "name": "Incidente, solução, retomada e socorro",
+      "steps": [
+        "Em dias pares, openDay() abre duas soluções para o incidente.",
+        "applyEventChoice() registra a escolha e acceptSolution() ativa o problema e a quest.",
+        "Falha deixa o problema ativo e habilita retomada posterior.",
+        "Uma crise pode gerar risco; currentQuestAction() prioriza rescueUrgentSurvivor()."
+      ]
+    },
+    {
+      "id": "night-transition",
+      "name": "Sono e transição noturna",
+      "steps": [
+        "No beliche, interactPoint() abre o painel de encerramento.",
+        "recalculateEndDayPanel() chama projectNight() para mostrar a previsão.",
+        "A confirmação chama endDay(), processNight(), simulateNightTransition() e applyNightProjection().",
+        "O desfecho abre derrota, vitória ou o próximo dia."
+      ]
+    },
+    {
+      "id": "automated-verification",
+      "name": "Verificação automatizada",
+      "steps": [
+        "tools/regression-windows.mjs seleciona Processing CLI, cópia temporária e cenários.",
+        "O sketch é iniciado com flags de captura, hit-test, escadas ou pipeline de assets.",
+        "capture.pde injeta fixtures, executa regras e salva capturas/artefatos de verificação.",
+        "Os scripts verificam o processo e isolam os outputs temporários."
+      ]
+    }
+  ],
+  "hotspots": [
+    {
+      "id": "hotspot-1",
+      "title": "Estado global compartilhado entre domínio e apresentação",
+      "paths": ["last_horizon/last_horizon.pde", "last_horizon/tasks.pde", "last_horizon/game.pde", "last_horizon/screens.pde", "last_horizon/hud.pde", "last_horizon/ui.pde"],
+      "reason": "Muitos Modules leem e escrevem campanha, quests, recursos e modais; as invariantes e os modos de erro ficam distribuídos entre as Interfaces.",
+      "suggestedNextPhase": "target-triage"
+    },
+    {
+      "id": "hotspot-2",
+      "title": "Quest física combinada com navegação espacial",
+      "paths": ["last_horizon/tasks.pde", "last_horizon/ship.pde", "last_horizon/movement.pde", "last_horizon/portals.pde"],
+      "reason": "IDs de pontos, cômodos, portas, conveses, distância, item carregado e etapa da quest precisam permanecer coerentes durante movimento e interação.",
+      "suggestedNextPhase": "target-triage"
+    },
+    {
+      "id": "hotspot-3",
+      "title": "Projeção noturna e aplicação de consequências",
+      "paths": ["last_horizon/night_projection.pde", "last_horizon/game.pde", "last_horizon/tasks.pde", "last_horizon/ui.pde", "last_horizon/capture.pde"],
+      "reason": "Preview, aplicação única, riscos, crises, resultados editoriais e desfechos compartilham NightSnapshot/NightProjection e são exercitados por vários chamadores.",
+      "suggestedNextPhase": "target-triage"
+    },
+    {
+      "id": "hotspot-4",
+      "title": "Assets, caches e fallback de renderização",
+      "paths": ["last_horizon/assets.pde", "last_horizon/ship.pde", "last_horizon/hud.pde", "last_horizon/animation.pde", "last_horizon/capture.pde"],
+      "reason": "Loaders, spritesheets, glows, caches, invalidações, fallback e pipeline de PNG formam uma cadeia sensível de dados externos e renderização.",
+      "suggestedNextPhase": "target-triage"
+    }
+  ],
+  "unknowns": [
+    "A execução real do Processing e dos comandos Windows não foi repetida; os resultados no README, SESSION_START.md e code/VERIFICATION.md são evidência registrada.",
+    "Não foi produzido um grafo estático completo de chamadas; chamadores foram derivados de referências diretas, documentação e fluxos observados.",
+    "O comportamento específico do Processing 4.5.6 em diferentes sistemas operacionais, incluindo janela, áudio e filesystem, não foi verificado em runtime.",
+    "Assets foram inventariados por paths e loaders; licenças, autoria e fidelidade visual/sonora não foram revisadas em profundidade.",
+    "O alinhamento entre prototype/balance-model.mjs e o sketch não foi comparado função a função.",
+    "discovery-notes.md é um template sem decisões de produto preenchidas.",
+    "Não foram encontrados módulos de persistência, rede, IPC, banco de dados ou workers no escopo inspecionado; isso foi inferido pelos arquivos e referências consultados, não por auditoria de dependências externas."
+  ]
+}

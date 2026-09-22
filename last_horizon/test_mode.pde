@@ -1,14 +1,3 @@
-/* ==========================================================================
-   TEST-MODE: Módulo de teste manual (Remover antes da entrega)
-   Ativação: Ctrl + K
-   Atalhos:
-     1 - Teleporte para Sala de Comando (deck do meio, centro)
-     2 - Teleporte para Dormitório (deck do meio, centro)
-     3 - Teleporte para Sala de Máquinas (deck do meio, centro)
-     4 - Teleporte para Depósito (deck do meio, centro)
-     5 - Alternar forçamento visual de interação das estações/objetos
-   ========================================================================== */
-
 boolean optional_test_mode_installed = installOptionalTestMode();
 
 
@@ -20,7 +9,6 @@ boolean installOptionalTestMode(){
 
 
 boolean handleOptionalModeKey(){
-  // Detecção de Ctrl + K (código ASCII 11 ou flag de tecla do keyEvent)
   boolean ctrl_down = (keyEvent != null && keyEvent.isControlDown());
   boolean is_ctrl_k = (ctrl_down && (key == 'k' || key == 'K')) || (key == 11);
 
@@ -66,7 +54,6 @@ boolean handleOptionalModeKey(){
 
 
 void testModeTeleport(int target_screen){
-  // Fecha modais e menus abertos para evitar inconsistências de interface
   event_open = false;
   orders_open = false;
   map_open = false;
@@ -77,7 +64,6 @@ void testModeTeleport(int target_screen){
   transmission_open = false;
   paused = false;
 
-  // Posiciona no deck do meio (deck_y[1]) e centro horizontal da sala
   float center_x = (ROOM_LEFT + ROOM_RIGHT) / 2.0;
   enterRoomAtPosition(target_screen, deck_y[1], center_x, 1);
 }
