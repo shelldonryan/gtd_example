@@ -361,7 +361,7 @@ void drawInitScreen(PGraphics g){
 
   long now = presentationTimeMillis();
 
-  textCentered(g, "MISSÃO STS-10 · DESTINO: MARTE", BASE_W / 2.0, 28, 9, 0x903FC8E8);
+  textCentered(g, "DESTINO: MARTE", BASE_W / 2.0, 28, 9, 0x903FC8E8);
 
   float title_y = 50;
   float title_pulse = (1 + sin(now * 0.002f)) * 0.5f;
@@ -412,16 +412,18 @@ void drawInitScreen(PGraphics g){
   g.stroke(0x303FC8E8);
   g.line(card_x + 1, card_y + 21, card_x + card_w - 1, card_y + 21);
 
-  text(g, "TERMINAL DE EMBARQUE - REGISTRO", card_x + 10, card_y + 4, 9, COL_CYAN);
+  float status_text_y = card_y + 4;
+  text(g, "TERMINAL DE EMBARQUE - REGISTRO", card_x + 10, status_text_y, 9, COL_CYAN);
 
   float led_pulse = (1 + sin(now * 0.006f)) * 0.5f;
-  float led_y = card_y + 8.5f;
+  g.textSize(renderTextSize(9));
+  float led_y = status_text_y + (g.textAscent() + g.textDescent()) / 1.4f;
   g.noStroke();
   g.fill(COL_GREEN, int(60 + 140 * led_pulse));
   g.ellipse(card_x + card_w - 60, led_y, 7, 7);
   g.fill(COL_GREEN);
   g.ellipse(card_x + card_w - 60, led_y, 3.5f, 3.5f);
-  text(g, "ONLINE", card_x + card_w - 50, card_y + 4, 9, COL_GREEN);
+  text(g, "ONLINE", card_x + card_w - 50, status_text_y, 9, COL_GREEN);
 
   float input_x = card_x + 14;
   float input_y = card_y + 30;
@@ -437,16 +439,20 @@ void drawInitScreen(PGraphics g){
 
   text(g, "IDENTIFICAÇÃO DO TÉCNICO:", input_x + 8, input_y + 6, 9, COL_MUTED);
 
-  text(g, ">", input_x + 8, input_y + 21, 14, COL_CYAN);
-  text(g, player_name, input_x + 20, input_y + 21, 14, COL_TEXT);
+  float name_text_y = input_y + 21;
+  text(g, ">", input_x + 8, name_text_y, 14, COL_CYAN);
+  text(g, player_name, input_x + 20, name_text_y, 14, COL_TEXT);
 
   float cursor_alpha = 120 + 135 * sin(now * 0.009f);
-  if (cursor_alpha > 40){
+  if (focused && cursor_alpha > 40){
     g.textSize(renderTextSize(14));
     float cursor_x = input_x + 20 + g.textWidth(player_name) + 2;
+    float cursor_ascent = g.textAscent();
+    float cursor_height = cursor_ascent + g.textDescent();
+    float cursor_y = name_text_y;
     g.noStroke();
     g.fill(COL_CYAN, cursor_alpha);
-    g.rect(cursor_x, input_y + 21, 7, 13, 1);
+    g.rect(cursor_x, cursor_y, 7, cursor_height, 1);
   }
 
   text(g, "[ DIGITE O NOME · ENTER CONFIRMA ]", card_x + 14, card_y + 82, 8.5f, COL_DIM);
@@ -457,7 +463,6 @@ void drawInitScreen(PGraphics g){
   drawButton(g, 180, btn_y, 170, 26, "INICIAR (ENTER)", ACTION_START_GAME, can_start);
   drawButton(g, 360, btn_y, 100, 26, "SAIR", ACTION_QUIT_GAME, true);
 
-  textCentered(g, "SISTEMA OPERACIONAL MERCURY v4.5 · NAVE HORIZON · TELEMETRIA ATIVA", BASE_W / 2.0, 336, 8.5f, 0x60A6BBC7);
 }
 
 

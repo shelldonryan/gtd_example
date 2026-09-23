@@ -225,6 +225,20 @@ void setup(){
   loadPlayerAssets();
   loadArtAssets();
   loadGameAudio();
+  requestGameWindowFocus();
+}
+
+
+void requestGameWindowFocus(){
+  Object native_surface = surface.getNative();
+  if (!(native_surface instanceof java.awt.Component)) return;
+
+  final java.awt.Component input_surface = (java.awt.Component) native_surface;
+  java.awt.EventQueue.invokeLater(new Runnable(){
+    public void run(){
+      if (input_surface.isShowing()) input_surface.requestFocusInWindow();
+    }
+  });
 }
 
 
