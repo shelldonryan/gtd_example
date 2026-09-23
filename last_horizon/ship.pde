@@ -318,7 +318,6 @@ int roomIndexOrInvalid(int room_id){
 
 
 void drawRoom(PGraphics g){
-  recordCurrentPresentationSurface("room");
   PImage backdrop = art_backdrop == null ? null : art_backdrop[roomIndex(screen)];
 
   if (backdrop != null){
@@ -416,21 +415,18 @@ PImage roomDetail(String name){
     throw new IllegalArgumentException("o nome do detalhe da sala é obrigatório");
   }
   if (room_detail_cache.containsKey(name)){
-    room_detail_cache_hits++;
     return room_detail_cache.get(name);
   }
 
-  room_detail_cache_misses++;
   String data_path = ART_DECORATION_DIR + name + ".png";
-  PImage art = loadArt(data_path, "legacy_image");
+  PImage art = loadArt(data_path);
   if (art == null){
     art = loadLegacyRoomArt(name);
   }
   PImage last_valid = room_detail_last_valid_cache.get(name);
   if (art == null && last_valid != null){
     art = last_valid;
-    recordFallbackDiagnostic(data_path, "decoration", "source_retry_failed",
-      "last_valid_image");
+
   } else if (art != null && art != last_valid){
     room_detail_last_valid_cache.put(name, art);
     invalidateRoomDetailSurfaces();
@@ -885,7 +881,7 @@ void drawRoomPoint(PGraphics g, int point){
   int npc_crew = npc ? crewIndexForName(point_label[point]) : -1;
   int npc_facing = npc ? npcFacingForPlayer(x, y) : 0;
 
-  boolean is_quest = (point == nextQuestPoint()) || optionalVisualOverrideActive();
+  boolean is_quest = point == nextQuestPoint();
   boolean has_art = drawPointArt(g, point, x, y, nearby, is_quest);
   if (!has_art){
     if (!npc){
@@ -1061,8 +1057,7 @@ void loadPlayerAssets(){
   }
 
   if (player_sheet.width < 64 || player_sheet.height < 64){
-    recordFallbackDiagnostic(PLAYER_SHEET_FILE, "spritesheet", "incomplete_sheet",
-      "geometric_fallback");
+
     println("player: spritesheet incomplete");
     return;
   }
@@ -1081,13 +1076,11 @@ void loadPlayerAssets(){
     try {
       player_sheet_frames = player_sheet_data.getJSONArray("frames");
     } catch (RuntimeException error){
-      recordFallbackDiagnostic(PLAYER_SHEET_FILE, "spritesheet", "invalid_frames",
-        "geometric_fallback");
+
       return;
     }
     if (player_sheet_frames == null || player_sheet_frames.size() == 0){
-      recordFallbackDiagnostic(PLAYER_SHEET_FILE, "spritesheet", "incomplete_frames",
-        "geometric_fallback");
+
       println("player: no frames in JSON");
       return;
     }
@@ -1110,8 +1103,7 @@ void loadPlayerAssets(){
     }
 
     if (!frames_valid){
-      recordFallbackDiagnostic(PLAYER_SHEET_FILE, "spritesheet", "incomplete_frames",
-        "geometric_fallback");
+
       player_frame_images = null;
       player_frame_durations = null;
       return;
@@ -1160,8 +1152,7 @@ void loadPlayerAssets(){
         }
       }
     } catch (RuntimeException error){
-      recordFallbackDiagnostic(PLAYER_SHEET_DATA_FILE, "spritesheet_metadata",
-        "invalid_frame_tags", "default_frame_ranges");
+
       player_idle_start = 0;
       player_idle_end = 0;
       player_walk_start = 0;
@@ -1189,8 +1180,7 @@ void loadPlayerAssets(){
       && player_sheet.height >= 42 * 64;
 
     if (!can_walk){
-      recordFallbackDiagnostic(PLAYER_SHEET_FILE, "spritesheet", "incomplete_sheet",
-        "geometric_fallback");
+
       player_frame_images = null;
       player_frame_durations = null;
       return;
@@ -1272,15 +1262,9 @@ void loadPlayerAssets(){
   }
 
   if (player_frame_images == null || player_frame_images.length == 0){
-    recordFallbackDiagnostic(PLAYER_SHEET_FILE, "spritesheet", "incomplete_sheet",
-      "geometric_fallback");
     return;
   }
 
-  if (player_frame_layer != null) releaseCacheBitmap(player_frame_layer);
-  if (player_frame_layer_staging != null){
-    releaseCacheBitmap(player_frame_layer_staging);
-  }
   player_frame_layer = null;
   player_frame_layer_staging = null;
   player_frame_layer_valid = false;
@@ -1293,15 +1277,12 @@ void loadPlayerAssets(){
     );
     if (player_frame_layer != null){
       player_frame_layer.noSmooth();
-      registerCacheBitmap(player_frame_layer);
     } else {
-      rememberPlayerFrameLayerFailure(-1, player_facing,
-        "graphics_buffer_unavailable");
+      rememberPlayerFrameLayerFailure(-1, player_facing);
     }
   } catch (RuntimeException error){
     player_frame_layer = null;
-    rememberPlayerFrameLayerFailure(-1, player_facing,
-      describePlayerFrameLayerError(error));
+    rememberPlayerFrameLayerFailure(-1, player_facing);
   }
   player_assets_loaded = true;
 }

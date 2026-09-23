@@ -219,10 +219,6 @@ continuar ativas após o reinício do prazo.
   coleta e entrega físicas, retomadas e socorro em um ponto fixo no Dormitório.
 - A previsão noturna e a noite confirmada compartilham `simulateNightTransition`;
   o preview não altera recursos, prazos, RNG ou memória editorial.
-- A validação independente usa `prototype/balance-model.mjs`; os resultados e
-  os limites da execução atual estão em
-  [`docs/CURRENT_IMPLEMENTATION.md`](../docs/CURRENT_IMPLEMENTATION.md) e
-  [`code/VERIFICATION.md`](../code/VERIFICATION.md).
 
 ## Referências
 

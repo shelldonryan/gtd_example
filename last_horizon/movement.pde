@@ -25,7 +25,7 @@ void updateRoom(FrameContext context){
   boolean step_door_active = doorTransitionActive();
 
   if (paused || !isRoomScreen() || step_layer != LAYER_SCENE || step_door_active){
-    discardQueuedFrameActions(context, frameFrozenReason());
+    discardQueuedFrameActions(context);
     if (context != null) context.interrupt(frameFrozenReason());
     return;
   }
@@ -41,7 +41,7 @@ void updateRoom(FrameContext context){
     if (interaction_change.length() > 0){
       updatePlayerAnimationState(context);
       if (context != null) context.interrupt(interaction_change);
-      discardJumpAction(context, interaction_change);
+      discardJumpAction(context);
       return;
     }
   }
@@ -92,11 +92,11 @@ void enforceFrameActionBudget(FrameContext context){
   FrameInputSnapshot input = context.input_snapshot;
   if (jump_queued && (!input.jump_queued || context.jump_action_consumed
     || context.jump_action_cleared)){
-    discardJumpAction(context, "action_outside_callback_budget");
+    discardJumpAction(context);
   }
   if (interact_queued && (!input.interact_queued || context.interact_action_consumed
     || context.interact_action_cleared)){
-    discardInteractAction(context, "action_outside_callback_budget");
+    discardInteractAction(context);
   }
 }
 
@@ -113,21 +113,21 @@ void consumeInteractAction(FrameContext context){
 }
 
 
-void discardJumpAction(FrameContext context, String reason){
-  if (jump_queued && context != null) context.recordJumpActionCleared(reason);
+void discardJumpAction(FrameContext context){
+  if (jump_queued && context != null) context.recordJumpActionCleared();
   jump_queued = false;
 }
 
 
-void discardInteractAction(FrameContext context, String reason){
-  if (interact_queued && context != null) context.recordInteractActionCleared(reason);
+void discardInteractAction(FrameContext context){
+  if (interact_queued && context != null) context.recordInteractActionCleared();
   interact_queued = false;
 }
 
 
-void discardQueuedFrameActions(FrameContext context, String reason){
-  discardJumpAction(context, reason);
-  discardInteractAction(context, reason);
+void discardQueuedFrameActions(FrameContext context){
+  discardJumpAction(context);
+  discardInteractAction(context);
 }
 
 void updatePlayerFacing(){

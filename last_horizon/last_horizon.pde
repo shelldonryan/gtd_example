@@ -163,7 +163,6 @@ boolean run_held = false;
 int sound_step_play_count = 0;
 FrameClock frame_clock;
 FrameContext current_frame_context;
-FrameCallbackObserver frame_callback_observer = (context) -> {};
 PGraphics base;
 PFont ui_font;
 PImage player_sheet;
@@ -205,41 +204,8 @@ boolean key_char_pressed = false;
 char key_char = ' ';
 
 
-interface SceneHook {
-  boolean draw(PGraphics target);
-}
-
-interface OptionalKeyHook {
-  boolean handle();
-}
-
-interface OptionalOverlayHook {
-  void draw(PGraphics target);
-}
-
-Runnable harness_setup = () -> {};
-Runnable harness_update = () -> {};
-SceneHook harness_scene = (target) -> false;
-String frame_harness_mode = "base";
-OptionalKeyHook optional_test_key_hook = () -> false;
-OptionalOverlayHook optional_test_overlay_hook = (target) -> {};
-boolean optional_mode_enabled = false;
-boolean optional_mode_force_visual = false;
-
-
-boolean optionalVisualOverrideActive(){
-  return optional_mode_enabled && optional_mode_force_visual;
-}
-
-
 void settings(){
-  boolean hit_test_window = false;
-  if (args != null){
-    for (int i = 0; i < args.length; i++){
-      if (args[i].equals("--hit-test")) hit_test_window = true;
-    }
-  }
-  size(hit_test_window ? 1400 : RENDER_W, hit_test_window ? 900 : RENDER_H);
+  size(RENDER_W, RENDER_H);
   noSmooth();
   pixelDensity(1);
 }
@@ -254,12 +220,11 @@ void setup(){
   ui_font = createFont("Segoe UI", 64, true);
 
   frameRate(60);
-  frame_clock = new FrameClock(new ProcessingFrameClockSource());
+  frame_clock = new FrameClock();
   cursor(ARROW);
   loadPlayerAssets();
   loadArtAssets();
   loadGameAudio();
-  harness_setup.run();
 }
 
 
@@ -272,18 +237,13 @@ void draw(){
     screen,
     current_room,
     ui_layer_at_start,
-    currentFrameHarnessMode(),
     doorTransitionActive()
   );
-  current_frame_context.beginPhase("frame_start");
   updateViewport();
-  current_frame_context.finishPhase("frame_start");
 
   beginFrameAudioCollection();
-  current_frame_context.beginPhase("input");
   current_frame_context.setInputSnapshot(sampleFrameInput());
   updateInput(current_frame_context.input_snapshot);
-  current_frame_context.finishPhase("input");
 
   String input_change_reason = frameControlChangeReason(
     current_frame_context.callback_start_screen,
@@ -297,28 +257,22 @@ void draw(){
   }
 
   if (doorTransitionActive()){
-    discardQueuedFrameActions(current_frame_context, "door_transition_active");
+    discardQueuedFrameActions(current_frame_context);
     updateDoorTransition();
   }
 
   boolean simulation_frozen = paused || !isRoomScreen()
     || uiLayer() != LAYER_SCENE || doorTransitionActive();
-  current_frame_context.refreshDomainState(screen, current_room, uiLayer(),
-    simulation_frozen, doorTransitionActive());
+  current_frame_context.refreshDomainState(simulation_frozen, doorTransitionActive());
   if (current_frame_context.paused || simulation_frozen || input_control_changed){
-    String clear_reason = current_frame_context.interruption_reason.length() > 0
-      ? current_frame_context.interruption_reason
-      : "simulation_frozen";
-    discardQueuedFrameActions(current_frame_context, clear_reason);
+    discardQueuedFrameActions(current_frame_context);
     frame_clock.pauseCallback(current_frame_context);
   }
 
-  current_frame_context.beginPhase("simulation");
   for (int step_index = 0; step_index < current_frame_context.steps_planned; step_index++){
     if (paused || !isRoomScreen() || uiLayer() != LAYER_SCENE || doorTransitionActive()){
       current_frame_context.interrupt(frameFrozenReason());
-      discardQueuedFrameActions(current_frame_context,
-        current_frame_context.interruption_reason);
+      discardQueuedFrameActions(current_frame_context);
       frame_clock.pauseCallback(current_frame_context);
       break;
     }
@@ -334,58 +288,25 @@ void draw(){
       current_frame_context.interrupt(step_change);
     }
     frame_clock.confirmStep(current_frame_context);
-    current_frame_context.refreshDomainState(screen, current_room, uiLayer(),
+    current_frame_context.refreshDomainState(
       paused || !isRoomScreen() || uiLayer() != LAYER_SCENE || doorTransitionActive(),
       doorTransitionActive());
     if (current_frame_context.interruption_reason.length() > 0){
-      discardQueuedFrameActions(current_frame_context,
-        current_frame_context.interruption_reason);
+      discardQueuedFrameActions(current_frame_context);
       frame_clock.pauseCallback(current_frame_context);
       break;
     }
   }
-  current_frame_context.finishPhase("simulation");
 
-  current_frame_context.beginPhase("audio_dispatch");
   dispatchFrameAudio();
-  current_frame_context.finishPhase("audio_dispatch");
 
-  current_frame_context.beginPhase("draw_base");
   drawBase();
-  current_frame_context.finishPhase("draw_base");
 
-  current_frame_context.beginPhase("cursor");
   updateCursor();
-  recordCurrentPresentationSurface("cursor");
-  current_frame_context.finishPhase("cursor");
 
-  current_frame_context.beginPhase("draw_window");
   drawWindow();
-  current_frame_context.finishPhase("draw_window");
 
-  current_frame_context.beginPhase("harness");
-  harness_update.run();
-  current_frame_context.finishPhase("harness");
-  current_frame_context.refreshDomainState(screen, current_room, uiLayer(),
-    paused || !isRoomScreen() || uiLayer() != LAYER_SCENE || doorTransitionActive(),
-    doorTransitionActive());
   current_frame_context.finishCallback();
-  frame_callback_observer.onCallbackComplete(current_frame_context);
-}
-
-
-String currentFrameHarnessMode(){
-  if (args != null){
-    for (String argument : args){
-      if (argument.equals("--metrics")) return "profiling";
-      if (argument.equals("--temporal-test")) return "temporal-test";
-      if (argument.equals("--capture")) return "capture";
-      if (argument.equals("--hit-test")) return "hit-test";
-      if (argument.equals("--ladder-test")) return "ladder-test";
-      if (argument.equals("--asset-pipeline-test")) return "asset-pipeline-test";
-    }
-  }
-  return frame_harness_mode;
 }
 
 
@@ -409,13 +330,6 @@ String frameFrozenReason(){
 
 
 void drawBase(){
-  if (current_frame_context != null && current_frame_context.callback_open){
-    current_frame_context.beginPresentation(frame_clock.confirmedStateVersion());
-    if (current_frame_context.presentation_active){
-      frame_clock.lockPresentation();
-    }
-  }
-
   base.beginDraw();
   base.smooth(4);
   base.resetMatrix();
@@ -430,27 +344,14 @@ void drawBase(){
   resetButtons();
 
   draw_layer = LAYER_SCENE;
-  boolean scene_replaced = harness_scene.draw(base);
-  if (scene_replaced){
-    recordCurrentPresentationSurface("harness_scene");
-  } else {
-    recordCurrentPresentationSurface("screens");
-    drawScreen(base);
+  drawScreen(base);
 
-    if (isRoomScreen()){
-      recordCurrentPresentationSurface("hud");
-      drawHud(base);
-      recordCurrentPresentationSurface("ui");
-      drawModalLayer(base);
-    } else if (uiLayer() != LAYER_SCENE){
-      recordCurrentPresentationSurface("ui");
-      drawModalLayer(base);
-    }
+  if (isRoomScreen()){
+    drawHud(base);
+    drawModalLayer(base);
+  } else if (uiLayer() != LAYER_SCENE){
+    drawModalLayer(base);
   }
-
-  recordCurrentPresentationSurface("test_overlay");
-  optional_test_overlay_hook.draw(base);
-  recordCurrentPresentationSurface("base");
 
   base.endDraw();
 }
@@ -461,12 +362,6 @@ void drawWindow(){
   noSmooth();
   imageMode(CORNER);
   image(base, view_offset_x, view_offset_y, RENDER_W * view_scale, RENDER_H * view_scale);
-  if (current_frame_context != null && current_frame_context.presentation_active){
-    current_frame_context.recordPresentationSurface("window");
-    current_frame_context.finishPresentation(frame_clock.confirmedStateVersion(),
-      width, height, view_scale, view_offset_x, view_offset_y);
-    frame_clock.unlockPresentation();
-  }
 }
 
 
@@ -624,8 +519,6 @@ void mousePressed(){
 
 
 void keyPressed(){
-  if (optional_test_key_hook.handle()) return;
-
   if (keyCode == ESC){
     key = 0;
     esc_pressed = true;

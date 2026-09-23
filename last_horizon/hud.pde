@@ -1,7 +1,4 @@
 void drawHud(PGraphics g){
-  if (current_frame_context != null && current_frame_context.presentation_active){
-    current_frame_context.hud_pass_count++;
-  }
   drawHeader(g);
   drawObjectiveStrip(g);
   drawFooter(g);
@@ -17,12 +14,8 @@ final int ICON_MORALE = 5;
 PImage[] resource_icon_cache = new PImage[6];
 PImage[] resource_icon_sources = new PImage[6];
 int[] resource_icon_scales = new int[6];
-int[] resource_icon_builds_by_icon = new int[6];
 PImage[] resource_icon_failed_sources = new PImage[6];
 int[] resource_icon_failed_scales = new int[6];
-int resource_icon_builds = 0;
-long resource_icon_cache_hits = 0;
-long resource_icon_cache_misses = 0;
 final int[] HUD_RESOURCE_ORDER = new int[] { 0, 1, 2, 3, 5, 4 };
 final int[] HUD_ICON_BY_RESOURCE = new int[] { 0, 1, 2, 3, 5, 4 };
 
@@ -162,7 +155,6 @@ void drawResourceIcon(PGraphics g, int icon, float x, float y, int colour){
   if (valid_icon && resource_icon_cache[icon] != null
     && resource_icon_sources[icon] == source
     && resource_icon_scales[icon] == RENDER_SCALE){
-    resource_icon_cache_hits++;
     g.imageMode(CENTER);
     g.image(resource_icon_cache[icon],
       round(x + ART_ICON_DRAW / 2),
@@ -246,35 +238,27 @@ void ensureResourceIconCache(int icon){
   if (!validArtImage(source)){
     if (resource_icon_failed_sources[icon] == source
       && resource_icon_failed_scales[icon] == render_scale){
-      resource_icon_cache_hits++;
       return;
     }
-    resource_icon_cache_misses++;
     resource_icon_failed_sources[icon] = source;
     resource_icon_failed_scales[icon] = render_scale;
-    String file = art_icon_file[icon] == null ? "icons/unknown.png"
-      : ART_ICON_DIR + art_icon_file[icon] + ".png";
-    recordFallbackDiagnostic(file, "resource_icon_cache", "invalid_source",
-      "last_valid_or_geometric_fallback");
+
     return;
   }
 
   if (resource_icon_cache[icon] != null
     && resource_icon_sources[icon] == source
     && resource_icon_scales[icon] == render_scale){
-    resource_icon_cache_hits++;
     return;
   }
 
   if (resource_icon_failed_sources[icon] == source
     && resource_icon_failed_scales[icon] == render_scale){
-    resource_icon_cache_hits++;
     return;
   }
 
   ResourceIconCacheEntry entry = findResourceIconCacheEntry(source, render_scale);
   if (entry != null){
-    resource_icon_cache_hits++;
     if (resource_icon_sources[icon] != null){
       invalidateResourceIconCache(icon);
     }
@@ -287,11 +271,9 @@ void ensureResourceIconCache(int icon){
   }
 
   int size = round(ART_ICON_DRAW * render_scale);
-  resource_icon_cache_misses++;
   PGraphics layer = null;
   PImage bitmap = null;
   boolean drawing = false;
-  String failure = "";
   try {
     layer = createGraphics(size, size);
     if (layer == null){
@@ -311,25 +293,17 @@ void ensureResourceIconCache(int icon){
     }
   } catch (RuntimeException error){
     bitmap = null;
-    failure = error.getMessage() == null ? error.getClass().getSimpleName()
-      : error.getMessage();
     if (drawing){
       try {
         layer.endDraw();
       } catch (RuntimeException endError){
-        String endFailure = endError.getMessage() == null
-          ? endError.getClass().getSimpleName() : endError.getMessage();
-        failure += "; encerramento do desenho: " + endFailure;
       }
     }
   }
   if (bitmap == null){
     resource_icon_failed_sources[icon] = source;
     resource_icon_failed_scales[icon] = render_scale;
-    String file = art_icon_file[icon] == null ? "icons/unknown.png"
-      : ART_ICON_DIR + art_icon_file[icon] + ".png";
-    recordFallbackDiagnostic(file, "resource_icon_cache",
-      "preparation_failed:" + failure, "last_valid_or_geometric_fallback");
+
     return;
   }
 
@@ -337,14 +311,11 @@ void ensureResourceIconCache(int icon){
     invalidateResourceIconCache(icon);
   }
   resource_icon_entries.add(new ResourceIconCacheEntry(source, render_scale, bitmap));
-  registerCacheBitmap(bitmap);
   resource_icon_cache[icon] = bitmap;
   resource_icon_sources[icon] = source;
   resource_icon_scales[icon] = render_scale;
   resource_icon_failed_sources[icon] = null;
   resource_icon_failed_scales[icon] = 0;
-  resource_icon_builds_by_icon[icon]++;
-  resource_icon_builds++;
 }
 
 void prepareResourceIconCache(){
@@ -396,13 +367,11 @@ void invalidateResourceIconCache(int icon){
     for (int i = resource_icon_entries.size() - 1; i >= 0; i--){
       ResourceIconCacheEntry entry = resource_icon_entries.get(i);
       if (entry.source == old_source && entry.render_scale == old_scale){
-        releaseCacheBitmap(entry.bitmap);
         resource_icon_entries.remove(i);
       }
     }
   }
 
-  cache_invalidations++;
 }
 
 

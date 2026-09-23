@@ -77,7 +77,6 @@ boolean uiActionAllowed(int action){
 
 
 void drawScreen(PGraphics g){
-  recordCurrentPresentationSurface("screen_content");
   if (screen == SCREEN_INIT){
     drawInitScreen(g);
     return;
@@ -101,7 +100,6 @@ void drawScreen(PGraphics g){
   drawShipArea(g);
 }
 void drawModalLayer(PGraphics g){
-  recordCurrentPresentationSurface("modal_content");
   int active_layer = uiLayer();
   draw_layer = active_layer;
 

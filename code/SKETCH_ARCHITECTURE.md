@@ -19,17 +19,15 @@ pasta compartilham o estado global e são compiladas juntas pelo Processing.
 | `hud.pde`, `ui.pde` | cartões, objetivo/alerta, painéis, texto, botões e hit-test |
 | `editorial.pde` | falas e resultados editoriais associados às quests |
 | `assets.pde` | caminhos, carregamento, cache e fallback de imagens |
-| `capture.pde`, `test_mode.pde` | harness e controles opcionais de verificação |
 
 O código de domínio usa principalmente funções e tabelas globais. Classes de
-dados organizam a projeção noturna, motivos de ação, caches e hooks.
+dados organizam a projeção noturna, motivos de ação e caches.
 
 ## Execução e estado
 
 Abra `last_horizon/last_horizon.pde` no Processing 4.5.6 para usar o editor.
-No terminal, `bash tools/run-processing.sh` executa o sketch e `npm run build`
-faz a compilação. A localização/configuração do executável e os comandos de
-verificação estão em [`VERIFICATION.md`](VERIFICATION.md).
+As abas `.pde` da pasta formam o mesmo sketch e são compiladas juntas pelo
+Processing.
 
 `setup()` cria o buffer 1280×720, inicializa Segoe UI e carrega assets. `draw()`
 calcula o fator inteiro de escala, centraliza a imagem na janela e encaminha o
@@ -67,24 +65,3 @@ interface.
 Para o técnico, o loader reconhece metadados de spritesheet Aseprite e o
 formato de matriz Universal LPC. O runtime usa a spritesheet PNG e o JSON em
 `data/player/`.
-
-## Verificação
-
-Os hooks de harness têm valores inertes no sketch base. `capture.pde` instala
-os cenários automatizados e `test_mode.pde` fornece controles de teste. O
-runner de Processing remove fisicamente os módulos opcionais ausentes antes da
-compilação e a matriz `base`, `capture`, `manual` e `complete` fica registrada
-por `tools/optional-modules.mjs`. Comandos e limites estão em
-[`VERIFICATION.md`](VERIFICATION.md).
-
-`test_mode.pde` é a única origem de Ctrl+K, teleporte e overlay manual. O
-predicado visual pode destacar um ponto para inspeção, mas a disponibilidade de
-interação continua sendo calculada por `tasks.pde`; o destaque não concede
-pagamento, aceite, coleta, entrega ou conclusão de quest.
-
-`tools/snapshot-entrega.mjs` cria a cópia final em `output/snapshot-entrega/`
-e grava `output/snapshot-entrega-manifest.json` depois da limpeza. Ele copia
-somente arquivos rastreados, aplica a lista de exclusões herdada, compila o
-runtime base, verifica a ausência de controles de desenvolvimento e não altera
-branches, refs ou commits. Pré-requisitos ausentes ficam registrados como
-INCONCLUSIVO no manifesto.

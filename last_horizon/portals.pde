@@ -298,7 +298,7 @@ boolean enterRoomAtPosition(int next_screen, float feet_y, float center_x, int f
   int previous_screen = screen;
   int previous_room = current_room;
   if (current_frame_context != null && current_frame_context.callback_open){
-    discardQueuedFrameActions(current_frame_context, "screen_changed");
+    discardQueuedFrameActions(current_frame_context);
   } else {
     jump_queued = false;
     interact_queued = false;

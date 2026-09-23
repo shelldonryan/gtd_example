@@ -1,5 +1,4 @@
 void drawPlayer(PGraphics g){
-  recordCurrentPresentationSurface("player");
   if (!player_assets_loaded){
     drawPlayerFallback(g);
     return;
@@ -42,10 +41,6 @@ PGraphics player_frame_layer_staging;
 boolean player_frame_layer_valid = false;
 int player_frame_layer_failed_frame = -1;
 int player_frame_layer_failed_facing = 0;
-long player_frame_layer_queries = 0;
-long player_frame_layer_reuses = 0;
-long player_frame_layer_rebuilds = 0;
-String player_frame_layer_failure = "";
 
 
 int resolvePlayerAnimationState(){
@@ -178,25 +173,21 @@ boolean validPlayerFrameRange(int first, int last){
 
 
 boolean updatePlayerFrameLayer(int frame){
-  player_frame_layer_queries++;
   if (player_frame_layer_valid && player_frame_layer != null
     && frame == player_rendered_frame
     && player_facing == player_rendered_facing){
-    player_frame_layer_reuses++;
     return true;
   }
 
   if (player_frame_layer_valid && player_frame_layer != null
     && frame == player_frame_layer_failed_frame
     && player_facing == player_frame_layer_failed_facing){
-    player_frame_layer_reuses++;
     return true;
   }
 
   if (!validPlayerFrameRange(frame, frame)
     || player_frame_images[frame] == null){
-    rememberPlayerFrameLayerFailure(frame, player_facing,
-      "selected_frame_unavailable");
+    rememberPlayerFrameLayerFailure(frame, player_facing);
     return player_frame_layer_valid && player_frame_layer != null;
   }
 
@@ -213,21 +204,17 @@ boolean updatePlayerFrameLayer(int frame){
     } catch (RuntimeException error){
       if (target_created && target != null){
         player_frame_layer_staging = target;
-        registerCacheBitmap(target);
       }
-      rememberPlayerFrameLayerFailure(frame, player_facing,
-        describePlayerFrameLayerError(error));
+      rememberPlayerFrameLayerFailure(frame, player_facing);
       return player_frame_layer_valid && player_frame_layer != null;
     }
     if (target_created){
       player_frame_layer_staging = target;
-      registerCacheBitmap(target);
     }
   }
 
   if (target == null){
-    rememberPlayerFrameLayerFailure(frame, player_facing,
-      "graphics_buffer_unavailable");
+    rememberPlayerFrameLayerFailure(frame, player_facing);
     return player_frame_layer_valid && player_frame_layer != null;
   }
 
@@ -254,15 +241,13 @@ boolean updatePlayerFrameLayer(int frame){
     target.endDraw();
     drawing = false;
   } catch (RuntimeException error){
-    String failure = describePlayerFrameLayerError(error);
     if (drawing){
       try {
         target.endDraw();
       } catch (RuntimeException endError){
-        failure += "; fim do desenho: " + describePlayerFrameLayerError(endError);
       }
     }
-    rememberPlayerFrameLayerFailure(frame, player_facing, failure);
+    rememberPlayerFrameLayerFailure(frame, player_facing);
     return player_frame_layer_valid && player_frame_layer != null;
   }
 
@@ -274,40 +259,11 @@ boolean updatePlayerFrameLayer(int frame){
   player_rendered_facing = player_facing;
   player_frame_layer_failed_frame = -1;
   player_frame_layer_failed_facing = 0;
-  player_frame_layer_failure = "";
-  player_frame_layer_rebuilds++;
   return true;
 }
 
 
-void rememberPlayerFrameLayerFailure(int frame, int facing, String failure){
+void rememberPlayerFrameLayerFailure(int frame, int facing){
   player_frame_layer_failed_frame = frame;
   player_frame_layer_failed_facing = facing;
-  player_frame_layer_failure = failure == null || failure.length() == 0
-    ? "falha não identificada ao reconstruir a camada"
-    : failure;
-  recordFallbackDiagnostic(PLAYER_SHEET_FILE, "player_frame_layer",
-    player_frame_layer_failure, "last_valid_or_geometric_fallback");
-  if (current_frame_context != null){
-    current_frame_context.diagnostic = appendFrameDiagnostic(
-      current_frame_context.diagnostic,
-      "player_frame_layer: " + player_frame_layer_failure
-    );
-  }
-  try {
-    recordFallbackDiagnostic(PLAYER_SHEET_FILE, "player_frame_layer",
-      player_frame_layer_failure, "previous_frame_or_geometric_fallback");
-  } catch (RuntimeException diagnosticError){
-    player_frame_layer_failure += "; diagnóstico: "
-      + describePlayerFrameLayerError(diagnosticError);
-  }
-}
-
-
-String describePlayerFrameLayerError(RuntimeException error){
-  if (error == null) return "falha não identificada";
-  String message = error.getMessage();
-  return message == null || message.length() == 0
-    ? error.getClass().getSimpleName()
-    : error.getClass().getSimpleName() + ": " + message;
 }

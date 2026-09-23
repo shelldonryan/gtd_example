@@ -27,15 +27,11 @@ pixel usa amostragem sem interpolação.
 
 Abra [`last_horizon/last_horizon.pde`](last_horizon/last_horizon.pde) no
 Processing 4.5.6. Esse arquivo é a entrada do sketch `last_horizon/`; as demais
-abas `.pde` da pasta fazem parte do mesmo sketch. No terminal, use
-`bash tools/run-processing.sh` para executar ou `npm run build` para compilar.
-Os pré-requisitos e a configuração do executável estão em
-[`code/VERIFICATION.md`](code/VERIFICATION.md).
+abas `.pde` da pasta fazem parte do mesmo sketch e são compiladas juntas pelo
+Processing.
 
 ## Documentação
 
-- [Estado atual da implementação](docs/CURRENT_IMPLEMENTATION.md): comportamento
-  confirmado no sketch, assets disponíveis e resultados de validação.
 - [Mecânicas e valores](mechanics/ACTIONS.md): recursos, calendário, quests,
   problemas, riscos e processamento noturno.
 - [Fluxo da interface](interface/FLOW.md), [HUD](interface/HUD.md) e
@@ -45,17 +41,5 @@ Os pré-requisitos e a configuração do executável estão em
   e premissa.
 - [Inventário de assets](assets/INVENTORY.md): arquivos de arte e áudio
   presentes e sua integração.
-- [Arquitetura do sketch](code/SKETCH_ARCHITECTURE.md) e
-  [verificação](code/VERIFICATION.md): organização do código e comandos.
-- [Proposta de enxugamento e imersão](docs/SPEC_ENXUGAMENTO_E_IMERSAO.md):
-  requisitos de produto; use `docs/CURRENT_IMPLEMENTATION.md` para distinguir
-  requisitos daquilo que está implementado.
-- [Decisões de arquitetura](docs/adr/): decisões registradas para o ciclo de
-  quests e o ciclo diário.
-
-## Validação registrada
-
-Em 21/09/2026, no Windows, `npm.cmd run typecheck`,
-`npm.cmd run regression:windows` (4/4 cenários) e
-`node prototype/balance-model.mjs --simulate` passaram. A simulação avaliou
-2.520 sequências. O modo de pipeline carrega um PNG sintético com `loadImage()`.
+- [Arquitetura do sketch](code/SKETCH_ARCHITECTURE.md): organização das abas
+  Processing e do estado da partida.

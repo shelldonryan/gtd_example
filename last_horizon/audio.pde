@@ -28,8 +28,6 @@ Clip[] sound_ladder_step = new Clip[AUDIO_LADDER_STEP_FILES.length];
 int sound_walk_step_index = 0;
 int sound_run_step_index = 0;
 int sound_ladder_step_index = 0;
-int audio_loaded = 0;
-int audio_expected = 0;
 final int FRAME_AUDIO_QUEUE_CAPACITY = 64;
 final int FRAME_AUDIO_PLAY_CLIP = 1;
 int[] frame_audio_commands = new int[FRAME_AUDIO_QUEUE_CAPACITY];
@@ -45,152 +43,49 @@ final String MOVEMENT_AUDIO_RUN = "run";
 final String MOVEMENT_AUDIO_LADDER = "ladder";
 final String MOVEMENT_AUDIO_TAKEOFF = "takeoff";
 final String MOVEMENT_AUDIO_LANDING = "landing";
-long movement_audio_global_order = 0;
-long movement_audio_playback_failure_count = 0;
-MovementAudioAdapter movement_audio_adapter = new CoalescingMovementAudioAdapter();
-ArrayList<StopStepSoundsMetric> stop_step_sound_metrics = new ArrayList<StopStepSoundsMetric>();
-
-
-boolean movementAudioDiagnosticsEnabled(){
-  if (current_frame_context == null) return false;
-  String mode = current_frame_context.harness_mode;
-  return "capture".equals(mode) || "profiling".equals(mode);
-}
+CoalescingMovementAudioAdapter movement_audio_adapter =
+  new CoalescingMovementAudioAdapter();
 
 
 class MovementAudioEvent {
   public final String family;
   public final int variant;
-  public final double logical_timestamp_seconds;
-  public final long global_order;
   public final long callback_id;
-  public final int step_index;
 
-  MovementAudioEvent(String eventFamily, int eventVariant, double timestamp,
-    long order, long callbackId, int stepIndex){
+  MovementAudioEvent(String eventFamily, int eventVariant, long callbackId){
     if (eventFamily == null || eventFamily.length() == 0
-      || !java.lang.Double.isFinite(timestamp) || order <= 0
-      || callbackId <= 0 || stepIndex < 0){
+      || eventVariant < 0 || callbackId <= 0){
       throw new IllegalArgumentException("evento de áudio de movimento inválido");
     }
     family = eventFamily;
     variant = eventVariant;
-    logical_timestamp_seconds = timestamp;
-    global_order = order;
     callback_id = callbackId;
-    step_index = stepIndex;
   }
 }
 
 
-class MovementAudioPlaybackResult {
-  public final long callback_id;
-  public final long event_order;
-  public final String family;
-  public final int variant;
-  public final String status;
-
-  MovementAudioPlaybackResult(MovementAudioEvent event, String resultStatus){
-    callback_id = event.callback_id;
-    event_order = event.global_order;
-    family = event.family;
-    variant = event.variant;
-    status = resultStatus;
-  }
-}
-
-
-class MovementAudioSequenceComparison {
-  public final String status;
-  public final String diagnostic;
-
-  MovementAudioSequenceComparison(String resultStatus, String reason){
-    status = resultStatus;
-    diagnostic = reason;
-  }
-}
-
-
-interface MovementAudioAdapter {
-  void beginCallback(long callbackId);
-  void emit(MovementAudioEvent event, boolean physicalPlaybackAllowed);
-  void dispatchCallback(long callbackId);
-}
-
-
-interface MovementAudioPlaybackPort {
-  String play(MovementAudioEvent event);
-}
-
-
-class JavaClipMovementAudioPlaybackPort implements MovementAudioPlaybackPort {
-  public String play(MovementAudioEvent event){
-    Clip clip = movementAudioClipFor(event);
-    if (clip == null){
-      movement_audio_playback_failure_count++;
-      println("som: clip ausente para " + event.family + " variante " + event.variant);
-      return "clip_missing";
-    }
-    try {
-      clip.stop();
-      clip.setFramePosition(0);
-      clip.start();
-      return "played";
-    }
-    catch (RuntimeException error){
-      movement_audio_playback_failure_count++;
-      println("som: falha ao reproduzir " + event.family + " (partida continua): "
-        + error.getMessage());
-      return "playback_exception";
-    }
-  }
-}
-
-
-class CoalescingMovementAudioAdapter implements MovementAudioAdapter {
-  private final MovementAudioPlaybackPort playback_port;
-  private final ArrayList<MovementAudioEvent> callback_events = new ArrayList<MovementAudioEvent>();
-  private final ArrayList<MovementAudioPlaybackResult> callback_results = new ArrayList<MovementAudioPlaybackResult>();
-  private final ArrayList<MovementAudioPlaybackResult> playback_history = new ArrayList<MovementAudioPlaybackResult>();
+class CoalescingMovementAudioAdapter {
+  private final ArrayList<MovementAudioEvent> callback_events =
+    new ArrayList<MovementAudioEvent>();
   private long active_callback_id = -1;
 
-  CoalescingMovementAudioAdapter(){
-    this(new JavaClipMovementAudioPlaybackPort());
-  }
-
-  CoalescingMovementAudioAdapter(MovementAudioPlaybackPort playbackPort){
-    if (playbackPort == null){
-      throw new IllegalArgumentException("porta de reprodução de áudio obrigatória");
-    }
-    playback_port = playbackPort;
-  }
-
-  public void beginCallback(long callbackId){
+  void beginCallback(long callbackId){
     if (callback_events.size() > 0){
       println("som: eventos físicos do callback " + active_callback_id
         + " foram descartados antes do despacho");
-      for (MovementAudioEvent event : callback_events){
-        recordPlaybackResult(event, "undispatched");
-      }
     }
     callback_events.clear();
-    callback_results.clear();
     active_callback_id = callbackId;
   }
 
-  public void emit(MovementAudioEvent event, boolean physicalPlaybackAllowed){
+  void emit(MovementAudioEvent event){
     if (event == null) throw new IllegalArgumentException("evento de áudio obrigatório");
-    if (physicalPlaybackAllowed && event.callback_id == active_callback_id){
-      callback_events.add(event);
-    }
+    if (event.callback_id == active_callback_id) callback_events.add(event);
   }
 
-  public void dispatchCallback(long callbackId){
+  void dispatchCallback(long callbackId){
     if (callback_events.size() == 0) return;
     if (callbackId != active_callback_id){
-      for (MovementAudioEvent event : callback_events){
-        recordPlaybackResult(event, "callback_mismatch");
-      }
       callback_events.clear();
       println("som: despacho ignorado por divergência de callback");
       return;
@@ -208,164 +103,50 @@ class CoalescingMovementAudioAdapter implements MovementAudioAdapter {
         }
       }
       for (MovementAudioEvent event : callback_events){
-        if (dispatched_families.contains(event.family)){
-          recordPlaybackResult(event, "coalesced");
-          continue;
-        }
+        if (dispatched_families.contains(event.family)) continue;
         dispatched_families.add(event.family);
-        String status = "adapter_exception";
-        try {
-          status = playback_port.play(event);
-          if (status == null || status.length() == 0){
-            status = "adapter_invalid_status";
-          }
-        }
-        catch (RuntimeException error){
-          println("som: adapter falhou para " + event.family
-            + " (partida continua): " + error.getMessage());
-        }
-        recordPlaybackResult(event, status);
+        playMovementAudioEvent(event);
       }
     }
     finally {
       callback_events.clear();
     }
   }
-
-  int resultCount(){
-    return callback_results.size();
-  }
-
-  MovementAudioPlaybackResult resultAt(int index){
-    return callback_results.get(index);
-  }
-
-  int playbackHistoryCount(){
-    return playback_history.size();
-  }
-
-  MovementAudioPlaybackResult playbackHistoryAt(int index){
-    return playback_history.get(index);
-  }
-
-  private void recordPlaybackResult(MovementAudioEvent event, String status){
-    MovementAudioPlaybackResult result = new MovementAudioPlaybackResult(event, status);
-    callback_results.add(result);
-    if (movementAudioDiagnosticsEnabled()) playback_history.add(result);
-  }
 }
 
 
-class StopStepSoundsMetric {
-  public final long callback_id;
-  public final int step_index;
-  public final long duration_nanos;
-  public final int clips_visited;
-  public final String[] visit_order;
-  public final int stop_failures;
-
-  StopStepSoundsMetric(long callbackId, int stepIndex, long duration,
-    String[] visits, int failures){
-    callback_id = callbackId;
-    step_index = stepIndex;
-    duration_nanos = duration;
-    clips_visited = visits.length;
-    visit_order = visits;
-    stop_failures = failures;
+void playMovementAudioEvent(MovementAudioEvent event){
+  Clip clip = movementAudioClipFor(event);
+  if (clip == null){
+    println("som: clip ausente para " + event.family + " variante " + event.variant);
+    return;
   }
-}
-
-
-MovementAudioSequenceComparison compareMovementAudioSequences(
-  MovementAudioEvent[] baselineEvents,
-  MovementAudioPlaybackResult[] baselinePlayback,
-  MovementAudioEvent[] revisedEvents,
-  MovementAudioPlaybackResult[] revisedPlayback){
-  if (baselineEvents == null || baselinePlayback == null
-    || revisedEvents == null || revisedPlayback == null){
-    return new MovementAudioSequenceComparison("INCONCLUSIVO",
-      "baseline ou sequência revisada ausente");
+  try {
+    clip.stop();
+    clip.setFramePosition(0);
+    clip.start();
   }
-  if (!sameMovementAudioEvents(baselineEvents, revisedEvents)){
-    return new MovementAudioSequenceComparison("FAIL",
-      "sequência de eventos lógicos divergiu");
+  catch (RuntimeException error){
+    println("som: falha ao reproduzir " + event.family + " (partida continua): "
+      + error.getMessage());
   }
-  if (!sameMovementAudioPlayback(baselinePlayback, revisedPlayback)){
-    return new MovementAudioSequenceComparison("FAIL",
-      "sequência de reproduções físicas divergiu");
-  }
-  return new MovementAudioSequenceComparison("PASS", "sequências equivalentes");
-}
-
-
-boolean sameMovementAudioEvents(MovementAudioEvent[] first, MovementAudioEvent[] second){
-  if (first.length != second.length) return false;
-  for (int i = 0; i < first.length; i++){
-    MovementAudioEvent a = first[i];
-    MovementAudioEvent b = second[i];
-    if (a == null || b == null || !a.family.equals(b.family)
-      || a.variant != b.variant || a.global_order != b.global_order
-      || a.callback_id != b.callback_id || a.step_index != b.step_index
-      || java.lang.Math.abs(a.logical_timestamp_seconds - b.logical_timestamp_seconds)
-        > FRAME_STEP_EPSILON_SECONDS){
-      return false;
-    }
-  }
-  return true;
-}
-
-
-boolean sameMovementAudioPlayback(MovementAudioPlaybackResult[] first,
-  MovementAudioPlaybackResult[] second){
-  if (first.length != second.length) return false;
-  for (int i = 0; i < first.length; i++){
-    MovementAudioPlaybackResult a = first[i];
-    MovementAudioPlaybackResult b = second[i];
-    if (a == null || b == null || !a.family.equals(b.family)
-      || !a.status.equals(b.status) || a.variant != b.variant
-      || a.callback_id != b.callback_id || a.event_order != b.event_order){
-      return false;
-    }
-  }
-  return true;
-}
-
-
-boolean audioOptimizationHasEquivalentTrace(MovementAudioSequenceComparison comparison){
-  return comparison != null && "PASS".equals(comparison.status);
-}
-
-
-void replaceMovementAudioAdapter(MovementAudioAdapter adapter){
-  if (adapter == null){
-    throw new IllegalArgumentException("adapter de áudio de movimento obrigatório");
-  }
-  movement_audio_adapter = adapter;
 }
 
 
 void emitMovementAudioEvent(FrameContext context, String family){
   requireMovementStep(context, "emitMovementAudioEvent");
   int variant = nextMovementAudioVariant(family);
-  long order = ++movement_audio_global_order;
-  double timestamp = context.simulation_time_seconds + context.fixed_step_seconds;
-  MovementAudioEvent event = new MovementAudioEvent(family, variant, timestamp,
-    order, context.callback_id, context.step_index);
-  if ("profiling".equals(context.harness_mode)){
-    context.recordLogicalAudioEvent(event);
-  }
+  MovementAudioEvent event = new MovementAudioEvent(family, variant,
+    context.callback_id);
   sound_step_play_count++;
-  boolean physicalPlaybackAllowed = "production".equals(context.clock_origin)
-    || "profiling".equals(context.harness_mode);
   try {
-    movement_audio_adapter.emit(event, physicalPlaybackAllowed);
+    movement_audio_adapter.emit(event);
   }
   catch (RuntimeException error){
     println("som: adapter não registrou o evento " + family
       + " (movimento continua): " + error.getMessage());
   }
 }
-
 
 int nextMovementAudioVariant(String family){
   if (MOVEMENT_AUDIO_RUN.equals(family)){
@@ -405,14 +186,11 @@ Clip movementAudioClipFor(MovementAudioEvent event){
 
 
 Clip loadSound(String path){
-  audio_expected++;
-
   try {
     AudioInputStream input = AudioSystem.getAudioInputStream(dataFile(path));
     Clip clip = AudioSystem.getClip();
     clip.open(input);
     input.close();
-    audio_loaded++;
     return clip;
   }
   catch (Exception error) {
@@ -501,7 +279,6 @@ void dispatchFrameAudio(){
       }
       frame_audio_clips[i] = null;
     }
-    long physicalDispatchStarted = System.nanoTime();
     long callbackId = current_frame_context == null ? -1 : current_frame_context.callback_id;
     try {
       movement_audio_adapter.dispatchCallback(callbackId);
@@ -510,10 +287,6 @@ void dispatchFrameAudio(){
       frame_audio_diagnostic = "adapter de áudio falhou no despacho: "
         + error.getMessage();
       println("som: " + frame_audio_diagnostic);
-    }
-    if (current_frame_context != null){
-      current_frame_context.physical_audio_dispatch_duration_nanos =
-        java.lang.Math.max(0L, System.nanoTime() - physicalDispatchStarted);
     }
   }
   finally {
@@ -533,7 +306,6 @@ boolean stopSound(Clip clip){
     return true;
   }
   catch (RuntimeException error){
-    movement_audio_playback_failure_count++;
     println("som: falha ao parar clip (partida continua): " + error.getMessage());
     return false;
   }
@@ -599,30 +371,11 @@ void primeSound(Clip clip){
 
 
 void stopStepSounds(){
-  boolean recordMetrics = movementAudioDiagnosticsEnabled();
-  String[] visitOrder = null;
-  if (recordMetrics){
-    visitOrder = new String[sound_walk_step.length * 3];
-    for (int i = 0; i < sound_walk_step.length; i++){
-      int visitIndex = i * 3;
-      visitOrder[visitIndex] = "walk[" + i + "]";
-      visitOrder[visitIndex + 1] = "run[" + i + "]";
-      visitOrder[visitIndex + 2] = "ladder[" + i + "]";
-    }
-  }
-  long started = recordMetrics ? System.nanoTime() : 0L;
-  int failures = 0;
   for (int i = 0; i < sound_walk_step.length; i++){
-    if (!stopSound(sound_walk_step[i])) failures++;
-    if (!stopSound(sound_run_step[i])) failures++;
-    if (!stopSound(sound_ladder_step[i])) failures++;
+    stopSound(sound_walk_step[i]);
+    stopSound(sound_run_step[i]);
+    stopSound(sound_ladder_step[i]);
   }
-  if (!recordMetrics) return;
-  long stopCompleted = System.nanoTime();
-  long callbackId = current_frame_context == null ? -1 : current_frame_context.callback_id;
-  int stepIndex = current_frame_context == null ? -1 : current_frame_context.step_index;
-  stop_step_sound_metrics.add(new StopStepSoundsMetric(callbackId, stepIndex,
-    java.lang.Math.max(0L, stopCompleted - started), visitOrder, failures));
 }
 
 
@@ -644,5 +397,4 @@ void loadGameAudio(){
     primeSound(sound_ladder_step[i]);
   }
 
-  println("som: " + audio_loaded + " de " + audio_expected + " carregados");
 }

@@ -9,12 +9,6 @@ application.windows64/
 application.macosx/
 application.linux32/
 application.linux64/
-last_horizon/output/
-last_horizon/output/*
-!last_horizon/output/
-!last_horizon/output/profiling-run-manifest.json
-!last_horizon/output/profiling-collection-report.json
-!last_horizon/output/profiling-comparison.json
 last_horizon/*.class
 .processing/
 
@@ -54,3 +48,16 @@ desktop.ini
 .obsidian/
 .vscode/
 .idea/
+
+# Generated pipeline and analysis artifacts
+/.codegraph/
+/.lionclaw*
+/.sprint-validation-report.md
+/SPEC_PROGRESS.md
+/discovery-notes.md
+# Project docs, snapshots and local tooling intentionally excluded from this branch
+/docs/
+/output/
+/prototype/
+/tools/
+/SESSION_START.md
