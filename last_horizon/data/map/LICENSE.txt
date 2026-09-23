@@ -1,0 +1,32 @@
+Mapa da Nave — Last Horizon
+==========================
+
+Arquivos desta pasta:
+  - ship.aseprite — arquivo-fonte editável da arte do casco da nave;
+  - ship.png      — exportação do casco usada no mapa;
+  - 1.png         — captura do Depósito;
+  - 2.png         — captura da Sala de Máquinas;
+  - 3.png         — captura do Dormitório;
+  - 4.png         — captura da Sala de Comando.
+
+Origem e produção:
+  A arte e a composição específicas do mapa foram preparadas para o projeto
+  Last Horizon por Jefferson. O arquivo ship.aseprite acompanha a exportação
+  ship.png. As imagens numeradas são capturas fornecidas para compor o mapa.
+
+Licença das contribuições autorais do mapa:
+  CC0 1.0 Universal (Public Domain Dedication)
+  https://creativecommons.org/publicdomain/zero/1.0/
+
+  A dedicação CC0 cobre somente as contribuições originais de mapa cujos
+  direitos pertencem a Jefferson. As capturas numeradas incorporam elementos
+  usados nas cenas do jogo; os direitos e créditos desses elementos continuam
+  regidos pelas licenças correspondentes, incluindo as de data/npc/,
+  data/stations/, data/decorations/ e data/environment/. Esta licença não
+  substitui nem amplia as licenças desses materiais incorporados.
+
+Uso no jogo:
+  As imagens numeradas são carregadas em art_map[] por art_map_file[] em
+  assets.pde, na ordem Comando (4), Máquinas (2), Depósito (1) e Dormitório (3).
+  ship.png é carregado em art_map_ship e os elementos são desenhados por
+  drawMapOverlay() e drawMapRoomCard() em ship.pde.

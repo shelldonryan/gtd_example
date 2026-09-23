@@ -1,0 +1,25 @@
+Icones de Recursos do HUD — Last Horizon (D-157)
+==================================================
+
+Arquivos desta pasta:
+  6 imagens PNG (32×32 px) e respectivos arquivos fontes do Aseprite (.aseprite):
+  - energia.png  / energia.aseprite  — Icone de Energia (raio/bateria)
+  - oxigenio.png / oxigenio.aseprite — Icone de Oxigenio (tanque O2)
+  - agua.png     / agua.aseprite     — Icone de Agua (gota de suprimento)
+  - comida.png   / comida.aseprite   — Icone de Comida (racao/nutricao)
+  - pecas.png    / pecas.aseprite    — Icone de Pecas (engrenagem de reparo)
+  - moral.png    / moral.aseprite    — Icone de Moral (indicador de estabilidade mental)
+
+Origem e Producao:
+  Arte autoral (Jefferson) criados e pixelizados no Aseprite especificamente para o HUD do projeto Last Horizon
+  (decisao D-157, issue #35), alinhados a grade estetica e paleta cromatica do jogo.
+
+Licenca:
+  CC0 1.0 Universal (Public Domain Dedication)
+  https://creativecommons.org/publicdomain/zero/1.0/
+  Disponibilizados livremente sob Dominio Publico / CC0 para o projeto Last Horizon.
+
+Uso no jogo:
+  Carregados em art_icon[] em assets.pde e desenhados nos cartoes de status
+  dos seis recursos na barra superior do HUD em hud.pde (drawHud). O alerta critico
+  de nivel zero permanece desenhado exclusivamente via codigo, sem arquivo PNG.

@@ -1,0 +1,768 @@
+final int LAYER_SCENE = 0;
+final int LAYER_PAUSE = 1;
+final int LAYER_TRANSMISSION = 2;
+final int LAYER_EVENT = 3;
+final int LAYER_ORDERS = 4;
+final int LAYER_MAP = 5;
+final int LAYER_DIALOGUE = 6;
+final int LAYER_TECHNICAL = 7;
+final int LAYER_SLEEP = 8;
+final int LAYER_HELP = 9;
+final int MAX_BUTTONS = 24;
+final int UI_LAYER_COUNT = LAYER_HELP + 1;
+final int MAX_REGISTERED_BUTTONS = MAX_BUTTONS * UI_LAYER_COUNT;
+final int NAME_MAX_LENGTH = 12;
+final float MIN_TEXT_SIZE = 16;
+final float MIN_WRAP_TEXT_SIZE = 16;
+final float MODAL_FOOTER_LEFT = 40;
+final float MODAL_FOOTER_RIGHT = 600;
+final float MODAL_FOOTER_GAP = 8;
+final float MODAL_BUTTON_HEIGHT = 20;
+
+int draw_layer = LAYER_SCENE;
+int button_count = 0;
+int[] button_layer_count = new int[UI_LAYER_COUNT];
+int[] button_overflow_count = new int[UI_LAYER_COUNT];
+String[] button_overflow_diagnostic = new String[UI_LAYER_COUNT];
+float[] button_x = new float[MAX_REGISTERED_BUTTONS];
+float[] button_y = new float[MAX_REGISTERED_BUTTONS];
+float[] button_w = new float[MAX_REGISTERED_BUTTONS];
+float[] button_h = new float[MAX_REGISTERED_BUTTONS];
+int[] button_action = new int[MAX_REGISTERED_BUTTONS];
+int[] button_layer = new int[MAX_REGISTERED_BUTTONS];
+boolean[] button_on = new boolean[MAX_REGISTERED_BUTTONS];
+
+
+void resetButtons(){
+  button_count = 0;
+  for (int layer = 0; layer < UI_LAYER_COUNT; layer++){
+    button_layer_count[layer] = 0;
+    button_overflow_count[layer] = 0;
+    button_overflow_diagnostic[layer] = "";
+  }
+}
+
+
+void addButton(float x, float y, float w, float h, int action, boolean on){
+  int layer = draw_layer;
+  if (layer < LAYER_SCENE || layer >= UI_LAYER_COUNT){
+    println("ui diagnostic: invalid button layer " + layer + " for action " + action);
+    return;
+  }
+
+  if (button_layer_count[layer] >= MAX_BUTTONS){
+    button_overflow_count[layer]++;
+    button_overflow_diagnostic[layer] = "button_limit_exceeded layer="
+      + uiLayerName(layer) + " limit=" + MAX_BUTTONS + " dropped="
+      + button_overflow_count[layer];
+    println("ui diagnostic: " + button_overflow_diagnostic[layer]
+      + "; action " + action + " is not interactive");
+    return;
+  }
+
+  if (button_count >= MAX_REGISTERED_BUTTONS){
+    println("ui diagnostic: global button registry capacity exhausted");
+    return;
+  }
+
+  button_x[button_count] = x + w / 2.0;
+  button_y[button_count] = y + h / 2.0;
+  button_w[button_count] = w;
+  button_h[button_count] = h;
+  button_action[button_count] = action;
+  button_layer[button_count] = draw_layer;
+  button_on[button_count] = on;
+  button_count++;
+  button_layer_count[layer]++;
+}
+
+
+String uiLayerName(int layer){
+  if (layer == LAYER_SCENE) return "scene";
+  if (layer == LAYER_PAUSE) return "pause";
+  if (layer == LAYER_TRANSMISSION) return "transmission";
+  if (layer == LAYER_EVENT) return "event";
+  if (layer == LAYER_ORDERS) return "orders";
+  if (layer == LAYER_MAP) return "map";
+  if (layer == LAYER_DIALOGUE) return "dialogue";
+  if (layer == LAYER_TECHNICAL) return "technical";
+  if (layer == LAYER_SLEEP) return "sleep";
+  if (layer == LAYER_HELP) return "help";
+  return "unknown";
+}
+
+
+int uiButtonOverflowCount(int layer){
+  if (layer < LAYER_SCENE || layer >= UI_LAYER_COUNT) return 0;
+  return button_overflow_count[layer];
+}
+
+
+String uiButtonOverflowDiagnostic(int layer){
+  if (layer < LAYER_SCENE || layer >= UI_LAYER_COUNT) return "";
+  return button_overflow_diagnostic[layer];
+}
+
+
+int findButton(float x, float y){
+  int layer = uiLayer();
+
+  return findButton(x, y, layer);
+}
+
+
+int findButton(float x, float y, int layer){
+
+  for (int i = button_count - 1; i >= 0; i--){
+    if (!button_on[i] || button_layer[i] != layer){
+      continue;
+    }
+
+    if (pointInButton(x, y, button_x[i] - button_w[i] / 2.0,
+      button_y[i] - button_h[i] / 2.0, button_w[i], button_h[i])){
+      return button_action[i];
+    }
+  }
+
+  return ACTION_NONE;
+}
+void updateCursor(){
+  int top_layer = uiLayer();
+
+  for (int i = button_count - 1; i >= 0; i--){
+    if (button_layer[i] != top_layer || !isButtonHovered(i)){
+      continue;
+    }
+
+    cursor(button_on[i] ? HAND : WAIT);
+    return;
+  }
+
+  cursor(ARROW);
+}
+
+
+boolean isButtonHovered(int index){
+  return pointInButton(base_mouse_x, base_mouse_y,
+    button_x[index] - button_w[index] / 2.0,
+    button_y[index] - button_h[index] / 2.0,
+    button_w[index], button_h[index]);
+}
+
+
+boolean isHovering(float x, float y, float w, float h){
+  return pointInButton(base_mouse_x, base_mouse_y, x, y, w, h);
+}
+
+
+boolean pointInButton(float px, float py, float x, float y, float w, float h){
+  return w > 0 && h > 0 && px >= x && px <= x + w && py >= y && py <= y + h;
+}
+
+
+boolean checkRectOverlap(float ax, float ay, float aw, float ah, float bx, float by, float bw, float bh){
+  return abs(ax - bx) * 2 < (aw + bw) && abs(ay - by) * 2 < (ah + bh);
+}
+
+
+void drawDropShadow(PGraphics g, float x, float y, float w, float h, float r){
+  g.noStroke();
+  g.fill(0x18000000);
+  g.rect(x - 2, y + 2, w + 4, h + 4, r + 2);
+  g.fill(0x35000000);
+  g.rect(x - 1, y + 2, w + 2, h + 2, r + 1);
+  g.fill(0x55000000);
+  g.rect(x, y + 1, w, h + 1, r);
+}
+
+
+void drawButton(PGraphics g, float x, float y, float w, float h, String label, int action, boolean on){
+  boolean hover = on && uiLayer() == draw_layer && isHovering(x, y, w, h);
+  int border = on ? (hover ? COL_CYAN : COL_BORDER) : COL_DIM;
+  int colour = on ? (hover ? COL_CYAN : COL_TEXT) : COL_DIM;
+  float text_size = fitTextSize(g, label, MIN_TEXT_SIZE, w - 16);
+  float render_size = renderTextSize(text_size);
+
+  if (on && hover){
+    g.noStroke();
+    g.fill(0x303FC8E8);
+    g.rect(x - 2, y - 2, w + 4, h + 4, 4);
+    g.fill(0xFF142B42);
+    g.stroke(COL_CYAN);
+    g.rect(x, y - 1, w, h, 3);
+    g.stroke(0x703FC8E8);
+    g.line(x + 2, y, x + w - 2, y);
+  } else {
+    g.noStroke();
+    g.fill(0x40000000);
+    g.rect(x, y + 1.5f, w, h, 3);
+    g.fill(on ? COL_PANEL_2 : COL_PANEL);
+    g.stroke(border);
+    g.rect(x, y, w, h, 3);
+    if (on){
+      g.stroke(0x28FFFFFF);
+      g.line(x + 2, y + 1, x + w - 2, y + 1);
+    }
+  }
+
+  g.fill(colour);
+  g.textSize(render_size);
+  float tx = max(x + 4, x + (w - g.textWidth(label)) / 2.0);
+  float ty = (on && hover) ? y - 1 + (h - render_size) / 2.0 : y + (h - render_size) / 2.0;
+  g.text(label, tx, ty);
+
+  addButton(x, y, w, h, action, on);
+}
+
+
+void drawTechCorners(PGraphics g, float x, float y, float w, float h, int colour){
+  float len = min(8, min(w, h) / 4.0f);
+  g.stroke(colour);
+  g.line(x, y + len, x, y);
+  g.line(x, y, x + len, y);
+  g.line(x + w - len, y, x + w, y);
+  g.line(x + w, y, x + w, y + len);
+  g.line(x, y + h - len, x, y + h);
+  g.line(x, y + h, x + len, y + h);
+  g.line(x + w - len, y + h, x + w, y + h);
+  g.line(x + w, y + h - len, x + w, y + h);
+}
+
+
+void drawPanel(PGraphics g, float x, float y, float w, float h, int border){
+  drawDropShadow(g, x, y, w, h, 3);
+  g.fill(COL_PANEL);
+  g.stroke(border);
+  g.rect(x, y, w, h, 3);
+  g.stroke(0x28FFFFFF);
+  g.line(x + 2, y + 1, x + w - 2, y + 1);
+  if (w >= 120 && h >= 40){
+    drawTechCorners(g, x, y, w, h, border);
+  }
+}
+
+
+
+void drawShadowText(PGraphics g, String value, float x, float y, float size, int colour){
+  float render_size = renderTextSize(size);
+  g.textSize(render_size);
+  g.fill(0xFF000000);
+  g.text(value, x + 1, y);
+  g.text(value, x - 1, y);
+  g.text(value, x, y + 1);
+  g.text(value, x, y - 1);
+  g.text(value, x + 1, y + 1);
+  g.fill(colour);
+  g.text(value, x, y);
+}
+
+
+void drawCenteredShadowText(PGraphics g, String value, float cx, float y,
+  float size, int colour){
+  float render_size = renderTextSize(size);
+  g.textSize(render_size);
+  drawShadowText(g, value, cx - g.textWidth(value) / 2.0, y, size, colour);
+}
+
+
+float modalButtonWidth(PGraphics g, String label){
+  return modalButtonWidth(g, label, MODAL_FOOTER_RIGHT - MODAL_FOOTER_LEFT);
+}
+
+
+float modalButtonWidth(PGraphics g, String label, float max_width){
+  if (label.length() == 0){
+    return 0;
+  }
+
+  g.textSize(renderTextSize(MIN_TEXT_SIZE));
+  return min(max_width, max(84, g.textWidth(label) + 18));
+}
+
+String[] modalButtonLines(PGraphics g, String label, float max_width){
+  ArrayList<String> lines = new ArrayList<String>();
+  String[] words = split(label.replace('\n', ' '), ' ');
+  float text_size = renderTextSize(MIN_TEXT_SIZE);
+  max_width = max(1, max_width);
+  g.textSize(text_size);
+  String line = "";
+
+  for (String word : words){
+    if (word.length() == 0) continue;
+    String candidate = line.length() == 0 ? word : line + " " + word;
+    if (line.length() > 0 && g.textWidth(candidate) > max_width){
+      lines.add(line);
+      line = "";
+    }
+
+    if (g.textWidth(word) <= max_width){
+      line = line.length() == 0 ? word : line + " " + word;
+      continue;
+    }
+
+    String fragment = "";
+    for (int index = 0; index < word.length(); index++){
+      String character = word.substring(index, index + 1);
+      String next = fragment + character;
+      if (fragment.length() > 0 && g.textWidth(next) > max_width){
+        lines.add(fragment);
+        fragment = character;
+      } else {
+        fragment = next;
+      }
+    }
+    line = fragment;
+  }
+
+  if (line.length() > 0 || lines.size() == 0) lines.add(line);
+  return lines.toArray(new String[lines.size()]);
+}
+
+
+float modalButtonHeight(PGraphics g, String label, float width){
+  if (label.length() == 0) return 0;
+  float line_height = renderTextSize(MIN_TEXT_SIZE) + 1;
+  int line_count = modalButtonLines(g, label, max(1, width - 16)).length;
+  return max(MODAL_BUTTON_HEIGHT, line_count * line_height + 3);
+}
+
+
+void drawModalFooterButton(PGraphics g, float x, float y, float w, float h,
+  String label, int action, boolean on){
+  boolean hover = on && uiLayer() == draw_layer && isHovering(x, y, w, h);
+  int border = on ? (hover ? COL_CYAN : COL_BORDER) : COL_DIM;
+  int colour = on ? (hover ? COL_CYAN : COL_TEXT) : COL_DIM;
+
+  if (on && hover){
+    g.noStroke();
+    g.fill(0x303FC8E8);
+    g.rect(x - 2, y - 2, w + 4, h + 4, 4);
+    g.fill(0xFF142B42);
+    g.stroke(COL_CYAN);
+    g.rect(x, y - 1, w, h, 3);
+    g.stroke(0x703FC8E8);
+    g.line(x + 2, y, x + w - 2, y);
+  } else {
+    g.noStroke();
+    g.fill(0x40000000);
+    g.rect(x, y + 1.5f, w, h, 3);
+    g.fill(on ? COL_PANEL_2 : COL_PANEL);
+    g.stroke(border);
+    g.rect(x, y, w, h, 3);
+    if (on){
+      g.stroke(0x28FFFFFF);
+      g.line(x + 2, y + 1, x + w - 2, y + 1);
+    }
+  }
+
+  String[] lines = modalButtonLines(g, label, max(1, w - 16));
+  float render_size = renderTextSize(MIN_TEXT_SIZE);
+  float line_height = render_size + 1;
+  float block_height = lines.length * render_size + max(0, lines.length - 1);
+  float text_y = (on && hover ? y - 1 : y) + (h - block_height) / 2.0;
+  g.fill(colour);
+  g.textSize(render_size);
+  for (int index = 0; index < lines.length; index++){
+    g.text(lines[index], x + (w - g.textWidth(lines[index])) / 2.0,
+      text_y + index * line_height);
+  }
+
+  addButton(x, y, w, h, action, on);
+}
+
+
+void drawModalFooter(PGraphics g, float y, String secondary, int secondary_action, boolean secondary_on,
+  String primary, int primary_action, boolean primary_on){
+  drawModalFooter(g, y, secondary, secondary_action, secondary_on,
+    primary, primary_action, primary_on, MODAL_FOOTER_LEFT, MODAL_FOOTER_RIGHT);
+}
+
+
+void drawModalFooter(PGraphics g, float y, String secondary, int secondary_action, boolean secondary_on,
+  String primary, int primary_action, boolean primary_on, float left, float right){
+  float content_w = right - left;
+  float primary_w = modalButtonWidth(g, primary, content_w);
+  float secondary_w = modalButtonWidth(g, secondary, content_w);
+  float total_w = primary_w + secondary_w + (secondary_w > 0 ? MODAL_FOOTER_GAP : 0);
+
+  if (total_w > content_w){
+    if (secondary.length() > 0 && primary.length() > 0){
+      float available_w = content_w - MODAL_FOOTER_GAP;
+      float primary_ratio = primary_w / max(1, primary_w + secondary_w);
+      if (available_w >= 168){
+        primary_w = constrain(available_w * primary_ratio, 84, available_w - 84);
+      } else {
+        primary_w = available_w * primary_ratio;
+      }
+      secondary_w = available_w - primary_w;
+    } else if (primary.length() > 0){
+      primary_w = content_w;
+    } else if (secondary.length() > 0){
+      secondary_w = content_w;
+    }
+  }
+
+  float footer_height = max(modalButtonHeight(g, primary, primary_w),
+    modalButtonHeight(g, secondary, secondary_w));
+  float footer_y = y + MODAL_BUTTON_HEIGHT - footer_height;
+  if (primary.length() > 0) drawModalFooterButton(g, right - primary_w, footer_y,
+    primary_w, footer_height, primary, primary_action, primary_on);
+  if (secondary.length() > 0){
+    float secondary_x = primary.length() > 0
+      ? right - primary_w - MODAL_FOOTER_GAP - secondary_w
+      : right - secondary_w;
+    drawModalFooterButton(g, secondary_x, footer_y, secondary_w, footer_height,
+      secondary, secondary_action, secondary_on);
+  }
+}
+
+
+void drawBackdrop(PGraphics g, float x, float y, float w, float h){
+  g.fill(COL_ROOM);
+  g.stroke(COL_BORDER);
+  g.rect(x, y, w, h, 3);
+}
+void drawModalShade(PGraphics g){
+  g.noStroke();
+  g.fill(0xC8040914);
+  g.rect(0, 52, BASE_W, BASE_H - 52);
+  g.stroke(0x403FC8E8);
+  g.line(0, 52, BASE_W, 52);
+}
+
+
+void openDialogue(String name, String value){
+  pending_quest_action = ACTION_NONE;
+  dialog_name = name;
+  dialog_text = value;
+  dialog_result = "";
+  dialog_crew = -1;
+  dialog_open = true;
+}
+
+
+void drawDialogue(PGraphics g){
+  drawModalShade(g);
+
+  boolean has_result = dialog_result.length() > 0;
+  float panel_bottom = 324;
+  float panel_h = has_result ? 122 : 92;
+  float panel_y = panel_bottom - panel_h;
+  float footer_y = panel_bottom - 30;
+  float portrait_y = panel_y - (ART_PORTRAIT_H - 26);
+
+  drawPortrait(g, dialog_name, 470, portrait_y);
+  drawPanel(g, 24, panel_y, 592, panel_h, COL_CYAN);
+  text(g, dialog_name, 40, panel_y + 12, 16, COL_CYAN);
+  drawTextWrapped(g, dialog_text, 40, panel_y + 31, 552, 16, 17, COL_TEXT);
+  if (has_result){
+    text(g, "Resultado", 40, panel_y + 51, 16, COL_GREEN);
+    drawTextWrapped(g, dialog_result, 40, panel_y + 69, 552, 16, 17, COL_TEXT);
+  }
+  if (pending_quest_action == ACTION_ACCEPT_ORDER){
+    boolean enabled = pendingQuestEnabled();
+    drawModalFooter(g, footer_y, "AGORA NÃO (ESC)", ACTION_CLOSE_MODAL, true,
+      "ACEITAR (ENTER)", ACTION_CONFIRM_QUEST, enabled);
+    if (!enabled) text(g, questReasonText(pendingQuestReason()), 40, footer_y + 2, 16, COL_ORANGE);
+  } else {
+    drawModalFooter(g, footer_y, "", ACTION_NONE, false,
+      "CONTINUAR (ENTER)", ACTION_CLOSE_MODAL, true);
+  }
+}
+
+
+void drawPortrait(PGraphics g, String name, float x, float y){
+  g.stroke(COL_BORDER);
+  g.fill(COL_PANEL);
+  g.rect(x, y, ART_PORTRAIT_W, ART_PORTRAIT_H, 4);
+
+  PImage art = crewPortraitArt(name);
+
+  if (art != null){
+    drawArtCorner(g, art, x, y, ART_PORTRAIT_W, ART_PORTRAIT_H);
+    return;
+  }
+
+  int colour = name.equals("VERA") ? COL_CYAN
+    : name.equals("SÍLVIA") ? COL_ORANGE
+    : name.equals("BENTO") ? COL_GREEN : COL_YELLOW;
+
+  g.noStroke();
+  g.fill(colour);
+  g.ellipse(x + 56, y + 40, 46, 46);
+  g.rect(x + 30, y + 66, 52, 60, 6);
+  g.fill(COL_TEXT);
+  g.rect(x + 44, y + 35, 4, 4);
+  g.rect(x + 64, y + 35, 4, 4);
+}
+
+
+void openTechnical(String title, String value){
+  pending_quest_action = ACTION_NONE;
+  clearRetryState();
+  technical_title = title;
+  technical_text = value;
+  technical_open = true;
+}
+
+
+void drawTechnicalPanel(PGraphics g){
+  drawModalShade(g);
+  drawPanel(g, 34, 108, 572, 210, COL_CYAN);
+  text(g, technical_title, 50, 120, 16, COL_CYAN);
+
+  String[] lines = split(technical_text, '\n');
+  float y = 146;
+
+  for (int i = 0; i < lines.length; i++){
+    String line = lines[i].trim();
+    if (line.length() == 0){
+      y += 6;
+      continue;
+    }
+
+    int col = COL_TEXT;
+    if (line.startsWith("Destino:") || line.startsWith("Coleta:") || line.startsWith("Entrega:")){
+      col = COL_CYAN;
+    } else if (line.startsWith("Benefício:") || line.startsWith("Resultado:") || line.startsWith("Efeito:")){
+      col = COL_GREEN;
+    } else if (line.startsWith("Se falhar:") || line.startsWith("Consequência:") || line.startsWith("Custo") || line.startsWith("Sem socorro:")){
+      col = COL_ORANGE;
+    } else if (line.startsWith("\"") || line.startsWith("Nota:")){
+      col = COL_MUTED;
+    }
+
+    y = drawTextWrapped(g, line, 50, y, 540, 16, 18, col);
+    y += 8;
+  }
+
+  if (pending_quest_action != ACTION_NONE){
+    boolean deliver = pending_quest_action == ACTION_DELIVER_QUEST;
+    String dismiss_label = pending_quest_action == ACTION_RETRY_QUEST
+      ? "VOLTAR (ESC)" : "AGORA NÃO (ESC)";
+    String label = deliver ? "APLICAR REPARO (ENTER)"
+      : pending_quest_action == ACTION_RESCUE ? "SOCORRER (ENTER)"
+      : pending_quest_action == ACTION_RETRY_QUEST ? "RETOMAR (ENTER)" : "CONFIRMAR (ENTER)";
+    boolean enabled = pendingQuestEnabled();
+    drawModalFooter(g, 284, dismiss_label, ACTION_CLOSE_MODAL, true,
+      label, ACTION_CONFIRM_QUEST, enabled);
+    if (!enabled) text(g, questReasonText(pendingQuestReason()), 50, 286, 16, COL_ORANGE);
+  } else {
+    drawModalFooter(g, 284, "", ACTION_NONE, false,
+      "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+  }
+}
+
+
+void drawEndDayPanel(PGraphics g){
+  NightProjection projection = recalculateEndDayPanel();
+  drawModalShade(g);
+
+  int fatal_count = projection.fatal_conditions.length;
+  float panel_h = 194 + fatal_count * 17;
+  float panel_y = round(205 - panel_h / 2.0);
+  float panel_x = 16;
+  float panel_w = 608;
+  float tx = 28;
+  float wrap_w = 582;
+
+  drawPanel(g, panel_x, panel_y, panel_w, panel_h, COL_ORANGE);
+  text(g, "Encerrar o dia?", tx, panel_y + 12, 16, COL_ORANGE);
+  text(g, "RECURSO        VARIAÇÃO       VALOR PREVISTO", tx, panel_y + 32, 16, COL_MUTED);
+  text(g, projection.resource_line_a, tx, panel_y + 48, 16, COL_TEXT);
+  text(g, projection.resource_line_b, tx, panel_y + 64, 16, COL_TEXT);
+
+  float y = panel_y + 84;
+  y = drawTextWrapped(g, projection.quest_summary, tx, y, wrap_w, 16, 17, COL_CYAN);
+  y = drawTextWrapped(g, projection.risk_line, tx, y + 1, wrap_w, 16, 17, COL_ORANGE);
+  y = drawTextWrapped(g, projection.outcome_line, tx, y + 1, wrap_w, 16, 17,
+    projection.game_outcome == NIGHT_OUTCOME_DEFEAT ? COL_RED : COL_GREEN);
+
+  if (fatal_count > 0){
+    text(g, "CONDIÇÕES FATAIS", tx, y + 1, 16, COL_RED);
+    y += 18;
+    for (int i = 0; i < fatal_count; i++){
+      y = drawTextWrapped(g, "• " + projection.fatal_conditions[i], tx, y, wrap_w, 16, 17, COL_RED);
+    }
+  } else {
+    y = drawTextWrapped(g, "Nenhuma condição fatal prevista.", tx, y + 1, wrap_w, 16, 17, COL_GREEN);
+  }
+
+  float footer_y = panel_y + panel_h - 30;
+  drawModalFooter(g, footer_y, "VOLTAR (ESC)", ACTION_CLOSE_MODAL, true,
+    "DORMIR (ENTER)", ACTION_END_DAY, true, tx, panel_x + panel_w - 14);
+}
+
+
+final String[] help_lines = {
+  "ANDAR: ← → OU A/D",
+  "CORRER: SHIFT COM ← → OU A/D",
+  "ESCADA: ↑ ↓ OU W/S",
+  "PULAR: ESPAÇO",
+  "INTERAGIR E ABRIR PORTAS: E",
+  "CONFIRMAR DIÁLOGO, ORDEM E DORMIR: ENTER",
+  "PAUSA, FECHAR MODAL E VOLTAR: ESC",
+  "MAPA, ORDENS E AJUDA: BOTÕES DO RODAPÉ, COM O MOUSE"
+};
+
+
+void drawHelpPanel(PGraphics g){
+  float panel_h = 84 + 9 * (help_lines.length - 1);
+  drawModalShade(g);
+  drawPanel(g, 34, 88, 572, panel_h, COL_CYAN);
+  text(g, "AJUDA — CONTROLES", 50, 98, 16, COL_CYAN);
+
+  float y = 120;
+
+  for (int i = 0; i < help_lines.length; i++){
+    text(g, help_lines[i], 50, y, 16, COL_TEXT);
+    y += 9;
+  }
+
+  drawModalFooter(g, y + 2, "", ACTION_NONE, false,
+    "FECHAR (ESC)", ACTION_CLOSE_MODAL, true);
+}
+
+
+void drawStars(PGraphics g){
+  g.noStroke();
+
+  for (int i = 0; i < 64; i++){
+    float x = 6 + ((i * 101) % 628);
+    float y = 6 + ((i * 67) % 348);
+    g.fill(0x507895A5);
+    g.rect(x, y, 1, 1);
+  }
+
+  long now = presentationTimeMillis();
+  for (int i = 0; i < 32; i++){
+    float x = 12 + ((i * 137) % 616);
+    float y = 10 + ((i * 89) % 340);
+    float phase = i * 1.37f;
+    float pulse = (1 + sin(now * 0.0025f + phase)) * 0.5f;
+    int star_col = lerpColor(0x403FC8E8, 0xE0EBF5, pulse);
+    g.fill(star_col);
+    float sz = (i % 4 == 0) ? 2 : 1;
+    g.rect(x, y, sz, sz);
+  }
+
+  int[] hero_x = { 110, 240, 480, 560, 310 };
+  int[] hero_y = {  45, 115,  68, 220, 310 };
+  for (int i = 0; i < hero_x.length; i++){
+    float phase = i * 2.1f;
+    float pulse = 0.5f + 0.5f * sin(now * 0.003f + phase);
+    float hx = hero_x[i];
+    float hy = hero_y[i];
+    g.fill(0x303FC8E8);
+    g.rect(hx - 2, hy - 2, 5, 5);
+    g.stroke(0x60D9E8F2);
+    g.line(hx - 3, hy, hx + 3, hy);
+    g.line(hx, hy - 3, hx, hy + 3);
+    g.noStroke();
+    g.fill(0xFFFFFFFF);
+    g.rect(hx - 0.5f, hy - 0.5f, 2, 2);
+  }
+
+  for (int i = 0; i < 18; i++){
+    float speed = 0.012f + (i % 3) * 0.006f;
+    float raw_x = (i * 73 + now * speed) % (BASE_W + 40);
+    float x = BASE_W - raw_x;
+    float raw_y = (i * 43 + now * speed * 0.4f) % BASE_H;
+    g.fill(0x303FC8E8);
+    g.rect(x, raw_y, 1.5f, 1.5f);
+  }
+}
+float fitTextSize(PGraphics g, String value, float desired_size, float max_width){
+  float size = desired_size;
+  g.textSize(renderTextSize(size));
+
+  while (size > 10 && g.textWidth(value) > max_width){
+    size -= 1;
+    g.textSize(renderTextSize(size));
+  }
+
+  return size;
+}
+float renderTextSize(float size){
+  return size / RENDER_SCALE;
+}
+float readableTextSize(float size){
+  return max(size, MIN_TEXT_SIZE);
+}
+
+
+float readableWrapSize(float size){
+  return max(size, MIN_WRAP_TEXT_SIZE);
+}
+
+
+void text(PGraphics g, String value, float x, float y, float size, int colour){
+  float actual_size = readableTextSize(size);
+
+  g.fill(colour);
+  g.textSize(renderTextSize(actual_size));
+  g.text(value, x, y);
+}
+
+
+void textCentered(PGraphics g, String value, float cx, float y, float size, int colour){
+  float actual_size = readableTextSize(size);
+
+  g.fill(colour);
+  g.textSize(renderTextSize(actual_size));
+  g.text(value, cx - g.textWidth(value) / 2.0, y);
+}
+
+
+void textCenteredShadow(PGraphics g, String value, float cx, float y, float size, int colour){
+  drawCenteredShadowText(g, value, cx, y, size, colour);
+}
+
+
+void textPromptShadow(PGraphics g, String value, float cx, float y, float size, int colour){
+  drawCenteredShadowText(g, value, cx, y, size, colour);
+}
+
+
+float drawTextWrapped(PGraphics g, String value, float x, float y, float w, float size, float line_h, int colour){
+  String[] paragraphs = split(value, '\n');
+  float actual_size = readableWrapSize(size);
+  float actual_line_h = max(line_h, actual_size + 2);
+  float render_size = renderTextSize(actual_size);
+  float render_line_h = renderTextSize(actual_line_h);
+
+  g.fill(colour);
+  g.textSize(render_size);
+
+  float line_y = y;
+
+  for (int p = 0; p < paragraphs.length; p++){
+    String paragraph = paragraphs[p];
+    if (paragraph.length() == 0){
+      line_y += render_line_h * 0.5;
+      continue;
+    }
+    String[] words = split(paragraph, ' ');
+    String line = "";
+
+    for (int i = 0; i < words.length; i++){
+      if (words[i].length() == 0) continue;
+      String candidate = (line.length() == 0) ? words[i] : line + " " + words[i];
+
+      if (line.length() > 0 && g.textWidth(candidate) > w){
+        g.text(line, x, line_y);
+        line = words[i];
+        line_y += render_line_h;
+      } else {
+        line = candidate;
+      }
+    }
+
+    if (line.length() > 0){
+      g.text(line, x, line_y);
+      line_y += render_line_h;
+    }
+  }
+
+  return line_y;
+}

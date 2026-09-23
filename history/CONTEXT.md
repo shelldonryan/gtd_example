@@ -14,30 +14,58 @@ essenciais para a viagem.
 
 ## Situação inicial
 
-O jogador assume o controle da espacionave logo após a partida. A nave possui
-quatro áreas principais:
+O jogador assume o controle do gerenciamento da espaçonave logo após a partida. 
+A nave possui quatro áreas principais:
 
-- Sala de comando.
-- Sala de controle de energia, onde fica o motor.
-- Depósito.
-- Dormitório.
+- Sala de comando, centro de navegação e comunicações.
+- Sala de máquinas, onde ficam motor, energia e suporte de vida.
+- Depósito, responsável por estoques e componentes especiais.
+- Dormitório, responsável por descanso, saúde e moral.
 
-Os sistemas estão funcionando, mas não foram preparados para uma viagem sem
-problemas. A nave precisa economizar energia, controlar os estoques e lidar com
-falhas que podem surgir durante o percurso.
+A Sala de comando é o hub: uma porta em cada convés leva ao Dormitório, ao
+Depósito ou à Sala de máquinas. O mapa mostra a sala atual, o objetivo e a
+contagem de problemas por cômodo.
+
+Dentro dos cômodos, o técnico pode andar, pular, usar escadas, atravessar
+plataformas e interagir com pessoas, sistemas e objetos.
+
+Quatro sobreviventes viajam a bordo, além do técnico: **Vera**, a piloto, no
+comando; **Bento**, o intendente, no depósito; **Neusa**, a enfermeira, no
+dormitório; e **Sílvia**, a mecânica, na Sala de máquinas ([[NPC_1]], [[NPC_2]],
+[[NPC_3]] e [[NPC_4]]). Eles ocupam pontos dos cômodos e respondem quando o
+técnico interage com eles. Se uma pessoa morrer, a contagem a bordo diminui e
+as ordens preventivas são oferecidas pelos sobreviventes vivos.
+
+Os sistemas da nave exigem gestão de energia e estoques, e falhas podem surgir
+durante o percurso.
 
 ## Desenvolvimento da viagem
 
-A viagem é representada por dez dias de jogo. Em cada dia, o técnico pode
-visitar os cômodos, realizar ações e decidir quando avançar o tempo. Ao final
-do dia, a nave consome água, comida, oxigênio e energia. Eventos como falhas no
-motor, chuva de meteoros, falta de comida e conflitos entre os sobreviventes
-podem alterar o estado da missão.
+A viagem é representada por dez dias de jogo. O primeiro começa na Sala de
+comando; os seguintes, no Dormitório. Incidentes surgem nos dias 2, 4, 6, 8 e
+10. Existem sete tipos de incidente, cinco escolhidos por partida sem
+reposição, organizados em falhas técnicas, suprimentos e tripulação.
 
-As decisões não possuem uma solução perfeita. Reparar o motor pode gastar as
-últimas peças, manter o consumo normal pode deixar os estoques vazios e aplicar
-o racionamento pode reduzir a moral. O jogador precisa escolher qual perda é
-aceitável para manter a viagem em andamento.
+Cada incidente apresenta duas soluções físicas ([[ACTIONS]]). O técnico escolhe
+uma, aceita a ordem, coleta o objeto indicado e o entrega no destino. Se a
+solução não for concluída antes de dormir, o problema permanece ativo, cobra sua
+perda diária, reduz o prazo e pode chegar à crise.
+
+Nos dias sem incidente, os sobreviventes oferecem duas ordens preventivas. O
+técnico escolhe uma, confirma a ordem presencialmente e executa uma rota curta de
+coleta e entrega. Uma ordem concluída aumenta um recurso específico. Se nenhuma
+ordem for aceita, os dois recursos associados às ofertas sofrem uma perda maior;
+se a ordem aceita não for concluída, perde-se uma quantidade menor do recurso
+protegido. A ordem aceita não pode ser cancelada.
+
+As ordens formam o trabalho do dia. Componentes especiais são objetos de quest,
+carregados um por vez. A origem e o destino aparecem nos cartões e detalhes das
+ordens; o mapa mostra a sala atual, o objetivo e a contagem de problemas por
+cômodo.
+
+O jogador administra os seis recursos durante o consumo diário e decide qual
+risco ou preparação merece a única conclusão de quest do dia. Conversas e
+leituras das estações contextualizam as ordens.
 
 ## Objetivo
 
@@ -55,6 +83,11 @@ decisões do jogador.
 
 ## Escopo
 
-O foco será a viagem e a administração da nave.
-Ao final, a vitória representa a chegada à base marciana e a possibilidade de
-reconstruir a humanidade.
+O foco será a viagem, a administração da nave e a exploração controlável dos
+cômodos. A visão macro organiza a navegação; as cenas laterais transformam cada
+cômodo em um espaço jogável para cumprir os objetivos da viagem.
+
+## Referências
+
+- [#11 Roteiro da vinheta, mensagens e textos do jogo](https://github.com/shelldonryan/gtd_example/issues/11)
+- [#14 Decisões pendentes: roster, derrota, objetivos das salas e vocabulário](https://github.com/shelldonryan/gtd_example/issues/14)
