@@ -11,6 +11,10 @@ application.linux32/
 application.linux64/
 last_horizon/output/
 last_horizon/output/*
+!last_horizon/output/
+!last_horizon/output/profiling-run-manifest.json
+!last_horizon/output/profiling-collection-report.json
+!last_horizon/output/profiling-comparison.json
 last_horizon/*.class
 .processing/
 

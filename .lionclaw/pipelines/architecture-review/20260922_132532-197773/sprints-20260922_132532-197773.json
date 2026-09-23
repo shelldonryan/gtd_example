@@ -1,0 +1,773 @@
+{
+  "project": {
+    "id": "32a47f2631719ef1fa1943a1f4a41fa4",
+    "name": "last_horizon_performance",
+    "description": "",
+    "path": "/home/ubuntu/pessoal/01-projetos/gtd_example",
+    "stack": [],
+    "config": {
+      "max_rounds_per_sprint": 3,
+      "use_playwright": false,
+      "evaluator_agent_id": "harness-evaluator",
+      "planner_agent_id": "harness-planner"
+    }
+  },
+  "sprints": [
+    {
+      "id": "sprint-001",
+      "index": 0,
+      "name": "Fundação do relógio de simulação",
+      "description": "Registrar o baseline verificável e introduzir o Frame Module, seu contexto temporal, o acumulador limitado e a integração inicial com o callback principal.",
+      "coder_agent_id": "dynamic-workflow-coder",
+      "stack": [
+        "Processing 4",
+        "Java (PDE)",
+        "Node.js",
+        "Bash"
+      ],
+      "features": [
+        {
+          "id": "feat-001",
+          "name": "Baseline técnico e funcional",
+          "description": "Registrar a referência anterior à migração, os pré-requisitos disponíveis e os resultados dos checks e métricas já existentes.",
+          "acceptance_criteria": [
+            "Um artefato versionado identifica o commit ou estado Git usado como baseline, a versão do Processing, o ambiente gráfico, a disponibilidade de áudio e os comandos executados.",
+            "Os checks existentes são registrados individualmente como PASS, FAIL ou INCONCLUSIVO, incluindo typecheck, build, regressão final, matriz de módulos opcionais e simulação de balanceamento.",
+            "Quando os pré-requisitos existirem, o baseline de profiling preserva três amostras de 30 segundos para os perfis core-i3-integrated e reference no cenário command-day1.",
+            "Ausência de Processing, xvfb-run, dispositivo de áudio ou metadado obrigatório é registrada como INCONCLUSIVO e nunca como PASS."
+          ]
+        },
+        {
+          "id": "feat-002",
+          "name": "Contrato temporal central",
+          "description": "Criar o Frame Module com relógio substituível, contexto do callback, passo fixo, acumulador limitado e diagnóstico de amostras inválidas.",
+          "acceptance_criteria": [
+            "O contrato expõe passo fixo de 1/60 segundo, máximo de quatro passos por callback, teto de acumulador de 4/60 segundo, tempo simulado confirmado e versão do último estado confirmado.",
+            "A primeira leitura do relógio executa zero passos; deltas negativos ou não finitos executam zero passos, preservam o estado confirmado, registram o diagnóstico e rebaseiam a leitura seguinte.",
+            "Para cada callback são observáveis accumulator_before, tempo observado, tempo aceito, tempo descartado, accumulator_after e quantidade de passos executados.",
+            "Nenhum callback executa mais de quatro passos e qualquer remanescente conservado é menor que um passo fixo.",
+            "O FrameContext publica tela/cômodo ativo, camada de UI, pausa, origem do relógio (production/fake), modo do harness, identificador do callback, quantidade e índice do passo, consumo de ações de borda, estado da transição de porta e versão do último estado confirmado."
+          ]
+        },
+        {
+          "id": "feat-003",
+          "name": "Integração do Frame Module ao shell",
+          "description": "Fazer o callback draw() usar o Frame Module como única origem dos passos de sala, mantendo a coordenação do input, apresentação, janela e harness no shell.",
+          "acceptance_criteria": [
+            "O caminho normal de draw() executa zero a quatro atualizações fixas e realiza uma única apresentação e uma única composição da janela por callback.",
+            "A ordem observável permanece: início do frame, input, simulação, despacho de áudio, drawBase(), cursor, drawWindow() e hook do harness.",
+            "A entrada de atualização de sala usada pelo runtime declara explicitamente o passo fixo ou o contexto do passo; draw() não usa mais a quantidade de callbacks como unidade implícita de avanço.",
+            "frame.pde contém somente relógio, acumulador, contexto temporal e instrumentação de fases, sem regras de movimento, desenho, domínio, assets ou reprodução física de áudio."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/last_horizon.pde",
+          "last_horizon/movement.pde",
+          "last_horizon/capture.pde",
+          "tools/profile-runner.mjs",
+          "tools/compare-profiling.mjs",
+          "tools/optional-modules.mjs",
+          "tools/regression-final.sh"
+        ],
+        "key_interfaces": [
+          "draw()",
+          "updateRoom()",
+          "harness_setup",
+          "harness_update",
+          "harness_scene",
+          "FrameContext",
+          "fonte de relógio production/fake"
+        ],
+        "architecture_notes": "Criar last_horizon/frame.pde como Module profundo e limitado ao contrato temporal. System.nanoTime() permanece destinado à medição de custo e não pode controlar o avanço lógico. Preservar as combinações base, capture, manual e complete."
+      },
+      "dependencies": [],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "decision_ids": [
+        "D1",
+        "D2",
+        "D3",
+        "D5"
+      ]
+    },
+    {
+      "id": "sprint-002",
+      "index": 1,
+      "name": "Fronteiras de callback, pausa e transições",
+      "description": "Completar o controle de execução do callback com snapshot de input, consumo único de ações de borda, congelamento fora das salas e barreiras para mudanças de camada, tela e porta.",
+      "coder_agent_id": "dynamic-workflow-coder",
+      "stack": [
+        "Processing 4",
+        "Java (PDE)"
+      ],
+      "features": [
+        {
+          "id": "feat-004",
+          "name": "Snapshot de input por callback",
+          "description": "Amostrar o input uma vez e disponibilizar estados contínuos e ações de borda aos passos do mesmo callback.",
+          "acceptance_criteria": [
+            "Estados de teclas mantidas são iguais para todos os passos executados no mesmo callback, sem nova leitura dos eventos da plataforma.",
+            "jump_queued e interact_queued possuem orçamento de no máximo uma consumação por callback, inclusive quando dois ou quatro passos são executados.",
+            "Flags de borda são limpas segundo o comportamento vigente quando a cena está pausada, em transição ou muda de camada.",
+            "O FrameContext informa se cada ação de borda foi consumida e em qual passo isso ocorreu."
+          ]
+        },
+        {
+          "id": "feat-005",
+          "name": "Congelamento e rebase da simulação",
+          "description": "Impedir acúmulo de tempo simulado durante pausa ou fora de telas de sala, mantendo o relógio de apresentação ativo.",
+          "acceptance_criteria": [
+            "Quando isRoomScreen() for falso ou a simulação estiver pausada, nenhum passo de sala, movimento ou áudio de movimento é executado.",
+            "O tempo transcorrido durante pausa, menu, vinheta, vitória ou derrota não entra no acumulador nem é convertido em passos ao retornar à sala.",
+            "O primeiro callback após retomar uma sala rebasa a fonte temporal e não produz avanço retroativo.",
+            "O relógio de apresentação continua avançando nos callbacks pausados e seu valor é observável separadamente do tempo simulado."
+          ]
+        },
+        {
+          "id": "feat-006",
+          "name": "Barreiras de controle e portas",
+          "description": "Interromper os passos restantes quando uma atualização abre modal, inicia uma porta ou muda a tela, preservando a semântica de parede das transições.",
+          "acceptance_criteria": [
+            "Se um passo abrir modal, iniciar transição de porta ou mudar a tela, nenhum passo restante do callback executa movimento, interação ou nova transição.",
+            "O motivo da interrupção, o último índice de passo executado e a versão final do estado ficam registrados no FrameContext.",
+            "updateDoorTransition() é chamado no máximo uma vez por callback e continua usando o relógio de parede da implementação vigente.",
+            "Transição ativa, reentrada, destino inválido e portal de retorno ausente não causam segunda entrada de sala nem mutação parcial da sala."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/frame.pde",
+          "last_horizon/last_horizon.pde",
+          "last_horizon/last_horizon.pde (define updateInput())",
+          "last_horizon/movement.pde",
+          "last_horizon/portals.pde",
+          "last_horizon/screens.pde",
+          "last_horizon/ui.pde",
+          "SPEC_PROGRESS.md"
+        ],
+        "key_interfaces": [
+          "FrameContext",
+          "draw()",
+          "updateInput()",
+          "isRoomScreen()",
+          "jump_queued",
+          "interact_queued",
+          "updateDoorTransition()",
+          "door_transition_started"
+        ],
+        "architecture_notes": "Use o contrato temporal e os nomes concretos registrados pela sprint-001. Portas permanecem no relógio de parede e participam apenas uma vez do callback. O harness observa o contexto, mas não pode criar passos extras."
+      },
+      "dependencies": [
+        "sprint-001"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2,
+      "decision_ids": [
+        "D1",
+        "D2",
+        "D3",
+        "D5"
+      ]
+    },
+    {
+      "id": "sprint-003",
+      "index": 2,
+      "name": "Movimento determinístico por passo fixo",
+      "description": "Migrar convés, corrida, salto, gravidade e escadas para o passo explícito, preservando colisões, limites, interações e o comportamento de referência em 60 FPS.",
+      "coder_agent_id": "dynamic-workflow-coder",
+      "stack": [
+        "Processing 4",
+        "Java (PDE)",
+        "Física 2D"
+      ],
+      "features": [
+        {
+          "id": "feat-007",
+          "name": "Integração de caminhada e corrida",
+          "description": "Fazer o deslocamento horizontal usar o tempo lógico do passo mantendo as velocidades observadas na referência de 60 FPS.",
+          "acceptance_criteria": [
+            "updateRoom() e updatePlayerOnDeck() recebem explicitamente o passo ou contexto fixo em todos os callers de produção e de teste.",
+            "Uma fixture com 60 passos produz a mesma distância de referência em caminhada e corrida, com tolerância máxima de 0,01 unidade lógica.",
+            "As fixtures equivalentes de 15, 30 e 60 FPS produzem a mesma posição e estado final após um segundo simulado, com tolerância máxima de 0,01 unidade lógica.",
+            "Colisões, limites do convés, portas e pontos de interação mantêm as condições existentes."
+          ]
+        },
+        {
+          "id": "feat-008",
+          "name": "Salto, gravidade e aterrissagem",
+          "description": "Migrar o avanço vertical e as transições de salto para o passo fixo sem repetir ações de borda.",
+          "acceptance_criteria": [
+            "Gravidade, velocidade vertical, início do salto e aterrissagem avançam exclusivamente durante passos confirmados.",
+            "Uma única ação de salto em callback com quatro passos inicia no máximo um salto.",
+            "Fixtures equivalentes de 15, 30 e 60 FPS produzem a mesma altura, estado aéreo e posição final para a mesma sequência de passos.",
+            "Pausa, frame descartado e callback sem passo não alteram altura, velocidade vertical ou estado de aterrissagem."
+          ]
+        },
+        {
+          "id": "feat-009",
+          "name": "Movimento de escada",
+          "description": "Migrar subida, descida, entrada e saída de escadas para o passo explícito.",
+          "acceptance_criteria": [
+            "updatePlayerOnLadder() recebe o passo ou contexto fixo em todos os callers.",
+            "Subida e descida equivalentes em 15, 30 e 60 FPS produzem a mesma distância e o mesmo estado de entrada ou saída da escada.",
+            "A saída para o convés e os limites verticais preservam as condições observadas no baseline.",
+            "Uma barreira de modal, porta ou tela impede qualquer deslocamento adicional de escada no mesmo callback."
+          ]
+        },
+        {
+          "id": "feat-010",
+          "name": "Cadência lógica de movimento",
+          "description": "Associar fases e limiares de contato do movimento ao avanço simulado para posterior emissão de animação e áudio.",
+          "acceptance_criteria": [
+            "A fase de caminhada, corrida e escada avança somente em passos executados e não consulta millis() como fonte de avanço.",
+            "Frames acima do teto não cruzam limiares referentes ao tempo descartado.",
+            "Callbacks sem passo e períodos pausados não alteram distância acumulada nem fase de contato.",
+            "A mesma fixture de passos produz a mesma sequência de cruzamentos de limiar nas cadências de 15, 30 e 60 FPS."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/frame.pde",
+          "last_horizon/last_horizon.pde",
+          "last_horizon/movement.pde",
+          "last_horizon/ship.pde",
+          "last_horizon/portals.pde",
+          "last_horizon/capture.pde",
+          "SPEC_PROGRESS.md"
+        ],
+        "key_interfaces": [
+          "FrameContext",
+          "updateRoom()",
+          "updatePlayerOnDeck()",
+          "updatePlayerOnLadder()",
+          "PLAYER_SPEED",
+          "PLAYER_RUN_SPEED",
+          "GRAVITY",
+          "LADDER_SPEED",
+          "jump_queued",
+          "interact_queued"
+        ],
+        "architecture_notes": "Use os passos produzidos pela sprint-001 e as barreiras da sprint-002. Os valores atuais representam o comportamento alvo em 60 FPS. Não alterar geometria, regras de colisão, domínio, quests ou transições de campanha."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "decision_ids": [
+        "D1",
+        "D2",
+        "D3",
+        "D5"
+      ]
+    },
+    {
+      "id": "sprint-004",
+      "index": 3,
+      "name": "Animação vinculada ao tempo simulado",
+      "description": "Migrar as transições e a seleção dos takes do jogador para o relógio de simulação, retirar mutações do render pass e preservar o cache player_frame_layer.",
+      "coder_agent_id": "dynamic-workflow-coder",
+      "stack": [
+        "Processing 4",
+        "Java (PDE)",
+        "Animação 2D"
+      ],
+      "features": [
+        {
+          "id": "feat-011",
+          "name": "Estado de animação confirmado",
+          "description": "Definir a transição do take e seu instante lógico durante o avanço simulado.",
+          "acceptance_criteria": [
+            "Mudanças entre idle, walk, run, climb e jump registram o início do take com o tempo simulado confirmado.",
+            "playerCurrentFrame() não reinicia take nem altera player_anim_state, player_animation_moving ou player_animation_started_at durante a apresentação.",
+            "Callbacks sem passo e renderizações repetidas do mesmo estado não mudam o take nem seu instante inicial.",
+            "A fase visual de caminhada usa o mesmo instante lógico empregado pela cadência de movimento."
+          ]
+        },
+        {
+          "id": "feat-012",
+          "name": "Seleção determinística de frames",
+          "description": "Calcular os frames dos takes existentes a partir do estado confirmado e do relógio fake ou de produção.",
+          "acceptance_criteria": [
+            "Idle, walk, run, climb e jump selecionam os mesmos takes e durações já carregados pelo jogo.",
+            "A mesma sequência de passos e estados produz a mesma sequência de frames em execuções com relógio fake.",
+            "O frame de salto e a animação parada na escada preservam o comportamento funcional existente.",
+            "Não permanece leitura de millis() ligada ao início, duração ou seleção do take do jogador no caminho normal."
+          ]
+        },
+        {
+          "id": "feat-013",
+          "name": "Invalidação da camada do jogador",
+          "description": "Preservar a reutilização de player_frame_layer entre apresentações equivalentes.",
+          "acceptance_criteria": [
+            "updatePlayerFrameLayer() reconstrói player_frame_layer somente quando o frame selecionado ou player_facing muda.",
+            "Mudança apenas no identificador do callback, relógio de apresentação ou quantidade de passos não reconstrói a camada.",
+            "Contadores do harness distinguem consultas, reutilizações e reconstruções da camada.",
+            "Falha ao preparar uma nova camada mantém a última representação válida quando existente ou usa o fallback visual anterior."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/frame.pde",
+          "last_horizon/movement.pde",
+          "last_horizon/animation.pde",
+          "last_horizon/ship.pde",
+          "last_horizon/assets.pde",
+          "last_horizon/capture.pde",
+          "SPEC_PROGRESS.md"
+        ],
+        "key_interfaces": [
+          "FrameContext",
+          "playerCurrentFrame()",
+          "updatePlayerFrameLayer()",
+          "player_frame_layer",
+          "player_anim_state",
+          "player_animation_moving",
+          "player_animation_started_at",
+          "player_facing"
+        ],
+        "architecture_notes": "A apresentação deve ser leitura do último estado confirmado. Transições de animação pertencem ao passo de simulação ou a uma operação explicitamente idempotente, sem criar um segundo relógio."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2,
+      "decision_ids": [
+        "D1",
+        "D4",
+        "D5"
+      ]
+    },
+    {
+      "id": "sprint-005",
+      "index": 4,
+      "name": "Eventos e adapter de áudio de movimento",
+      "description": "Separar eventos lógicos de movimento da reprodução física, registrar todas as ocorrências e coalescer disparos físicos por categoria e callback.",
+      "coder_agent_id": "dynamic-workflow-coder",
+      "stack": [
+        "Processing 4",
+        "Java (PDE)",
+        "javax.sound.sampled"
+      ],
+      "features": [
+        {
+          "id": "feat-014",
+          "name": "Contrato de evento sonoro",
+          "description": "Representar caminhada, corrida, escada, decolagem e aterrissagem como eventos produzidos pelos passos executados.",
+          "acceptance_criteria": [
+            "Cada evento lógico contém família, variante, timestamp lógico, ordem global, identificador do callback e índice do passo de origem.",
+            "Eventos são emitidos somente quando um passo executado cruza o limiar correspondente de movimento.",
+            "Tempo descartado, callbacks sem passo e pausas não produzem eventos retrospectivos.",
+            "playDeckStepSound() e playLadderStepSound(), quando mantidos, recebem eventos já derivados da simulação e não decidem a cadência."
+          ]
+        },
+        {
+          "id": "feat-015",
+          "name": "Recorder de áudio em memória",
+          "description": "Disponibilizar um adapter substituível que registre eventos sem abrir dispositivo de áudio.",
+          "acceptance_criteria": [
+            "O recorder registra todos os eventos lógicos, inclusive múltiplos eventos da mesma categoria no mesmo callback.",
+            "A ordem, o tipo, o timestamp lógico, o callback e o passo registrados correspondem à ordem de emissão da simulação.",
+            "O uso do recorder não cria, remove, reordena ou repete eventos.",
+            "O modo de produção não depende da presença de capture.pde nem do recorder."
+          ]
+        },
+        {
+          "id": "feat-016",
+          "name": "Despacho físico coalescido",
+          "description": "Concentrar a reprodução concreta e limitar rajadas sem alterar o registro lógico.",
+          "acceptance_criteria": [
+            "O adapter físico dispara no máximo uma reprodução por família em cada callback, representada pela primeira ocorrência elegível daquela família.",
+            "A coalescência física não apaga nem reordena os eventos preservados pelo recorder.",
+            "Clips pré-carregados e a rotação de variantes existentes continuam sendo utilizados.",
+            "Clip ausente ou exceção de reprodução registra status próprio, não desfaz movimento, não interrompe passos seguintes e não provoca retry automático."
+          ]
+        },
+        {
+          "id": "feat-017",
+          "name": "Instrumentação de stopStepSounds",
+          "description": "Medir o custo e a visita aos clips antes de aceitar qualquer mudança de desempenho.",
+          "acceptance_criteria": [
+            "Cada chamada observada de stopStepSounds() registra duração, quantidade de clips visitados e ordem de visita.",
+            "O custo do despacho físico de áudio é medido separadamente da simulação e do render.",
+            "O comparador classifica a equivalência como PASS quando as sequências de eventos lógicos e de reproduções físicas antes/depois têm mesma contagem e ordem, FAIL quando divergem e INCONCLUSIVO quando falta baseline comparável; duração, quantidade e ordem dos clips visitados são métricas separadas. Uma otimização só permanece quando a equivalência é PASS; nos demais casos, conserva-se o comportamento anterior.",
+            "Se a equivalência não puder ser demonstrada, o comportamento anterior de parada é conservado e seu custo permanece registrado."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/frame.pde",
+          "last_horizon/last_horizon.pde",
+          "last_horizon/movement.pde",
+          "last_horizon/audio.pde",
+          "last_horizon/capture.pde",
+          "SPEC_PROGRESS.md"
+        ],
+        "key_interfaces": [
+          "FrameContext",
+          "evento normalizado de movimento",
+          "Audio Adapter",
+          "playDeckStepSound()",
+          "playLadderStepSound()",
+          "stopStepSounds()",
+          "javax.sound.sampled.Clip"
+        ],
+        "architecture_notes": "A emissão é síncrona e serial dentro do passo. O recorder lógico é completo; somente a reprodução física é coalescida. Falhas do adapter são best effort e nunca alteram o estado da campanha."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "decision_ids": [
+        "D1",
+        "D2",
+        "D5"
+      ]
+    },
+    {
+      "id": "sprint-006",
+      "index": 5,
+      "name": "Apresentação, HUD, UI e política de assets",
+      "description": "Centralizar o tempo visual, garantir a apresentação única do estado confirmado e consolidar fallbacks, caches e métricas de assets sem mudar a ordem visual.",
+      "coder_agent_id": "dynamic-workflow-coder",
+      "stack": [
+        "Processing 4",
+        "Java (PDE)",
+        "PGraphics"
+      ],
+      "features": [
+        {
+          "id": "feat-018",
+          "name": "Relógio de apresentação",
+          "description": "Direcionar os efeitos visuais de HUD, nave e UI para o tempo de apresentação fornecido pelo Frame Module.",
+          "acceptance_criteria": [
+            "Chamadas visuais de millis() em hud.pde, ship.pde, ui.pde e screens.pde são inventariadas em artefato com arquivo, linha, efeito e relógio atribuído; efeitos visuais usam o relógio de apresentação central, sem chamada relevante sem classificação.",
+            "Pulsos e efeitos visuais continuam avançando durante pausa, enquanto tempo simulado, movimento e áudio permanecem congelados.",
+            "portals.pde continua usando millis() ou relógio de parede para ART_DOOR_PHASE_MS.",
+            "frameCount não controla simulação nem movimento fora dos agendamentos legados do harness."
+          ]
+        },
+        {
+          "id": "feat-019",
+          "name": "Apresentação do último estado confirmado",
+          "description": "Fazer nave, jogador, HUD, UI e overlays desenharem uma vez a versão final produzida pelos passos do callback.",
+          "acceptance_criteria": [
+            "A versão de estado desenhada é igual à última versão confirmada registrada pelo FrameContext.",
+            "Nenhum caminho de desenho executa passo adicional, interpolação, extrapolação ou mutação temporal do jogador.",
+            "drawBase(), drawRoom(), drawHud(), telas, cursor e drawWindow() preservam a ordem visual e a composição de PGraphics, viewport e letterbox; o harness registra uma apresentação por callback, a sequência das fases, a versão consumida por cada superfície e as dimensões/offsets do viewport.",
+            "harness_scene pode substituir ou compor a cena, mas não consegue incrementar a versão do estado simulado.",
+            "A evidência de apresentação cobre explicitamente screens.pde e demonstra que telas, nave, HUD e UI leem a mesma versão confirmada, sem mutação de versão durante o desenho."
+          ]
+        },
+        {
+          "id": "feat-020",
+          "name": "Preparação de HUD e UI",
+          "description": "Manter conteúdo e hit-test equivalentes, evitando preparação repetida por passo.",
+          "acceptance_criteria": [
+            "resetButtons() e addButton() são executados conforme o render pass e não são duplicados pela quantidade de passos de simulação.",
+            "Hit-test, hover, cursor, prioridade de camadas, modais e limite de 24 controles permanecem equivalentes aos testes existentes.",
+            "O HUD mantém dia, tripulação, seis recursos, objetivo, alertas, pulso e layout.",
+            "Preparação de dados, desenho e builds de cache possuem contadores ou duração observável por callback."
+          ]
+        },
+        {
+          "id": "feat-021",
+          "name": "Assets, fallbacks e caches compartilhados",
+          "description": "Alinhar roomDetail() à política comum de assets e preservar caches e fallbacks mensuráveis.",
+          "acceptance_criteria": [
+            "roomDetail() consulta a política de resolução e fallback de loadArt() antes de qualquer compatibilidade legada.",
+            "Miss, PNG inválido ou erro de decodificação não provoca nova tentativa de filesystem a cada frame; nova tentativa exige invalidação de fonte, escala ou geração.",
+            "Falha de preparação mantém a última representação válida quando disponível ou usa o fallback geométrico existente sem alterar o estado simulado.",
+            "Cache hit, miss, invalidação, fallback, carregamento inicial, memória adicional, builds de ícones, faixas de piso e camada do jogador ficam observáveis.",
+            "O fechamento da sprint apresenta evidência e status para cada critério das features feat-018 a feat-021; qualquer FAIL bloqueia a conclusão, e cada INCONCLUSIVO identifica o pré-requisito ausente e não é contado como PASS."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/frame.pde",
+          "last_horizon/last_horizon.pde",
+          "last_horizon/animation.pde",
+          "last_horizon/audio.pde",
+          "last_horizon/ship.pde",
+          "last_horizon/hud.pde",
+          "last_horizon/ui.pde",
+          "last_horizon/screens.pde",
+          "last_horizon/assets.pde",
+          "last_horizon/portals.pde",
+          "last_horizon/capture.pde",
+          "SPEC_PROGRESS.md"
+        ],
+        "key_interfaces": [
+          "FrameContext",
+          "drawBase()",
+          "drawRoom()",
+          "drawHud()",
+          "drawWindow()",
+          "resetButtons()",
+          "addButton()",
+          "loadArt()",
+          "roomDetail()",
+          "player_frame_layer",
+          "screens.pde e seu contexto de apresentação"
+        ],
+        "architecture_notes": "Simulação e apresentação são fases distintas. Não alterar geometria, ordem de camadas, textos, regras de domínio ou a semântica temporal de portas. Caso o fallback legado de roomDetail() precise permanecer, ele deve compartilhar diagnóstico e contadores com a política comum."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003",
+        "sprint-004",
+        "sprint-005"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "decision_ids": [
+        "D4",
+        "D5"
+      ]
+    },
+    {
+      "id": "sprint-007",
+      "index": 6,
+      "name": "Harness temporal determinístico",
+      "description": "Adicionar relógio fake, fixtures equivalentes, recorder e verificações determinísticas para movimento, animação, áudio, pausas, falhas e portas.",
+      "coder_agent_id": "dynamic-workflow-coder",
+      "stack": [
+        "Processing 4",
+        "Java (PDE)",
+        "Testes determinísticos"
+      ],
+      "features": [
+        {
+          "id": "feat-022",
+          "name": "Fixtures equivalentes de 15, 30 e 60 FPS",
+          "description": "Executar a mesma entrada por um segundo simulado nas três cadências e comparar os estados produzidos.",
+          "acceptance_criteria": [
+            "As fixtures usam deltas de aproximadamente 1/60, 2/60 e 4/60 segundo e totalizam exatamente 60 passos confirmados por cenário.",
+            "Caminhada, corrida, gravidade, salto, subida e descida de escada terminam com estados equivalentes e distância com tolerância máxima de 0,01 unidade lógica.",
+            "As três cadências produzem a mesma sequência lógica de tipos de eventos, timestamps simulados e intervalos.",
+            "A seleção dos takes idle, walk, run, climb e jump é reproduzível sem consultar relógio real."
+          ]
+        },
+        {
+          "id": "feat-023",
+          "name": "Frames longos e amostras inválidas",
+          "description": "Verificar descarte imediato, ausência de dívida e tratamento seguro de leituras inválidas.",
+          "acceptance_criteria": [
+            "Um delta maior que 4/60 segundo executa exatamente quatro passos, registra separadamente tempo observado, aceito e descartado e deixa accumulator_after menor que 1/60 segundo.",
+            "O callback seguinte não recupera o tempo descartado nem produz eventos referentes a esse excedente.",
+            "Primeiro sample, delta negativo e delta não finito executam zero passos, preservam estado e produzem diagnóstico verificável.",
+            "Nenhum cenário de frame longo produz rajada física superior a um disparo por família no callback."
+          ]
+        },
+        {
+          "id": "feat-024",
+          "name": "Pausa, input e barreiras de execução",
+          "description": "Cobrir consumo único de bordas, congelamento fora de salas e interrupção dos passos restantes.",
+          "acceptance_criteria": [
+            "Uma única ação de espaço ou E em callback com dois ou quatro passos é consumida no máximo uma vez.",
+            "Abertura de modal, início de portal ou troca de tela no primeiro passo impede movimento e interação nos passos restantes.",
+            "Callbacks fora de uma sala ou pausados não acumulam tempo e a retomada não executa passos retroativos.",
+            "Durante a pausa, uma evidência mostra o relógio de apresentação avançando e simulação, movimento e eventos de áudio permanecendo congelados."
+          ]
+        },
+        {
+          "id": "feat-025",
+          "name": "Falhas, caches, áudio e portas",
+          "description": "Cobrir adapters indisponíveis, invariantes de cache, camada do jogador e transições de porta.",
+          "acceptance_criteria": [
+            "Clip ausente e falha de reprodução mantêm distância e estado físico, preservam o evento lógico e registram a falha física separadamente.",
+            "Assets ausentes ou inválidos usam fallback, não repetem carregamento por frame e apresentam contadores de hit, miss, invalidação e build.",
+            "player_frame_layer não é reconstruída quando frame e direção permanecem iguais.",
+            "Porta completa, incompleta, inválida e reentrada preservam a ordem de abertura, troca e fechamento, com no máximo uma atualização por callback.",
+            "O fechamento da sprint apresenta evidência e status para cada critério das features feat-022 a feat-025; qualquer FAIL bloqueia a conclusão, e cada INCONCLUSIVO identifica o pré-requisito ausente e não é contado como PASS."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/frame.pde",
+          "last_horizon/last_horizon.pde",
+          "last_horizon/movement.pde",
+          "last_horizon/animation.pde",
+          "last_horizon/audio.pde",
+          "last_horizon/ship.pde",
+          "last_horizon/portals.pde",
+          "last_horizon/hud.pde",
+          "last_horizon/ui.pde",
+          "last_horizon/assets.pde",
+          "last_horizon/capture.pde",
+          "SPEC_PROGRESS.md"
+        ],
+        "key_interfaces": [
+          "FrameContext",
+          "fonte de relógio fake",
+          "Audio Adapter em memória",
+          "harness_setup",
+          "harness_update",
+          "harness_scene",
+          "updateRoom()",
+          "playerCurrentFrame()",
+          "updateDoorTransition()"
+        ],
+        "architecture_notes": "O harness fornece deltas e adapters, mas não chama updateRoom() nem cria passos fora do orçamento do Frame Module. Deve restaurar tabelas e estado global após cada fixture e funcionar sem dispositivo de áudio."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003",
+        "sprint-004",
+        "sprint-005",
+        "sprint-006"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "decision_ids": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5"
+      ]
+    },
+    {
+      "id": "sprint-008",
+      "index": 7,
+      "name": "Profiling, toolchain e regressão integrada",
+      "description": "Fechar a medição por fase, os artefatos temporais, a compatibilidade do toolchain e a evidência integrada de regressão e domínio.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "Node.js",
+        "JavaScript",
+        "Bash",
+        "Processing 4",
+        "CSV",
+        "JSON"
+      ],
+      "features": [
+        {
+          "id": "feat-026",
+          "name": "Sidecar temporal e métricas por fase",
+          "description": "Produzir artefatos versionados com os dados temporais, eventos e custos p95 exigidos.",
+          "acceptance_criteria": [
+            "Cada amostra identifica versão, perfil, cenário, sample_id, cadence_fps (15, 30 ou 60), sequência de deltas, passos, tempo aceito, remanescente, tempo descartado, distância e eventos lógicos.",
+            "O sidecar contém callback_time_p95_ms, simulation_time_p95_ms, render_time_p95_ms, draw_base_time_p95_ms, draw_window_time_p95_ms e audio_dispatch_time_p95_ms.",
+            "As métricas adicionais usam as mesmas amostras e a mesma janela do frame_time_p95_ms, com fronteiras de medição distintas.",
+            "Status de relógio, áudio, asset e cache são registrados de forma consistente e uma métrica ausente torna o artefato INCONCLUSIVO.",
+            "O sidecar registra por amostra os campos mínimos do FrameContext: tela/cômodo, camada de UI, pausa, origem do relógio, modo de harness, callback, quantidade/índice dos passos, consumo de bordas, estado da porta e versão do estado confirmado.",
+            "As cadências de 15, 30 e 60 FPS têm métricas p95 separadas para callback, simulação, render, drawBase(), drawWindow() e despacho de áudio, calculadas sobre os callbacks da respectiva cadência; ausência de uma cadência, amostra ou métrica marca esse resultado como INCONCLUSIVO. O CSV canônico permanece inalterado."
+          ]
+        },
+        {
+          "id": "feat-027",
+          "name": "Compatibilidade do profiling canônico",
+          "description": "Preservar o CSV atual e ampliar a validação sem relaxar seus gates.",
+          "acceptance_criteria": [
+            "O CSV continua contendo sample_id, duration_real_s, frame_count, frame_time_median_ms, frame_time_p95_ms, load_time_ms, additional_memory_bytes, icon_builds, floor_band_builds, cache_invalidations e allocations_per_frame.",
+            "tools/compare-profiling.mjs rejeita amostras ausentes, manifestos incompatíveis, sidecars incompletos e mistura de identidade entre baseline e revisada.",
+            "Permanecem ativos os gates de p95 máximo de 33,3 ms, regressão máxima de 10% e tolerância de ruído de 1% para allocations_per_frame.",
+            "A comparação não exige ganho adicional de p95, alocações ou memória além dos gates já aprovados."
+          ]
+        },
+        {
+          "id": "feat-028",
+          "name": "CLI e módulos opcionais",
+          "description": "Expor o cenário temporal no toolchain quando necessário e preservar todas as combinações opcionais.",
+          "acceptance_criteria": [
+            "tools/run-headless.sh e tools/processing-cli.sh executam o cenário temporal de forma não interativa e recusam início quando faltam pré-requisitos obrigatórios.",
+            "tools/optional-modules.mjs compila e verifica base, capture, manual e complete.",
+            "A combinação base não contém dependência permanente de relógio fake, recorder ou cena de captura.",
+            "A presença do harness, sem cenário ativo, não altera a ordem, os passos, o áudio ou a apresentação do caminho de produção."
+          ]
+        },
+        {
+          "id": "feat-029",
+          "name": "Verificação final e relatório de execução",
+          "description": "Executar a matriz de regressão e registrar resultados rastreáveis sem alterar regras de campanha.",
+          "acceptance_criteria": [
+            "São executados, conforme os pré-requisitos, npm run typecheck, npm run build, capture, hit-test, ladder-test, asset-pipeline-test, matriz opcional, balance-model --simulate, comparação de profiling e verification:final.",
+            "O relatório classifica cada comando como PASS somente quando foi executado, terminou com código zero e satisfez suas verificações; como FAIL quando executado e falhou; ou como INCONCLUSIVO apenas quando não pôde rodar por pré-requisito nomeado. Não há classificação genérica baseada apenas em “conforme os pré-requisitos”.",
+            "A equivalência de 22 quests por 34 estados permanece PASS e não há alteração funcional em game.pde, tasks.pde, night_projection.pde, editorial.pde ou prototype/balance-model.mjs.",
+            "Uma busca final confirma todos os callers atualizados de updateRoom, updatePlayerOnDeck, updatePlayerOnLadder, playerCurrentFrame, playDeckStepSound, playLadderStepSound e stopStepSounds, sem caller de teste usando assinatura temporal obsoleta.",
+            "A matriz final associa cada decisão D1–D5 a pelo menos um ID sprint/feature e à evidência correspondente; registra também que delta variável, dívida temporal, passo comprimido, interpolação, extrapolação e refatoração funcional ampla não foram introduzidos como requisitos ativos.",
+            "O fechamento da sprint apresenta evidência e status para cada critério das features feat-026 a feat-029; nenhuma feature pode ser encerrada parcialmente, qualquer FAIL bloqueia a conclusão e cada INCONCLUSIVO identifica o pré-requisito ausente sem ser contado como PASS."
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "last_horizon/frame.pde",
+          "last_horizon/last_horizon.pde",
+          "last_horizon/capture.pde",
+          "last_horizon/movement.pde",
+          "last_horizon/animation.pde",
+          "last_horizon/audio.pde",
+          "last_horizon/assets.pde",
+          "last_horizon/hud.pde",
+          "last_horizon/ship.pde",
+          "last_horizon/ui.pde",
+          "last_horizon/screens.pde",
+          "last_horizon/portals.pde",
+          "tools/profile-runner.mjs",
+          "tools/compare-profiling.mjs",
+          "tools/run-headless.sh",
+          "tools/processing-cli.sh",
+          "tools/optional-modules.mjs",
+          "tools/regression-final.sh",
+          "prototype/balance-model.mjs",
+          "SPEC_PROGRESS.md"
+        ],
+        "key_interfaces": [
+          "FrameContext e métricas de fase",
+          "schema do CSV canônico",
+          "schema do sidecar temporal",
+          "profile-runner",
+          "compare-profiling",
+          "harness_setup",
+          "harness_update",
+          "harness_scene"
+        ],
+        "architecture_notes": "Não alterar o schema canônico consumido pelas ferramentas existentes; os novos dados pertencem ao sidecar ou relatório versionado. System.nanoTime() mede custo real, mas nunca controla o relógio lógico. Registrar escolhas locais para questões abertas sem transformá-las em novas regras funcionais."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003",
+        "sprint-004",
+        "sprint-005",
+        "sprint-006",
+        "sprint-007"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "decision_ids": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5"
+      ]
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "created_at": "2026-09-22T18:48:42.707Z",
+    "total_sprints": 8,
+    "total_features": 29
+  },
+  "decision_source": ".lionclaw/pipelines/architecture-review/20260922_132532-197773/ArchitectureDecisions-20260922_132532-197773.md"
+}

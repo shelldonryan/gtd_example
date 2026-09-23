@@ -105,6 +105,13 @@ boolean preparePortalTransition(int door){
   boolean returning = last_portal_valid
     && last_portal_from_room == target_screen
     && last_portal_to_room == from_screen;
+  float arrival_x = returning ? last_portal_from_x : door_arrival_x[door];
+  float arrival_y = returning ? last_portal_from_y : door_arrival_y[door];
+  if (Float.isNaN(arrival_x) || Float.isInfinite(arrival_x)
+    || Float.isNaN(arrival_y) || Float.isInfinite(arrival_y)){
+    reportPortalFailure(door, "invalid_arrival_position");
+    return false;
+  }
 
   portal_prepared_door = door;
   portal_prepared_from_room = from_screen;
@@ -113,8 +120,8 @@ boolean preparePortalTransition(int door){
   portal_prepared_departure_x = player_x + PLAYER_W / 2.0;
   portal_prepared_departure_y = player_y + PLAYER_H;
   portal_prepared_returning = returning;
-  portal_prepared_arrival_x = returning ? last_portal_from_x : door_arrival_x[door];
-  portal_prepared_arrival_y = returning ? last_portal_from_y : door_arrival_y[door];
+  portal_prepared_arrival_x = arrival_x;
+  portal_prepared_arrival_y = arrival_y;
   portal_prepared_arrival_facing = door_arrival_facing[door];
   portal_transition_prepared = true;
 
@@ -151,10 +158,20 @@ void startDoorTransition(int door){
   door_transition_arrival_y = portal_prepared_arrival_y;
   door_transition_facing = portal_prepared_arrival_facing;
   clearPreparedPortalTransition();
+  if (current_frame_context != null && current_frame_context.callback_open){
+    current_frame_context.interrupt("door_transition_started");
+  }
 }
 
 
 void updateDoorTransition(){
+  if (current_frame_context != null && current_frame_context.callback_open){
+    current_frame_context.door_transition_update_count++;
+    if (current_frame_context.door_transition_update_count > 1){
+      throw new IllegalStateException("updateDoorTransition foi chamado mais de uma vez no callback");
+    }
+  }
+
   if (millis() - door_transition_started < ART_DOOR_PHASE_MS){
     return;
   }
@@ -162,8 +179,21 @@ void updateDoorTransition(){
   door_transition_started = millis();
 
   if (door_transition_phase == DOOR_PHASE_OPENING){
-    enterRoomAtPosition(door_transition_target, door_transition_arrival_y,
-      door_transition_arrival_x, door_transition_facing);
+    boolean valid_target = portalRoomExists(door_transition_target)
+      && door_transition_target != screen
+      && portalDataValid(door_transition_return_door)
+      && door_room[door_transition_return_door] == door_transition_target
+      && door_target[door_transition_return_door] == screen;
+    if (!valid_target){
+      reportPortalFailure(door_transition_door, "transition_target_invalidated");
+      cancelDoorTransition();
+      return;
+    }
+    if (!enterRoomAtPosition(door_transition_target, door_transition_arrival_y,
+      door_transition_arrival_x, door_transition_facing)){
+      cancelDoorTransition();
+      return;
+    }
     door_transition_door = door_transition_return_door;
     door_transition_phase = DOOR_PHASE_CLOSING;
     portal_transition_prepared = false;
@@ -177,6 +207,19 @@ void updateDoorTransition(){
   door_transition_arrival_x = 0;
   door_transition_arrival_y = 0;
   door_transition_facing = 1;
+  clearPreparedPortalTransition();
+}
+
+
+void cancelDoorTransition(){
+  door_transition_door = -1;
+  door_transition_phase = DOOR_PHASE_CLOSED;
+  door_transition_target = SCREEN_NONE;
+  door_transition_return_door = -1;
+  door_transition_arrival_x = 0;
+  door_transition_arrival_y = 0;
+  door_transition_facing = 1;
+  last_portal_valid = false;
   clearPreparedPortalTransition();
 }
 
@@ -239,23 +282,50 @@ void enterRoomThroughDoor(int door){
 }
 
 
-void enterRoomAtPosition(int next_screen, float feet_y, float center_x, int facing){
+boolean enterRoomAtPosition(int next_screen, float feet_y, float center_x, int facing){
+  if (!portalRoomExists(next_screen)
+    || Float.isNaN(feet_y) || Float.isInfinite(feet_y)
+    || Float.isNaN(center_x) || Float.isInfinite(center_x)
+    || (facing != -1 && facing != 1)){
+    reportPortalFailure(-1, "invalid_room_entry");
+    return false;
+  }
+
+  float clamped_feet_y = constrain(feet_y, ROOM_TOP + PLAYER_H, ROOM_BOTTOM);
+  float clamped_player_x = constrain(center_x - PLAYER_W / 2.0,
+    ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
+  float clamped_player_y = clamped_feet_y - PLAYER_H;
+  int previous_screen = screen;
+  int previous_room = current_room;
+  if (current_frame_context != null && current_frame_context.callback_open){
+    discardQueuedFrameActions(current_frame_context, "screen_changed");
+  } else {
+    jump_queued = false;
+    interact_queued = false;
+  }
   clearPreparedPortalTransition();
   screen = next_screen;
   current_room = next_screen;
   player_facing = facing;
-  float clamped_feet_y = constrain(feet_y, ROOM_TOP + PLAYER_H, ROOM_BOTTOM);
-  player_x = constrain(center_x - PLAYER_W / 2.0,
-    ROOM_LEFT + 4, ROOM_RIGHT - 4 - PLAYER_W);
-  player_y = clamped_feet_y - PLAYER_H;
+  player_x = clamped_player_x;
+  player_y = clamped_player_y;
   player_velocity_y = 0;
   player_grounded = isDeckSurface(clamped_feet_y);
   player_on_ladder = false;
   current_ladder = -1;
   ladder_vertical_release_required = false;
-  jump_queued = false;
+  ladder_climbing_active = false;
+  ladder_steps_taken = 0;
+  ladder_step_accum = 0;
+  ladder_step_phase = 0;
   player_step_accum = 0;
+  walk_step_accum = 0;
   walk_step_active = false;
   walk_step_phase = 0;
-  interact_queued = false;
+  run_step_phase = 0;
+  if (current_frame_context != null && current_frame_context.callback_open
+    && (screen != previous_screen || current_room != previous_room)){
+    current_frame_context.interrupt("screen_changed");
+  }
+  return true;
 }

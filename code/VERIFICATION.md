@@ -1,15 +1,58 @@
 # Registro de verificação — Fundação de rastreabilidade e baseline
 
+## Sidecar temporal do profiling
+
+Cada CSV canônico mantém o cabeçalho e a janela já aprovados. Para cada amostra,
+`capture.pde` também grava `<sample_id>.temporal.json`, e o artefato de profiling
+vincula esse arquivo pelo campo `temporal_json`.
+
+O sidecar identifica versão, perfil, cenário, amostra e cadência lógica de 15,
+30 ou 60 FPS. Registra deltas observados, passos planejados e executados, tempo
+aceito, acumulador remanescente, tempo descartado, distância, eventos lógicos e
+os campos de diagnóstico de cada `FrameContext`. O relógio sintético avança em
+cadências lógicas sobre o callback de apresentação; assim as três cadências usam
+a mesma janela real de captura e não alteram a apresentação de 60 FPS usada pelo
+CSV canônico.
+
+`System.nanoTime()` mede callback, simulação, renderização, `drawBase()`,
+`drawWindow()` e despacho de áudio. Essas fronteiras são independentes; o tempo
+de renderização cobre o trecho entre `drawBase()` e o fim de `drawWindow()`. O
+sidecar calcula p95 sobre os callbacks capturados na mesma janela do CSV e
+registra status de relógio, áudio, assets e caches. Campo, sequência ou status
+ausente resulta em `INCONCLUSIVO` no comparador. Os p95 temporais são evidência
+adicional; os limites canônicos de 33,3 ms, regressão de 10% e ruído de alocação
+de 1% permanecem aplicados sem exigir ganho nas métricas novas.
+
+`bash tools/run-headless.sh --temporal-test` executa as fixtures temporais sem
+interação. O runner exige Processing, `xvfb-run` no modo headless e o módulo de
+captura antes de iniciar. O comparador valida os sidecars temporais dos dois
+perfis e das três cadências e os inclui no relatório sem mudar o CSV.
+
+## Executar o sketch Processing
+
+O sketch de produção está em `last_horizon/` e sua entrada é
+`last_horizon/last_horizon.pde`. Abra esse arquivo no Processing 4.5.6 para
+executar pelo editor. As outras abas `.pde` da pasta pertencem ao mesmo sketch.
+
+- `bash tools/run-processing.sh`: executa o jogo pelo Processing CLI.
+- `npm run build`: compila o sketch sem iniciar a janela do jogo.
+
+O launcher usa `tools/processing-cli.sh`. Ele aceita o caminho do executável
+pela variável `PROCESSING_BIN`; sem ela, procura `/opt/processing/bin/Processing`
+e depois `Processing` ou `processing` no `PATH`. Exemplo quando o executável
+está instalado em outro local: `PROCESSING_BIN="/caminho/para/Processing"
+bash tools/run-processing.sh`.
+
 ## Sprint 009 — validação integrada e registro de conclusão
 
 ### Estado desta entrega
 
 | Decisão | Status | Evidência e impacto |
 | --- | --- | --- |
-| Validação integrada da entrega completa | INCONCLUSIVO | O runner executa todos os comandos Linux; o cenário Windows permanece inconclusivo porque Processing.exe e `win32` não estão disponíveis neste ambiente. O impacto é restrito à confirmação da plataforma Windows. |
-| Gate de performance e profiling | PASS | A coleta antes/depois concluiu 12 resultados PASS: baseline e revisada, dois perfis, um cenário e três amostras por combinação. A comparação concluiu 16 custos PASS e p95 revisado máximo de 18,504 ms. |
-| Snapshot final pós-limpeza | PASS | `output/snapshot-entrega-manifest.json` foi regenerado depois da limpeza, com `final: true`, cópia compilada e controles de desenvolvimento ausentes. |
-| Decisão geral | INCONCLUSIVO | A precedência aplicada é `FAIL`, depois `INCONCLUSIVO`, depois `PASS`; a única condição inconclusiva é o runner Windows, sem impacto nos resultados Linux ou no gate de otimização. |
+| Validação integrada da entrega completa | FAIL | O último `integrated-verification-report.json` registrou falha no snapshot final; a execução Windows não iniciou por ausência da plataforma e o profiling não iniciou por indisponibilidade de `/proc/asound/cards`. O código do snapshot foi corrigido depois desse relatório e ainda aguarda nova execução. |
+| Gate de performance e profiling | INCONCLUSIVO | A coleta atual não produziu as amostras baseline/revisada porque o pré-requisito nomeado de áudio está indisponível. A tabela numérica abaixo é histórica e não comprova o estado atual. |
+| Snapshot final pós-limpeza | FAIL | O último manifesto registrou `output/snapshot-entrega/package.json` ausente e falha de compilação porque `last_horizon/frame.pde` não entrou na cópia. O seletor do snapshot foi corrigido depois dessa execução e aguarda validação. |
+| Decisão geral | FAIL | O último relatório integrado bloqueia o fechamento pela falha do snapshot. Os resultados INCONCLUSIVO de Windows e profiling não contam como PASS; reexecute `npm run verification:final` para atualizar as evidências após as correções. |
 
 ### Runner canônico
 
@@ -28,6 +71,14 @@ O resultado de um comando iniciado que termina com erro é `FAIL`; um
 pré-requisito ausente antes do início é `INCONCLUSIVO`. O relatório final usa a
 mesma precedência para impedir que uma execução parcial seja apresentada como
 aprovação.
+
+Cada comando registra se foi iniciado, seu código de saída e um diagnóstico.
+Código 2 só recebe `INCONCLUSIVO` quando o log ou o manifesto identifica o
+pré-requisito ausente; código 2 sem motivo nomeado é `FAIL`. O relatório também
+lista os 16 critérios de aceite de `feat-026` a `feat-029`, cada um com status,
+checks e evidências. A feature só pode ser encerrada quando todos os seus
+critérios forem `PASS`; `FAIL` bloqueia a entrega e `INCONCLUSIVO` permanece
+fora da contagem de aprovação.
 
 ### Equivalência funcional
 
@@ -54,14 +105,19 @@ crescimento persistente acima de 1% de `allocations_per_frame` nos dois perfis. 
 são rendering, image scaling, alocações por quadro, preview de transições e
 carregamento/cache de assets.
 
-`PASS` exige redução mensurável na mediana e em pelo menos duas amostras
-correspondentes de algum custo, evidência válida em todos os perfis, cenários,
-amostras e hotspots, ausência de `FAIL` e ausência de `INCONCLUSIVO`. Sem
-artefatos suficientes, o gate permanece `INCONCLUSIVO`.
+`PASS` exige evidência válida em todos os perfis, cenários, amostras e hotspots,
+p95 revisado de no máximo 33,3 ms, nenhuma regressão de custo acima de 10% e
+nenhum crescimento persistente de `allocations_per_frame` acima da tolerância
+de ruído de 1%. Uma redução reproduzível pode ser registrada como dado
+descritivo, mas não é um gate adicional. Manifesto incompatível, amostra,
+cadência, sidecar ou métrica obrigatória ausente mantém o resultado
+`INCONCLUSIVO`; dados completos que excedem qualquer limite produzem `FAIL`.
 
 ### Tabela final de métricas de custo
 
-Os valores abaixo são as medianas das três amostras por perfil. A fonte
+Os valores abaixo são medianas de uma execução anterior e não representam
+evidência válida da coleta atual, que ficou INCONCLUSIVA por falta do dispositivo
+de áudio. São medianas das três amostras por perfil. A fonte
 autoritativa com os arrays de amostras e os links individuais é
 `last_horizon/output/profiling-comparison.json`; cada linha mantém status
 `PASS`, `FAIL` ou `INCONCLUSIVO`.
@@ -141,6 +197,10 @@ inclui o módulo manual.
 
 ### Auditoria lexical
 
+As cópias versionadas em `output/snapshot-entrega/` herdam a auditoria do
+caminho-fonte correspondente; a verificação final mapeia esses caminhos para a
+mesma entrada lexical, sem omitir o runtime compilado.
+
 A contagem abaixo considera um comentário de linha por `//` ou `#` fora de
 strings e um comentário de bloco por abertura `/*`; shebangs e marcadores
 dentro de strings foram excluídos. A contagem inicial foi recalculada no
@@ -179,7 +239,9 @@ preservação do shebang.
 | `tools/snapshot-entrega.mjs` | `.mjs` | 2 (2 blocos) | 0 | busca lexical; 1 |
 | `tools/compare-profiling.mjs` | `.mjs` | 0 | 0 | nenhuma exceção; busca lexical; 1 |
 | `tools/optional-modules.mjs` | `.mjs` | 2 blocos `/* ... */` | 0 | shebang `#!/usr/bin/env node` preservado; busca lexical; 1 |
+| `tools/profile-runner.mjs` | `.mjs` | 0 | 0 | busca lexical e `node --check`; 1 |
 | `tools/typecheck.mjs` | `.mjs` | 0 | 0 | shebang `#!/usr/bin/env node` preservado; busca lexical; 1 |
+| `tools/verify-delivery.mjs` | `.mjs` | 0 | 0 | busca lexical e `node --check`; 1 |
 | `tools/build.sh` | `.sh` | 0 | 0 | shebang preservado; busca de comentários; 1 |
 | `tools/processing-cli.sh` | `.sh` | 1 `#` | 0 | shebang preservado; busca de comentários; 1 |
 | `tools/regression-final.sh` | `.sh` | 0 | 0 | shebang preservado; busca de comentários; 1 |
@@ -203,7 +265,7 @@ da consolidação do HUD:
 | `npm run typecheck` | PASS | 0; `node --check` passou nos oito módulos `.mjs` cobertos pelo runner. |
 | `for file in $(find last_horizon prototype tools -type f -name '*.mjs' -print | sort); do node --check "$file"; done` | PASS | 0; os dez módulos `.mjs` presentes no worktree foram aceitos pelo parser. |
 | `for file in tools/*.sh; do bash -n "$file"; done` | PASS | 0; todos os scripts shell mantiveram sintaxe e shebang. |
-| auditoria lexical dos 31 arquivos `.pde`, `.mjs` e `.sh` | PASS | 0; nenhum comentário lexical restante, 5 shebangs Bash e 5 shebangs Node preservados. |
+| auditoria lexical dos 33 caminhos-fonte `.pde`, `.mjs` e `.sh` | PASS | 0; nenhum comentário lexical restante, 5 shebangs Bash e 5 shebangs Node preservados. |
 | `npm run build` | PASS | 0; `PROCESSING REGRESSION: PASS`. |
 | `npm run modules:matrix` | PASS | 0; combinações `base`, `capture`, `manual` e `complete` compiladas. |
 | `bash tools/regression-final.sh` | PASS | 0; captura, hit-test, escadas, pipeline de imagem e limpeza terminaram em PASS. O áudio registrou INCONCLUSIVE apenas pela indisponibilidade do backend `Clip`. |

@@ -1,0 +1,98 @@
+{
+  "runId": "20260922_132532-197773",
+  "recommendedCandidateId": "C6",
+  "selectedCandidateId": null,
+  "candidates": [
+    {
+      "id": "C5",
+      "title": "Aprofundar o Adapter de assets e caches do caminho quente",
+      "files": [
+        "last_horizon/assets.pde",
+        "last_horizon/ship.pde",
+        "last_horizon/hud.pde",
+        "last_horizon/animation.pde",
+        "last_horizon/portals.pde",
+        "last_horizon/capture.pde"
+      ],
+      "problem": "assets.pde mantém art_cache, diagnósticos, frames, glows e cache de faixas; ship.pde mantém room_detail_cache e chama loadImage diretamente no caminho legado; hud.pde mantém cache próprio de ícones. Resolução de assets, invalidação e representação de ausência estão distribuídas. Deletion test: sem esse Adapter, carregamento, recorte, fallback e invalidação reaparecem em cada renderer.",
+      "proposedDirection": "Aprofundar o Adapter existente para concentrar resolução de paths, metadados, fallback e invalidação seletiva, preservando os caches por fonte, escala e geração. Este candidato é parcial e não cobre sozinho o relógio de movimento, o loop draw() ou a cadência de áudio.",
+      "benefits": {
+        "locality": "Mudanças de PNG, spritesheet, fallback e cache ficam em um lugar.",
+        "leverage": "ship.pde, hud.pde, animation.pde e portals.pde compartilham uma política de carregamento e invalidação.",
+        "testing": "Contadores de builds, cache_invalidations, diagnósticos de fallback e cenários de pipeline tornam o efeito mensurável."
+      },
+      "payoff": "medium",
+      "risk": "medium",
+      "whyNow": "O Map identifica assets e caches como hotspot, e o contrato existente mede tempo de carga, builds de ícones, builds de faixas e invalidações."
+    },
+    {
+      "id": "C6",
+      "title": "Aprofundar o Module de frame e o relógio de movimento",
+      "files": [
+        "last_horizon/last_horizon.pde",
+        "last_horizon/movement.pde",
+        "last_horizon/animation.pde",
+        "last_horizon/audio.pde",
+        "last_horizon/ship.pde",
+        "last_horizon/hud.pde",
+        "last_horizon/ui.pde",
+        "last_horizon/assets.pde",
+        "last_horizon/capture.pde"
+      ],
+      "problem": "draw() executa updateInput, updateRoom, drawBase, updateCursor e drawWindow uma vez por frame; movement.pde aplica velocidade, gravidade e escada por chamada sem delta de tempo explícito; animation.pde usa millis() e audio.pde dispara passos a partir das atualizações de movimento. A queda de frames altera movimento, áudio e custo de renderização. Deletion test: sem um Module de frame e tempo, ordem, duração, orçamento e agendamento reaparecem em vários chamadores.",
+      "proposedDirection": "Aprofundar o Module de execução por frame para explicitar tempo decorrido, fases de atualização e renderização e limite de trabalho. Movimento e animação devem manter comportamento temporal controlado, eventos de áudio devem depender do avanço normalizado do movimento e frames longos não devem produzir rajadas de sons; o caminho de renderização deve reutilizar caches e dados preparados. A Interface final fica para a fase seguinte.",
+      "benefits": {
+        "locality": "Tempo, ordem de atualização, renderização e emissão de áudio ficam concentrados no caminho de frame.",
+        "leverage": "Movimento, animação, áudio, nave e HUD obedecem ao mesmo relógio e orçamento de trabalho.",
+        "testing": "capture.pde já mede p95 de frame, allocations_per_frame, memória, builds/invalidações de cache e verifica movimento, animação e passos."
+      },
+      "payoff": "high",
+      "risk": "high",
+      "whyNow": "frameRate(60) define apenas a meta do Processing; movimento e passos de áudio ainda dependem da quantidade de frames. Este é o único candidato que cobre conjuntamente todas as superfícies obrigatórias."
+    },
+    {
+      "id": "C7",
+      "title": "Aprofundar o Module de apresentação com dados preparados e menos alocações",
+      "files": [
+        "last_horizon/last_horizon.pde",
+        "last_horizon/ship.pde",
+        "last_horizon/hud.pde",
+        "last_horizon/ui.pde",
+        "last_horizon/animation.pde",
+        "last_horizon/assets.pde",
+        "last_horizon/capture.pde"
+      ],
+      "problem": "drawBase é refeito por frame e percorre sala, pontos, HUD, footer, modais e jogador. O HUD reconstrói linhas com concatenação de String, usa millis() para pulsos e consulta regras durante a apresentação; ship.pde recalcula disponibilidade, labels, frames e glows de pontos. Os caches existentes não cobrem todo o trabalho de decisão e formatação. Deletion test: sem um Module de apresentação que prepare e recicle dados, formatação, seleção de arte e decisões de desenho reaparecem nos chamadores visuais.",
+      "proposedDirection": "Aprofundar a apresentação para preparar dados estáveis fora do caminho quente, reutilizar texto, geometria, frames e bitmaps enquanto as fontes não mudarem e invalidar apenas dependências alteradas. O efeito deve ser medido por frame time e alocações, preservando a ordem visual e as regras funcionais; a Interface final fica para a fase seguinte.",
+      "benefits": {
+        "locality": "Preparação, reutilização e invalidação ficam concentradas no caminho visual.",
+        "leverage": "Nave, HUD, UI e animação compartilham o mesmo orçamento de renderização.",
+        "testing": "frame_time_p95_ms, allocations_per_frame, builds de ícones/faixas e verificações de pixels/pipeline distinguem ganho de mudança visual."
+      },
+      "payoff": "high",
+      "risk": "medium",
+      "whyNow": "Os caches existentes mostram Seams de preparação, mas o custo residual precisa ser localizado no render pass completo, e não apenas no carregamento inicial de assets."
+    },
+    {
+      "id": "C8",
+      "title": "Aprofundar o Adapter de áudio de movimento com cadência independente do frame",
+      "files": [
+        "last_horizon/movement.pde",
+        "last_horizon/audio.pde",
+        "last_horizon/animation.pde",
+        "last_horizon/last_horizon.pde",
+        "last_horizon/capture.pde"
+      ],
+      "problem": "updateRoom chama o movimento uma vez por frame; corrida emite passos por player_step_accum, caminhada alterna fase com millis() e escada acumula distância por chamada. Cada passo chama stopStepSounds, que percorre e para todos os Clip antes de reiniciar um som. Em baixa taxa de frames, o evento pode atrasar, mudar de cadência ou concentrar trabalho no frame seguinte. Deletion test: sem o Adapter de áudio de movimento, escolha, rotação, interrupção e tolerância reaparecem em movement.pde, animation.pde e no shell.",
+      "proposedDirection": "Aprofundar o Adapter de áudio para receber eventos temporais de movimento normalizados, manter a rotação dos Clip pré-carregados e evitar interrupções ou sons acumulados após um frame longo. A cadência deve continuar coerente com caminhada, corrida, escada e salto; a Interface final fica para a fase seguinte.",
+      "benefits": {
+        "locality": "Emissão, interrupção e tolerância a atraso ficam em um lugar.",
+        "leverage": "Os modos de movimento usam a mesma cadência temporal e deixam de depender diretamente da taxa de renderização.",
+        "testing": "sound_step_play_count e os cenários de caminhada, corrida, escada e salto permitem verificar cadência sem inspecionar o áudio interno."
+      },
+      "payoff": "medium",
+      "risk": "high",
+      "whyNow": "Os Clip já são carregados no setup; o custo e a variação estão na emissão por movimento e no stopStepSounds(), permitindo atuar no Adapter sem transformar carregamento de assets em regra de gameplay."
+    }
+  ]
+}

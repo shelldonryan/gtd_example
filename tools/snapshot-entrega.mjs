@@ -39,6 +39,9 @@ const EXCLUDED = [
   "tools",
   "skills-lock.json",
   ".obsidian",
+  ".sprint-validation-report.md",
+  "output/snapshot-entrega",
+  "output/snapshot-entrega-manifest.json",
   "last_horizon/capture.pde",
   "last_horizon/test_mode.pde",
   "last_horizon/output",
@@ -69,15 +72,19 @@ function isExcluded(repositoryPath) {
   );
 }
 
-function copyTrackedSnapshot() {
+function copyWorkingTreeSnapshot() {
   const trackedFiles = git("ls-files", "-z")
     .split("\0")
     .filter(Boolean);
+  const untrackedRuntimeFiles = git("ls-files", "--others", "--exclude-standard", "-z", "--", "last_horizon")
+    .split("\0")
+    .filter(Boolean);
+  const sourceFiles = [...new Set([...trackedFiles, ...untrackedRuntimeFiles])];
   const copied = [];
   const excluded = [];
   const missing = [];
 
-  for (const repositoryPath of trackedFiles) {
+  for (const repositoryPath of sourceFiles) {
     if (isExcluded(repositoryPath)) {
       excluded.push(repositoryPath);
       continue;
@@ -191,7 +198,7 @@ function run() {
   const temporaryRoot = mkdtempSync(resolve(outputRoot, ".snapshot-entrega-run-"));
 
   try {
-    const inventory = copyTrackedSnapshot();
+    const inventory = copyWorkingTreeSnapshot();
     const runtimeFiles = inventory.copied.filter((path) =>
       path.startsWith("last_horizon/") && !path.startsWith("last_horizon/output/"),
     );
@@ -221,7 +228,7 @@ function run() {
       source: {
         branch: git("branch", "--show-current"),
         revision: git("rev-parse", "HEAD"),
-        workingTree: "current tracked working tree",
+        workingTree: "current working tree, including non-ignored runtime sources",
       },
       exclusionPolicy: {
         source: "tools/snapshot-entrega.mjs",

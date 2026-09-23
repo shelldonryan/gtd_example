@@ -1,0 +1,17 @@
+{
+  "schema": "profiling-comparison-v1",
+  "generatedAt": "2026-09-23T01:50:48.206Z",
+  "baselineVersion": "baseline",
+  "revisedVersion": "revised",
+  "status": "INCONCLUSIVO",
+  "gateDecision": "INCONCLUSIVO",
+  "diagnostic": "pré-requisito ausente antes da coleta: pré-requisito ausente antes do início: dispositivo de áudio (/proc/asound/cards): ENOENT: no such file or directory, open '/proc/asound/cards'",
+  "comparisons": [],
+  "evidence": {
+    "manifest": "last_horizon/output/profiling-run-manifest.json",
+    "profilingPattern": "last_horizon/output/profiling/<versao>/<perfil>/<cenario>/<amostra>.json",
+    "metricsPattern": "last_horizon/output/<versao>/<perfil>/<sample_id>.csv",
+    "sidecarPattern": "last_horizon/output/<versao>/<perfil>/<sample_id>.sidecar.json",
+    "temporalSidecarPattern": "last_horizon/output/<versao>/<perfil>/<sample_id>.temporal.json"
+  }
+}

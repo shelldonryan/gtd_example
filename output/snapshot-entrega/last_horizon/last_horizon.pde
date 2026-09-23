@@ -130,7 +130,7 @@ int engine_state = ENGINE_WORKING;
 int game_over_reason = REASON_NONE;
 String system_message = "";
 String last_system_message = "";
-int system_message_until = 0;
+long system_message_until_ms = 0;
 
 int current_room = SCREEN_COMMAND;
 float player_x = ROOM_LEFT + 24;
@@ -161,6 +161,9 @@ boolean move_up_held = false;
 boolean move_down_held = false;
 boolean run_held = false;
 int sound_step_play_count = 0;
+FrameClock frame_clock;
+FrameContext current_frame_context;
+FrameCallbackObserver frame_callback_observer = (context) -> {};
 PGraphics base;
 PFont ui_font;
 PImage player_sheet;
@@ -217,6 +220,7 @@ interface OptionalOverlayHook {
 Runnable harness_setup = () -> {};
 Runnable harness_update = () -> {};
 SceneHook harness_scene = (target) -> false;
+String frame_harness_mode = "base";
 OptionalKeyHook optional_test_key_hook = () -> false;
 OptionalOverlayHook optional_test_overlay_hook = (target) -> {};
 boolean optional_mode_enabled = false;
@@ -250,6 +254,7 @@ void setup(){
   ui_font = createFont("Segoe UI", 64, true);
 
   frameRate(60);
+  frame_clock = new FrameClock(new ProcessingFrameClockSource());
   cursor(ARROW);
   loadPlayerAssets();
   loadArtAssets();
@@ -259,22 +264,158 @@ void setup(){
 
 
 void draw(){
+  boolean room_active_at_start = isRoomScreen();
+  int ui_layer_at_start = uiLayer();
+  current_frame_context = frame_clock.beginCallback(
+    paused || ui_layer_at_start != LAYER_SCENE,
+    room_active_at_start,
+    screen,
+    current_room,
+    ui_layer_at_start,
+    currentFrameHarnessMode(),
+    doorTransitionActive()
+  );
+  current_frame_context.beginPhase("frame_start");
   updateViewport();
-  updateInput();
+  current_frame_context.finishPhase("frame_start");
 
-  if (isRoomScreen()){
-    updateRoom();
+  beginFrameAudioCollection();
+  current_frame_context.beginPhase("input");
+  current_frame_context.setInputSnapshot(sampleFrameInput());
+  updateInput(current_frame_context.input_snapshot);
+  current_frame_context.finishPhase("input");
+
+  String input_change_reason = frameControlChangeReason(
+    current_frame_context.callback_start_screen,
+    current_frame_context.callback_start_room,
+    current_frame_context.callback_start_ui_layer,
+    current_frame_context.door_transition_active
+  );
+  boolean input_control_changed = input_change_reason.length() > 0;
+  if (input_control_changed){
+    current_frame_context.interrupt("input_" + input_change_reason);
   }
 
-  drawBase();
-  updateCursor();
-  drawWindow();
+  if (doorTransitionActive()){
+    discardQueuedFrameActions(current_frame_context, "door_transition_active");
+    updateDoorTransition();
+  }
 
+  boolean simulation_frozen = paused || !isRoomScreen()
+    || uiLayer() != LAYER_SCENE || doorTransitionActive();
+  current_frame_context.refreshDomainState(screen, current_room, uiLayer(),
+    simulation_frozen, doorTransitionActive());
+  if (current_frame_context.paused || simulation_frozen || input_control_changed){
+    String clear_reason = current_frame_context.interruption_reason.length() > 0
+      ? current_frame_context.interruption_reason
+      : "simulation_frozen";
+    discardQueuedFrameActions(current_frame_context, clear_reason);
+    frame_clock.pauseCallback(current_frame_context);
+  }
+
+  current_frame_context.beginPhase("simulation");
+  for (int step_index = 0; step_index < current_frame_context.steps_planned; step_index++){
+    if (paused || !isRoomScreen() || uiLayer() != LAYER_SCENE || doorTransitionActive()){
+      current_frame_context.interrupt(frameFrozenReason());
+      discardQueuedFrameActions(current_frame_context,
+        current_frame_context.interruption_reason);
+      frame_clock.pauseCallback(current_frame_context);
+      break;
+    }
+    int step_screen = screen;
+    int step_room = current_room;
+    int step_layer = uiLayer();
+    boolean step_door_active = doorTransitionActive();
+    current_frame_context.beginStep(step_index);
+    updateRoom(current_frame_context);
+    String step_change = frameControlChangeReason(step_screen, step_room,
+      step_layer, step_door_active);
+    if (step_change.length() > 0){
+      current_frame_context.interrupt(step_change);
+    }
+    frame_clock.confirmStep(current_frame_context);
+    current_frame_context.refreshDomainState(screen, current_room, uiLayer(),
+      paused || !isRoomScreen() || uiLayer() != LAYER_SCENE || doorTransitionActive(),
+      doorTransitionActive());
+    if (current_frame_context.interruption_reason.length() > 0){
+      discardQueuedFrameActions(current_frame_context,
+        current_frame_context.interruption_reason);
+      frame_clock.pauseCallback(current_frame_context);
+      break;
+    }
+  }
+  current_frame_context.finishPhase("simulation");
+
+  current_frame_context.beginPhase("audio_dispatch");
+  dispatchFrameAudio();
+  current_frame_context.finishPhase("audio_dispatch");
+
+  current_frame_context.beginPhase("draw_base");
+  drawBase();
+  current_frame_context.finishPhase("draw_base");
+
+  current_frame_context.beginPhase("cursor");
+  updateCursor();
+  recordCurrentPresentationSurface("cursor");
+  current_frame_context.finishPhase("cursor");
+
+  current_frame_context.beginPhase("draw_window");
+  drawWindow();
+  current_frame_context.finishPhase("draw_window");
+
+  current_frame_context.beginPhase("harness");
   harness_update.run();
+  current_frame_context.finishPhase("harness");
+  current_frame_context.refreshDomainState(screen, current_room, uiLayer(),
+    paused || !isRoomScreen() || uiLayer() != LAYER_SCENE || doorTransitionActive(),
+    doorTransitionActive());
+  current_frame_context.finishCallback();
+  frame_callback_observer.onCallbackComplete(current_frame_context);
+}
+
+
+String currentFrameHarnessMode(){
+  if (args != null){
+    for (String argument : args){
+      if (argument.equals("--metrics")) return "profiling";
+      if (argument.equals("--temporal-test")) return "temporal-test";
+      if (argument.equals("--capture")) return "capture";
+      if (argument.equals("--hit-test")) return "hit-test";
+      if (argument.equals("--ladder-test")) return "ladder-test";
+      if (argument.equals("--asset-pipeline-test")) return "asset-pipeline-test";
+    }
+  }
+  return frame_harness_mode;
+}
+
+
+String frameControlChangeReason(int startScreen, int startRoom, int startLayer,
+  boolean startDoorActive){
+  if (!startDoorActive && doorTransitionActive()) return "door_transition_started";
+  if (screen != startScreen) return "screen_changed";
+  if (current_room != startRoom) return "room_changed";
+  if (uiLayer() != startLayer) return "ui_layer_changed";
+  if (paused != (startLayer == LAYER_PAUSE)) return "pause_state_changed";
+  return "";
+}
+
+
+String frameFrozenReason(){
+  if (doorTransitionActive()) return "door_transition_active";
+  if (!isRoomScreen()) return "outside_room";
+  if (paused || uiLayer() != LAYER_SCENE) return "simulation_paused_or_modal";
+  return "simulation_frozen";
 }
 
 
 void drawBase(){
+  if (current_frame_context != null && current_frame_context.callback_open){
+    current_frame_context.beginPresentation(frame_clock.confirmedStateVersion());
+    if (current_frame_context.presentation_active){
+      frame_clock.lockPresentation();
+    }
+  }
+
   base.beginDraw();
   base.smooth(4);
   base.resetMatrix();
@@ -289,18 +430,27 @@ void drawBase(){
   resetButtons();
 
   draw_layer = LAYER_SCENE;
-  if (!harness_scene.draw(base)){
+  boolean scene_replaced = harness_scene.draw(base);
+  if (scene_replaced){
+    recordCurrentPresentationSurface("harness_scene");
+  } else {
+    recordCurrentPresentationSurface("screens");
     drawScreen(base);
 
     if (isRoomScreen()){
+      recordCurrentPresentationSurface("hud");
       drawHud(base);
+      recordCurrentPresentationSurface("ui");
       drawModalLayer(base);
     } else if (uiLayer() != LAYER_SCENE){
+      recordCurrentPresentationSurface("ui");
       drawModalLayer(base);
     }
   }
 
+  recordCurrentPresentationSurface("test_overlay");
   optional_test_overlay_hook.draw(base);
+  recordCurrentPresentationSurface("base");
 
   base.endDraw();
 }
@@ -311,6 +461,12 @@ void drawWindow(){
   noSmooth();
   imageMode(CORNER);
   image(base, view_offset_x, view_offset_y, RENDER_W * view_scale, RENDER_H * view_scale);
+  if (current_frame_context != null && current_frame_context.presentation_active){
+    current_frame_context.recordPresentationSurface("window");
+    current_frame_context.finishPresentation(frame_clock.confirmedStateVersion(),
+      width, height, view_scale, view_offset_x, view_offset_y);
+    frame_clock.unlockPresentation();
+  }
 }
 
 
@@ -322,37 +478,58 @@ void updateViewport(){
 
 
 void updateMouseToBase(){
-  base_mouse_x = (mouseX - view_offset_x) / view_scale / RENDER_SCALE;
-  base_mouse_y = (mouseY - view_offset_y) / view_scale / RENDER_SCALE;
+  updateMouseToBase(mouseX, mouseY);
+}
+
+
+void updateMouseToBase(int mouse_x, int mouse_y){
+  base_mouse_x = (mouse_x - view_offset_x) / view_scale / RENDER_SCALE;
+  base_mouse_y = (mouse_y - view_offset_y) / view_scale / RENDER_SCALE;
+}
+
+
+FrameInputSnapshot sampleFrameInput(){
+  return new FrameInputSnapshot(mouseX, mouseY, mouse_pressed, esc_pressed,
+    enter_pressed, backspace_pressed, key_char_pressed, key_char,
+    move_left_held, move_right_held, move_up_held, move_down_held,
+    run_held, jump_queued, interact_queued);
 }
 
 
 void updateInput(){
-  updateMouseToBase();
+  updateInput(sampleFrameInput());
+}
 
-  if (mouse_pressed){
-    mouse_pressed = false;
+
+void updateInput(FrameInputSnapshot input){
+  if (input == null){
+    throw new IllegalArgumentException("updateInput exige um snapshot do callback");
+  }
+  updateMouseToBase(input.mouse_x, input.mouse_y);
+  mouse_pressed = false;
+  esc_pressed = false;
+  enter_pressed = false;
+  backspace_pressed = false;
+  key_char_pressed = false;
+
+  if (input.mouse_pressed){
     handleClick(base_mouse_x, base_mouse_y);
   }
 
-  if (esc_pressed){
-    esc_pressed = false;
+  if (input.esc_pressed){
     handleEscape();
   }
 
-  if (enter_pressed){
-    enter_pressed = false;
+  if (input.enter_pressed){
     handleEnter();
   }
 
-  if (backspace_pressed){
-    backspace_pressed = false;
+  if (input.backspace_pressed){
     handleBackspace();
   }
 
-  if (key_char_pressed){
-    key_char_pressed = false;
-    handleChar(key_char);
+  if (input.key_char_pressed){
+    handleChar(input.key_char);
   }
 }
 

@@ -1,4 +1,7 @@
 void drawHud(PGraphics g){
+  if (current_frame_context != null && current_frame_context.presentation_active){
+    current_frame_context.hud_pass_count++;
+  }
   drawHeader(g);
   drawObjectiveStrip(g);
   drawFooter(g);
@@ -15,7 +18,11 @@ PImage[] resource_icon_cache = new PImage[6];
 PImage[] resource_icon_sources = new PImage[6];
 int[] resource_icon_scales = new int[6];
 int[] resource_icon_builds_by_icon = new int[6];
+PImage[] resource_icon_failed_sources = new PImage[6];
+int[] resource_icon_failed_scales = new int[6];
 int resource_icon_builds = 0;
+long resource_icon_cache_hits = 0;
+long resource_icon_cache_misses = 0;
 final int[] HUD_RESOURCE_ORDER = new int[] { 0, 1, 2, 3, 5, 4 };
 final int[] HUD_ICON_BY_RESOURCE = new int[] { 0, 1, 2, 3, 5, 4 };
 
@@ -95,7 +102,7 @@ void drawHeaderCard(PGraphics g, float x, String label, String value, int accent
 void drawResourceCard(PGraphics g, float x, int resource, int icon, float value, String label,
   int accent, float fill){
   boolean critical = resource != RESOURCE_PARTS && value < RESOURCE_RED;
-  float now = millis();
+  long now = presentationTimeMillis();
   float alert_pulse = critical ? (1 + sin(now * 0.008f)) * 0.5f : 0;
   int border = critical ? lerpColor(COL_BORDER, COL_RED, alert_pulse) : COL_BORDER;
 
@@ -155,6 +162,7 @@ void drawResourceIcon(PGraphics g, int icon, float x, float y, int colour){
   if (valid_icon && resource_icon_cache[icon] != null
     && resource_icon_sources[icon] == source
     && resource_icon_scales[icon] == RENDER_SCALE){
+    resource_icon_cache_hits++;
     g.imageMode(CENTER);
     g.image(resource_icon_cache[icon],
       round(x + ART_ICON_DRAW / 2),
@@ -232,46 +240,109 @@ void ensureResourceIconCache(int icon){
   int render_scale = RENDER_SCALE;
 
   if (source == null){
-    if (resource_icon_sources[icon] != null){
-      invalidateResourceIconCache(icon);
+    return;
+  }
+
+  if (!validArtImage(source)){
+    if (resource_icon_failed_sources[icon] == source
+      && resource_icon_failed_scales[icon] == render_scale){
+      resource_icon_cache_hits++;
+      return;
     }
+    resource_icon_cache_misses++;
+    resource_icon_failed_sources[icon] = source;
+    resource_icon_failed_scales[icon] = render_scale;
+    String file = art_icon_file[icon] == null ? "icons/unknown.png"
+      : ART_ICON_DIR + art_icon_file[icon] + ".png";
+    recordFallbackDiagnostic(file, "resource_icon_cache", "invalid_source",
+      "last_valid_or_geometric_fallback");
     return;
   }
 
   if (resource_icon_cache[icon] != null
     && resource_icon_sources[icon] == source
     && resource_icon_scales[icon] == render_scale){
+    resource_icon_cache_hits++;
     return;
   }
 
-  if (resource_icon_sources[icon] != null
-    && (resource_icon_sources[icon] != source
-      || resource_icon_scales[icon] != render_scale)){
-    invalidateResourceIconCache(icon);
+  if (resource_icon_failed_sources[icon] == source
+    && resource_icon_failed_scales[icon] == render_scale){
+    resource_icon_cache_hits++;
+    return;
   }
 
   ResourceIconCacheEntry entry = findResourceIconCacheEntry(source, render_scale);
   if (entry != null){
+    resource_icon_cache_hits++;
+    if (resource_icon_sources[icon] != null){
+      invalidateResourceIconCache(icon);
+    }
     resource_icon_cache[icon] = entry.bitmap;
     resource_icon_sources[icon] = source;
     resource_icon_scales[icon] = render_scale;
+    resource_icon_failed_sources[icon] = null;
+    resource_icon_failed_scales[icon] = 0;
     return;
   }
 
   int size = round(ART_ICON_DRAW * render_scale);
-  PGraphics layer = createGraphics(size, size);
-  layer.noSmooth();
-  layer.beginDraw();
-  layer.clear();
-  layer.imageMode(CENTER);
-  layer.image(source, size / 2.0, size / 2.0, size, size);
-  layer.endDraw();
-  PImage bitmap = layer.get();
+  resource_icon_cache_misses++;
+  PGraphics layer = null;
+  PImage bitmap = null;
+  boolean drawing = false;
+  String failure = "";
+  try {
+    layer = createGraphics(size, size);
+    if (layer == null){
+      throw new IllegalStateException("buffer gráfico indisponível");
+    }
+    layer.noSmooth();
+    layer.beginDraw();
+    drawing = true;
+    layer.clear();
+    layer.imageMode(CENTER);
+    layer.image(source, size / 2.0, size / 2.0, size, size);
+    layer.endDraw();
+    drawing = false;
+    bitmap = layer.get();
+    if (!validArtImage(bitmap)){
+      throw new IllegalStateException("a camada preparada está vazia");
+    }
+  } catch (RuntimeException error){
+    bitmap = null;
+    failure = error.getMessage() == null ? error.getClass().getSimpleName()
+      : error.getMessage();
+    if (drawing){
+      try {
+        layer.endDraw();
+      } catch (RuntimeException endError){
+        String endFailure = endError.getMessage() == null
+          ? endError.getClass().getSimpleName() : endError.getMessage();
+        failure += "; encerramento do desenho: " + endFailure;
+      }
+    }
+  }
+  if (bitmap == null){
+    resource_icon_failed_sources[icon] = source;
+    resource_icon_failed_scales[icon] = render_scale;
+    String file = art_icon_file[icon] == null ? "icons/unknown.png"
+      : ART_ICON_DIR + art_icon_file[icon] + ".png";
+    recordFallbackDiagnostic(file, "resource_icon_cache",
+      "preparation_failed:" + failure, "last_valid_or_geometric_fallback");
+    return;
+  }
+
+  if (resource_icon_sources[icon] != null){
+    invalidateResourceIconCache(icon);
+  }
   resource_icon_entries.add(new ResourceIconCacheEntry(source, render_scale, bitmap));
   registerCacheBitmap(bitmap);
   resource_icon_cache[icon] = bitmap;
   resource_icon_sources[icon] = source;
   resource_icon_scales[icon] = render_scale;
+  resource_icon_failed_sources[icon] = null;
+  resource_icon_failed_scales[icon] = 0;
   resource_icon_builds_by_icon[icon]++;
   resource_icon_builds++;
 }
@@ -305,6 +376,8 @@ void invalidateResourceIconCache(int icon){
   resource_icon_cache[icon] = null;
   resource_icon_sources[icon] = null;
   resource_icon_scales[icon] = 0;
+  resource_icon_failed_sources[icon] = null;
+  resource_icon_failed_scales[icon] = 0;
 
   if (old_source == null){
     return;
@@ -334,7 +407,7 @@ void invalidateResourceIconCache(int icon){
 
 
 void drawWarningIcon(PGraphics g, float x, float y){
-  float alert_pulse = (1 + sin(millis() * 0.008f)) * 0.5f;
+  float alert_pulse = (1 + sin(presentationTimeMillis() * 0.008f)) * 0.5f;
   int col = lerpColor(COL_RED, 0xFFFF7766, alert_pulse);
   g.noStroke();
   g.fill(col);
@@ -352,7 +425,7 @@ void drawObjectiveStrip(PGraphics g){
 
   if (!system_message.equals(last_system_message)){
     last_system_message = system_message;
-    system_message_until = frameCount + 180;
+    system_message_until_ms = presentationTimeMillis() + 3000L;
   }
 
   g.stroke(0x2024516B);
@@ -422,7 +495,8 @@ String currentAlertLine(){
     if (other > 0) warning += " · +" + other + " problemas";
     return warning;
   }
-  if (system_message.length() > 0 && frameCount < system_message_until) return system_message;
+  if (system_message.length() > 0
+    && presentationTimeMillis() < system_message_until_ms) return system_message;
   return "Sem problemas ativos";
 }
 
@@ -456,7 +530,8 @@ String orderFailureLine(int q){
 
 
 String problemWarningLine(){
-  if (system_message.length() > 0 && frameCount < system_message_until) return system_message;
+  if (system_message.length() > 0
+    && presentationTimeMillis() < system_message_until_ms) return system_message;
 
   int urgent = urgentProblem();
   String warning = urgent < 0 ? "SEM PROBLEMAS ATIVOS" : problem_short[urgent] + ": " + problem_deadline[urgent] + "D"
@@ -494,7 +569,7 @@ void drawFooter(PGraphics g){
 
 
 float ordersPulse(){
-  return (1 - cos(TWO_PI * (millis() % 1400) / 1400.0)) * 0.5;
+  return (1 - cos(TWO_PI * (presentationTimeMillis() % 1400) / 1400.0)) * 0.5;
 }
 
 

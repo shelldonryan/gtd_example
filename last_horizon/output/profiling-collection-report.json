@@ -1,0 +1,72 @@
+{
+  "schema": "profiling-collection-report-v1",
+  "generatedAt": "2026-09-23T01:50:48.142Z",
+  "status": "INCONCLUSIVO",
+  "manifest": "last_horizon/output/profiling-run-manifest.json",
+  "results": [
+    {
+      "version": "baseline",
+      "profile": "core-i3-integrated",
+      "scenario": "command-day1",
+      "status": "INCONCLUSIVO",
+      "exitCode": 2,
+      "diagnostic": "coleta não iniciada: pré-requisito ausente antes do início: dispositivo de áudio (/proc/asound/cards): ENOENT: no such file or directory, open '/proc/asound/cards'",
+      "output": "",
+      "artifacts": "ausentes",
+      "historicalArtifactsRetained": false,
+      "logPaths": [
+        "last_horizon/output/baseline/core-i3-integrated/command-day1/sample-01.log",
+        "last_horizon/output/baseline/core-i3-integrated/command-day1/sample-02.log",
+        "last_horizon/output/baseline/core-i3-integrated/command-day1/sample-03.log"
+      ]
+    },
+    {
+      "version": "baseline",
+      "profile": "reference",
+      "scenario": "command-day1",
+      "status": "INCONCLUSIVO",
+      "exitCode": 2,
+      "diagnostic": "coleta não iniciada: pré-requisito ausente antes do início: dispositivo de áudio (/proc/asound/cards): ENOENT: no such file or directory, open '/proc/asound/cards'",
+      "output": "",
+      "artifacts": "ausentes",
+      "historicalArtifactsRetained": false,
+      "logPaths": [
+        "last_horizon/output/baseline/reference/command-day1/sample-01.log",
+        "last_horizon/output/baseline/reference/command-day1/sample-02.log",
+        "last_horizon/output/baseline/reference/command-day1/sample-03.log"
+      ]
+    },
+    {
+      "version": "revised",
+      "profile": "core-i3-integrated",
+      "scenario": "command-day1",
+      "status": "INCONCLUSIVO",
+      "exitCode": 2,
+      "diagnostic": "coleta não iniciada: pré-requisito ausente antes do início: dispositivo de áudio (/proc/asound/cards): ENOENT: no such file or directory, open '/proc/asound/cards'",
+      "output": "",
+      "artifacts": "ausentes",
+      "historicalArtifactsRetained": false,
+      "logPaths": [
+        "last_horizon/output/revised/core-i3-integrated/command-day1/sample-01.log",
+        "last_horizon/output/revised/core-i3-integrated/command-day1/sample-02.log",
+        "last_horizon/output/revised/core-i3-integrated/command-day1/sample-03.log"
+      ]
+    },
+    {
+      "version": "revised",
+      "profile": "reference",
+      "scenario": "command-day1",
+      "status": "INCONCLUSIVO",
+      "exitCode": 2,
+      "diagnostic": "coleta não iniciada: pré-requisito ausente antes do início: dispositivo de áudio (/proc/asound/cards): ENOENT: no such file or directory, open '/proc/asound/cards'",
+      "output": "",
+      "artifacts": "ausentes",
+      "historicalArtifactsRetained": false,
+      "logPaths": [
+        "last_horizon/output/revised/reference/command-day1/sample-01.log",
+        "last_horizon/output/revised/reference/command-day1/sample-02.log",
+        "last_horizon/output/revised/reference/command-day1/sample-03.log"
+      ]
+    }
+  ]
+}

@@ -81,6 +81,8 @@ int[] deck_strip_scales;
 int[] deck_strip_generations;
 int[] deck_strip_builds_by_deck = new int[DECK_COUNT];
 int deck_strip_builds = 0;
+long deck_strip_cache_hits = 0;
+long deck_strip_cache_misses = 0;
 PImage art_dorm_bunk;
 
 HashMap<String, PImage> art_cache = new HashMap<String, PImage>();
@@ -92,6 +94,14 @@ boolean art_load_measured = false;
 boolean cache_metrics_available = false;
 long cache_memory_bytes = 0;
 long cache_memory_peak_bytes = 0;
+long art_cache_hits = 0;
+long art_cache_misses = 0;
+long art_filesystem_checks = 0;
+long art_decode_failures = 0;
+long fallback_diagnostic_count = 0;
+long room_detail_cache_hits = 0;
+long room_detail_cache_misses = 0;
+long room_detail_cache_invalidations = 0;
 
 final String FALLBACK_DIAGNOSTICS_FILE = "output/fallback-diagnostics.jsonl";
 java.io.PrintWriter fallback_diagnostics_writer;
@@ -115,8 +125,26 @@ class DeckStripCacheEntry {
   }
 }
 
+
+class DeckStripFailureEntry {
+  PImage source;
+  int render_width;
+  int render_scale;
+  int source_generation;
+
+  DeckStripFailureEntry(PImage sourceValue, int widthValue, int scaleValue,
+    int generationValue){
+    source = sourceValue;
+    render_width = widthValue;
+    render_scale = scaleValue;
+    source_generation = generationValue;
+  }
+}
+
 ArrayList<DeckStripCacheEntry> deck_strip_cache_entries =
   new ArrayList<DeckStripCacheEntry>();
+ArrayList<DeckStripFailureEntry> deck_strip_failed_entries =
+  new ArrayList<DeckStripFailureEntry>();
 
 
 void recordFallbackDiagnostic(String file, String asset_type, String failure,
@@ -128,6 +156,7 @@ void recordFallbackDiagnostic(String file, String asset_type, String failure,
   }
 
   fallback_diagnostics_keys.add(key);
+  fallback_diagnostic_count++;
   if (fallback_diagnostics_writer == null){
     new File(sketchPath("output")).mkdirs();
     fallback_diagnostics_writer = createWriter(sketchPath(FALLBACK_DIAGNOSTICS_FILE));
@@ -223,6 +252,7 @@ boolean allFramesPresent(PImage[] frames){
 
 
 boolean artExists(String path){
+  art_filesystem_checks++;
   return new File(sketchPath("data/" + path)).isFile();
 }
 
@@ -233,28 +263,39 @@ boolean validArtImage(PImage image){
 
 
 PImage loadArt(String path){
+  return loadArt(path, "geometric_fallback");
+}
+
+
+PImage loadArt(String path, String failure_fallback){
   if (path == null){
     return null;
   }
 
   if (art_cache.containsKey(path)){
+    art_cache_hits++;
     return art_cache.get(path);
   }
 
+  art_cache_misses++;
   art_expected++;
   PImage art = null;
   if (!artExists(path)){
-    recordFallbackDiagnostic(path, "image", "missing_file", "geometric_fallback");
+    recordFallbackDiagnostic(path, "image", "missing_file", failure_fallback);
   } else {
+    boolean decode_failed = false;
     try {
       art = loadImage(path);
     } catch (RuntimeException error){
-      recordFallbackDiagnostic(path, "image", "invalid_png", "geometric_fallback");
+      art_decode_failures++;
+      decode_failed = true;
+      recordFallbackDiagnostic(path, "image", "invalid_png", failure_fallback);
     }
 
     if (!validArtImage(art)){
       art = null;
-      recordFallbackDiagnostic(path, "image", "invalid_png", "geometric_fallback");
+      if (!decode_failed) art_decode_failures++;
+      recordFallbackDiagnostic(path, "image", "invalid_png", failure_fallback);
     }
   }
   art_cache.put(path, art);
@@ -264,6 +305,69 @@ PImage loadArt(String path){
   }
 
   return art;
+}
+
+
+PImage loadLegacyRoomArt(String name){
+  String key = "legacy-room:" + name;
+  if (art_cache.containsKey(key)){
+    art_cache_hits++;
+    return art_cache.get(key);
+  }
+
+  art_cache_misses++;
+  String relative_path = "../assets/PNG/" + name + ".png";
+  String diagnostic_path = "../assets/PNG/" + name + ".png";
+  String file_path = sketchPath(relative_path);
+  art_filesystem_checks++;
+  PImage art = null;
+  if (!new File(file_path).isFile()){
+    recordFallbackDiagnostic(ART_DECORATION_DIR + name + ".png",
+      "decoration", "missing_file", "geometric_fallback");
+  } else {
+    boolean decode_failed = false;
+    try {
+      art = loadImage(file_path);
+    } catch (RuntimeException error){
+      art_decode_failures++;
+      decode_failed = true;
+      recordFallbackDiagnostic(diagnostic_path, "image", "invalid_png",
+        "geometric_fallback");
+    }
+    if (!validArtImage(art)){
+      art = null;
+      if (!decode_failed) art_decode_failures++;
+      recordFallbackDiagnostic(diagnostic_path, "image", "invalid_png",
+        "geometric_fallback");
+    }
+  }
+
+  art_cache.put(key, art);
+  if (art != null) art_loaded++;
+  return art;
+}
+
+
+void invalidateArtPath(String path){
+  if (path == null || path.length() == 0){
+    throw new IllegalArgumentException("o caminho do asset a invalidar é obrigatório");
+  }
+  boolean invalidated = art_cache.containsKey(path);
+  if (invalidated) art_cache.remove(path);
+  if (path.indexOf(ART_DECORATION_DIR) == 0){
+    String name = path.substring(ART_DECORATION_DIR.length());
+    if (name.endsWith(".png")) name = name.substring(0, name.length() - 4);
+    if (room_detail_cache.containsKey(name)){
+      room_detail_cache.remove(name);
+      room_detail_cache_invalidations++;
+      invalidated = true;
+    }
+    if (art_cache.containsKey("legacy-room:" + name)){
+      art_cache.remove("legacy-room:" + name);
+      invalidated = true;
+    }
+  }
+  if (invalidated) cache_invalidations++;
 }
 
 
@@ -671,19 +775,39 @@ void prepareDeckStrips(int render_w, int render_scale){
   for (int i = 0; i < DECK_COUNT; i++){
     PImage tile = floorArtForDeck(i);
     int generation = floorSourceGeneration(tile);
-
-    if (deckStripKeyChanged(i, tile, render_w, render_scale, generation)){
-      invalidateDeckStripCache(i);
-    }
+    boolean key_changed = deckStripKeyChanged(i, tile, render_w,
+      render_scale, generation);
 
     if (tile == null){
-      art_deck_strip[i] = null;
+      if (art_deck_strip[i] == null && key_changed){
+        invalidateDeckStripCache(i);
+      } else if (art_deck_strip[i] != null){
+        recordFallbackDiagnostic("environment/floor_1.png#deck-" + i,
+          "floor_band_cache", "source_unavailable",
+          "last_valid_or_geometric_fallback");
+      }
+      continue;
+    }
+
+    if (findDeckStripFailureEntry(tile, render_w, render_scale, generation) != null){
+      deck_strip_cache_hits++;
+      continue;
+    }
+
+    if (!validArtImage(tile)){
+      deck_strip_cache_misses++;
+      rememberDeckStripFailure(tile, render_w, render_scale, generation);
+      recordFallbackDiagnostic("environment/floor_1.png#deck-" + i,
+        "floor_band_cache", "invalid_source",
+        "last_valid_or_geometric_fallback");
       continue;
     }
 
     DeckStripCacheEntry entry = findDeckStripCacheEntry(tile, render_w, render_scale,
       generation);
     if (entry != null){
+      deck_strip_cache_hits++;
+      if (key_changed) invalidateDeckStripCache(i);
       art_deck_strip[i] = entry.bitmap;
       deck_strip_sources[i] = tile;
       deck_strip_widths[i] = render_w;
@@ -691,19 +815,56 @@ void prepareDeckStrips(int render_w, int render_scale){
       deck_strip_generations[i] = generation;
       continue;
     }
+    deck_strip_cache_misses++;
 
-    PGraphics strip = createGraphics(render_w, tile.height);
-    strip.beginDraw();
-    strip.clear();
-    strip.noSmooth();
-    int x = 0;
-    while (x < render_w){
-      int w_to_draw = min(tile.width, render_w - x);
-      strip.image(tile.get(0, 0, w_to_draw, tile.height), x, 0);
-      x += tile.width;
+    PGraphics strip = null;
+    PImage bitmap = null;
+    boolean drawing = false;
+    String failure = "";
+    try {
+      strip = createGraphics(render_w, tile.height);
+      if (strip == null){
+        throw new IllegalStateException("buffer gráfico indisponível");
+      }
+      strip.beginDraw();
+      drawing = true;
+      strip.clear();
+      strip.noSmooth();
+      int x = 0;
+      while (x < render_w){
+        int w_to_draw = min(tile.width, render_w - x);
+        strip.image(tile.get(0, 0, w_to_draw, tile.height), x, 0);
+        x += tile.width;
+      }
+      strip.endDraw();
+      drawing = false;
+      bitmap = strip.get();
+      if (!validArtImage(bitmap)){
+        throw new IllegalStateException("a faixa preparada está vazia");
+      }
+    } catch (RuntimeException error){
+      bitmap = null;
+      failure = error.getMessage() == null ? error.getClass().getSimpleName()
+        : error.getMessage();
+      if (drawing){
+        try {
+          strip.endDraw();
+        } catch (RuntimeException endError){
+          String endFailure = endError.getMessage() == null
+            ? endError.getClass().getSimpleName() : endError.getMessage();
+          failure += "; encerramento do desenho: " + endFailure;
+        }
+      }
     }
-    strip.endDraw();
-    PImage bitmap = strip.get();
+    if (bitmap == null){
+      rememberDeckStripFailure(tile, render_w, render_scale, generation);
+      recordFallbackDiagnostic("environment/floor_1.png#deck-" + i,
+        "floor_band_cache", "preparation_failed:" + failure,
+        "last_valid_or_geometric_fallback");
+      continue;
+    }
+
+    if (key_changed) invalidateDeckStripCache(i);
     deck_strip_cache_entries.add(new DeckStripCacheEntry(tile, render_w, render_scale,
       generation, bitmap));
     registerCacheBitmap(bitmap);
@@ -714,6 +875,29 @@ void prepareDeckStrips(int render_w, int render_scale){
     deck_strip_generations[i] = generation;
     deck_strip_builds_by_deck[i]++;
     deck_strip_builds++;
+  }
+}
+
+
+DeckStripFailureEntry findDeckStripFailureEntry(PImage source, int render_w,
+  int render_scale, int generation){
+  for (int index = 0; index < deck_strip_failed_entries.size(); index++){
+    DeckStripFailureEntry entry = deck_strip_failed_entries.get(index);
+    if (entry.source == source && entry.render_width == render_w
+      && entry.render_scale == render_scale
+      && entry.source_generation == generation){
+      return entry;
+    }
+  }
+  return null;
+}
+
+
+void rememberDeckStripFailure(PImage source, int render_w, int render_scale,
+  int generation){
+  if (findDeckStripFailureEntry(source, render_w, render_scale, generation) == null){
+    deck_strip_failed_entries.add(new DeckStripFailureEntry(source, render_w,
+      render_scale, generation));
   }
 }
 
@@ -998,7 +1182,7 @@ int artFrameIndex(int frame_count, int frame_ms){
     return 0;
   }
 
-  return int((millis() / frame_ms) % frame_count);
+  return int((presentationTimeMillis() / frame_ms) % frame_count);
 }
 
 

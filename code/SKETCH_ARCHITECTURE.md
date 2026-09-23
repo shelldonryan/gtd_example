@@ -1,8 +1,9 @@
 # Arquitetura do sketch
 
-O jogo está implementado como um sketch Processing único em `last_horizon/`.
-As abas `.pde` compartilham o estado global do sketch e são compiladas juntas
-pelo Processing.
+O jogo está implementado como um sketch Processing 4.5.6 único em
+`last_horizon/`, cuja entrada é `last_horizon/last_horizon.pde`. O nome do
+arquivo de entrada corresponde ao nome da pasta do sketch. As abas `.pde` da
+pasta compartilham o estado global e são compiladas juntas pelo Processing.
 
 ## Módulos
 
@@ -24,6 +25,11 @@ O código de domínio usa principalmente funções e tabelas globais. Classes de
 dados organizam a projeção noturna, motivos de ação, caches e hooks.
 
 ## Execução e estado
+
+Abra `last_horizon/last_horizon.pde` no Processing 4.5.6 para usar o editor.
+No terminal, `bash tools/run-processing.sh` executa o sketch e `npm run build`
+faz a compilação. A localização/configuração do executável e os comandos de
+verificação estão em [`VERIFICATION.md`](VERIFICATION.md).
 
 `setup()` cria o buffer 1280×720, inicializa Segoe UI e carrega assets. `draw()`
 calcula o fator inteiro de escala, centraliza a imagem na janela e encaminha o

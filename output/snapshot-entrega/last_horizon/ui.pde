@@ -34,6 +34,9 @@ boolean[] button_on = new boolean[MAX_REGISTERED_BUTTONS];
 
 
 void resetButtons(){
+  if (current_frame_context != null && current_frame_context.presentation_active){
+    current_frame_context.button_reset_count++;
+  }
   button_count = 0;
   for (int layer = 0; layer < UI_LAYER_COUNT; layer++){
     button_layer_count[layer] = 0;
@@ -44,6 +47,9 @@ void resetButtons(){
 
 
 void addButton(float x, float y, float w, float h, int action, boolean on){
+  if (current_frame_context != null && current_frame_context.presentation_active){
+    current_frame_context.button_add_count++;
+  }
   int layer = draw_layer;
   if (layer < LAYER_SCENE || layer >= UI_LAYER_COUNT){
     println("ui diagnostic: invalid button layer " + layer + " for action " + action);
@@ -634,7 +640,7 @@ void drawStars(PGraphics g){
     g.rect(x, y, 1, 1);
   }
 
-  long now = millis();
+  long now = presentationTimeMillis();
   for (int i = 0; i < 32; i++){
     float x = 12 + ((i * 137) % 616);
     float y = 10 + ((i * 89) % 340);

@@ -11,7 +11,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { createHash } from "node:crypto";
-import { hostname } from "node:os";
+import { arch, hostname, release } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -27,11 +27,101 @@ const sampleIds = ["sample-01", "sample-02", "sample-03"];
 const scenario = "command-day1";
 const collectionTimeoutMs = 1_500_000;
 const processingTimeoutMs = 240_000;
+function commandPath(command) {
+  const result = spawnSync("bash", ["-lc", `command -v ${command}`], {
+    encoding: "utf8",
+    timeout: 10_000,
+  });
+  return result.status === 0 ? result.stdout.trim() : "";
+}
+
+function inspectProcessing() {
+  const processingBin = process.env.PROCESSING_BIN
+    || (existsSync("/opt/processing/bin/Processing") ? "/opt/processing/bin/Processing" : "")
+    || commandPath("Processing")
+    || commandPath("processing");
+  if (!processingBin) {
+    return {
+      available: false,
+      version: null,
+      diagnostic: "Processing CLI ausente em /opt/processing/bin/Processing e no PATH.",
+    };
+  }
+
+  const result = spawnSync(processingBin, ["cli", "--help"], {
+    encoding: "utf8",
+    timeout: 10_000,
+    maxBuffer: 1024 * 1024,
+  });
+  const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+  const match = output.match(/Command line edition for Processing\s+([^\s]+)/i);
+  return {
+    available: result.error == null,
+    version: match?.[1] ?? null,
+    diagnostic: result.error?.message
+      ?? (match ? "" : "Processing CLI não informou uma versão verificável."),
+  };
+}
+
+function inspectAudioDevice() {
+  if (process.platform !== "linux") {
+    return {
+      available: null,
+      deviceMetadata: "/proc/asound/cards",
+      diagnostic: "A disponibilidade não foi verificada neste sistema operacional.",
+    };
+  }
+  try {
+    const cards = readFileSync("/proc/asound/cards", "utf8").trim();
+    const available = cards.length > 0 && !cards.includes("--- no soundcards ---");
+    return {
+      available,
+      deviceMetadata: "/proc/asound/cards",
+      diagnostic: available ? "" : "Nenhum dispositivo de áudio foi listado.",
+    };
+  } catch (error) {
+    return {
+      available: false,
+      deviceMetadata: "/proc/asound/cards",
+      diagnostic: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+const processingMetadata = inspectProcessing();
+const xvfbRunPath = commandPath("xvfb-run");
+const audioMetadata = inspectAudioDevice();
 const environmentMetadata = {
   environment: "approved-metrics-fixture-v1-linux-headless",
   machine: hostname() || "local-verification-host",
   gpu: "xvfb-renderer",
+  host: {
+    operatingSystem: `${process.platform} ${release()}`,
+    architecture: arch(),
+  },
+  graphicalEnvironment: {
+    mode: "headless",
+    xvfbRunAvailable: xvfbRunPath.length > 0,
+    xvfbRunPath: xvfbRunPath || null,
+    renderer: "xvfb-renderer",
+  },
+  processing: processingMetadata,
+  audio: audioMetadata,
 };
+const profilePrerequisiteDiagnostics = [
+  ...(!processingMetadata.available
+    ? [`pré-requisito ausente antes do início: Processing CLI (${processingMetadata.diagnostic})`]
+    : []),
+  ...(!processingMetadata.version
+    ? ["pré-requisito ausente antes do início: versão verificável do Processing"]
+    : []),
+  ...(xvfbRunPath.length === 0
+    ? ["pré-requisito ausente antes do início: xvfb-run"]
+    : []),
+  ...(audioMetadata.available !== true
+    ? [`pré-requisito ausente antes do início: dispositivo de áudio (${audioMetadata.deviceMetadata}): ${audioMetadata.diagnostic}`]
+    : []),
+].filter(Boolean);
 const manifestPath = resolve(outputRoot, "profiling-run-manifest.json");
 const collectionReportPath = resolve(outputRoot, "profiling-collection-report.json");
 
@@ -483,6 +573,7 @@ function validateRequiredArtifacts(version, profile) {
   return sampleIds.flatMap((sample) => [
     resolve(metricsRoot, `${sample}.csv`),
     resolve(metricsRoot, `${sample}.sidecar.json`),
+    resolve(metricsRoot, `${sample}.temporal.json`),
     resolve(profileRoot, `${sample}.json`),
   ]).every((path) => existsSync(path));
 }
@@ -520,9 +611,9 @@ function run() {
   const baselineRevision = git("rev-parse", "HEAD");
   const temporaryRoot = mkdtempSync(join("/tmp", "last-horizon-profiling-"));
   const baselineRoot = resolve(temporaryRoot, "baseline");
-  const revisedRoot = resolve(temporaryRoot, "revised");
-  const results = [];
-  const startedAt = new Date().toISOString();
+    const revisedRoot = resolve(temporaryRoot, "revised");
+    const results = [];
+    const startedAt = new Date().toISOString();
   try {
     mkdirSync(baselineRoot, { recursive: true });
     extractRevision(baselineRevision, baselineRoot);
@@ -530,9 +621,11 @@ function run() {
     prepareBaselineCapture(baselineSourceRoot);
     copySource(sketchRoot, revisedRoot);
     const runVersions = requestedVersions?.length > 0 ? requestedVersions : requiredVersions;
-    for (const version of runVersions) {
-      rmSync(resolve(outputRoot, version), { recursive: true, force: true });
-      rmSync(resolve(outputRoot, "profiling", version), { recursive: true, force: true });
+    if (profilePrerequisiteDiagnostics.length === 0){
+      for (const version of runVersions) {
+        rmSync(resolve(outputRoot, version), { recursive: true, force: true });
+        rmSync(resolve(outputRoot, "profiling", version), { recursive: true, force: true });
+      }
     }
 
     for (const version of runVersions) {
@@ -544,13 +637,29 @@ function run() {
           results.push({ version, profile, scenario, status: "FAIL", diagnostic: "timeout agregado de profiling excedido" });
           break;
         }
-        const result = runMetrics(version, profile, sourceRoot);
-        const copied = copyCollectedOutput(sourceRoot, version, profile);
+        const result = profilePrerequisiteDiagnostics.length === 0
+          ? runMetrics(version, profile, sourceRoot)
+          : {
+            version,
+            profile,
+            scenario,
+            status: "INCONCLUSIVO",
+            exitCode: 2,
+            diagnostic: `coleta não iniciada: ${profilePrerequisiteDiagnostics.join("; ")}`,
+            output: "",
+          };
+        const copied = profilePrerequisiteDiagnostics.length === 0
+          ? copyCollectedOutput(sourceRoot, version, profile)
+          : false;
         writeCollectedLogs(version, profile, result);
-        const artifactsValid = copied && validateRequiredArtifacts(version, profile);
+        const historicalArtifactsValid = validateRequiredArtifacts(version, profile);
+        const artifactsValid = profilePrerequisiteDiagnostics.length === 0
+          ? copied && historicalArtifactsValid
+          : historicalArtifactsValid;
         const finalResult = {
           ...result,
           artifacts: artifactsValid ? "last_horizon/output/<versao>/<perfil>/<sample_id>.*" : "ausentes",
+          historicalArtifactsRetained: profilePrerequisiteDiagnostics.length > 0 && artifactsValid,
           logPaths: sampleIds.map((sample) => `last_horizon/output/${version}/${profile}/${scenario}/${sample}.log`),
         };
         if (result.status === "PASS" && !artifactsValid) {
@@ -579,6 +688,16 @@ function run() {
         processingTimeoutMs,
         environment: environmentMetadata,
       },
+      commandsExecuted: [{
+        command: ["node", "tools/profile-runner.mjs", ...process.argv.slice(2)].join(" "),
+        status: results.some((item) => item.status === "FAIL")
+          ? "FAIL"
+          : results.some((item) => item.status === "INCONCLUSIVO")
+            ? "INCONCLUSIVO"
+            : "PASS",
+        startedAt,
+        prerequisiteDiagnostics: profilePrerequisiteDiagnostics,
+      }],
       results,
       artifacts: {
         collectionReport: "last_horizon/output/profiling-collection-report.json",

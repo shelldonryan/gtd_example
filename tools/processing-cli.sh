@@ -7,6 +7,7 @@ PROCESSING_BIN="${PROCESSING_BIN:-}"
 HEADLESS="${HEADLESS:-0}"
 TIMEOUT_SECONDS=300
 METRICS_MODE=0
+TEMPORAL_MODE=0
 MODULE_SET="complete"
 METRICS_SCENARIO="command-day1"
 PROCESSING_USER_ARGS=()
@@ -15,6 +16,10 @@ for argument in "$@"; do
   case "$argument" in
     --module-set=*)
       MODULE_SET="${argument#*=}"
+      ;;
+    --temporal-test)
+      TEMPORAL_MODE=1
+      PROCESSING_USER_ARGS+=("--capture" "--temporal-test")
       ;;
     *)
       PROCESSING_USER_ARGS+=("$argument")
@@ -39,6 +44,13 @@ report_inconclusive() {
   echo "Diagnóstico: $reason Impacto: $impact" >&2
   exit 2
 }
+
+if [[ "$TEMPORAL_MODE" == "1" && "$MODULE_SET" != "capture" \
+  && "$MODULE_SET" != "complete" ]]; then
+  report_inconclusive \
+    "pré-requisito ausente antes do início: módulo capture para o cenário temporal" \
+    "a matriz base/manual não contém o harness temporal e nenhuma execução foi iniciada"
+fi
 
 if printf '%s\n' "${PROCESSING_USER_ARGS[@]}" | grep -Fxq -- "--metrics"; then
   TIMEOUT_SECONDS=180
@@ -277,7 +289,7 @@ if [[ "$PROCESSING_STATUS" -ne 0 ]]; then
 fi
 
 if grep -Eiq \
-  '(^|[^[:alpha:]])FALHOU([^[:alpha:]]|$)|QUEST CHECK: FAIL|CAPTURE CHECK: FAIL|METRICS CHECK: (FAIL|INVESTIGATE)|java\.lang\.[A-Za-z0-9.$]+Exception' \
+  '(^|[^[:alpha:]])FALHOU([^[:alpha:]]|$)|QUEST CHECK: FAIL|CAPTURE CHECK: FAIL|TEMPORAL CHECK: FAIL|METRICS CHECK: (FAIL|INVESTIGATE)|java\.lang\.[A-Za-z0-9.$]+Exception' \
   "$TEMP_ROOT/processing.stdout" "$TEMP_ROOT/processing.stderr" 2>/dev/null; then
   echo "PROCESSING REGRESSION: FAIL — o harness reportou falha"
   echo "Diagnóstico: o harness reportou falha. Impacto: esta execução não é evidência de PASS." >&2
@@ -288,6 +300,13 @@ if [[ "$METRICS_MODE" == "1" ]] \
   && ! grep -Eq 'METRICS CHECK: PASS' "$TEMP_ROOT/processing.stdout" "$TEMP_ROOT/processing.stderr" 2>/dev/null; then
   echo "PROCESSING REGRESSION: FAIL — a captura não confirmou três amostras canônicas"
   echo "Diagnóstico: o Processing terminou sem emitir METRICS CHECK: PASS. Impacto: CSVs ou sidecars incompletos não são evidência de PASS." >&2
+  exit 1
+fi
+
+if [[ "$TEMPORAL_MODE" == "1" ]] \
+  && ! grep -Eq 'TEMPORAL CHECK: PASS' "$TEMP_ROOT/processing.stdout" "$TEMP_ROOT/processing.stderr" 2>/dev/null; then
+  echo "PROCESSING REGRESSION: FAIL — o cenário temporal não confirmou sua evidência"
+  echo "Diagnóstico: TEMPORAL CHECK: PASS ausente. Impacto: as fixtures temporais não são evidência de PASS." >&2
   exit 1
 fi
 

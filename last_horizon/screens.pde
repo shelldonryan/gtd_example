@@ -77,6 +77,7 @@ boolean uiActionAllowed(int action){
 
 
 void drawScreen(PGraphics g){
+  recordCurrentPresentationSurface("screen_content");
   if (screen == SCREEN_INIT){
     drawInitScreen(g);
     return;
@@ -100,6 +101,7 @@ void drawScreen(PGraphics g){
   drawShipArea(g);
 }
 void drawModalLayer(PGraphics g){
+  recordCurrentPresentationSurface("modal_content");
   int active_layer = uiLayer();
   draw_layer = active_layer;
 
@@ -359,7 +361,7 @@ void drawScreenBackdrop(PGraphics g, int index){
 void drawInitScreen(PGraphics g){
   drawScreenBackdrop(g, 0);
 
-  float now = millis();
+  long now = presentationTimeMillis();
 
   textCentered(g, "MISSÃO STS-10 · DESTINO: MARTE", BASE_W / 2.0, 28, 9, 0x903FC8E8);
 
@@ -494,7 +496,7 @@ void drawVignetteScreen(PGraphics g){
     g.ellipse(dx, dot_y, i == vignette_page ? 5 : 3.5f, i == vignette_page ? 5 : 3.5f);
   }
 
-  float prompt_pulse = (1 + sin(millis() * 0.005f)) * 0.5f;
+  float prompt_pulse = (1 + sin(presentationTimeMillis() * 0.005f)) * 0.5f;
   int prompt_col = lerpColor(0x903FC8E8, COL_CYAN, prompt_pulse);
   textCentered(g, "CLIQUE OU ENTER PARA CONTINUAR", BASE_W / 2.0, 276, 10, prompt_col);
 

@@ -318,6 +318,7 @@ int roomIndexOrInvalid(int room_id){
 
 
 void drawRoom(PGraphics g){
+  recordCurrentPresentationSurface("room");
   PImage backdrop = art_backdrop == null ? null : art_backdrop[roomIndex(screen)];
 
   if (backdrop != null){
@@ -407,37 +408,46 @@ void drawRoomDecor(PGraphics g){
 
 
 HashMap<String, PImage> room_detail_cache = new HashMap<String, PImage>();
+HashMap<String, PImage> room_detail_last_valid_cache = new HashMap<String, PImage>();
 PImage[] room_wall_surfaces = new PImage[ROOM_COUNT];
 
 PImage roomDetail(String name){
-  if (!room_detail_cache.containsKey(name)){
-    String data_path = ART_DECORATION_DIR + name + ".png";
-    PImage art = artExists(data_path) ? loadArt(data_path) : null;
-    if (art == null){
-      String legacy_path = sketchPath("../assets/PNG/" + name + ".png");
-      if (new File(legacy_path).isFile()){
-        if (!artExists(data_path)){
-          recordFallbackDiagnostic(data_path, "decoration", "missing_file",
-            "legacy_image");
-        }
-        try {
-          art = loadImage(legacy_path);
-        } catch (RuntimeException error){
-          art = null;
-        }
-        if (!validArtImage(art)){
-          art = null;
-          recordFallbackDiagnostic("../assets/PNG/" + name + ".png", "image",
-            "invalid_png", "geometric_fallback");
-        }
-      } else if (!artExists(data_path)){
-        recordFallbackDiagnostic(data_path, "decoration", "missing_file",
-          "geometric_fallback");
-      }
-    }
-    room_detail_cache.put(name, art);
+  if (name == null || name.length() == 0){
+    throw new IllegalArgumentException("o nome do detalhe da sala é obrigatório");
   }
-  return room_detail_cache.get(name);
+  if (room_detail_cache.containsKey(name)){
+    room_detail_cache_hits++;
+    return room_detail_cache.get(name);
+  }
+
+  room_detail_cache_misses++;
+  String data_path = ART_DECORATION_DIR + name + ".png";
+  PImage art = loadArt(data_path, "legacy_image");
+  if (art == null){
+    art = loadLegacyRoomArt(name);
+  }
+  PImage last_valid = room_detail_last_valid_cache.get(name);
+  if (art == null && last_valid != null){
+    art = last_valid;
+    recordFallbackDiagnostic(data_path, "decoration", "source_retry_failed",
+      "last_valid_image");
+  } else if (art != null && art != last_valid){
+    room_detail_last_valid_cache.put(name, art);
+    invalidateRoomDetailSurfaces();
+  }
+  room_detail_cache.put(name, art);
+  return art;
+}
+
+
+void invalidateRoomDetailSurfaces(){
+  for (int room = 0; room < room_wall_surfaces.length; room++){
+    room_wall_surfaces[room] = null;
+  }
+  room_vent_strip = null;
+  for (int view = 0; view < room_window_views.length; view++){
+    room_window_views[view] = null;
+  }
 }
 
 void drawRoomDetail(PGraphics g, String name, float x, int deck, boolean on_floor){
@@ -942,7 +952,7 @@ boolean drawPointArt(PGraphics g, int point, float x, float y, boolean nearby, b
       ? art_station_glow_orange[point]
       : null;
     if (glow != null){
-      float pulse = (1.0 - cos(TWO_PI * (millis() % 2200) / 2200.0)) * 0.5;
+      float pulse = (1.0 - cos(TWO_PI * (presentationTimeMillis() % 2200) / 2200.0)) * 0.5;
       float alpha = lerp(80, 240, pulse);
       g.tint(255, alpha);
       drawArt(g, glow, x, y - h / 2.0, w, h);
@@ -1007,7 +1017,7 @@ void drawNpc(PGraphics g, float x, float y, int crew, int facing, boolean nearby
     if (nearby && glow != null){
       drawArt(g, glow, x, y - PLAYER_H / 2.0, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
     } else if (quest_target && orange_glow != null){
-      float pulse = (1.0 - cos(TWO_PI * (millis() % 2200) / 2200.0)) * 0.5;
+      float pulse = (1.0 - cos(TWO_PI * (presentationTimeMillis() % 2200) / 2200.0)) * 0.5;
       float alpha = lerp(80, 240, pulse);
       g.tint(255, alpha);
       drawArt(g, orange_glow, x, y - PLAYER_H / 2.0, ART_SPRITE_DRAW, ART_SPRITE_DRAW);
@@ -1267,12 +1277,32 @@ void loadPlayerAssets(){
     return;
   }
 
-  player_frame_layer = createGraphics(
-    PLAYER_DRAW_W * RENDER_SCALE,
-    PLAYER_DRAW_H * RENDER_SCALE
-  );
-  player_frame_layer.noSmooth();
-  player_animation_started_at = millis();
+  if (player_frame_layer != null) releaseCacheBitmap(player_frame_layer);
+  if (player_frame_layer_staging != null){
+    releaseCacheBitmap(player_frame_layer_staging);
+  }
+  player_frame_layer = null;
+  player_frame_layer_staging = null;
+  player_frame_layer_valid = false;
+  player_rendered_frame = -1;
+  player_rendered_facing = 0;
+  try {
+    player_frame_layer = createGraphics(
+      PLAYER_DRAW_W * RENDER_SCALE,
+      PLAYER_DRAW_H * RENDER_SCALE
+    );
+    if (player_frame_layer != null){
+      player_frame_layer.noSmooth();
+      registerCacheBitmap(player_frame_layer);
+    } else {
+      rememberPlayerFrameLayerFailure(-1, player_facing,
+        "graphics_buffer_unavailable");
+    }
+  } catch (RuntimeException error){
+    player_frame_layer = null;
+    rememberPlayerFrameLayerFailure(-1, player_facing,
+      describePlayerFrameLayerError(error));
+  }
   player_assets_loaded = true;
 }
 
@@ -1291,9 +1321,12 @@ void resetRoomState(){
   ladder_climbing_active = false;
   ladder_steps_taken = 0;
   ladder_step_accum = 0;
+  ladder_step_phase = 0;
   player_step_accum = 0;
+  walk_step_accum = 0;
   walk_step_active = false;
   walk_step_phase = 0;
+  run_step_phase = 0;
   interact_queued = false;
   held_item = ITEM_NONE;
   map_open = false;

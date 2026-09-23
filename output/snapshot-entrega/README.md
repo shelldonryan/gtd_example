@@ -26,7 +26,10 @@ pixel usa amostragem sem interpolação.
 ## Executar
 
 Abra [`last_horizon/last_horizon.pde`](last_horizon/last_horizon.pde) no
-Processing 4.5.6 e execute. Para os comandos de validação no Windows, veja
+Processing 4.5.6. Esse arquivo é a entrada do sketch `last_horizon/`; as demais
+abas `.pde` da pasta fazem parte do mesmo sketch. No terminal, use
+`bash tools/run-processing.sh` para executar ou `npm run build` para compilar.
+Os pré-requisitos e a configuração do executável estão em
 [`code/VERIFICATION.md`](code/VERIFICATION.md).
 
 ## Documentação

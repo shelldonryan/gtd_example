@@ -1,0 +1,165 @@
+{
+  "runId": "20260922_132532-197773",
+  "candidateId": "C6",
+  "rootCause": "O Module de frame não possui uma Interface temporal: draw() é simultaneamente o relógio implícito da simulação, o orquestrador do render pass e o ponto de instrumentação. Movimento e áudio avançam por callbacks, enquanto animação e HUD consultam millis()/frameCount; os caches e hooks existentes são Seams parciais e não dão Leverage e Locality para controlar tempo, ordem e orçamento.",
+  "evidence": [
+    {
+      "path": "last_horizon/last_horizon.pde",
+      "lines": "252-273",
+      "finding": "setup() solicita frameRate(60), e draw() executa updateInput(), updateRoom(), drawBase(), updateCursor(), drawWindow() e harness_update em uma única sequência por callback.",
+      "impact": "A taxa de frames é o relógio implícito de atualização, renderização e instrumentação; não há FrameContext ou delta explícito para separar duração da simulação, fases do render e orçamento."
+    },
+    {
+      "path": "last_horizon/movement.pde",
+      "lines": "17-50",
+      "finding": "updateRoom() não recebe tempo decorrido e chama um dos integradores de jogador uma vez por invocação, depois limpa jump_queued.",
+      "impact": "Física e consumo de input estão acoplados à quantidade de callbacks de draw(), exigindo repetição de chamadas e estado global nos testes."
+    },
+    {
+      "path": "last_horizon/movement.pde",
+      "lines": "110-146",
+      "finding": "PLAYER_SPEED/PLAYER_RUN_SPEED são somados diretamente a player_x por chamada; corrida acumula distância por chamada e caminhada calcula a fase com millis() antes de tocar passos.",
+      "impact": "Distância e eventos de corrida dependem de callbacks, enquanto a fase da caminhada depende do relógio de parede; queda de frames atravessa movimento, animação e áudio sem um Seam temporal comum."
+    },
+    {
+      "path": "last_horizon/movement.pde",
+      "lines": "208-226",
+      "finding": "A escada aplica vertical * LADDER_SPEED por invocação, acumula dy e toca um passo ao atingir LADDER_FIRST_STEP/LADDER_STEP_SPACING.",
+      "impact": "Deslocamento e passos de escada variam com a quantidade de atualizações; não há política para compensar frame longo, descartar eventos acumulados ou limitar trabalho."
+    },
+    {
+      "path": "last_horizon/animation.pde",
+      "lines": "53-105",
+      "finding": "playerCurrentFrame() reinicia player_animation_started_at com millis() e calcula raw_elapsed com millis() - player_animation_started_at para selecionar frames.",
+      "impact": "A animação usa tempo de parede independente do avanço físico por callback; frames longos podem pular frames visuais e os testes precisam manipular diretamente o timestamp global."
+    },
+    {
+      "path": "last_horizon/audio.pde",
+      "lines": "139-169",
+      "finding": "stopStepSounds() percorre os arrays de caminhada, corrida e escada; playDeckStepSound() e playLadderStepSound() chamam essa rotina antes de playSound().",
+      "impact": "Cada evento de movimento executa a política de interrupção de todos os clips no caminho quente, sem Adapter temporal, fila ou regra de frames longos."
+    },
+    {
+      "path": "last_horizon/last_horizon.pde",
+      "lines": "277-305",
+      "finding": "drawBase() reinicia botões, desenha a tela, HUD, modais e overlay opcional entre beginDraw() e endDraw() em todo callback.",
+      "impact": "Render pass, hit-test e hooks de teste compartilham a cadência da simulação; não há Module para preparar dados ou impor orçamento por fase."
+    },
+    {
+      "path": "last_horizon/ship.pde",
+      "lines": "320-343",
+      "finding": "drawRoom() percorre backdrop ou paredes, decoração, conveses, escadas, título, portas, pontos da sala e jogador.",
+      "impact": "Geometria, pontos físicos, arte e animação são visitados a cada frame, mantendo decisões de apresentação dentro do callback que também serve como relógio."
+    },
+    {
+      "path": "last_horizon/hud.pde",
+      "lines": "38-50",
+      "finding": "drawHeader() concatena valores de dia e sobreviventes e percorre seis recursos, consultando valor, label, cor e preenchimento a cada chamada.",
+      "impact": "Formatação e consultas de estado são refeitas no render pass e ficam misturadas com custos de nave, modais e caches."
+    },
+    {
+      "path": "last_horizon/hud.pde",
+      "lines": "95-117",
+      "finding": "drawResourceCard() usa millis() para o pulso de alerta e formata o valor e label durante o desenho.",
+      "impact": "O HUD mantém uma política de tempo visual própria e sem preparação separada, dificultando coerência com movimento, animação e pausa."
+    },
+    {
+      "path": "last_horizon/ui.pde",
+      "lines": "36-77",
+      "finding": "resetButtons() zera contadores de todas as camadas e addButton() preenche arrays e contadores globais durante o desenho.",
+      "impact": "Renderização e hit-test são efeitos do mesmo passe; uma mudança de renderização afeta interação e custo do frame simultaneamente."
+    },
+    {
+      "path": "last_horizon/assets.pde",
+      "lines": "235-266",
+      "finding": "loadArt() consulta art_cache, acessa filesystem, chama loadImage(), registra fallback e armazena o resultado.",
+      "impact": "Existe um Adapter parcial para assets, mas resolução, fallback e cache dependem do estado global e não são controlados pelo Module de frame."
+    },
+    {
+      "path": "last_horizon/ship.pde",
+      "lines": "409-438",
+      "finding": "roomDetail() mantém room_detail_cache, tenta loadArt() e, no fallback legado, chama loadImage(legacy_path) diretamente.",
+      "impact": "O caminho visual tem uma segunda política de carregamento e fallback; a primeira renderização pode executar filesystem e decodificação dentro de drawRoom()."
+    },
+    {
+      "path": "last_horizon/assets.pde",
+      "lines": "656-715",
+      "finding": "prepareDeckStrips() invalida por fonte, largura, escala ou geração e, em miss, cria PGraphics, copia tiles e materializa bitmap.",
+      "impact": "Cache e invalidação são Seams reais, mas seu trabalho não é governado por fases ou orçamento do Module de frame."
+    },
+    {
+      "path": "last_horizon/hud.pde",
+      "lines": "225-275",
+      "finding": "ensureResourceIconCache() invalida e reconstrói cache por fonte e escala, criando PGraphics e bitmap em miss.",
+      "impact": "O HUD mantém política de cache paralela à de faixas e assets gerais, distribuindo alocações e invalidações entre renderizadores."
+    },
+    {
+      "path": "last_horizon/capture.pde",
+      "lines": "92-101",
+      "finding": "installHarness() instala hooks de setup, update e cena para fixtures, captura e substituição de desenho.",
+      "impact": "O harness oferece Seam de verificação, mas não injeta relógio, delta, Clip ou política de frame; os testes continuam ligados ao estado global."
+    },
+    {
+      "path": "last_horizon/capture.pde",
+      "lines": "637-664",
+      "finding": "updatePerformanceMetrics() mede o intervalo entre callbacks com System.nanoTime(), armazena frame_ms e fecha a amostra de 30 segundos.",
+      "impact": "A medição observa p95 e duração real, mas não controla o intervalo nem separa update, render, cache e áudio."
+    },
+    {
+      "path": "last_horizon/capture.pde",
+      "lines": "2281-2320",
+      "finding": "Os testes repetem updatePlayerOnDeck() por contagem de chamadas e verificam sound_step_play_count para caminhada, corrida, pulo e aterrissagem.",
+      "impact": "A superfície atual valida semântica por frame/evento, mas não compara o mesmo tempo lógico com taxas de atualização diferentes."
+    }
+  ],
+  "dependencyCategories": [
+    {
+      "dependency": "Estado global de movimento, animação e geometria em memória",
+      "category": "in-process",
+      "testStrategy": "Usar fixtures determinísticas e testar integradores, transições e seleção de frame como funções do estado fornecido."
+    },
+    {
+      "dependency": "Ciclo draw(), millis() e frameCount do Processing",
+      "category": "local-substitutable",
+      "testStrategy": "Fornecer relógio/frame fake ao futuro Module e manter um teste de integração com callbacks reais."
+    },
+    {
+      "dependency": "PGraphics, createGraphics() e desenho Processing",
+      "category": "local-substitutable",
+      "testStrategy": "Usar superfície headless ou harness de pixels com fixtures e verificar equivalência visual em cenários selecionados."
+    },
+    {
+      "dependency": "Filesystem local de assets, File, loadImage() e loadJSONObject()",
+      "category": "local-substitutable",
+      "testStrategy": "Usar catálogo/fake de assets ou diretório temporário; reservar a leitura de data/ para integração."
+    },
+    {
+      "dependency": "Java Sound Clip e AudioSystem",
+      "category": "external",
+      "testStrategy": "Injetar recorder/mock de eventos e verificar tipo, ordem, cadência e descarte sem abrir dispositivo de áudio."
+    },
+    {
+      "dependency": "System.nanoTime(), ThreadMXBean e arquivos de métricas",
+      "category": "local-substitutable",
+      "testStrategy": "Fornecer sampler e saída temporários/fakes e testar agregação de p95 e alocações separadamente da captura real."
+    }
+  ],
+  "currentSeams": [
+    "Callbacks setup()/draw() do Processing para a ordem atual de input, movimento, renderização e captura.",
+    "Hooks harness_setup, harness_update e harness_scene em capture.pde:92-101.",
+    "loadArt() e caches de faixas e ícones para parte do carregamento e invalidação de assets.",
+    "playerCurrentFrame() e updatePlayerFrameLayer() para seleção e materialização do frame.",
+    "playDeckStepSound() e playLadderStepSound() como pontos nomeados de reprodução, ainda sem evento temporal ou Adapter em memória.",
+    "Contadores de performance em capture.pde:527-536 e 637-664."
+  ],
+  "missingSeams": [
+    "Interface de relógio/frame com delta controlado, timestamp lógico, pausa e orçamento de trabalho.",
+    "Seam de integração de movimento para receber delta e tornar convés e escada independentes da quantidade de callbacks.",
+    "Seam movimento-áudio para eventos normalizados consumidos por Adapter real e recorder em memória.",
+    "Seam entre preparação e render pass para dados de nave, HUD, UI, animação e caches.",
+    "Seam único de resolução de assets que elimine o caminho legado de loadImage() fora da política de loadArt().",
+    "Seam de teste temporal para fornecer deltas, frames longos e captura de eventos sem relógio real ou hardware de áudio."
+  ],
+  "testingImpact": "Os testes existentes repetem updatePlayerOnDeck() e manipulam timestamps globais, mas não fornecem um delta comum a movimento, animação e áudio nem comparam taxas de atualização diferentes. O harness e as métricas observam o frame real, porém não controlam suas fases; isso torna difícil separar custo de atualização, renderização, cache e áudio.",
+  "riskOfNoChange": "Movimento e passos podem variar com a taxa de callbacks enquanto animação e HUD seguem millis(); frames longos podem produzir cadência sonora irregular e custo concentrado no mesmo callback. O p95 e as alocações continuarão sem orçamento por fase, e mudanças futuras atravessarão vários Modules e Seams parciais, aumentando regressões cruzadas e reduzindo Locality para manutenção."
+}
