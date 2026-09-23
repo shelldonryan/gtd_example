@@ -49,10 +49,10 @@ bash tools/run-processing.sh`.
 
 | Decisão | Status | Evidência e impacto |
 | --- | --- | --- |
-| Validação integrada da entrega completa | FAIL | O último `integrated-verification-report.json` registrou falha no snapshot final; a execução Windows não iniciou por ausência da plataforma e o profiling não iniciou por indisponibilidade de `/proc/asound/cards`. O código do snapshot foi corrigido depois desse relatório e ainda aguarda nova execução. |
-| Gate de performance e profiling | INCONCLUSIVO | A coleta atual não produziu as amostras baseline/revisada porque o pré-requisito nomeado de áudio está indisponível. A tabela numérica abaixo é histórica e não comprova o estado atual. |
+| Validação integrada da entrega completa | FAIL | O último `integrated-verification-report.json` é anterior a esta correção e registrou falha no snapshot final. A verificação integrada ainda não foi reexecutada. |
+| Gate de performance e profiling | PASS local | Em 23/09/2026, a coleta Windows produziu 12 amostras válidas de `HEAD` contra o working tree; o comparador aprovou p95 máximo revisado de 19,065 ms. Os dois rótulos de perfil foram executados na mesma máquina. |
 | Snapshot final pós-limpeza | FAIL | O último manifesto registrou `output/snapshot-entrega/package.json` ausente e falha de compilação porque `last_horizon/frame.pde` não entrou na cópia. O seletor do snapshot foi corrigido depois dessa execução e aguarda validação. |
-| Decisão geral | FAIL | O último relatório integrado bloqueia o fechamento pela falha do snapshot. Os resultados INCONCLUSIVO de Windows e profiling não contam como PASS; reexecute `npm run verification:final` para atualizar as evidências após as correções. |
+| Decisão geral | FAIL | A regressão de captura, a compilação de produção e o profiling local passaram; o relatório integrado e o snapshot final ainda aguardam nova validação. |
 
 ### Runner canônico
 
@@ -113,14 +113,20 @@ descritivo, mas não é um gate adicional. Manifesto incompatível, amostra,
 cadência, sidecar ou métrica obrigatória ausente mantém o resultado
 `INCONCLUSIVO`; dados completos que excedem qualquer limite produzem `FAIL`.
 
+No Windows, o runner usa `Processing.exe cli`, verifica os clips pelo sketch e
+mantém os temporários em `last_horizon/output` até o fim da coleta. A baseline
+padrão é o `HEAD` confirmado, comparado ao working tree. `--baseline-ref=<ref>`
+permite escolher outra revisão; uma revisão sem sidecar temporal recebe
+`INCONCLUSIVO` antes da coleta. Os rótulos `core-i3-integrated` e `reference`
+não representam dois hardwares quando ambos são coletados na mesma máquina.
+
 ### Tabela final de métricas de custo
 
-Os valores abaixo são medianas de uma execução anterior e não representam
-evidência válida da coleta atual, que ficou INCONCLUSIVA por falta do dispositivo
-de áudio. São medianas das três amostras por perfil. A fonte
-autoritativa com os arrays de amostras e os links individuais é
-`last_horizon/output/profiling-comparison.json`; cada linha mantém status
-`PASS`, `FAIL` ou `INCONCLUSIVO`.
+Os valores da tabela abaixo pertencem a uma execução anterior. A coleta local de
+23/09/2026 está em [profiling-comparison.json](../last_horizon/output/profiling-comparison.json):
+12 amostras válidas, p95 máximo revisado de 19,065 ms, variação de p95 de
+-2,81% em `core-i3-integrated` e -0,41% em `reference`. Essa comparação mede
+`HEAD` contra a correção atual, não o refactor do último commit contra seu pai.
 
 | Perfil | Hotspot / métrica | Baseline | Revisada | Variação | Status |
 | --- | --- | ---: | ---: | ---: | --- |
@@ -141,12 +147,10 @@ autoritativa com os arrays de amostras e os links individuais é
 | reference | transition_preview / cache_invalidations | 0 | 0 | 0,00% | PASS |
 | reference | per_frame_allocations / allocations_per_frame | 146007.360 | 146166.310 | 0,11% | PASS |
 
-Os crescimentos observados de 0,01% e 0,11% estão abaixo da tolerância de ruído
-de 1% e não são regressão persistente; crescimento acima de 1% nos dois perfis
-aciona `FAIL`. A coleta registra as variações no JSON. O ganho reproduzível é
-demonstrado por frame time, memória de cache e carregamento no perfil integrado.
+Os números da tabela histórica não devem ser usados para avaliar a correção
+atual; as amostras e variações atuais estão no JSON vinculado acima.
 
-O manifesto identifica a baseline por `31bb14fd1512669769b2e6be0651b1deb3ace9c3`
+O manifesto atual identifica a baseline por `fea5e946af69ccb87edfcdc2b91f7231019a7f62`
 e a versão revisada por `working-tree:<digest>`. Os valores completos dos dois
 manifestos, incluindo cada arquivo e SHA-256, ficam em
 `last_horizon/output/profiling-run-manifest.json`. O relatório integrado aponta

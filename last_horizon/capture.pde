@@ -2002,6 +2002,28 @@ void checkMovementAudioAdapterContract(){
       && "walk[0]".equals(stop_step_sound_metrics.get(metricsBefore).visit_order[0])
       && "run[0]".equals(stop_step_sound_metrics.get(metricsBefore).visit_order[1])
       && "ladder[0]".equals(stop_step_sound_metrics.get(metricsBefore).visit_order[2]));
+    String previousHarnessMode = current_frame_context.harness_mode;
+    int productionMetricsBefore = stop_step_sound_metrics.size();
+    try {
+      current_frame_context.harness_mode = "base";
+      CoalescingMovementAudioAdapter productionAdapter =
+        new CoalescingMovementAudioAdapter(playbackPort);
+      for (int callback = 0; callback < 24; callback++){
+        long callbackId = 9000 + callback;
+        productionAdapter.beginCallback(callbackId);
+        productionAdapter.emit(new MovementAudioEvent(MOVEMENT_AUDIO_WALK,
+          0, 15.0 + callback * FRAME_FIXED_STEP_SECONDS,
+          9000 + callback, callbackId, 0), true);
+        productionAdapter.dispatchCallback(callbackId);
+      }
+      verify("áudio de produção não retém histórico nem métricas por passo",
+        productionAdapter.resultCount() == 1
+        && productionAdapter.playbackHistoryCount() == 0
+        && stop_step_sound_metrics.size() == productionMetricsBefore);
+    }
+    finally {
+      current_frame_context.harness_mode = previousHarnessMode;
+    }
     checkMovementAudioPlaybackFailures();
   }
   finally {

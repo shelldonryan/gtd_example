@@ -51,6 +51,13 @@ MovementAudioAdapter movement_audio_adapter = new CoalescingMovementAudioAdapter
 ArrayList<StopStepSoundsMetric> stop_step_sound_metrics = new ArrayList<StopStepSoundsMetric>();
 
 
+boolean movementAudioDiagnosticsEnabled(){
+  if (current_frame_context == null) return false;
+  String mode = current_frame_context.harness_mode;
+  return "capture".equals(mode) || "profiling".equals(mode);
+}
+
+
 class MovementAudioEvent {
   public final String family;
   public final int variant;
@@ -244,7 +251,7 @@ class CoalescingMovementAudioAdapter implements MovementAudioAdapter {
   private void recordPlaybackResult(MovementAudioEvent event, String status){
     MovementAudioPlaybackResult result = new MovementAudioPlaybackResult(event, status);
     callback_results.add(result);
-    playback_history.add(result);
+    if (movementAudioDiagnosticsEnabled()) playback_history.add(result);
   }
 }
 
@@ -592,20 +599,25 @@ void primeSound(Clip clip){
 
 
 void stopStepSounds(){
-  String[] visitOrder = new String[sound_walk_step.length * 3];
-  for (int i = 0; i < sound_walk_step.length; i++){
-    int visitIndex = i * 3;
-    visitOrder[visitIndex] = "walk[" + i + "]";
-    visitOrder[visitIndex + 1] = "run[" + i + "]";
-    visitOrder[visitIndex + 2] = "ladder[" + i + "]";
+  boolean recordMetrics = movementAudioDiagnosticsEnabled();
+  String[] visitOrder = null;
+  if (recordMetrics){
+    visitOrder = new String[sound_walk_step.length * 3];
+    for (int i = 0; i < sound_walk_step.length; i++){
+      int visitIndex = i * 3;
+      visitOrder[visitIndex] = "walk[" + i + "]";
+      visitOrder[visitIndex + 1] = "run[" + i + "]";
+      visitOrder[visitIndex + 2] = "ladder[" + i + "]";
+    }
   }
-  long started = System.nanoTime();
+  long started = recordMetrics ? System.nanoTime() : 0L;
   int failures = 0;
   for (int i = 0; i < sound_walk_step.length; i++){
     if (!stopSound(sound_walk_step[i])) failures++;
     if (!stopSound(sound_run_step[i])) failures++;
     if (!stopSound(sound_ladder_step[i])) failures++;
   }
+  if (!recordMetrics) return;
   long stopCompleted = System.nanoTime();
   long callbackId = current_frame_context == null ? -1 : current_frame_context.callback_id;
   int stepIndex = current_frame_context == null ? -1 : current_frame_context.step_index;

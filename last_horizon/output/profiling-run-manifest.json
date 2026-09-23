@@ -1,34 +1,30 @@
 {
   "schema": "profiling-run-manifest-v1",
-  "generatedAt": "2026-09-23T01:50:48.141Z",
+  "generatedAt": "2026-09-23T05:28:43.058Z",
   "baseline": {
     "kind": "git-revision",
-    "reference": "a8f144569f5d0f544f5deb78362576d039815bd0",
-    "source": "git archive HEAD",
+    "reference": "fea5e946af69ccb87edfcdc2b91f7231019a7f62",
+    "source": "git archive fea5e946af69ccb87edfcdc2b91f7231019a7f62",
     "files": [
       {
-        "path": "code/VERIFICATION.md",
-        "sha256": "2b1ab5a4eba2db6a8671bede74987911207d62bd5576a26bc25db7ccead711f4"
-      },
-      {
         "path": "last_horizon/animation.pde",
-        "sha256": "8a5c49373c4ca7e2a84d4b1c873377aa9b9995cf1e679ce31e37ba550dc61463"
+        "sha256": "f9bdc8f89b0c15edf7ca0f661fcbf4aa05b3a67c6bf83362d4f5453880706697"
       },
       {
         "path": "last_horizon/assets.pde",
-        "sha256": "b9821fa60d11d150e31c7df81a2acd4cc579b4d2d4ef21ed92c58f0550ed3e31"
+        "sha256": "b4831f052c8effcc32136673aaffd88084cafd9b0dd34ea3ccbb319636dd0bfa"
       },
       {
         "path": "last_horizon/audio.pde",
-        "sha256": "507e25bab04881decac20932eda78dfe4ea53efe7b23c0609e458f3d75738417"
+        "sha256": "f4df871fc6c202fd249f28f019f699429c138b7a087982a576e4f7d88b623cb6"
       },
       {
         "path": "last_horizon/capture.pde",
-        "sha256": "ed713f7798da085c0cbb8439b90372bfe48da70aab5a1edd83a59515a688e2f5"
+        "sha256": "57008cb55162fc519abe829f939f79ec9ad4473f8f1d9ecc841b4a214774d4de"
       },
       {
         "path": "last_horizon/data/audio/door/LICENSE.txt",
-        "sha256": "eb51761f85fa98452903262b77cec2ab1d42e91771cbea9d1760059239a0af9e"
+        "sha256": "eefaebe988b225e257faf875d6eed1426108092ebdeebda29d393e27dbeefd49"
       },
       {
         "path": "last_horizon/data/audio/door/door.wav",
@@ -36,7 +32,7 @@
       },
       {
         "path": "last_horizon/data/audio/ladder/LICENSE.txt",
-        "sha256": "7ce1e06e3424822a3823cfd78698b032c53e8703c157edd281d6226026b011a4"
+        "sha256": "1a92c99df601479fb0c1235adb9245f8d7d76835c3ce518d0e446524c1a2808d"
       },
       {
         "path": "last_horizon/data/audio/ladder/ladder.wav",
@@ -60,7 +56,7 @@
       },
       {
         "path": "last_horizon/data/audio/run/LICENSE.txt",
-        "sha256": "67579a453ea3e2a8042fe23c4dabb9b1b0a597786c0f65d84a87043528dc4587"
+        "sha256": "b425b3670df0f14568be2dfe04799744bda12ced134ec965761c1300456792a8"
       },
       {
         "path": "last_horizon/data/audio/run/step_01.wav",
@@ -80,7 +76,7 @@
       },
       {
         "path": "last_horizon/data/audio/walk/LICENSE.txt",
-        "sha256": "786aa93f138f1b97f6a96be0a2dc045309ba37902011b98e06a92db775c6fba6"
+        "sha256": "d1323a7930b5d970be79e6989cf3af2a49e7f81dfd3cab38d1062a9bf889fc41"
       },
       {
         "path": "last_horizon/data/audio/walk/step_01.wav",
@@ -120,7 +116,7 @@
       },
       {
         "path": "last_horizon/data/decorations/LICENSE.txt",
-        "sha256": "629966c3f8b0fff227d419ec35abde9e828a63aa101dad5777c36b9686e82919"
+        "sha256": "9817d93de7f4ad67b6536b5b2dd292d56a30f046655a7e44fd2e2f72b573ec4f"
       },
       {
         "path": "last_horizon/data/decorations/Lamp 1.png",
@@ -188,11 +184,11 @@
       },
       {
         "path": "last_horizon/data/doors/LICENSE.txt",
-        "sha256": "ded885358b352b79365403f0ba9e754c30d35519f3692051f687087377128d5d"
+        "sha256": "0aafce3513eb945b05b74dc70103842beb957a792e51f65a93a841e49086814f"
       },
       {
         "path": "last_horizon/data/doors/door_sheet.json",
-        "sha256": "66d40e2f5ba6bfe9597d2b3dce6074b515daca075f05128d7cba71019dbe66d3"
+        "sha256": "fa642df1d5e136098861646642b6dc3396890eda5512f5356cd7ce0fe0f82119"
       },
       {
         "path": "last_horizon/data/doors/door_sheet.png",
@@ -200,7 +196,7 @@
       },
       {
         "path": "last_horizon/data/environment/LICENSE.txt",
-        "sha256": "3fedb21deabd100917d49e1b1a97ef6d04fcffdff9fdfcc2d55f96858802f8fb"
+        "sha256": "774e9fa71fc08ea96ec210af73cca44b11590f91f6da38121dabe7ff987a2b67"
       },
       {
         "path": "last_horizon/data/environment/dorm_bunk.png",
@@ -216,7 +212,7 @@
       },
       {
         "path": "last_horizon/data/icons/LICENSE.txt",
-        "sha256": "a07439dad0506e0f27c857680234850447b0589d792d888168a2f56d76940e46"
+        "sha256": "48e2e5e0bfa70ee04eaa42ad71d2c32c5501f49ddd5f361643fd5138194d1e1d"
       },
       {
         "path": "last_horizon/data/icons/agua.aseprite",
@@ -284,7 +280,7 @@
       },
       {
         "path": "last_horizon/data/map/LICENSE.txt",
-        "sha256": "aa7b6c5f7129693ee01d80fcc7491c074edb1d6f13d19a852e50695576216130"
+        "sha256": "97f96b77bb9c1b2aa6a3a4f1768e5e39a62506f4adcc05f01ae4876530831903"
       },
       {
         "path": "last_horizon/data/map/ship.aseprite",
@@ -296,7 +292,7 @@
       },
       {
         "path": "last_horizon/data/npc/LICENSE.txt",
-        "sha256": "469e87e260ccfabb665127290f712d896a7ec7c631ec3d442119e08de1c051a9"
+        "sha256": "6ea65851a7f189a63bfecd634f17518080e173cf83d0fc167121d55c0ce90c17"
       },
       {
         "path": "last_horizon/data/npc/bento.png",
@@ -332,11 +328,11 @@
       },
       {
         "path": "last_horizon/data/player/LICENSE.txt",
-        "sha256": "ae07517a83b9b5e9e81c4691f2680efc8a1c9b3b52ef870d6def14dbbab3c6f7"
+        "sha256": "d263eff81fa44228ce5f81e05ca4d1f53d48e68446e7b2f948bbd5695d2aaa8b"
       },
       {
         "path": "last_horizon/data/player/player_sheet.json",
-        "sha256": "16c6c8d6b2d5d1cd625848c886b87736f2402d9cdc20fadf38bd8e172ed93f94"
+        "sha256": "e6781503b245d021556db7a47bcd6220923ae6181f7dfc474450267ac12d1ac6"
       },
       {
         "path": "last_horizon/data/player/player_sheet.png",
@@ -344,7 +340,7 @@
       },
       {
         "path": "last_horizon/data/stations/LICENSE.txt",
-        "sha256": "fcd13f9d5b2cdc6a4990fe08cf515a0b4c395a69b9dd2d36ce53f03b2d37e18d"
+        "sha256": "5ddb6c6cbe4c91484f2cfd493bfad45b5ddb939ed6471bb07024c619ce5af7f5"
       },
       {
         "path": "last_horizon/data/stations/antena.png",
@@ -392,654 +388,642 @@
       },
       {
         "path": "last_horizon/editorial.pde",
-        "sha256": "3fdf5aec465c167e568e866fa20d0386741addd2db6f09e07f6036dc0ea7f5ec"
-      },
-      {
-        "path": "last_horizon/game.pde",
-        "sha256": "fca385a24998b8a41bb771c7db69a4ec617c94cf47e5e738691f6bf92a848de9"
-      },
-      {
-        "path": "last_horizon/hud.pde",
-        "sha256": "0450f268f85d93711d6c8322f8417a937765f880ddf0f735fa93b35cdf7c68ea"
-      },
-      {
-        "path": "last_horizon/last_horizon.pde",
-        "sha256": "9142777a3aa232f8bb563233ad00048ae19ded2841895892ee97df3cc52e4141"
-      },
-      {
-        "path": "last_horizon/movement.pde",
-        "sha256": "3e769f5765f8cfb498bc0962315667d0ea6689f9e0f1aad7d9f2fb5e94b8676b"
-      },
-      {
-        "path": "last_horizon/night_projection.pde",
-        "sha256": "151a5fab8e249414958fb54e4f947ac410d34c935355b43af49fefd918965d3d"
-      },
-      {
-        "path": "last_horizon/portals.pde",
-        "sha256": "993e8ef84529c59c96633c8e3c5a80067e5e853c76c90b9728b662c4e1e94ef9"
-      },
-      {
-        "path": "last_horizon/screens.pde",
-        "sha256": "9b355d48e876971fe51ec01128685cb95b140f5c6f7e8046cc66c8bce47df197"
-      },
-      {
-        "path": "last_horizon/ship.pde",
-        "sha256": "92ae1d69b897bcd792cd11b0bd9a754ff2643eb0511de171906d2179112e4d98"
-      },
-      {
-        "path": "last_horizon/tasks.pde",
-        "sha256": "3b869b41e9807ed67f6f7dd51f869662b929975a5b799c73e7dad997f6d47157"
-      },
-      {
-        "path": "last_horizon/test_mode.pde",
-        "sha256": "5813f13712babda38dbb82c5135b25f755d3f630a55a64e7adfdcbde05c2f6da"
-      },
-      {
-        "path": "last_horizon/ui.pde",
-        "sha256": "425b562d31581347257dcb4e6ec00809dcf552547f93613afb96eb8e723c84e8"
-      },
-      {
-        "path": "package.json",
-        "sha256": "c67a8ce22b983894a33016aa6c59faaa8e9cbb5f6fad0d060ee5d7a35359f585"
-      },
-      {
-        "path": "prototype/balance-model.mjs",
-        "sha256": "c44980ec39d14d11b449c241d95bddf5814969b415228993ff0aaa999320bffa"
-      },
-      {
-        "path": "tools/build.sh",
-        "sha256": "bda6e6f445b87838b86d272785849128a8f383a8ff72ec21933a040f77673bbb"
-      },
-      {
-        "path": "tools/cleanup-verification-artifacts.mjs",
-        "sha256": "ca8766d3911a70e56241ed1f661bcc6dd5f007ed5c98f33c966d04c6a181652c"
-      },
-      {
-        "path": "tools/compare-metrics.mjs",
-        "sha256": "5a3499c4e561a4d21723f896b99124dc8e65ca01e1c92237e0291f2d0c21c756"
-      },
-      {
-        "path": "tools/compare-profiling.mjs",
-        "sha256": "adb27b362e186fe85b8230f98d202db97a756b62fa5a632cd8e87f1792dba91e"
-      },
-      {
-        "path": "tools/e6-audit.mjs",
-        "sha256": "ce10d9db065c24619bf52d7e574ef31144f979a8638b189cc4362a0f569ad0da"
-      },
-      {
-        "path": "tools/e6-evidence.mjs",
-        "sha256": "8575058d4d25e3a3ef83f37b1620aea94dc414121c40789577163b39b50c2e71"
-      },
-      {
-        "path": "tools/optional-modules.mjs",
-        "sha256": "3fce4101d5db5b549fd89cd61fc2ffba00ccee483e302f9a7005ac31a3e54df1"
-      },
-      {
-        "path": "tools/processing-cli.sh",
-        "sha256": "a3664230a81ee6291cb067387318c7cac6cb6cd7349475b647c88970aedbd54c"
-      },
-      {
-        "path": "tools/profile-runner.mjs",
-        "sha256": "1b059779740e8e6850e4b79aa0f123925434108848acbe3b190b12d017631866"
-      },
-      {
-        "path": "tools/regression-final.sh",
-        "sha256": "1c156af3cd62c6a63b67f59e0d8860d50c33eba17c2411e214a1859f2e0bcd67"
-      },
-      {
-        "path": "tools/regression-windows.mjs",
-        "sha256": "95b1b1e6c159aefdd6f18b59761d2afe92a75cd5b2d0a10ebb1c93143da6d054"
-      },
-      {
-        "path": "tools/run-headless.sh",
-        "sha256": "ea97b5028ebf62b4cdacc1437cc0eb1845cea4237806d9566db6f6f8abdf3c73"
-      },
-      {
-        "path": "tools/run-processing.sh",
-        "sha256": "1a6c14af7328d97fc11f42e334d09c894e2f54e6c4e404225d3cc306e889dd5a"
-      },
-      {
-        "path": "tools/snapshot-entrega.mjs",
-        "sha256": "a9372025974bc4f75a25f5c8b1d3080d0c8b9f12580432bddb217e6cd4a36198"
-      },
-      {
-        "path": "tools/typecheck.mjs",
-        "sha256": "38963dc950b366e459e2647c3aa8e59f3b8d2c30e6957509d44d10603db29524"
-      },
-      {
-        "path": "tools/verify-delivery.mjs",
-        "sha256": "eaad7065a99d1b6575f9b193251d981dfb9d02b02fb5313a2402b733096337b4"
-      }
-    ],
-    "digest": "7b547894469332cb4c6e6088bcf2e214dbef17134c1289867256e5df76d31edc"
-  },
-  "revised": {
-    "kind": "working-tree",
-    "reference": "working-tree:bd5875e873a8560db5d50ba3c6108e90ab8e6788033d7e43ce1a515ef75ae2b1",
-    "source": "current working tree",
-    "files": [
-      {
-        "path": "code/VERIFICATION.md",
-        "sha256": "dab30cae5d7188b156e499303b8da4cef06e73e6069e7109b49be7948eb90fb7"
-      },
-      {
-        "path": "last_horizon/animation.pde",
-        "sha256": "403f0f80f0b5dbe8f5fce7cffdecb76b52e1883f19a17aceea1518a7fb2b04ba"
-      },
-      {
-        "path": "last_horizon/assets.pde",
-        "sha256": "ec05811fb51b7a4d639b681dee91570fdb40a62e54ac494a9fd02c922873b462"
-      },
-      {
-        "path": "last_horizon/audio.pde",
-        "sha256": "eab2f6efbca7034911569455aadf217d7997de41746cb97660f5e9762cc93eae"
-      },
-      {
-        "path": "last_horizon/capture.pde",
-        "sha256": "23f1270094a1297da2a57af957b325f89fa89d9860cb34a4c8f19075c2528205"
-      },
-      {
-        "path": "last_horizon/data/audio/door/LICENSE.txt",
-        "sha256": "eb51761f85fa98452903262b77cec2ab1d42e91771cbea9d1760059239a0af9e"
-      },
-      {
-        "path": "last_horizon/data/audio/door/door.wav",
-        "sha256": "3eb94554af9a158856a58bd5ed3428662fe39775b7b434262b905ea9d172a998"
-      },
-      {
-        "path": "last_horizon/data/audio/ladder/LICENSE.txt",
-        "sha256": "7ce1e06e3424822a3823cfd78698b032c53e8703c157edd281d6226026b011a4"
-      },
-      {
-        "path": "last_horizon/data/audio/ladder/ladder.wav",
-        "sha256": "a487a4296517a575f696b85328f6f7754ca059d7cfec34240d6b7c4a7dbaa1d8"
-      },
-      {
-        "path": "last_horizon/data/audio/ladder/step_01.wav",
-        "sha256": "45d1385aa054f2329ad825b83b63b255122e197f0c641689f2701f61967a4c26"
-      },
-      {
-        "path": "last_horizon/data/audio/ladder/step_02.wav",
-        "sha256": "a664f079b7e6a2caefc0f3a101ad594a6edb7f18de652edf29b2a182a0ee76e2"
-      },
-      {
-        "path": "last_horizon/data/audio/ladder/step_03.wav",
-        "sha256": "70566342705c25033f983cb09fdaf3436657a03cf62d00a9f40df20949db6c25"
-      },
-      {
-        "path": "last_horizon/data/audio/ladder/step_04.wav",
-        "sha256": "c5df6ca251af7cf68dcf05903496909aa54f48404a69ca582ab737e5458692d7"
-      },
-      {
-        "path": "last_horizon/data/audio/run/LICENSE.txt",
-        "sha256": "67579a453ea3e2a8042fe23c4dabb9b1b0a597786c0f65d84a87043528dc4587"
-      },
-      {
-        "path": "last_horizon/data/audio/run/step_01.wav",
-        "sha256": "94d295c6f207b5458bc69c88911fae6b3909049f907228182199f9d99567253a"
-      },
-      {
-        "path": "last_horizon/data/audio/run/step_02.wav",
-        "sha256": "9b96bb99d0dc2982b1be1912ced0b557bf5582030650e1844135d61f322c2d6f"
-      },
-      {
-        "path": "last_horizon/data/audio/run/step_03.wav",
-        "sha256": "1dbe53b302275d5bfa092f525c96bb8d237863cc6d8d5c98409e40d42df68acd"
-      },
-      {
-        "path": "last_horizon/data/audio/run/step_04.wav",
-        "sha256": "274092d5d6f2a11f33e9ac3e461944cacedc8e6aacd3fe670d8a7d8ab712d9d3"
-      },
-      {
-        "path": "last_horizon/data/audio/walk/LICENSE.txt",
-        "sha256": "786aa93f138f1b97f6a96be0a2dc045309ba37902011b98e06a92db775c6fba6"
-      },
-      {
-        "path": "last_horizon/data/audio/walk/step_01.wav",
-        "sha256": "efea19f9909bf83c4880034f7a5a4bd9fa5b55ac3fb134ef4ae2bad0f71d8bf6"
-      },
-      {
-        "path": "last_horizon/data/audio/walk/step_02.wav",
-        "sha256": "13e1f94efa4aa48e91518d88c264137afe8ff9cff7373bde9da9e443930359d7"
-      },
-      {
-        "path": "last_horizon/data/audio/walk/step_03.wav",
-        "sha256": "b6df9707787ac501c053687b899d9a658d28c763561430653854376b73420f05"
-      },
-      {
-        "path": "last_horizon/data/audio/walk/step_04.wav",
-        "sha256": "96a91a8a03dea084f78266b444ca4996419adf256d6ac15bbda606031af7e5ca"
-      },
-      {
-        "path": "last_horizon/data/decorations/Baril 1.png",
-        "sha256": "cf13f2ef42421bc20addb8cccec8af369eeeb476a8658bce788c458097f88af9"
-      },
-      {
-        "path": "last_horizon/data/decorations/Baril 2.png",
-        "sha256": "302305651a291d5409a9b3c8828613625b8f5ba46e03ca0c0d9bc56a2d7fa638"
-      },
-      {
-        "path": "last_horizon/data/decorations/Board 1.png",
-        "sha256": "c74558e7cb355e9f0dc0d778dc934c988dee57e1bde1a1a26fdaf32e0de69db2"
-      },
-      {
-        "path": "last_horizon/data/decorations/Computer 1.png",
-        "sha256": "aa4f3a8fb77583664a1d56e69ae0f546202b3fe671bacba500aae753d6e5b4d7"
-      },
-      {
-        "path": "last_horizon/data/decorations/Electric wall.png",
-        "sha256": "bb1d2bee5b21a3a30af08a618f0a676101ae0fffd8ffd3d21e1835d61601763d"
-      },
-      {
-        "path": "last_horizon/data/decorations/LICENSE.txt",
-        "sha256": "629966c3f8b0fff227d419ec35abde9e828a63aa101dad5777c36b9686e82919"
-      },
-      {
-        "path": "last_horizon/data/decorations/Lamp 1.png",
-        "sha256": "e03d25131c79d81384570e8f3ade06c721e4cfca4a3a18d9853f59a1eaebcdfb"
-      },
-      {
-        "path": "last_horizon/data/decorations/Lockers 1.png",
-        "sha256": "5c362ff766ded3df27a7ff2b68ad75a1fa89122317ce41753ac64e7f1e257bf3"
-      },
-      {
-        "path": "last_horizon/data/decorations/Neon.png",
-        "sha256": "faa920651b35484dd557cd19c54e947fb33484f42ac77bef87d17d77d05b26ec"
-      },
-      {
-        "path": "last_horizon/data/decorations/Pipe2.png",
-        "sha256": "fa1901e040235ef11c4d3b7301f3336141e18e6655ef7a604c8b519e70452c39"
-      },
-      {
-        "path": "last_horizon/data/decorations/Screen info 1.png",
-        "sha256": "d66ed7aa9214b375dd48263a938609371948e86b86442a4ebe5e302bf5c24a72"
-      },
-      {
-        "path": "last_horizon/data/decorations/Screen info 2.png",
-        "sha256": "b09172c30cf84af85781c77592a11b625340731cf6cafac58b49099be044a743"
-      },
-      {
-        "path": "last_horizon/data/decorations/Small Machine 1.png",
-        "sha256": "932ceaf76a7f8c5325456f28b29f2366314f31a8bc80bb4d62167c138fd177f4"
-      },
-      {
-        "path": "last_horizon/data/decorations/Wall 3.png",
-        "sha256": "16516555c956593fa3ae06816186870bba1d417a3d8ae06384f49923db6b4b6d"
-      },
-      {
-        "path": "last_horizon/data/decorations/Wall 4 Light.png",
-        "sha256": "7a87850890dd6359c0a0a5502f2c6eb3cc4801dc11f9d89144c6f287044f5d91"
-      },
-      {
-        "path": "last_horizon/data/decorations/Wall cover 2.png",
-        "sha256": "b8826a5e2438c17c34f1da742753ebefcf258e86a68325e25cb8191f6f3c9cc8"
-      },
-      {
-        "path": "last_horizon/data/decorations/Wall cover 3.png",
-        "sha256": "5e652749c6cfaffc7945bbb6f90c84a8f2e7d28783262ffc86959c896337b660"
-      },
-      {
-        "path": "last_horizon/data/decorations/Wall electric pannel 1.png",
-        "sha256": "25f6c2eb4fe84549a3b919e44f22bc3824d2a92440442c62204246cb94743eed"
-      },
-      {
-        "path": "last_horizon/data/decorations/Wall pipes.png",
-        "sha256": "bb83b662311777beff20108bbf8e83cdc7adaeffb701acf4e1401a19d82f1deb"
-      },
-      {
-        "path": "last_horizon/data/decorations/Wallbox 1.png",
-        "sha256": "b70361cfd08dda8fc8e5c5275f6dfb32087f59f58f4b85232c06d7e4f8a684dc"
-      },
-      {
-        "path": "last_horizon/data/decorations/Window 2.png",
-        "sha256": "faf6a8b7950554362f1bd16957fcefd3f686082af4325975304a3fe5f8dc7e08"
-      },
-      {
-        "path": "last_horizon/data/decorations/post it.png",
-        "sha256": "06083e701001ae0659779d4c1545b1153e4356c3288f387a50b632578022f889"
-      },
-      {
-        "path": "last_horizon/data/doors/LICENSE.txt",
-        "sha256": "ded885358b352b79365403f0ba9e754c30d35519f3692051f687087377128d5d"
-      },
-      {
-        "path": "last_horizon/data/doors/door_sheet.json",
-        "sha256": "66d40e2f5ba6bfe9597d2b3dce6074b515daca075f05128d7cba71019dbe66d3"
-      },
-      {
-        "path": "last_horizon/data/doors/door_sheet.png",
-        "sha256": "d135f1e9120cc78a60e0b4ceefe451d93d79c8b1d643a9c3101321521e5b3cdb"
-      },
-      {
-        "path": "last_horizon/data/environment/LICENSE.txt",
-        "sha256": "3fedb21deabd100917d49e1b1a97ef6d04fcffdff9fdfcc2d55f96858802f8fb"
-      },
-      {
-        "path": "last_horizon/data/environment/dorm_bunk.png",
-        "sha256": "18aa74d905ebe8143f4ccf98f34a6af9b1d7663ec96b4a530813ec50a0e9ca8c"
-      },
-      {
-        "path": "last_horizon/data/environment/floor_1.png",
-        "sha256": "3a74997c3442f0ba2a861812d278b8add304923b5804d2d6a0894b0d77ef2594"
-      },
-      {
-        "path": "last_horizon/data/environment/window_space.png",
-        "sha256": "af8562d3fc99af87825677711adc101f9ce9c9be5d1cbfceda0834abd49ac0c5"
-      },
-      {
-        "path": "last_horizon/data/icons/LICENSE.txt",
-        "sha256": "a07439dad0506e0f27c857680234850447b0589d792d888168a2f56d76940e46"
-      },
-      {
-        "path": "last_horizon/data/icons/agua.aseprite",
-        "sha256": "8a9e0cc32c6c36e83d3358c9b94a778df0305dad3b47687bd1f47947f582a71d"
-      },
-      {
-        "path": "last_horizon/data/icons/agua.png",
-        "sha256": "99460574e89b5ffe6c6f766acdd57e780e0945ff23866b532d78d31199a4b1de"
-      },
-      {
-        "path": "last_horizon/data/icons/comida.aseprite",
-        "sha256": "487325e5d80fee48db55c2cf5cba7db4769be5ace9705bfc60afe7a9e048a153"
-      },
-      {
-        "path": "last_horizon/data/icons/comida.png",
-        "sha256": "2b8908388c2810c462d4ee8ccb1a25cc834b193f4f14f6f193679299b27e2577"
-      },
-      {
-        "path": "last_horizon/data/icons/energia.aseprite",
-        "sha256": "188585ada921b51ffd053217ae0b5d1053dd6e558ae1534de73e9369c5e3a249"
-      },
-      {
-        "path": "last_horizon/data/icons/energia.png",
-        "sha256": "c63c3f2c305cc6fdcaabc2e7575f586b60b3e89b1b840a11b838a236917f43ad"
-      },
-      {
-        "path": "last_horizon/data/icons/moral.aseprite",
-        "sha256": "b27638ef79baa05070ec07bd364abe8a8d5f076a6a1d518ba14960310a4a71a1"
-      },
-      {
-        "path": "last_horizon/data/icons/moral.png",
-        "sha256": "9cc978686afd233eca3170b1c5f527c2aa8a2d6e8917b26b9f8164962b17d753"
-      },
-      {
-        "path": "last_horizon/data/icons/oxigenio.aseprite",
-        "sha256": "8f10bc308f4bc9e0781cfe5ef272ebd68dc6bf61d2deb16164cb00b71dee6ed1"
-      },
-      {
-        "path": "last_horizon/data/icons/oxigenio.png",
-        "sha256": "60ff24b6022022c4943062f5147d6b6c411549eab18f52d6602af90916fdafbb"
-      },
-      {
-        "path": "last_horizon/data/icons/pecas.aseprite",
-        "sha256": "6d55244ed456def419fcc2c5b39c98856c5cf64db6ce6642cb9b1b85f825706d"
-      },
-      {
-        "path": "last_horizon/data/icons/pecas.png",
-        "sha256": "344992de0669617605e8b3010012d98aa171a8b5b3d213bb7f9134549394a99a"
-      },
-      {
-        "path": "last_horizon/data/map/1.png",
-        "sha256": "08dfbaa6f382de56d42026e7cafde4ae9bf6a1654bde12adf768cb48cd036c7a"
-      },
-      {
-        "path": "last_horizon/data/map/2.png",
-        "sha256": "15c1e210be67058e43956d03ad562d2faea7baf7d0fec0baa211d8871dbfb0b4"
-      },
-      {
-        "path": "last_horizon/data/map/3.png",
-        "sha256": "c4475b5ca203a62585fa9b6ddc653aa75ad67b976437b57c7fbb124d188d3941"
-      },
-      {
-        "path": "last_horizon/data/map/4.png",
-        "sha256": "601a609a2f4306d9feb454bceca316a115f03ad4028255578bf7fd7b1bc0ad90"
-      },
-      {
-        "path": "last_horizon/data/map/LICENSE.txt",
-        "sha256": "aa7b6c5f7129693ee01d80fcc7491c074edb1d6f13d19a852e50695576216130"
-      },
-      {
-        "path": "last_horizon/data/map/ship.aseprite",
-        "sha256": "56a063036d0989168a1a49377f6634c3230a13b7f899da78e1da2e01d7e75bd6"
-      },
-      {
-        "path": "last_horizon/data/map/ship.png",
-        "sha256": "1c16682bf0ecad9686b217d4f36e02eade0752485400640034cb09d5134afce6"
-      },
-      {
-        "path": "last_horizon/data/npc/LICENSE.txt",
-        "sha256": "469e87e260ccfabb665127290f712d896a7ec7c631ec3d442119e08de1c051a9"
-      },
-      {
-        "path": "last_horizon/data/npc/bento.png",
-        "sha256": "91ad8842201dfe21f880f46c86f7f4ae95b699c3c4248f24ef184f33af015515"
-      },
-      {
-        "path": "last_horizon/data/npc/bento_portrait.png",
-        "sha256": "5bb5dd7ddac83fa179f3f8a2099a2038ee379efd46a9334b76240e307a534566"
-      },
-      {
-        "path": "last_horizon/data/npc/neusa.png",
-        "sha256": "5f1e4e5e1e0e444f70017b57d608c84b3cd267fa213e48f6c9a48786ec037001"
-      },
-      {
-        "path": "last_horizon/data/npc/neusa_portrait.png",
-        "sha256": "e64fff14fa1eab751f3b8efc99b280e48c69ca6d2002b87fb76e13992d9d31d8"
-      },
-      {
-        "path": "last_horizon/data/npc/silvia.png",
-        "sha256": "99ed9cc2c7dd14557525d92d52d5b4e6b7f9bdb01f7127ae60815464f10ef1aa"
-      },
-      {
-        "path": "last_horizon/data/npc/silvia_portrait.png",
-        "sha256": "8dadd054974d70918bbddaf95cb3a2874aa7518d0ff8433fad04abd249bb7d9d"
-      },
-      {
-        "path": "last_horizon/data/npc/vera.png",
-        "sha256": "3248d7169aae15f3de71e5d399740ef77e1f59e8b0898c3b2a5680d02c03925a"
-      },
-      {
-        "path": "last_horizon/data/npc/vera_portrait.png",
-        "sha256": "785037d0ceaf91dabb30209ed2b2492f1b103cd5a3ca1a99c9414db56181ed32"
-      },
-      {
-        "path": "last_horizon/data/player/LICENSE.txt",
-        "sha256": "ae07517a83b9b5e9e81c4691f2680efc8a1c9b3b52ef870d6def14dbbab3c6f7"
-      },
-      {
-        "path": "last_horizon/data/player/player_sheet.json",
-        "sha256": "16c6c8d6b2d5d1cd625848c886b87736f2402d9cdc20fadf38bd8e172ed93f94"
-      },
-      {
-        "path": "last_horizon/data/player/player_sheet.png",
-        "sha256": "84ac5b711ce73d5f2f7eeb8a075d0f621b158952c0a294e28e3366e6fea551dd"
-      },
-      {
-        "path": "last_horizon/data/stations/LICENSE.txt",
-        "sha256": "fcd13f9d5b2cdc6a4990fe08cf515a0b4c395a69b9dd2d36ce53f03b2d37e18d"
-      },
-      {
-        "path": "last_horizon/data/stations/antena.png",
-        "sha256": "18d1c541f2e7fa0cf3dcf75598141a9a475a72913397873947da23a16fab639f"
-      },
-      {
-        "path": "last_horizon/data/stations/bancada_motor.png",
-        "sha256": "d75ec46962a5ab7076cedd4fd86895b8cab549fb9ca57333f3ca91f95bdc996a"
-      },
-      {
-        "path": "last_horizon/data/stations/beliche_socorro.png",
-        "sha256": "fcbc2c2026ab5a28de9b3ee08061ab7bdfb5793af2a3711be8848afa0333006b"
-      },
-      {
-        "path": "last_horizon/data/stations/beliche_tecnico.png",
-        "sha256": "e587d2ff6d2e33713d3e4a0a5c08d35f4ceaf5c89d6cbd032117f1ac91d978d7"
-      },
-      {
-        "path": "last_horizon/data/stations/console_rota.png",
-        "sha256": "69bd270c164537e765a6a0224050ac44eafef8f073b59c9f0c1e6a86329c988d"
-      },
-      {
-        "path": "last_horizon/data/stations/estoque_comida.png",
-        "sha256": "72dc2242f0f37a0a911e3263533afc2753c5d8de7f1391f7018de78dfbe5042c"
-      },
-      {
-        "path": "last_horizon/data/stations/mesa_comum.png",
-        "sha256": "9a8de0a526d592d70ed918b2ea70daf086c1b0d7f4091f942fb4d32689fb4e2a"
-      },
-      {
-        "path": "last_horizon/data/stations/mesa_grupo.png",
-        "sha256": "c5fd8c9e1d95a71ead0c75d5ae72b99d83dc4f91ecef0cfd6c26c2128cd96286"
-      },
-      {
-        "path": "last_horizon/data/stations/painel_distribuicao.png",
-        "sha256": "0ff15036943bae9d725475f0df4019372e6ffbb9dca1281c6151616654042e43"
-      },
-      {
-        "path": "last_horizon/data/stations/painel_suporte.png",
-        "sha256": "78bd5d1509fb5ee6341bb1bddb13efefc54c36eb0db5048943131dc1b8825176"
-      },
-      {
-        "path": "last_horizon/data/stations/prateleira_reserva.png",
-        "sha256": "29bd76a4dd780cc98797f03653335d9970e9225202a123e313141e594acb7b87"
-      },
-      {
-        "path": "last_horizon/editorial.pde",
-        "sha256": "3fdf5aec465c167e568e866fa20d0386741addd2db6f09e07f6036dc0ea7f5ec"
+        "sha256": "5909ef9c8e09beda4c37f1acc60d6ba3e61c22093a5690c3615e4824bc8de1a9"
       },
       {
         "path": "last_horizon/frame.pde",
-        "sha256": "14fadb79350f8c39e405b8d0c21367d8bed548a4b14fdc30ebf550ea624ef926"
+        "sha256": "73ae053aa2bb613c2e860156adc4b195ae71ee7e101a01d45ac4ea7daf6b2f25"
       },
       {
         "path": "last_horizon/game.pde",
-        "sha256": "fca385a24998b8a41bb771c7db69a4ec617c94cf47e5e738691f6bf92a848de9"
+        "sha256": "51f7a4ec22dc87582ff4966880e101b44c1047eef3e4135e3d2e521624070714"
       },
       {
         "path": "last_horizon/hud.pde",
-        "sha256": "c3f651870b97078da6bcf510143c98ba57a652c9e661aa45ee37bb4339d4de5e"
+        "sha256": "3b1b2eb9cfecf7f74948210c99a75e641983fbfe97554d2809a4399bfbbe0631"
       },
       {
         "path": "last_horizon/last_horizon.pde",
-        "sha256": "bd71a7fc3c29a507a352b4efbfdf50bf73c96737c9e7086e5932e3ea3c164bea"
+        "sha256": "5505d80784020f15f3abac07be9e5adcc1b8ac3bf0ae338bec8bbf48218dd25d"
       },
       {
         "path": "last_horizon/movement.pde",
-        "sha256": "14ec222a855c84a5de54257c4a1a40a02ca6a291de7fd8c801880598022cb0cf"
+        "sha256": "d26ac53923aa9fce2289bf43e13d9aa90d4656e3f65cbb1fd32ac542bcc09e58"
       },
       {
         "path": "last_horizon/night_projection.pde",
-        "sha256": "151a5fab8e249414958fb54e4f947ac410d34c935355b43af49fefd918965d3d"
-      },
-      {
-        "path": "last_horizon/output/profiling-collection-report.json",
-        "sha256": "74801658d39df12148c8685eab8c0f85c5139fad5b4d31317bd9115c0f8f44d0"
-      },
-      {
-        "path": "last_horizon/output/profiling-comparison.json",
-        "sha256": "497d7cc2da0f977707d565dc7070d421161762a38e65d5fce50fc4e1ac177343"
-      },
-      {
-        "path": "last_horizon/output/profiling-run-manifest.json",
-        "sha256": "3b96541ca0e584f73de8ddd565257d22b71c448082d19ac7c4d0827a630c24b3"
+        "sha256": "177defe4c5941d05922495ab10c92e2694ca8a77e241d1e16b0cbd1e82f11a58"
       },
       {
         "path": "last_horizon/portals.pde",
-        "sha256": "9c4b37b3deab22ffc781ecf43b98ea06af7f7936086b953d944e8923e76346f6"
+        "sha256": "f0dbea6b59005d0e2985bc33fbbca96b566480dc68a141ead4bdd8e4ef6713ff"
       },
       {
         "path": "last_horizon/screens.pde",
-        "sha256": "9faa6e45d24f429bad364987bd46f263f8882679d1b9735767cac2bcd9850287"
+        "sha256": "e4233f0ccc3e802bbc37f0ca0dd93242f1d5bed3b587b6ba5594613e38ea91cc"
       },
       {
         "path": "last_horizon/ship.pde",
-        "sha256": "2a618a1188ea5c84aac592b124649000b7b598535c5a337bc02a6104bb7f2cf9"
+        "sha256": "f6ce190a6cd68f0b27fb916d7ec936151ce05cd2ad7f1f9450176a709ebb3e53"
       },
       {
         "path": "last_horizon/tasks.pde",
-        "sha256": "3b869b41e9807ed67f6f7dd51f869662b929975a5b799c73e7dad997f6d47157"
+        "sha256": "de220433b1cb9309edbbae6dc0687995ced9a9a1fdb874f6123a663086208b73"
       },
       {
         "path": "last_horizon/test_mode.pde",
-        "sha256": "5813f13712babda38dbb82c5135b25f755d3f630a55a64e7adfdcbde05c2f6da"
+        "sha256": "fa560e2cb5b850b740b6b3bcb86a8dbac097ec404c9a09e7a3fa2698043c324d"
       },
       {
         "path": "last_horizon/ui.pde",
-        "sha256": "f7d7d2da88b5110840b3818b21522ff2737c9ad29031fe766e75aa147b99849f"
+        "sha256": "4890cad20579393457f7ddfe9f59e3f214c5d6782c56a1d4cfcbf94572308058"
       },
       {
         "path": "package.json",
-        "sha256": "c67a8ce22b983894a33016aa6c59faaa8e9cbb5f6fad0d060ee5d7a35359f585"
+        "sha256": "b41190362d86043274f1aa1074770132bbee7d5280d3cb1e8d2b1eca77d66814"
       },
       {
         "path": "prototype/balance-model.mjs",
-        "sha256": "c44980ec39d14d11b449c241d95bddf5814969b415228993ff0aaa999320bffa"
+        "sha256": "7b489af750ca8283a30fabb9a1c2ef5e3f57ce41e278fa67bb03a46bd7d20073"
       },
       {
         "path": "tools/build.sh",
-        "sha256": "bda6e6f445b87838b86d272785849128a8f383a8ff72ec21933a040f77673bbb"
+        "sha256": "9418f43ac9c68cdf23be4b8b99104eb97d782e9005a5be588886ab0bfe8f8fbe"
       },
       {
         "path": "tools/cleanup-verification-artifacts.mjs",
-        "sha256": "ca8766d3911a70e56241ed1f661bcc6dd5f007ed5c98f33c966d04c6a181652c"
+        "sha256": "1bdc5b72c0684eb75c71da6faca43c8ee4d14acd66fe6df23adf4c6570fd42b7"
       },
       {
         "path": "tools/compare-metrics.mjs",
-        "sha256": "5a3499c4e561a4d21723f896b99124dc8e65ca01e1c92237e0291f2d0c21c756"
+        "sha256": "fe1fffb08b33eb5f3c2eccd6463889bbffed3943dcae83fcf66bee13febf5fe6"
       },
       {
         "path": "tools/compare-profiling.mjs",
-        "sha256": "458a2bab818151b467db533878dab5a988a29508aaa4f0aa59f0025bbba5eebe"
+        "sha256": "de4e3ee05612e4b79c739e8075cb0526ed5f6af5d78841e62e601febaa59c105"
       },
       {
         "path": "tools/e6-audit.mjs",
-        "sha256": "ce10d9db065c24619bf52d7e574ef31144f979a8638b189cc4362a0f569ad0da"
+        "sha256": "241d12d4e60280be84e8a035066087d438bbe6de214f7015fc5e34264853c7ed"
       },
       {
         "path": "tools/e6-evidence.mjs",
-        "sha256": "8575058d4d25e3a3ef83f37b1620aea94dc414121c40789577163b39b50c2e71"
+        "sha256": "d1bdd44e1a784b24ecfaa6fadb389e604a115c47e8831bf782ecd10728b833b7"
       },
       {
         "path": "tools/optional-modules.mjs",
-        "sha256": "9a851ace3da24ef6df0ed5fb9fb59611f12a72f54d5b59baed043595d8517648"
+        "sha256": "7ed545a493f2ded7a96734b6e4ebd55109513a6a6a3b475732195cdf9f99bd4e"
       },
       {
         "path": "tools/processing-cli.sh",
-        "sha256": "ae7360b83800c3d8e33fea33d4d39ef3990399184527cca7cb8e731f3fa12431"
+        "sha256": "f34736b3c82db5db192b5f8c5e293fce3fd7a91d0e6db06d67f913803f5dd9ca"
       },
       {
         "path": "tools/profile-runner.mjs",
-        "sha256": "d579c5f8bf7ad3c23a2f0c33f160dc909da8b96ec449984ff304c2ba2c3bc162"
+        "sha256": "4bac6bbc4b3a09310d688536148097aace0363b098a344a3d49b628662c4b36e"
       },
       {
         "path": "tools/regression-final.sh",
-        "sha256": "1c156af3cd62c6a63b67f59e0d8860d50c33eba17c2411e214a1859f2e0bcd67"
+        "sha256": "461a5088acf13ae1ea68aa28aad3ec9e1cd7e3ce4249b866bb35c5a223847cee"
       },
       {
         "path": "tools/regression-windows.mjs",
-        "sha256": "95b1b1e6c159aefdd6f18b59761d2afe92a75cd5b2d0a10ebb1c93143da6d054"
+        "sha256": "79c48756600c0669b54a8aacd66a02c6c5325227377d5d01966b8bc373dbb9d7"
       },
       {
         "path": "tools/run-headless.sh",
-        "sha256": "ea97b5028ebf62b4cdacc1437cc0eb1845cea4237806d9566db6f6f8abdf3c73"
+        "sha256": "b8ffc9ae14383d65ec0016b9e647d14db81b7f75ba9d3f4cad0a3650fea346ee"
       },
       {
         "path": "tools/run-processing.sh",
-        "sha256": "1a6c14af7328d97fc11f42e334d09c894e2f54e6c4e404225d3cc306e889dd5a"
+        "sha256": "403f4ded6b9e35459a143e72a4e35aab00971f27f8a37da43a15d0639b83b42d"
       },
       {
         "path": "tools/snapshot-entrega.mjs",
-        "sha256": "4fd5ab903240e5e477c903182ec33a86fff3e453d4551509398220f9872b2f2e"
+        "sha256": "b0dcc55e1e646063d086b57747b13d353d71a8d490655d0524ff95c2f796932f"
       },
       {
         "path": "tools/typecheck.mjs",
-        "sha256": "38963dc950b366e459e2647c3aa8e59f3b8d2c30e6957509d44d10603db29524"
+        "sha256": "bc1318ffd9d4bf26a27e5f3477596b1e1f6960152f82ff0d6966dff0dcd923d2"
       },
       {
         "path": "tools/verify-delivery.mjs",
-        "sha256": "27d250f7e09ce8ff9dc2b2ffcfc5f9582993b8c3ba7b6bbb770e91a51339285e"
+        "sha256": "d6a3b6d194c31a2959b33431947c70a239051575123a6ad3a19e969543a2cb56"
       }
     ],
-    "digest": "37860b6515cad419006637eea9e1bf719bc2117ed30f2a14cb1bfa79884cf157"
+    "digest": "41b446326e458925d8b263bddb482ae1ab56013890d165d9391145a99c95d35b"
+  },
+  "revised": {
+    "kind": "working-tree",
+    "reference": "working-tree:1b684b636700f1b665e9b8411159024f473e29d37e0468b94224b704157cfddf",
+    "source": "current working tree",
+    "files": [
+      {
+        "path": "last_horizon/animation.pde",
+        "sha256": "f9bdc8f89b0c15edf7ca0f661fcbf4aa05b3a67c6bf83362d4f5453880706697"
+      },
+      {
+        "path": "last_horizon/assets.pde",
+        "sha256": "b4831f052c8effcc32136673aaffd88084cafd9b0dd34ea3ccbb319636dd0bfa"
+      },
+      {
+        "path": "last_horizon/audio.pde",
+        "sha256": "3df174b8d5403bce3ceafe684d467762f7302bb7b08fcb4a442e14a375e5dc4f"
+      },
+      {
+        "path": "last_horizon/capture.pde",
+        "sha256": "02a5fb763c565d353c10db46131cdbce214e9aed5ae9154902de0007dc02a48f"
+      },
+      {
+        "path": "last_horizon/data/audio/door/LICENSE.txt",
+        "sha256": "eb51761f85fa98452903262b77cec2ab1d42e91771cbea9d1760059239a0af9e"
+      },
+      {
+        "path": "last_horizon/data/audio/door/door.wav",
+        "sha256": "3eb94554af9a158856a58bd5ed3428662fe39775b7b434262b905ea9d172a998"
+      },
+      {
+        "path": "last_horizon/data/audio/ladder/LICENSE.txt",
+        "sha256": "1a92c99df601479fb0c1235adb9245f8d7d76835c3ce518d0e446524c1a2808d"
+      },
+      {
+        "path": "last_horizon/data/audio/ladder/ladder.wav",
+        "sha256": "a487a4296517a575f696b85328f6f7754ca059d7cfec34240d6b7c4a7dbaa1d8"
+      },
+      {
+        "path": "last_horizon/data/audio/ladder/step_01.wav",
+        "sha256": "45d1385aa054f2329ad825b83b63b255122e197f0c641689f2701f61967a4c26"
+      },
+      {
+        "path": "last_horizon/data/audio/ladder/step_02.wav",
+        "sha256": "a664f079b7e6a2caefc0f3a101ad594a6edb7f18de652edf29b2a182a0ee76e2"
+      },
+      {
+        "path": "last_horizon/data/audio/ladder/step_03.wav",
+        "sha256": "70566342705c25033f983cb09fdaf3436657a03cf62d00a9f40df20949db6c25"
+      },
+      {
+        "path": "last_horizon/data/audio/ladder/step_04.wav",
+        "sha256": "c5df6ca251af7cf68dcf05903496909aa54f48404a69ca582ab737e5458692d7"
+      },
+      {
+        "path": "last_horizon/data/audio/run/LICENSE.txt",
+        "sha256": "b425b3670df0f14568be2dfe04799744bda12ced134ec965761c1300456792a8"
+      },
+      {
+        "path": "last_horizon/data/audio/run/step_01.wav",
+        "sha256": "94d295c6f207b5458bc69c88911fae6b3909049f907228182199f9d99567253a"
+      },
+      {
+        "path": "last_horizon/data/audio/run/step_02.wav",
+        "sha256": "9b96bb99d0dc2982b1be1912ced0b557bf5582030650e1844135d61f322c2d6f"
+      },
+      {
+        "path": "last_horizon/data/audio/run/step_03.wav",
+        "sha256": "1dbe53b302275d5bfa092f525c96bb8d237863cc6d8d5c98409e40d42df68acd"
+      },
+      {
+        "path": "last_horizon/data/audio/run/step_04.wav",
+        "sha256": "274092d5d6f2a11f33e9ac3e461944cacedc8e6aacd3fe670d8a7d8ab712d9d3"
+      },
+      {
+        "path": "last_horizon/data/audio/walk/LICENSE.txt",
+        "sha256": "d1323a7930b5d970be79e6989cf3af2a49e7f81dfd3cab38d1062a9bf889fc41"
+      },
+      {
+        "path": "last_horizon/data/audio/walk/step_01.wav",
+        "sha256": "efea19f9909bf83c4880034f7a5a4bd9fa5b55ac3fb134ef4ae2bad0f71d8bf6"
+      },
+      {
+        "path": "last_horizon/data/audio/walk/step_02.wav",
+        "sha256": "13e1f94efa4aa48e91518d88c264137afe8ff9cff7373bde9da9e443930359d7"
+      },
+      {
+        "path": "last_horizon/data/audio/walk/step_03.wav",
+        "sha256": "b6df9707787ac501c053687b899d9a658d28c763561430653854376b73420f05"
+      },
+      {
+        "path": "last_horizon/data/audio/walk/step_04.wav",
+        "sha256": "96a91a8a03dea084f78266b444ca4996419adf256d6ac15bbda606031af7e5ca"
+      },
+      {
+        "path": "last_horizon/data/decorations/Baril 1.png",
+        "sha256": "cf13f2ef42421bc20addb8cccec8af369eeeb476a8658bce788c458097f88af9"
+      },
+      {
+        "path": "last_horizon/data/decorations/Baril 2.png",
+        "sha256": "302305651a291d5409a9b3c8828613625b8f5ba46e03ca0c0d9bc56a2d7fa638"
+      },
+      {
+        "path": "last_horizon/data/decorations/Board 1.png",
+        "sha256": "c74558e7cb355e9f0dc0d778dc934c988dee57e1bde1a1a26fdaf32e0de69db2"
+      },
+      {
+        "path": "last_horizon/data/decorations/Computer 1.png",
+        "sha256": "aa4f3a8fb77583664a1d56e69ae0f546202b3fe671bacba500aae753d6e5b4d7"
+      },
+      {
+        "path": "last_horizon/data/decorations/Electric wall.png",
+        "sha256": "bb1d2bee5b21a3a30af08a618f0a676101ae0fffd8ffd3d21e1835d61601763d"
+      },
+      {
+        "path": "last_horizon/data/decorations/LICENSE.txt",
+        "sha256": "629966c3f8b0fff227d419ec35abde9e828a63aa101dad5777c36b9686e82919"
+      },
+      {
+        "path": "last_horizon/data/decorations/Lamp 1.png",
+        "sha256": "e03d25131c79d81384570e8f3ade06c721e4cfca4a3a18d9853f59a1eaebcdfb"
+      },
+      {
+        "path": "last_horizon/data/decorations/Lockers 1.png",
+        "sha256": "5c362ff766ded3df27a7ff2b68ad75a1fa89122317ce41753ac64e7f1e257bf3"
+      },
+      {
+        "path": "last_horizon/data/decorations/Neon.png",
+        "sha256": "faa920651b35484dd557cd19c54e947fb33484f42ac77bef87d17d77d05b26ec"
+      },
+      {
+        "path": "last_horizon/data/decorations/Pipe2.png",
+        "sha256": "fa1901e040235ef11c4d3b7301f3336141e18e6655ef7a604c8b519e70452c39"
+      },
+      {
+        "path": "last_horizon/data/decorations/Screen info 1.png",
+        "sha256": "d66ed7aa9214b375dd48263a938609371948e86b86442a4ebe5e302bf5c24a72"
+      },
+      {
+        "path": "last_horizon/data/decorations/Screen info 2.png",
+        "sha256": "b09172c30cf84af85781c77592a11b625340731cf6cafac58b49099be044a743"
+      },
+      {
+        "path": "last_horizon/data/decorations/Small Machine 1.png",
+        "sha256": "932ceaf76a7f8c5325456f28b29f2366314f31a8bc80bb4d62167c138fd177f4"
+      },
+      {
+        "path": "last_horizon/data/decorations/Wall 3.png",
+        "sha256": "16516555c956593fa3ae06816186870bba1d417a3d8ae06384f49923db6b4b6d"
+      },
+      {
+        "path": "last_horizon/data/decorations/Wall 4 Light.png",
+        "sha256": "7a87850890dd6359c0a0a5502f2c6eb3cc4801dc11f9d89144c6f287044f5d91"
+      },
+      {
+        "path": "last_horizon/data/decorations/Wall cover 2.png",
+        "sha256": "b8826a5e2438c17c34f1da742753ebefcf258e86a68325e25cb8191f6f3c9cc8"
+      },
+      {
+        "path": "last_horizon/data/decorations/Wall cover 3.png",
+        "sha256": "5e652749c6cfaffc7945bbb6f90c84a8f2e7d28783262ffc86959c896337b660"
+      },
+      {
+        "path": "last_horizon/data/decorations/Wall electric pannel 1.png",
+        "sha256": "25f6c2eb4fe84549a3b919e44f22bc3824d2a92440442c62204246cb94743eed"
+      },
+      {
+        "path": "last_horizon/data/decorations/Wall pipes.png",
+        "sha256": "bb83b662311777beff20108bbf8e83cdc7adaeffb701acf4e1401a19d82f1deb"
+      },
+      {
+        "path": "last_horizon/data/decorations/Wallbox 1.png",
+        "sha256": "b70361cfd08dda8fc8e5c5275f6dfb32087f59f58f4b85232c06d7e4f8a684dc"
+      },
+      {
+        "path": "last_horizon/data/decorations/Window 2.png",
+        "sha256": "faf6a8b7950554362f1bd16957fcefd3f686082af4325975304a3fe5f8dc7e08"
+      },
+      {
+        "path": "last_horizon/data/decorations/post it.png",
+        "sha256": "06083e701001ae0659779d4c1545b1153e4356c3288f387a50b632578022f889"
+      },
+      {
+        "path": "last_horizon/data/doors/LICENSE.txt",
+        "sha256": "ded885358b352b79365403f0ba9e754c30d35519f3692051f687087377128d5d"
+      },
+      {
+        "path": "last_horizon/data/doors/door_sheet.json",
+        "sha256": "66d40e2f5ba6bfe9597d2b3dce6074b515daca075f05128d7cba71019dbe66d3"
+      },
+      {
+        "path": "last_horizon/data/doors/door_sheet.png",
+        "sha256": "d135f1e9120cc78a60e0b4ceefe451d93d79c8b1d643a9c3101321521e5b3cdb"
+      },
+      {
+        "path": "last_horizon/data/environment/LICENSE.txt",
+        "sha256": "3fedb21deabd100917d49e1b1a97ef6d04fcffdff9fdfcc2d55f96858802f8fb"
+      },
+      {
+        "path": "last_horizon/data/environment/dorm_bunk.png",
+        "sha256": "18aa74d905ebe8143f4ccf98f34a6af9b1d7663ec96b4a530813ec50a0e9ca8c"
+      },
+      {
+        "path": "last_horizon/data/environment/floor_1.png",
+        "sha256": "3a74997c3442f0ba2a861812d278b8add304923b5804d2d6a0894b0d77ef2594"
+      },
+      {
+        "path": "last_horizon/data/environment/window_space.png",
+        "sha256": "af8562d3fc99af87825677711adc101f9ce9c9be5d1cbfceda0834abd49ac0c5"
+      },
+      {
+        "path": "last_horizon/data/icons/LICENSE.txt",
+        "sha256": "a07439dad0506e0f27c857680234850447b0589d792d888168a2f56d76940e46"
+      },
+      {
+        "path": "last_horizon/data/icons/agua.aseprite",
+        "sha256": "8a9e0cc32c6c36e83d3358c9b94a778df0305dad3b47687bd1f47947f582a71d"
+      },
+      {
+        "path": "last_horizon/data/icons/agua.png",
+        "sha256": "99460574e89b5ffe6c6f766acdd57e780e0945ff23866b532d78d31199a4b1de"
+      },
+      {
+        "path": "last_horizon/data/icons/comida.aseprite",
+        "sha256": "487325e5d80fee48db55c2cf5cba7db4769be5ace9705bfc60afe7a9e048a153"
+      },
+      {
+        "path": "last_horizon/data/icons/comida.png",
+        "sha256": "2b8908388c2810c462d4ee8ccb1a25cc834b193f4f14f6f193679299b27e2577"
+      },
+      {
+        "path": "last_horizon/data/icons/energia.aseprite",
+        "sha256": "188585ada921b51ffd053217ae0b5d1053dd6e558ae1534de73e9369c5e3a249"
+      },
+      {
+        "path": "last_horizon/data/icons/energia.png",
+        "sha256": "c63c3f2c305cc6fdcaabc2e7575f586b60b3e89b1b840a11b838a236917f43ad"
+      },
+      {
+        "path": "last_horizon/data/icons/moral.aseprite",
+        "sha256": "b27638ef79baa05070ec07bd364abe8a8d5f076a6a1d518ba14960310a4a71a1"
+      },
+      {
+        "path": "last_horizon/data/icons/moral.png",
+        "sha256": "9cc978686afd233eca3170b1c5f527c2aa8a2d6e8917b26b9f8164962b17d753"
+      },
+      {
+        "path": "last_horizon/data/icons/oxigenio.aseprite",
+        "sha256": "8f10bc308f4bc9e0781cfe5ef272ebd68dc6bf61d2deb16164cb00b71dee6ed1"
+      },
+      {
+        "path": "last_horizon/data/icons/oxigenio.png",
+        "sha256": "60ff24b6022022c4943062f5147d6b6c411549eab18f52d6602af90916fdafbb"
+      },
+      {
+        "path": "last_horizon/data/icons/pecas.aseprite",
+        "sha256": "6d55244ed456def419fcc2c5b39c98856c5cf64db6ce6642cb9b1b85f825706d"
+      },
+      {
+        "path": "last_horizon/data/icons/pecas.png",
+        "sha256": "344992de0669617605e8b3010012d98aa171a8b5b3d213bb7f9134549394a99a"
+      },
+      {
+        "path": "last_horizon/data/map/1.png",
+        "sha256": "08dfbaa6f382de56d42026e7cafde4ae9bf6a1654bde12adf768cb48cd036c7a"
+      },
+      {
+        "path": "last_horizon/data/map/2.png",
+        "sha256": "15c1e210be67058e43956d03ad562d2faea7baf7d0fec0baa211d8871dbfb0b4"
+      },
+      {
+        "path": "last_horizon/data/map/3.png",
+        "sha256": "c4475b5ca203a62585fa9b6ddc653aa75ad67b976437b57c7fbb124d188d3941"
+      },
+      {
+        "path": "last_horizon/data/map/4.png",
+        "sha256": "601a609a2f4306d9feb454bceca316a115f03ad4028255578bf7fd7b1bc0ad90"
+      },
+      {
+        "path": "last_horizon/data/map/LICENSE.txt",
+        "sha256": "aa7b6c5f7129693ee01d80fcc7491c074edb1d6f13d19a852e50695576216130"
+      },
+      {
+        "path": "last_horizon/data/map/ship.aseprite",
+        "sha256": "56a063036d0989168a1a49377f6634c3230a13b7f899da78e1da2e01d7e75bd6"
+      },
+      {
+        "path": "last_horizon/data/map/ship.png",
+        "sha256": "1c16682bf0ecad9686b217d4f36e02eade0752485400640034cb09d5134afce6"
+      },
+      {
+        "path": "last_horizon/data/npc/LICENSE.txt",
+        "sha256": "469e87e260ccfabb665127290f712d896a7ec7c631ec3d442119e08de1c051a9"
+      },
+      {
+        "path": "last_horizon/data/npc/bento.png",
+        "sha256": "91ad8842201dfe21f880f46c86f7f4ae95b699c3c4248f24ef184f33af015515"
+      },
+      {
+        "path": "last_horizon/data/npc/bento_portrait.png",
+        "sha256": "5bb5dd7ddac83fa179f3f8a2099a2038ee379efd46a9334b76240e307a534566"
+      },
+      {
+        "path": "last_horizon/data/npc/neusa.png",
+        "sha256": "5f1e4e5e1e0e444f70017b57d608c84b3cd267fa213e48f6c9a48786ec037001"
+      },
+      {
+        "path": "last_horizon/data/npc/neusa_portrait.png",
+        "sha256": "e64fff14fa1eab751f3b8efc99b280e48c69ca6d2002b87fb76e13992d9d31d8"
+      },
+      {
+        "path": "last_horizon/data/npc/silvia.png",
+        "sha256": "99ed9cc2c7dd14557525d92d52d5b4e6b7f9bdb01f7127ae60815464f10ef1aa"
+      },
+      {
+        "path": "last_horizon/data/npc/silvia_portrait.png",
+        "sha256": "8dadd054974d70918bbddaf95cb3a2874aa7518d0ff8433fad04abd249bb7d9d"
+      },
+      {
+        "path": "last_horizon/data/npc/vera.png",
+        "sha256": "3248d7169aae15f3de71e5d399740ef77e1f59e8b0898c3b2a5680d02c03925a"
+      },
+      {
+        "path": "last_horizon/data/npc/vera_portrait.png",
+        "sha256": "785037d0ceaf91dabb30209ed2b2492f1b103cd5a3ca1a99c9414db56181ed32"
+      },
+      {
+        "path": "last_horizon/data/player/LICENSE.txt",
+        "sha256": "d263eff81fa44228ce5f81e05ca4d1f53d48e68446e7b2f948bbd5695d2aaa8b"
+      },
+      {
+        "path": "last_horizon/data/player/player_sheet.json",
+        "sha256": "e6781503b245d021556db7a47bcd6220923ae6181f7dfc474450267ac12d1ac6"
+      },
+      {
+        "path": "last_horizon/data/player/player_sheet.png",
+        "sha256": "84ac5b711ce73d5f2f7eeb8a075d0f621b158952c0a294e28e3366e6fea551dd"
+      },
+      {
+        "path": "last_horizon/data/stations/LICENSE.txt",
+        "sha256": "fcd13f9d5b2cdc6a4990fe08cf515a0b4c395a69b9dd2d36ce53f03b2d37e18d"
+      },
+      {
+        "path": "last_horizon/data/stations/antena.png",
+        "sha256": "18d1c541f2e7fa0cf3dcf75598141a9a475a72913397873947da23a16fab639f"
+      },
+      {
+        "path": "last_horizon/data/stations/bancada_motor.png",
+        "sha256": "d75ec46962a5ab7076cedd4fd86895b8cab549fb9ca57333f3ca91f95bdc996a"
+      },
+      {
+        "path": "last_horizon/data/stations/beliche_socorro.png",
+        "sha256": "fcbc2c2026ab5a28de9b3ee08061ab7bdfb5793af2a3711be8848afa0333006b"
+      },
+      {
+        "path": "last_horizon/data/stations/beliche_tecnico.png",
+        "sha256": "e587d2ff6d2e33713d3e4a0a5c08d35f4ceaf5c89d6cbd032117f1ac91d978d7"
+      },
+      {
+        "path": "last_horizon/data/stations/console_rota.png",
+        "sha256": "69bd270c164537e765a6a0224050ac44eafef8f073b59c9f0c1e6a86329c988d"
+      },
+      {
+        "path": "last_horizon/data/stations/estoque_comida.png",
+        "sha256": "72dc2242f0f37a0a911e3263533afc2753c5d8de7f1391f7018de78dfbe5042c"
+      },
+      {
+        "path": "last_horizon/data/stations/mesa_comum.png",
+        "sha256": "9a8de0a526d592d70ed918b2ea70daf086c1b0d7f4091f942fb4d32689fb4e2a"
+      },
+      {
+        "path": "last_horizon/data/stations/mesa_grupo.png",
+        "sha256": "c5fd8c9e1d95a71ead0c75d5ae72b99d83dc4f91ecef0cfd6c26c2128cd96286"
+      },
+      {
+        "path": "last_horizon/data/stations/painel_distribuicao.png",
+        "sha256": "0ff15036943bae9d725475f0df4019372e6ffbb9dca1281c6151616654042e43"
+      },
+      {
+        "path": "last_horizon/data/stations/painel_suporte.png",
+        "sha256": "78bd5d1509fb5ee6341bb1bddb13efefc54c36eb0db5048943131dc1b8825176"
+      },
+      {
+        "path": "last_horizon/data/stations/prateleira_reserva.png",
+        "sha256": "29bd76a4dd780cc98797f03653335d9970e9225202a123e313141e594acb7b87"
+      },
+      {
+        "path": "last_horizon/editorial.pde",
+        "sha256": "5909ef9c8e09beda4c37f1acc60d6ba3e61c22093a5690c3615e4824bc8de1a9"
+      },
+      {
+        "path": "last_horizon/frame.pde",
+        "sha256": "73ae053aa2bb613c2e860156adc4b195ae71ee7e101a01d45ac4ea7daf6b2f25"
+      },
+      {
+        "path": "last_horizon/game.pde",
+        "sha256": "51f7a4ec22dc87582ff4966880e101b44c1047eef3e4135e3d2e521624070714"
+      },
+      {
+        "path": "last_horizon/hud.pde",
+        "sha256": "3b1b2eb9cfecf7f74948210c99a75e641983fbfe97554d2809a4399bfbbe0631"
+      },
+      {
+        "path": "last_horizon/last_horizon.pde",
+        "sha256": "5505d80784020f15f3abac07be9e5adcc1b8ac3bf0ae338bec8bbf48218dd25d"
+      },
+      {
+        "path": "last_horizon/movement.pde",
+        "sha256": "d26ac53923aa9fce2289bf43e13d9aa90d4656e3f65cbb1fd32ac542bcc09e58"
+      },
+      {
+        "path": "last_horizon/night_projection.pde",
+        "sha256": "177defe4c5941d05922495ab10c92e2694ca8a77e241d1e16b0cbd1e82f11a58"
+      },
+      {
+        "path": "last_horizon/portals.pde",
+        "sha256": "f0dbea6b59005d0e2985bc33fbbca96b566480dc68a141ead4bdd8e4ef6713ff"
+      },
+      {
+        "path": "last_horizon/screens.pde",
+        "sha256": "e4233f0ccc3e802bbc37f0ca0dd93242f1d5bed3b587b6ba5594613e38ea91cc"
+      },
+      {
+        "path": "last_horizon/ship.pde",
+        "sha256": "f6ce190a6cd68f0b27fb916d7ec936151ce05cd2ad7f1f9450176a709ebb3e53"
+      },
+      {
+        "path": "last_horizon/tasks.pde",
+        "sha256": "de220433b1cb9309edbbae6dc0687995ced9a9a1fdb874f6123a663086208b73"
+      },
+      {
+        "path": "last_horizon/test_mode.pde",
+        "sha256": "fa560e2cb5b850b740b6b3bcb86a8dbac097ec404c9a09e7a3fa2698043c324d"
+      },
+      {
+        "path": "last_horizon/ui.pde",
+        "sha256": "4890cad20579393457f7ddfe9f59e3f214c5d6782c56a1d4cfcbf94572308058"
+      },
+      {
+        "path": "package.json",
+        "sha256": "b41190362d86043274f1aa1074770132bbee7d5280d3cb1e8d2b1eca77d66814"
+      },
+      {
+        "path": "prototype/balance-model.mjs",
+        "sha256": "7b489af750ca8283a30fabb9a1c2ef5e3f57ce41e278fa67bb03a46bd7d20073"
+      },
+      {
+        "path": "tools/build.sh",
+        "sha256": "9418f43ac9c68cdf23be4b8b99104eb97d782e9005a5be588886ab0bfe8f8fbe"
+      },
+      {
+        "path": "tools/cleanup-verification-artifacts.mjs",
+        "sha256": "1bdc5b72c0684eb75c71da6faca43c8ee4d14acd66fe6df23adf4c6570fd42b7"
+      },
+      {
+        "path": "tools/compare-metrics.mjs",
+        "sha256": "fe1fffb08b33eb5f3c2eccd6463889bbffed3943dcae83fcf66bee13febf5fe6"
+      },
+      {
+        "path": "tools/compare-profiling.mjs",
+        "sha256": "5dc28113f8084a6f71ae6f223b298dde32eb0ca16ac49f4b123117c4ed6ae928"
+      },
+      {
+        "path": "tools/e6-audit.mjs",
+        "sha256": "241d12d4e60280be84e8a035066087d438bbe6de214f7015fc5e34264853c7ed"
+      },
+      {
+        "path": "tools/e6-evidence.mjs",
+        "sha256": "d1bdd44e1a784b24ecfaa6fadb389e604a115c47e8831bf782ecd10728b833b7"
+      },
+      {
+        "path": "tools/optional-modules.mjs",
+        "sha256": "7ed545a493f2ded7a96734b6e4ebd55109513a6a6a3b475732195cdf9f99bd4e"
+      },
+      {
+        "path": "tools/processing-cli.sh",
+        "sha256": "f34736b3c82db5db192b5f8c5e293fce3fd7a91d0e6db06d67f913803f5dd9ca"
+      },
+      {
+        "path": "tools/profile-runner.mjs",
+        "sha256": "9ea3092b5f6231c6d05b8d7063964cd23d6583333beab7f1c5f77fee09141d2d"
+      },
+      {
+        "path": "tools/regression-final.sh",
+        "sha256": "461a5088acf13ae1ea68aa28aad3ec9e1cd7e3ce4249b866bb35c5a223847cee"
+      },
+      {
+        "path": "tools/regression-windows.mjs",
+        "sha256": "79c48756600c0669b54a8aacd66a02c6c5325227377d5d01966b8bc373dbb9d7"
+      },
+      {
+        "path": "tools/run-headless.sh",
+        "sha256": "b8ffc9ae14383d65ec0016b9e647d14db81b7f75ba9d3f4cad0a3650fea346ee"
+      },
+      {
+        "path": "tools/run-processing.sh",
+        "sha256": "403f4ded6b9e35459a143e72a4e35aab00971f27f8a37da43a15d0639b83b42d"
+      },
+      {
+        "path": "tools/snapshot-entrega.mjs",
+        "sha256": "b0dcc55e1e646063d086b57747b13d353d71a8d490655d0524ff95c2f796932f"
+      },
+      {
+        "path": "tools/typecheck.mjs",
+        "sha256": "bc1318ffd9d4bf26a27e5f3477596b1e1f6960152f82ff0d6966dff0dcd923d2"
+      },
+      {
+        "path": "tools/verify-delivery.mjs",
+        "sha256": "d6a3b6d194c31a2959b33431947c70a239051575123a6ad3a19e969543a2cb56"
+      }
+    ],
+    "digest": "6d7a6a1bec8b40c2781bc500c8bf9c3f974440c3ae915923b9672b4ed2eb8048"
   },
   "fixture": {
     "scenario": "command-day1",
@@ -1053,42 +1037,41 @@
       "reference"
     ],
     "nominalWindowSeconds": 30,
-    "processingRunner": "tools/processing-cli.sh",
+    "processingRunner": "Processing.exe cli",
     "processingTimeoutMs": 240000,
     "environment": {
-      "environment": "approved-metrics-fixture-v1-linux-headless",
-      "machine": "vm-ubuntu-free-01",
-      "gpu": "xvfb-renderer",
+      "environment": "approved-metrics-fixture-v1-windows-native",
+      "machine": "Jefferson",
+      "gpu": "system-default",
       "host": {
-        "operatingSystem": "linux 6.17.0-1020-oracle",
-        "architecture": "arm64"
+        "operatingSystem": "win32 10.0.26200",
+        "architecture": "x64"
       },
       "graphicalEnvironment": {
-        "mode": "headless",
-        "xvfbRunAvailable": true,
-        "xvfbRunPath": "/usr/bin/xvfb-run",
-        "renderer": "xvfb-renderer"
+        "mode": "native",
+        "xvfbRunAvailable": false,
+        "xvfbRunPath": null,
+        "renderer": "system-default"
       },
       "processing": {
         "available": true,
+        "path": "C:\\Program Files\\Processing\\Processing.exe",
         "version": "4.5.6",
         "diagnostic": ""
       },
       "audio": {
-        "available": false,
-        "deviceMetadata": "/proc/asound/cards",
-        "diagnostic": "ENOENT: no such file or directory, open '/proc/asound/cards'"
+        "available": null,
+        "deviceMetadata": "javax.sound.sampled",
+        "diagnostic": "Os clips e falhas de reprodução serão verificados pelo sketch durante a coleta."
       }
     }
   },
   "commandsExecuted": [
     {
       "command": "node tools/profile-runner.mjs",
-      "status": "INCONCLUSIVO",
-      "startedAt": "2026-09-23T01:50:47.870Z",
-      "prerequisiteDiagnostics": [
-        "pré-requisito ausente antes do início: dispositivo de áudio (/proc/asound/cards): ENOENT: no such file or directory, open '/proc/asound/cards'"
-      ]
+      "status": "PASS",
+      "startedAt": "2026-09-23T05:22:08.855Z",
+      "prerequisiteDiagnostics": []
     }
   ],
   "results": [
@@ -1096,11 +1079,11 @@
       "version": "baseline",
       "profile": "core-i3-integrated",
       "scenario": "command-day1",
-      "status": "INCONCLUSIVO",
-      "exitCode": 2,
-      "diagnostic": "coleta não iniciada: pré-requisito ausente antes do início: dispositivo de áudio (/proc/asound/cards): ENOENT: no such file or directory, open '/proc/asound/cards'",
-      "output": "",
-      "artifacts": "ausentes",
+      "status": "PASS",
+      "exitCode": 0,
+      "diagnostic": "",
+      "output": "arte: 33 de 57 imagens carregadas; ausentes usam a geometria do prot�tipo\r\nsom: 14 de 14 carregados\r\nmetrics: amostra 1 | mediana 16.6767 ms | p95 18.9225 ms | mem�ria adicional 141120 bytes | dura��o 30.00446 s\r\nmetrics: csv=last_horizon/output/baseline/core-i3-integrated/sample-01.csv | sidecar=last_horizon/output/baseline/core-i3-integrated/sample-01.sidecar.json | profiling=last_horizon/output/profiling/baseline/core-i3-integrated/command-day1/sample-01.json\r\nmetrics: amostra 2 | mediana 16.7331 ms | p95 19.9317 ms | mem�ria adicional 141120 bytes | dura��o 30.015432 s\r\nmetrics: csv=last_horizon/output/baseline/core-i3-integrated/sample-02.csv | sidecar=last_horizon/output/baseline/core-i3-integrated/sample-02.sidecar.json | profiling=last_horizon/output/profiling/baseline/core-i3-integrated/command-day1/sample-02.json\r\nmetrics: amostra 3 | mediana 16.7237 ms | p95 19.617 ms | mem�ria adicional 141120 bytes | dura��o 30.0147 s\r\nmetrics: csv=last_horizon/output/baseline/core-i3-integrated/sample-03.csv | sidecar=last_horizon/output/baseline/core-i3-integrated/sample-03.sidecar.json | profiling=last_horizon/output/profiling/baseline/core-i3-integrated/command-day1/sample-03.json\r\nMETRICS CHECK: PASS\r\nFinished.\r\n\nSep 23, 2026 2:22:11 AM java.util.prefs.WindowsPreferences <init>\r\nWARNING: Could not open/create prefs root node Software\\JavaSoft\\Prefs at root 0xffffffff80000001. Windows RegCreateKeyEx(...) returned error code 5.\r\nSep 23, 2026 2:22:11 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs at root 0xffffffff80000001.\r\nSep 23, 2026 2:22:11 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:22:11 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org at root 0xffffffff80000001.\r\nSep 23, 2026 2:22:11 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:22:11 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing at root 0xffffffff80000001.\r\nSep 23, 2026 2:22:11 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:22:11 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001.\r\nSep 23, 2026 2:22:11 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:22:11 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001.\r\nSep 23, 2026 2:22:11 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\ndisplay count needs to be implemented for non-AWT\nAWT disabled, displayWidth/displayHeight will be 0",
+      "artifacts": "last_horizon/output/<versao>/<perfil>/<sample_id>.*",
       "historicalArtifactsRetained": false,
       "logPaths": [
         "last_horizon/output/baseline/core-i3-integrated/command-day1/sample-01.log",
@@ -1112,11 +1095,11 @@
       "version": "baseline",
       "profile": "reference",
       "scenario": "command-day1",
-      "status": "INCONCLUSIVO",
-      "exitCode": 2,
-      "diagnostic": "coleta não iniciada: pré-requisito ausente antes do início: dispositivo de áudio (/proc/asound/cards): ENOENT: no such file or directory, open '/proc/asound/cards'",
-      "output": "",
-      "artifacts": "ausentes",
+      "status": "PASS",
+      "exitCode": 0,
+      "diagnostic": "",
+      "output": "arte: 33 de 57 imagens carregadas; ausentes usam a geometria do prot�tipo\r\nsom: 14 de 14 carregados\r\nmetrics: amostra 1 | mediana 16.689 ms | p95 19.1168 ms | mem�ria adicional 141120 bytes | dura��o 30.003096 s\r\nmetrics: csv=last_horizon/output/baseline/reference/sample-01.csv | sidecar=last_horizon/output/baseline/reference/sample-01.sidecar.json | profiling=last_horizon/output/profiling/baseline/reference/command-day1/sample-01.json\r\nmetrics: amostra 2 | mediana 16.6827 ms | p95 18.6588 ms | mem�ria adicional 141120 bytes | dura��o 30.006565 s\r\nmetrics: csv=last_horizon/output/baseline/reference/sample-02.csv | sidecar=last_horizon/output/baseline/reference/sample-02.sidecar.json | profiling=last_horizon/output/profiling/baseline/reference/command-day1/sample-02.json\r\nmetrics: amostra 3 | mediana 16.6901 ms | p95 19.2382 ms | mem�ria adicional 141120 bytes | dura��o 30.012245 s\r\nmetrics: csv=last_horizon/output/baseline/reference/sample-03.csv | sidecar=last_horizon/output/baseline/reference/sample-03.sidecar.json | profiling=last_horizon/output/profiling/baseline/reference/command-day1/sample-03.json\r\nMETRICS CHECK: PASS\r\nFinished.\r\n\nSep 23, 2026 2:23:49 AM java.util.prefs.WindowsPreferences <init>\r\nWARNING: Could not open/create prefs root node Software\\JavaSoft\\Prefs at root 0xffffffff80000001. Windows RegCreateKeyEx(...) returned error code 5.\r\nSep 23, 2026 2:23:49 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs at root 0xffffffff80000001.\r\nSep 23, 2026 2:23:49 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:23:49 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org at root 0xffffffff80000001.\r\nSep 23, 2026 2:23:49 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:23:49 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing at root 0xffffffff80000001.\r\nSep 23, 2026 2:23:49 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:23:49 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001.\r\nSep 23, 2026 2:23:49 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:23:49 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001.\r\nSep 23, 2026 2:23:49 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\ndisplay count needs to be implemented for non-AWT\nAWT disabled, displayWidth/displayHeight will be 0",
+      "artifacts": "last_horizon/output/<versao>/<perfil>/<sample_id>.*",
       "historicalArtifactsRetained": false,
       "logPaths": [
         "last_horizon/output/baseline/reference/command-day1/sample-01.log",
@@ -1128,11 +1111,11 @@
       "version": "revised",
       "profile": "core-i3-integrated",
       "scenario": "command-day1",
-      "status": "INCONCLUSIVO",
-      "exitCode": 2,
-      "diagnostic": "coleta não iniciada: pré-requisito ausente antes do início: dispositivo de áudio (/proc/asound/cards): ENOENT: no such file or directory, open '/proc/asound/cards'",
-      "output": "",
-      "artifacts": "ausentes",
+      "status": "PASS",
+      "exitCode": 0,
+      "diagnostic": "",
+      "output": "arte: 33 de 57 imagens carregadas; ausentes usam a geometria do prot�tipo\r\nsom: 14 de 14 carregados\r\nmetrics: amostra 1 | mediana 16.6591 ms | p95 18.8679 ms | mem�ria adicional 141120 bytes | dura��o 30.003431 s\r\nmetrics: csv=last_horizon/output/revised/core-i3-integrated/sample-01.csv | sidecar=last_horizon/output/revised/core-i3-integrated/sample-01.sidecar.json | profiling=last_horizon/output/profiling/revised/core-i3-integrated/command-day1/sample-01.json\r\nmetrics: amostra 2 | mediana 16.707 ms | p95 19.1273 ms | mem�ria adicional 141120 bytes | dura��o 30.003563 s\r\nmetrics: csv=last_horizon/output/revised/core-i3-integrated/sample-02.csv | sidecar=last_horizon/output/revised/core-i3-integrated/sample-02.sidecar.json | profiling=last_horizon/output/profiling/revised/core-i3-integrated/command-day1/sample-02.json\r\nmetrics: amostra 3 | mediana 16.7209 ms | p95 19.0648 ms | mem�ria adicional 141120 bytes | dura��o 30.002808 s\r\nmetrics: csv=last_horizon/output/revised/core-i3-integrated/sample-03.csv | sidecar=last_horizon/output/revised/core-i3-integrated/sample-03.sidecar.json | profiling=last_horizon/output/profiling/revised/core-i3-integrated/command-day1/sample-03.json\r\nMETRICS CHECK: PASS\r\nFinished.\r\n\nSep 23, 2026 2:25:28 AM java.util.prefs.WindowsPreferences <init>\r\nWARNING: Could not open/create prefs root node Software\\JavaSoft\\Prefs at root 0xffffffff80000001. Windows RegCreateKeyEx(...) returned error code 5.\r\nSep 23, 2026 2:25:28 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs at root 0xffffffff80000001.\r\nSep 23, 2026 2:25:28 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:25:28 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org at root 0xffffffff80000001.\r\nSep 23, 2026 2:25:28 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:25:28 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing at root 0xffffffff80000001.\r\nSep 23, 2026 2:25:28 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:25:28 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001.\r\nSep 23, 2026 2:25:28 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:25:28 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001.\r\nSep 23, 2026 2:25:28 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\ndisplay count needs to be implemented for non-AWT\nAWT disabled, displayWidth/displayHeight will be 0",
+      "artifacts": "last_horizon/output/<versao>/<perfil>/<sample_id>.*",
       "historicalArtifactsRetained": false,
       "logPaths": [
         "last_horizon/output/revised/core-i3-integrated/command-day1/sample-01.log",
@@ -1144,11 +1127,11 @@
       "version": "revised",
       "profile": "reference",
       "scenario": "command-day1",
-      "status": "INCONCLUSIVO",
-      "exitCode": 2,
-      "diagnostic": "coleta não iniciada: pré-requisito ausente antes do início: dispositivo de áudio (/proc/asound/cards): ENOENT: no such file or directory, open '/proc/asound/cards'",
-      "output": "",
-      "artifacts": "ausentes",
+      "status": "PASS",
+      "exitCode": 0,
+      "diagnostic": "",
+      "output": "arte: 33 de 57 imagens carregadas; ausentes usam a geometria do prot�tipo\r\nsom: 14 de 14 carregados\r\nmetrics: amostra 1 | mediana 16.704 ms | p95 19.0554 ms | mem�ria adicional 141120 bytes | dura��o 30.01027 s\r\nmetrics: csv=last_horizon/output/revised/reference/sample-01.csv | sidecar=last_horizon/output/revised/reference/sample-01.sidecar.json | profiling=last_horizon/output/profiling/revised/reference/command-day1/sample-01.json\r\nmetrics: amostra 2 | mediana 16.7105 ms | p95 19.0376 ms | mem�ria adicional 141120 bytes | dura��o 30.012274 s\r\nmetrics: csv=last_horizon/output/revised/reference/sample-02.csv | sidecar=last_horizon/output/revised/reference/sample-02.sidecar.json | profiling=last_horizon/output/profiling/revised/reference/command-day1/sample-02.json\r\nmetrics: amostra 3 | mediana 16.7038 ms | p95 18.8825 ms | mem�ria adicional 141120 bytes | dura��o 30.002728 s\r\nmetrics: csv=last_horizon/output/revised/reference/sample-03.csv | sidecar=last_horizon/output/revised/reference/sample-03.sidecar.json | profiling=last_horizon/output/profiling/revised/reference/command-day1/sample-03.json\r\nMETRICS CHECK: PASS\r\nFinished.\r\n\nSep 23, 2026 2:27:06 AM java.util.prefs.WindowsPreferences <init>\r\nWARNING: Could not open/create prefs root node Software\\JavaSoft\\Prefs at root 0xffffffff80000001. Windows RegCreateKeyEx(...) returned error code 5.\r\nSep 23, 2026 2:27:06 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs at root 0xffffffff80000001.\r\nSep 23, 2026 2:27:06 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:27:06 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org at root 0xffffffff80000001.\r\nSep 23, 2026 2:27:06 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:27:06 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing at root 0xffffffff80000001.\r\nSep 23, 2026 2:27:06 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:27:06 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001.\r\nSep 23, 2026 2:27:06 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\nSep 23, 2026 2:27:06 AM java.util.prefs.WindowsPreferences WindowsRegOpenKey1\r\nWARNING: Trying to recreate Windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001.\r\nSep 23, 2026 2:27:06 AM java.util.prefs.WindowsPreferences openKey\r\nWARNING: Could not open windows registry node Software\\JavaSoft\\Prefs\\org\\processing\\app at root 0xffffffff80000001. Windows RegOpenKey(...) returned error code 2.\r\ndisplay count needs to be implemented for non-AWT\nAWT disabled, displayWidth/displayHeight will be 0",
+      "artifacts": "last_horizon/output/<versao>/<perfil>/<sample_id>.*",
       "historicalArtifactsRetained": false,
       "logPaths": [
         "last_horizon/output/revised/reference/command-day1/sample-01.log",

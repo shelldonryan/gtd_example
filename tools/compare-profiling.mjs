@@ -198,7 +198,8 @@ async function readRunManifest(outputRoot, baselineVersion, revisedVersion) {
     || REQUIRED_PROFILES.some((profile) => !fixture.profiles.includes(profile))) {
     throw fail("manifesto de profiling incompatível: fixture, perfis, amostras ou janela divergentes");
   }
-  if (fixture.processingRunner !== "tools/processing-cli.sh"
+  const nativeWindowsRunner = fixture.processingRunner === "Processing.exe cli";
+  if ((fixture.processingRunner !== "tools/processing-cli.sh" && !nativeWindowsRunner)
     || fixture.processingTimeoutMs !== 240_000
     || fixture.environment === null || typeof fixture.environment !== "object"
     || Array.isArray(fixture.environment)) {
@@ -215,8 +216,9 @@ async function readRunManifest(outputRoot, baselineVersion, revisedVersion) {
     || environment.graphicalEnvironment === null
     || typeof environment.graphicalEnvironment !== "object"
     || Array.isArray(environment.graphicalEnvironment)
-    || environment.graphicalEnvironment.mode !== "headless"
+    || environment.graphicalEnvironment.mode !== (nativeWindowsRunner ? "native" : "headless")
     || typeof environment.graphicalEnvironment.xvfbRunAvailable !== "boolean"
+    || (nativeWindowsRunner && environment.graphicalEnvironment.xvfbRunAvailable)
     || (environment.graphicalEnvironment.xvfbRunAvailable
       && typeof environment.graphicalEnvironment.xvfbRunPath !== "string")
     || environment.processing === null || typeof environment.processing !== "object"
